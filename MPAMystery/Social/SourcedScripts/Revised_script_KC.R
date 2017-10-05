@@ -1690,3 +1690,21 @@ p.vals.bhs$Indicator <- factor(p.vals.bhs$Indicator,
 # 
 # save.xlsx("ATT_by_MPA_2016_1027", hfoodsec.ATT,assets.ATT,tenure.ATT,enrol.ATT,attach.ATT)
 # 
+
+
+# ---- Remove unneeded data frames from environment, to reduce clutter ----
+rm(assets.outcome,bias.adjust,Children.HH,covariates,dampier,dummy.match,
+   dummy.match.control,dummy.match.mpa,household.assets,i.ps,int.xsection.covariate,
+   kaimana,kofiau,master.MPA.t2,match.covariate,misool,MPA.int.xsection.pairs,MPA.rpt.xsection.pairs,
+   MPA.time.pairs,n.child,nonbaseline.pairs.t2,rpt.xsection.covariate,telma,time.match.covariate,tntc,
+   wealth.quintiles,X.ps,Z,assets.dampier,assets.dampier.sens,assets.kaimana,assets.kaimana.sens,
+   assets.kofiau,assets.misool,assets.misool.sens,assets.seascape,assets.seascape.sens,
+   assets.telma,assets.telma.sens,assets.tntc,attach.dampier,attach.kaimana,attach.kofiau,
+   attach.misool,attach.seascape,attach.seascape.sens,attach.telma,attach.telma.sens,attach.tntc,
+   attach.tntc.sens,caliper10,caliper7,dummy.balance,enrol.dampier,enrol.kaimana,enrol.kofiau,
+   enrol.kofiau.sens,enrol.misool,enrol.seascape,enrol.telma,enrol.telma.sens,enrol.tntc,enrol.tntc.sens,
+   hfs.dampier,hfs.dampier.sens,hfs.kaimana,hfs.kaimana.sens,hfs.kofiau,hfs.kofiau.sense,hfs.misool,
+   hfs.misool.sens,hfs.seascape,hfs.seascape.sens,hfs.telma,hfs.telma.sens,hfs.tntc,hfs.tntc.sens,im10,
+   imb1,ips,ipsm1,m2,mb2,tenure.dampier,tenure.dampier.sens,tenure.kaimana,tenure.kaimana.sens,
+   tenure.kofiau,tenure.misool,tenure.misool.sens,tenure.seascape,tenure.seascape.sens,tenure.telma,
+   tenure.telma.sens,tenure.tntc,tenure.tntc.sens,Tr,X,xm7,xmb7,xps,xpsm1,Y)

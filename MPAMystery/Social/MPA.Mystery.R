@@ -1,5 +1,6 @@
 # 
 # code: Calculating the social impacts of marine protected areas -BHS
+# 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: September 2016
 # modified: October 2017

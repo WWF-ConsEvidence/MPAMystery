@@ -1,0 +1,272 @@
+# 
+# code:  Dampier Technical Report Datasets
+# 
+# github: kaclaborn/WWF-conservation-evidence/MPAMystery/Social/TechnicalReports/BHS
+# --- Duplicate all code from "Social" onward, to maintain file structure for sourced code
+# 
+# author: Kelly Claborn, clabornkelly@gmail.com
+# created: November 2016
+# modified: October 2017
+# 
+# 
+# ---- inputs ----
+#  1) Source MPA.Mystery.R 
+#  2) Source Dampier.TechReport.SigTests.R 
+# 
+# ---- code sections ----
+#  1) Data Sourcing, Configuration, and Subsetting
+#  2) Define Datasets for Status, Trend, and Annex Plots for Export
+#  3) Export Data to Excel
+# 
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 1: Data Sourcing, Configuration, and Subsetting ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+
+# ---- 1.1 Source MPA.Mystery and statistical test results from "Dampier.TechReport.SigTests.R" ----
+
+source("MPAMystery/Social/MPA.Mystery.R")  # !!! No need to re-source this if already done from previous script
+source("MPAMystery/Social/TechnicalReports/BHS/Dampier.TechReport.SigTests.R")
+
+
+# ---- 1.2 Subset Days Unwell variable by settlement and MPA ----
+
+Days.unwell.Dampier.BySett <- 
+  rbind.data.frame(Days.unwell.BySett[Days.unwell.BySett$MPAID==5 &
+                                        !is.na(Days.unwell.BySett$SettlementID),c(1,3,4,5)],
+                   cbind.data.frame(MonitoringYear="Baseline",
+                                    SettlementID=72,
+                                    Days.unwell=NA,
+                                    Days.unwell.err=NA))
+
+Days.unwell.Dampier.ByMPA <- 
+  Days.unwell.ByMPA[Days.unwell.ByMPA$MPAID==5 &
+                      !is.na(Days.unwell.ByMPA$MPAID),2:4]
+
+
+# ---- 1.3 Subset Proportional Data of Age/Gender for Dampier ----
+
+Dampier.AgeGender <- 
+  data.frame(AgeCat=c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
+                      "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+             Male.Baseline=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==5 &
+                                                    AgeGenderDemos.ByMPA$MonitoringYear=="Baseline",
+                                                  seq(3,41,by=2)]),
+             Female.Baseline=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==5 &
+                                                      AgeGenderDemos.ByMPA$MonitoringYear=="Baseline",
+                                                    seq(4,42,by=2)]),
+             Male.2yr=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==5 &
+                                               AgeGenderDemos.ByMPA$MonitoringYear=="2 Year Post",
+                                             seq(3,41,by=2)]),
+             Female.2yr=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==5 &
+                                                 AgeGenderDemos.ByMPA$MonitoringYear=="2 Year Post",
+                                               seq(4,42,by=2)]),
+             Male.4yr=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==5 &
+                                               AgeGenderDemos.ByMPA$MonitoringYear=="4 Year Post",
+                                             seq(3,41,by=2)]),
+             Female.4yr=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==5 &
+                                                 AgeGenderDemos.ByMPA$MonitoringYear=="4 Year Post",
+                                               seq(4,42,by=2)]),
+             row.names=NULL)
+
+
+# ---- 1.4 MPA-level Proportional data (row to be added to bottom of status and annex plots in tech report) ----
+
+Dampier.level.PropData.status <- 
+  data.frame(c(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="MPA",
+               Techreport.ByMPA[Techreport.ByMPA$MPAID==5 &
+                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:38]))
+Dampier.level.PropData.annex <- 
+  cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
+                   SettlementID=0,SettlementName="MPA",
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==5,3:38])
+
+null.row.PropData <- 
+  matrix(rep(NA,39),ncol=39,dimnames=list(NULL,colnames(Dampier.level.PropData.status)))
+
+
+# ---- 1.5 MPA-level Continuous data (row to be added to bottom of status and annex plots in tech report) ----
+
+Dampier.level.ContData.status <- 
+  cbind.data.frame(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="MPA",
+                   BigFive.MPAGroup[BigFive.MPAGroup$MPAID==5 &
+                                      BigFive.MPAGroup$MonitoringYear=="4 Year Post",6:15],
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==5 &
+                                      Techreport.ByMPA$MonitoringYear=="4 Year Post",39:40],
+                   Days.unwell.Dampier.ByMPA[Days.unwell.Dampier.ByMPA$MonitoringYear=="4 Year Post",
+                                             c("Days.unwell","Days.unwell.err")])
+Dampier.level.ContData.annex <- 
+  cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
+                   SettlementID=0,SettlementName="MPA",
+                   BigFive.MPAGroup[BigFive.MPAGroup$MPAID==5,6:15],
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==5,39:40],
+                   Days.unwell.Dampier.ByMPA[,c("Days.unwell","Days.unwell.err")])
+
+null.row.ContData <- 
+  matrix(rep(NA,17),ncol=17,dimnames=list(NULL,colnames(Dampier.level.ContData.status)))
+
+
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 2: Define Datasets for Status, Trend, and Annex Plots for Export ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+
+# ---- 2.1 Status dataset for Dampier, proportional data ----
+
+Dampier.PropData.Techreport.status <- 
+  Techreport.BySett[Techreport.BySett$MPAID==5 &
+                      Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:40)]
+Dampier.PropData.Techreport.status <- 
+  Dampier.PropData.Techreport.status[rev(order(Dampier.PropData.Techreport.status$SettlementName)),]
+
+Dampier.PropData.Techreport.status.PLOTFORMAT <- 
+  rbind.data.frame(Dampier.level.PropData.status[2:39],
+                   null.row.PropData[1:37],
+                   Dampier.PropData.Techreport.status)
+
+
+# ---- 2.2 Status dataset for Dampier, continuous data (with p values) ----
+
+Dampier.ContData.Techreport.status <- 
+  left_join(BigFive.SettleGroup[BigFive.SettleGroup$Treatment==1 &
+                                  BigFive.SettleGroup$MonitoringYear=="4 Year Post" &
+                                  BigFive.SettleGroup$MPAID==5,
+                                c(1,2,6:15)],
+            Techreport.BySett[Techreport.BySett$MPAID==5 &
+                                Techreport.BySett$MonitoringYear=="4 Year Post",c(1,41:42)],
+            by="SettlementID")
+
+Dampier.ContData.Techreport.status <- 
+  left_join(Dampier.ContData.Techreport.status,
+            Days.unwell.Dampier.BySett[Days.unwell.Dampier.BySett$MonitoringYear=="4 Year Post",c(1,3,4)],
+            by="SettlementID")
+
+Dampier.ContData.Techreport.status <- 
+  Dampier.ContData.Techreport.status[rev(order(Dampier.ContData.Techreport.status$SettlementName)),]
+
+Dampier.ContData.Techreport.status.withMPA <- 
+  rbind.data.frame(Dampier.level.ContData.status[2:17],
+                   null.row.ContData[2:17],
+                   Dampier.ContData.Techreport.status)
+
+Dampier.ContData.Techreport.status.withMPA$SettlementName <- 
+  factor(Dampier.ContData.Techreport.status.withMPA$SettlementName)
+
+Dampier.ContData.Techreport.status.PLOTFORMAT <- 
+  left_join(Dampier.ContData.Techreport.status.withMPA,
+            sigvals.Damp,by="SettlementName")
+
+
+# ---- 2.3 Trend dataset for Dampier, MPA-level proportional data ----
+
+Dampier.TrendPropData.Techreport.PLOTFORMAT <- 
+  Techreport.ByMPA[Techreport.ByMPA$MPAID==5,c(2,1,3:38)]
+
+
+# ---- 2.4 Trend dataset for Dampier, MPA-level continuous data (with p values) ----
+
+Dampier.TrendContData.Techreport.PLOTFORMAT <- 
+  rbind.data.frame(Dampier.level.ContData.annex[,c(1,4:17)],
+                   trend.sigvals.Damp)
+
+
+# ---- 2.5 Annex dataset for Dampier, Settlement-level proportional data ----
+
+Dampier.AnnexPropData.Techreport <- 
+  Techreport.BySett[Techreport.BySett$MPAID==5,c(2,1,4:40)]
+
+Dampier.AnnexPropData.Techreport <- 
+  Dampier.AnnexPropData.Techreport[rev(order(Dampier.AnnexPropData.Techreport$SettlementName)),]
+
+Dampier.AnnexPropData.Techreport.PLOTFORMAT <- 
+  rbind.data.frame(Dampier.level.PropData.annex[Dampier.level.PropData.annex$MonitoringYear=="4 Year Post",],
+                   Dampier.level.PropData.annex[Dampier.level.PropData.annex$MonitoringYear=="2 Year Post",],
+                   Dampier.level.PropData.annex[Dampier.level.PropData.annex$MonitoringYear=="Baseline",],
+                   null.row.PropData,
+                   Dampier.AnnexPropData.Techreport)
+
+
+# ---- 2.6 Annex dataset for Dampier, Settlement-level continuous data (with p values) ----
+
+Dampier.AnnexContData.Techreport <- 
+  left_join(BigFive.SettleGroup[BigFive.SettleGroup$MPAID==5 &
+                                  BigFive.SettleGroup$Treatment==1,
+                                c(5,1,2,6:15)],
+            Techreport.BySett[Techreport.BySett$MPAID==5,c(1,2,41,42)],
+            by=c("SettlementID","MonitoringYear"))
+
+Dampier.AnnexContData.Techreport <- 
+  left_join(Dampier.AnnexContData.Techreport,
+            Days.unwell.Dampier.BySett,
+            by=c("SettlementID","MonitoringYear"))
+
+Dampier.AnnexContData.Techreport$MonitoringYear <- 
+  factor(Dampier.AnnexContData.Techreport$MonitoringYear,
+         levels=c("Baseline","2 Year Post","4 Year Post"),ordered=T)
+
+Dampier.AnnexContData.Techreport <- 
+  Dampier.AnnexContData.Techreport[rev(order(Dampier.AnnexContData.Techreport$SettlementName,
+                                             Dampier.AnnexContData.Techreport$MonitoringYear)),]
+
+Dampier.AnnexContData.Techreport.PLOTFORMAT <- 
+  rbind.data.frame(Dampier.level.ContData.annex[Dampier.level.ContData.annex$MonitoringYear=="4 Year Post",],
+                   Dampier.level.ContData.annex[Dampier.level.ContData.annex$MonitoringYear=="2 Year Post",],
+                   Dampier.level.ContData.annex[Dampier.level.ContData.annex$MonitoringYear=="Baseline",],
+                   null.row.ContData,
+                   Dampier.AnnexContData.Techreport)
+
+
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+# ---- SECTION 3: Export Data to Excel ----
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+
+# ---- 3.1 Define filename for Excel spreadsheet ----
+
+FileName <- paste(paste("MPAMystery/Social/FlatDataFiles/BHS/TechReportOutput/Dampier/Dampier_TechReportData--produced",
+                        format(Sys.Date(),format="%Y_%m_%d"),sep="_"),
+                  "xlsx",sep=".")
+
+
+# ---- 3.2 Write to Excel, each data frame as a new sheet ----
+
+write.xlsx(Dampier.PropData.Techreport.status.PLOTFORMAT,FileName,sheetName='PropData_StatusPlots',row.names=F)
+write.xlsx(Dampier.ContData.Techreport.status.PLOTFORMAT,FileName,sheetName='ContData_StatusPlots_withpvals',row.names=F,append=T)
+write.xlsx(Dampier.TrendPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_TrendPlots',row.names=F,append=T)
+write.xlsx(Dampier.TrendContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_TrendPlots_withpvals',row.names=F,append=T)
+write.xlsx(Dampier.AnnexPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_AnnexPlots',row.names=F,append=T)
+write.xlsx(Dampier.AnnexContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_AnnexPlots',row.names=F,append=T)
+write.xlsx(annex.sigvals.Damp,FileName,sheetName='Pvals_ContData_AnnexPlots',row.names=F,append=T)
+write.xlsx(Dampier.AgeGender,FileName,sheetName='AgeGender',row.names=F,append=T)
+
+
+
+
+
+# ---- Remove all unneeded dataframes from environment, to reduce clutter ----
+rm(Dampier.level.PropData.status)
+rm(Dampier.level.ContData.status)
+rm(Dampier.level.PropData.annex)
+rm(Dampier.level.ContData.annex)
+rm(Days.unwell.Dampier.ByMPA)
+rm(Days.unwell.Dampier.BySett)
+rm(null.row.PropData)
+rm(null.row.ContData)
+rm(Dampier.PropData.Techreport.status)
+rm(Dampier.ContData.Techreport.status)
+rm(Dampier.AnnexPropData.Techreport)
+rm(Dampier.AnnexContData.Techreport)
+rm(Dampier.ContData.Techreport.status.withMPA)
+rm(FileName)
