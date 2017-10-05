@@ -461,8 +461,8 @@ ndrops.mpa <- left_join(ndrops.mpa, sample.MPA, by="MPAID")
 ndrops.mpa <-ddply (ndrops.mpa,.(MPAID), summarise, percent.drop =(ndrops/sample.size)*100)
 ndrops.mpa<- ndrops.mpa[order(ndrops.mpa$MPAID),]
 
-write.table(ndrops.mpa, "MPA_time_ndrops_byMPA.txt", sep=",", row.names=FALSE)
-write.table(ndrops.settlement, "MPA_time_ndrops_bySettlement.txt", sep=",", row.names=FALSE)
+write.table(ndrops.mpa, "MPAMystery/Social/FlatDataFiles/MPA_time_ndrops_byMPA.txt", sep=",", row.names=FALSE)
+write.table(ndrops.settlement, "MPAMystery/Social/FlatDataFiles/MPA_time_ndrops_bySettlement.txt", sep=",", row.names=FALSE)
 
 rm(sample.settlement, sample.MPA,index.rows, index.treated, ndrops.mpa, ndrops.settlement, index.dropped, X)
 
