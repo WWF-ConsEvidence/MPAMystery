@@ -10,7 +10,7 @@
 # 
 # 
 # ---- inputs ----
-#  1) Source MPA.Mystery.R 
+#  Dependencies: BHS_MPA_Mystery.R 
 # 
 # ---- code sections ----
 #  1) Import Data
@@ -34,7 +34,7 @@ MPA.TechReport.SigTest.Data <-
             HHLivelihood[,c(1,15)],
             by="HouseholdID")
 
-# --- "MPA Household Data" dataset
+# - "MPA Household Data" dataset
 Kai.TechReport.MPAHouseholdData <- 
   left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$Treatment==1 &
                                           MPA.TechReport.SigTest.Data$MonitoringYear== "4 Year Post" &
@@ -47,7 +47,7 @@ Kai.TechReport.MPAHouseholdData <-
 Kai.TechReport.MPAHouseholdData$SettlementName <- 
   factor(Kai.TechReport.MPAHouseholdData$SettlementName)
 
-# --- "MPA versus Control" dataset
+# - "MPA versus Control" dataset
 Kai.TechReport.MPAvControl <- 
   left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$MPAID==3 &
                                           MPA.TechReport.SigTest.Data$MonitoringYear=="4 Year Post",],
@@ -59,7 +59,7 @@ Kai.TechReport.MPAvControl <-
 Kai.TechReport.MPAvControl$MPA.v.Control <- 
   factor(ifelse(Kai.TechReport.MPAvControl$Treatment==1,"MPA","Control"))
 
-# --- "Settlement Means" dataset
+# - "Settlement Means" dataset
 Kai.TechReport.SettlementMeans <- 
   left_join(BigFive.SettleGroup[BigFive.SettleGroup$Treatment==1 &
                                   BigFive.SettleGroup$MonitoringYear=="4 Year Post" &
@@ -82,7 +82,7 @@ colnames(Kai.TechReport.SettlementMeans) <- c(colnames(Kai.TechReport.Settlement
                                                "FSIndex","FSErr","MAIndex","MAErr","PAIndex","PAErr",
                                                "MTIndex","MTErr","SERate","SEErr","TimeMarketClean","DaysUnwell")
 
-# --- "Trend" dataset
+# - "Trend" dataset
 Kai.Trend.Data <- 
   left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$Treatment==1 &
                                           MPA.TechReport.SigTest.Data$MPAID==3,],
@@ -323,7 +323,7 @@ non.parametric.test.settlements.Kai <-
                     }))
 
 
-# --- Alphabetize each column of settlement names.  Now all settlement names are in same order.
+# - Alphabetize each column of settlement names.  Now all settlement names are in same order.
 sigvals.Sett.Kai <- 
   cbind.data.frame(non.parametric.test.settlements.Kai[order(non.parametric.test.settlements.Kai$"FSIndex.SettlementName"),
                                                         c("FSIndex.SettlementName","FSIndex.p.value")],
@@ -340,7 +340,7 @@ sigvals.Sett.Kai <-
                    non.parametric.test.settlements.Kai[order(non.parametric.test.settlements.Kai$"DaysUnwell.SettlementName"),
                                                         c("DaysUnwell.SettlementName","DaysUnwell.p.value")])
 
-# --- Remove all settlement name columns except for one. 
+# - Remove all settlement name columns except for one. 
 sigvals.Sett.Kai <- 
   sigvals.Sett.Kai[,c(1,2,4,6,8,10,12,14)]
 
@@ -367,13 +367,13 @@ null.row.sigvals.Kai <-
   matrix(rep(NA,length(sigvals.MPA.Kai)),ncol=length(sigvals.MPA.Kai),
          dimnames=list(NULL,colnames(sigvals.MPA.Kai)))
 
-# --- Define data frame with p-values for status plots
-#     (households in each settlement are compared to those in the median settlement for the given variable,
-#      using Mann Whitney U-Test -- so, interpretation is "compared to the median settlement, this settlement 
-#      [is/is not] significantly different")
+# - Define data frame with p-values for status plots
+#   (households in each settlement are compared to those in the median settlement for the given variable,
+#   using Mann-Whitney U test -- so, interpretation is "compared to the median settlement, this settlement 
+#   [is/is not] significantly different")
 # 
-#      (for MPA p-values, households in the MPA were compared to those in the control settlements (for the MPA),
-#      also using Mann Whitney U-Test)
+#   (for MPA p-values, households in the MPA were compared to those in the control settlements (for the MPA),
+#   also using Mann Whitney U-Test)
 sigvals.Kai <- 
   rbind.data.frame(sigvals.MPA.Kai,
                    null.row.sigvals.Kai,
@@ -393,10 +393,10 @@ trend.non.parametric.test.byMPA.Kai <-
 
 colnames(trend.non.parametric.test.byMPA.Kai) <- colnames(sigvals.Kai[2:8])
 
-# --- Define data frame with p-values for trend plots
-#     (all MPA households from each year of sampling are compared across time for the given variable, 
-#      using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
-#      there [is/is not] a significant difference in this variable across the MPA")
+# - Define data frame with p-values for trend plots
+#   (all MPA households from each year of sampling are compared across time for the given variable, 
+#   using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
+#   there [is/is not] a significant difference in this variable across the MPA")
 trend.sigvals.Kai <- 
   cbind.data.frame(MonitoringYear="p.value",trend.non.parametric.test.byMPA.Kai["sl",1],NA,trend.non.parametric.test.byMPA.Kai["sl",2],
                    NA,trend.non.parametric.test.byMPA.Kai["sl",3],NA,trend.non.parametric.test.byMPA.Kai["sl",4],NA,trend.non.parametric.test.byMPA.Kai["sl",5],
@@ -425,10 +425,10 @@ trend.non.parametric.test.bySett.Kai <-
 
 colnames(trend.non.parametric.test.bySett.Kai) <- colnames(sigvals.Kai)
 
-# --- Define data frame with p-values for annex plots
-#     (households within each settlement from each year of sampling are compared across time for the given 
-#      variable, using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
-#      there [is/is not] a significant difference in this variable across the settlement)
+# - Define data frame with p-values for annex plots
+#   (households within each settlement from each year of sampling are compared across time for the given 
+#   variable, using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
+#   there [is/is not] a significant difference in this variable across the settlement)
 annex.sigvals.Kai <- 
   rbind.data.frame(cbind.data.frame(SettlementName="MPA",trend.non.parametric.test.byMPA.Kai["sl",]),
                    null.row.sigvals.Kai,

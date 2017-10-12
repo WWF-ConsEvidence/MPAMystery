@@ -104,18 +104,11 @@ HHData$EconomicStatusReasonClean <- ifelse(HHData$EconomicStatusReason=="994" |
                                               HHData$EconomicStatusReason=="999",NA,
                                             as.character(HHData$EconomicStatusReason))
 
-HHData$RemoveFS <- ifelse(HHData$DidNotLastCoded+HHData$BalancedDietCoded+HHData$FreqAdultSkipCoded+
-                                   HHData$AdultSkipCoded+HHData$EatLessCoded+HHData$HungryCoded>3959,"Yes","No")
-HHData$RemoveMA <- ifelse(HHData$CarTruckClean+HHData$BicycleClean+HHData$MotorcycleClean+
-                                   HHData$BoatNoMotorClean+HHData$BoatOutboardClean+HHData$BoatInboardClean+
-                                   HHData$PhoneCombinedClean+HHData$TVClean+HHData$EntertainClean+
-                                   HHData$SatelliteClean+HHData$GeneratorClean>=10890,"Yes","No")
-HHData$RemovePA <- ifelse(HHData$PlaceHappyCoded+HHData$PlaceFavouriteCoded+HHData$PlaceMissCoded+
-                                   HHData$PlaceBestCoded+HHData$PlaceFishHereCoded+HHData$PlaceBeMyselfCoded>=5940,"Yes","No")
-HHData$RemoveMT <- ifelse(HHData$RightsAccessCoded+HHData$RightsHarvestCoded+HHData$RightsManageCoded+
-                                   HHData$RightsExcludeCoded+HHData$RightsTransferCoded>=4950,"Yes","No")
-HHData$RemovecFS <- ifelse(HHData$ChildPortionCoded+HHData$LowCostFoodCoded+HHData$ChildSkipCoded+
-                                    HHData$FreqChildSkipCoded+HHData$NoMealChildCoded>2969,"Yes","No")
+HHData$RemoveFS <- ifelse(rowSums(HHData[,5:10],na.rm=T)>3959,"Yes","No")
+HHData$RemoveMA <- ifelse(rowSums(HHData[,18:28],na.rm=T)>=10890,"Yes","No")
+HHData$RemovePA <- ifelse(rowSums(HHData[,41:46],na.rm=T)>=5940,"Yes","No")
+HHData$RemoveMT <- ifelse(rowSums(HHData[,54:58],na.rm=T)>=4950,"Yes","No")
+HHData$RemovecFS <- ifelse(rowSums(HHData[,65:69],na.rm=T)>2969,"Yes","No")
 
 HHData <- HHData[,c(1:10,91,11:27,92,28:44,93,45:55,94,56:65,95,66:83,90,85:89)]
 

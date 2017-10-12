@@ -10,7 +10,7 @@
 # 
 # 
 # ---- inputs ----
-#  1) Source MPA.Mystery.R 
+#  Dependencies: BHS_MPA_Mystery.R 
 # 
 # ---- code sections ----
 #  1) Import Data
@@ -34,7 +34,7 @@ MPA.TechReport.SigTest.Data <-
             HHLivelihood[,c(1,15)],
             by="HouseholdID")
 
-# --- "MPA Household Data" dataset
+# - "MPA Household Data" dataset
 Kof.TechReport.MPAHouseholdData <- 
   left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$Treatment==1 &
                                           MPA.TechReport.SigTest.Data$MonitoringYear== "4 Year Post" &
@@ -47,7 +47,7 @@ Kof.TechReport.MPAHouseholdData <-
 Kof.TechReport.MPAHouseholdData$SettlementName <- 
   factor(Kof.TechReport.MPAHouseholdData$SettlementName)
 
-# --- "MPA versus Control" dataset
+# - "MPA versus Control" dataset
 Kof.TechReport.MPAvControl <- 
   left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$MPAID==4 &
                                           MPA.TechReport.SigTest.Data$MonitoringYear=="4 Year Post",],
@@ -59,7 +59,7 @@ Kof.TechReport.MPAvControl <-
 Kof.TechReport.MPAvControl$MPA.v.Control <- 
   factor(ifelse(Kof.TechReport.MPAvControl$Treatment==1,"MPA","Control"))
 
-# --- "Settlement Means" dataset
+# - "Settlement Means" dataset
 Kof.TechReport.SettlementMeans <- 
   left_join(BigFive.SettleGroup[BigFive.SettleGroup$Treatment==1 &
                                   BigFive.SettleGroup$MonitoringYear=="4 Year Post" &
@@ -82,7 +82,7 @@ colnames(Kof.TechReport.SettlementMeans) <- c(colnames(Kof.TechReport.Settlement
                                                "FSIndex","FSErr","MAIndex","MAErr","PAIndex","PAErr",
                                                "MTIndex","MTErr","SERate","SEErr","TimeMarketClean","DaysUnwell")
 
-# --- "Trend" dataset
+# - "Trend" dataset
 Kof.Trend.Data <- 
   left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$Treatment==1 &
                                           MPA.TechReport.SigTest.Data$MPAID==4,],
@@ -323,7 +323,7 @@ non.parametric.test.settlements.Kof <-
                     }))
 
 
-# --- Alphabetize each column of settlement names.  Now all settlement names are in same order.
+# - Alphabetize each column of settlement names.  Now all settlement names are in same order.
 sigvals.Sett.Kof <- 
   cbind.data.frame(non.parametric.test.settlements.Kof[order(non.parametric.test.settlements.Kof$"FSIndex.SettlementName"),
                                                         c("FSIndex.SettlementName","FSIndex.p.value")],
@@ -340,7 +340,7 @@ sigvals.Sett.Kof <-
                    non.parametric.test.settlements.Kof[order(non.parametric.test.settlements.Kof$"DaysUnwell.SettlementName"),
                                                         c("DaysUnwell.SettlementName","DaysUnwell.p.value")])
 
-# --- Remove all settlement name columns except for one. 
+# - Remove all settlement name columns except for one. 
 sigvals.Sett.Kof <- 
   sigvals.Sett.Kof[,c(1,2,4,6,8,10,12,14)]
 
@@ -367,13 +367,13 @@ null.row.sigvals.Kof <-
   matrix(rep(NA,length(sigvals.MPA.Kof)),ncol=length(sigvals.MPA.Kof),
          dimnames=list(NULL,colnames(sigvals.MPA.Kof)))
 
-# --- Define data frame with p-values for status plots
-#     (households in each settlement are compared to those in the median settlement for the given variable,
-#      using Mann Whitney U-Test -- so, interpretation is "compared to the median settlement, this settlement 
-#      [is/is not] significantly different")
+# - Define data frame with p-values for status plots
+#   (households in each settlement are compared to those in the median settlement for the given variable,
+#   using Mann Whitney U-Test -- so, interpretation is "compared to the median settlement, this settlement 
+#   [is/is not] significantly different")
 # 
-#      (for MPA p-values, households in the MPA were compared to those in the control settlements (for the MPA),
-#      also using Mann Whitney U-Test)
+#   (for MPA p-values, households in the MPA were compared to those in the control settlements (for the MPA),
+#   also using Mann Whitney U-Test)
 sigvals.Kof <- 
   rbind.data.frame(sigvals.MPA.Kof,
                    null.row.sigvals.Kof,
@@ -393,10 +393,10 @@ trend.non.parametric.test.byMPA.Kof <-
 
 colnames(trend.non.parametric.test.byMPA.Kof) <- colnames(sigvals.Kof[2:8])
 
-# --- Define data frame with p-values for trend plots
-#     (all MPA households from each year of sampling are compared across time for the given variable, 
-#      using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
-#      there [is/is not] a significant difference in this variable across the MPA")
+# - Define data frame with p-values for trend plots
+#   (all MPA households from each year of sampling are compared across time for the given variable, 
+#   using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
+#   there [is/is not] a significant difference in this variable across the MPA")
 trend.sigvals.Kof <- 
   cbind.data.frame(MonitoringYear="p.value",trend.non.parametric.test.byMPA.Kof["sl",1],NA,trend.non.parametric.test.byMPA.Kof["sl",2],
                    NA,trend.non.parametric.test.byMPA.Kof["sl",3],NA,trend.non.parametric.test.byMPA.Kof["sl",4],NA,trend.non.parametric.test.byMPA.Kof["sl",5],
@@ -425,10 +425,10 @@ trend.non.parametric.test.bySett.Kof <-
 
 colnames(trend.non.parametric.test.bySett.Kof) <- colnames(sigvals.Kof)
 
-# --- Define data frame with p-values for annex plots
-#     (households within each settlement from each year of sampling are compared across time for the given 
-#      variable, using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
-#      there [is/is not] a significant difference in this variable across the settlement)
+# - Define data frame with p-values for annex plots
+#   (households within each settlement from each year of sampling are compared across time for the given 
+#   variable, using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
+#   there [is/is not] a significant difference in this variable across the settlement)
 annex.sigvals.Kof <- 
   rbind.data.frame(cbind.data.frame(SettlementName="MPA",trend.non.parametric.test.byMPA.Kof["sl",]),
                    null.row.sigvals.Kof,

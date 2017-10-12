@@ -10,7 +10,7 @@
 # 
 # 
 # ---- inputs ----
-#  1) Source MPA.Mystery.R 
+#  Dependencies: BHS_MPA_Mystery.R 
 # 
 # ---- code sections ----
 #  1) Import Data
@@ -34,7 +34,7 @@ MPA.TechReport.SigTest.Data <-
             HHLivelihood[,c(1,15)],
             by="HouseholdID")
 
-# --- "MPA Household Data" dataset
+# - "MPA Household Data" dataset
 Damp.TechReport.MPAHouseholdData <- 
   left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$Treatment==1 &
                                           MPA.TechReport.SigTest.Data$MonitoringYear== "4 Year Post" &
@@ -47,7 +47,7 @@ Damp.TechReport.MPAHouseholdData <-
 Damp.TechReport.MPAHouseholdData$SettlementName <- 
   factor(Damp.TechReport.MPAHouseholdData$SettlementName)
 
-# --- "MPA versus Control" dataset
+# - "MPA versus Control" dataset
 Damp.TechReport.MPAvControl <- 
   left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$MPAID==5 &
                                           MPA.TechReport.SigTest.Data$MonitoringYear=="4 Year Post",],
@@ -59,7 +59,7 @@ Damp.TechReport.MPAvControl <-
 Damp.TechReport.MPAvControl$MPA.v.Control <- 
   factor(ifelse(Damp.TechReport.MPAvControl$Treatment==1,"MPA","Control"))
 
-# --- "Settlement Means" dataset
+# - "Settlement Means" dataset
 Damp.TechReport.SettlementMeans <- 
   left_join(BigFive.SettleGroup[BigFive.SettleGroup$Treatment==1 &
                                   BigFive.SettleGroup$MonitoringYear=="4 Year Post" &
@@ -82,7 +82,7 @@ colnames(Damp.TechReport.SettlementMeans) <- c(colnames(Damp.TechReport.Settleme
                                                "FSIndex","FSErr","MAIndex","MAErr","PAIndex","PAErr",
                                                "MTIndex","MTErr","SERate","SEErr","TimeMarketClean","DaysUnwell")
 
-# --- "Trend" dataset
+# - "Trend" dataset
 Damp.Trend.Data <- 
   left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$Treatment==1 &
                                           MPA.TechReport.SigTest.Data$MPAID==5,],
@@ -323,7 +323,7 @@ non.parametric.test.settlements.Damp <-
                     }))
 
 
-# --- Alphabetize each column of settlement names.  Now all settlement names are in same order.
+# - Alphabetize each column of settlement names.  Now all settlement names are in same order.
 sigvals.Sett.Damp <- 
   cbind.data.frame(non.parametric.test.settlements.Damp[order(non.parametric.test.settlements.Damp$"FSIndex.SettlementName"),
                                                         c("FSIndex.SettlementName","FSIndex.p.value")],
@@ -340,7 +340,7 @@ sigvals.Sett.Damp <-
                    non.parametric.test.settlements.Damp[order(non.parametric.test.settlements.Damp$"DaysUnwell.SettlementName"),
                                                         c("DaysUnwell.SettlementName","DaysUnwell.p.value")])
 
-# --- Remove all settlement name columns except for one. 
+# - Remove all settlement name columns except for one. 
 sigvals.Sett.Damp <- 
   sigvals.Sett.Damp[,c(1,2,4,6,8,10,12,14)]
 
@@ -367,13 +367,13 @@ null.row.sigvals.Damp <-
   matrix(rep(NA,length(sigvals.MPA.Damp)),ncol=length(sigvals.MPA.Damp),
          dimnames=list(NULL,colnames(sigvals.MPA.Damp)))
 
-# --- Define data frame with p-values for status plots
-#     (households in each settlement are compared to those in the median settlement for the given variable,
-#      using Mann Whitney U-Test -- so, interpretation is "compared to the median settlement, this settlement 
-#      [is/is not] significantly different")
+# - Define data frame with p-values for status plots
+#   (households in each settlement are compared to those in the median settlement for the given variable,
+#   using Mann Whitney U-Test -- so, interpretation is "compared to the median settlement, this settlement 
+#   [is/is not] significantly different")
 # 
-#      (for MPA p-values, households in the MPA were compared to those in the control settlements (for the MPA),
-#      also using Mann Whitney U-Test)
+#   (for MPA p-values, households in the MPA were compared to those in the control settlements (for the MPA),
+#   also using Mann-Whitney U test)
 sigvals.Damp <- 
   rbind.data.frame(sigvals.MPA.Damp,
                    null.row.sigvals.Damp,
@@ -393,10 +393,10 @@ trend.non.parametric.test.byMPA.Damp <-
 
 colnames(trend.non.parametric.test.byMPA.Damp) <- colnames(sigvals.Damp[2:8])
 
-# --- Define data frame with p-values for trend plots
-#     (all MPA households from each year of sampling are compared across time for the given variable, 
-#      using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
-#      there [is/is not] a significant difference in this variable across the MPA")
+# - Define data frame with p-values for trend plots
+#   (all MPA households from each year of sampling are compared across time for the given variable, 
+#   using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
+#   there [is/is not] a significant difference in this variable across the MPA")
 trend.sigvals.Damp <- 
   cbind.data.frame(MonitoringYear="p.value",trend.non.parametric.test.byMPA.Damp["sl",1],NA,trend.non.parametric.test.byMPA.Damp["sl",2],
                    NA,trend.non.parametric.test.byMPA.Damp["sl",3],NA,trend.non.parametric.test.byMPA.Damp["sl",4],NA,trend.non.parametric.test.byMPA.Damp["sl",5],
@@ -425,10 +425,10 @@ trend.non.parametric.test.bySett.Damp <-
 
 colnames(trend.non.parametric.test.bySett.Damp) <- colnames(sigvals.Damp)
 
-# --- Define data frame with p-values for annex plots
-#     (households within each settlement from each year of sampling are compared across time for the given 
-#      variable, using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
-#      there [is/is not] a significant difference in this variable across the settlement)
+# - Define data frame with p-values for annex plots
+#   (households within each settlement from each year of sampling are compared across time for the given 
+#   variable, using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
+#   there [is/is not] a significant difference in this variable across the settlement)
 annex.sigvals.Damp <- 
   rbind.data.frame(cbind.data.frame(SettlementName="MPA",trend.non.parametric.test.byMPA.Damp["sl",]),
                    null.row.sigvals.Damp,

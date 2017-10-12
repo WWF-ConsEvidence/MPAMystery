@@ -10,8 +10,8 @@
 # 
 # 
 # ---- inputs ----
-#  1) Source MPA.Mystery.R
-#  2) Source TNTC.TechReport.SigTests.R
+#  1) Source TNTC.TechReport.SigTests.R
+#     - Dependencies: BHS_MPA_Mystery.R
 # 
 # ---- code sections ----
 #  1) Data Sourcing, Configuration, and Subsetting
@@ -27,10 +27,9 @@
 # 
 
 
-# ---- 1.1 Source MPA.Mystery and statistical test results from "TNTC.TechReport.SigTests.R" ----
+# ---- 1.1 Source statistical test results from "TNTC.TechReport.SigTests.R" ----
 
-source("MPAMystery/Social/MPA.Mystery.R")  # !!! No need to re-source this if already done from previous script
-source("MPAMystery/Social/TechnicalReports/BHS/TNTC.TechReport.SigTests.R")
+source("MPAMystery/Social/TechnicalReports/BHS/SignificanceTestCodes/TNTC.TechReport.SigTests.R")
 
 
 # ---- 1.2 Subset Days Unwell variable by settlement and MPA ----

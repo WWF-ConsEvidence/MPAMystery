@@ -40,10 +40,10 @@
 # district.data - treatment identifier for each settlement, plus other district level information
 # Ethnic - processed paternal ethnicity data for each household
 
-HH.data <- read.delim("MPAMystery/Social/FlatDataFiles/HHdata_raw_2015_0704.txt")
-DE.data <-read.delim("MPAMystery/Social/FlatDataFiles/Demographic_raw_2015_0704.txt")
-district.data <-read.delim("MPAMystery/Social/FlatDataFiles/District_codes_2015_0704.txt")
-Ethnic<- read.delim ("MPAMystery/Social/FlatDataFiles/Ethnic_2015_0705.txt")
+HH.data <- read.delim("MPAMystery/Social/FlatDataFiles/BHS/HHdata_raw_2015_0704.txt")
+DE.data <-read.delim("MPAMystery/Social/FlatDataFiles/BHS/Demographic_raw_2015_0704.txt")
+district.data <-read.delim("MPAMystery/Social/FlatDataFiles/BHS/District_codes_2015_0704.txt")
+Ethnic<- read.delim ("MPAMystery/Social/FlatDataFiles/BHS/Ethnic_2015_0705.txt")
 
 # ================================================================================================
 #
@@ -160,8 +160,8 @@ HH.age.baseline<-data.frame(HH.age.baseline)
 HHHead<-subset(DE.data, select=c("HouseholdID","RelationHHH", "IndividualGender", "IndividualAge", "IndividualEdLevel", "IndividualEducation", "DemographicCode"))
 HHHead<-subset(HHHead,HHHead$DemographicCode==1) #  identify household heads
 ed.level.unique<-unique(subset(HHHead,select=c("IndividualEducation")))
-write.table(ed.level.unique, "MPAMystery/Social/FlatDataFiles/ed.level.unique.txt", sep=",")
-ed.level.unique <-read.delim("MPAMystery/Social/FlatDataFiles/ed.level.unique.coded.txt")
+write.table(ed.level.unique, "MPAMystery/Social/FlatDataFiles/BHS/ed.level.unique.txt", sep=",")
+ed.level.unique <-read.delim("MPAMystery/Social/FlatDataFiles/BHS/ed.level.unique.coded.txt")
 HHHead$IndividualEducation<-as.character(HHHead$IndividualEducation)
 ed.level.unique$IndividualEducation<-as.character(ed.level.unique$IndividualEducation)
 HH.ed.level <- inner_join(HHHead,ed.level.unique, by="IndividualEducation") 
@@ -323,7 +323,7 @@ time.match.covariate<- time.match.covariate[order(time.match.covariate$Household
 
 # ======
 # 5.6 Recode Kaimana
-settlement.data <-read.delim("MPAMystery/Social/FlatDataFiles/Settlement_2015_0715.txt")
+settlement.data <-read.delim("MPAMystery/Social/FlatDataFiles/BHS/Settlement_2015_0715.txt")
 MPA.recode <- subset(settlement.data, select=c("SettlementID","MPAID"))
 time.match.covariate$MPAID<-NULL
 time.match.covariate<-left_join(time.match.covariate, MPA.recode, by="SettlementID")
@@ -519,7 +519,7 @@ MPA.time.pairs.match$years.resident.longitudinal <- as.factor(MPA.time.pairs.mat
 MPA.time.pairs.match$individual.age.longitudinal <-as.factor(MPA.time.pairs.match$individual.age.longitudinal)
 dummy.balance <- MatchBalance(Tr~ SettlementID+ dom.eth+n.child+occ.dependence+individual.gender +ed.level+years.resident.longitudinal + individual.age.longitudinal, match.out=dummy.time.match, data=MPA.time.pairs.match,ks=TRUE, nboots=100, digits=3, paired=TRUE)
 
-rm(MPA.time.pairs.t2, MPA.time.pairs.bl, MPA.time.pairs.match, exact.match, X, Tr, dummy.time.match, x)
+rm(MPA.time.pairs.t2, MPA.time.pairs.bl, MPA.time.pairs.match, exact.match, X, Tr, dummy.time.match)
 
 # ================================================================================================
 #
@@ -845,12 +845,12 @@ MPA.int.xsection.pairs <- left_join(master.MPA.t2,MPA.int.xsection.pairs, by=c("
 # 4.1  Compute MPA outcomes
 # Sources code that runs place attachment, household food security, household assets, marine tenure, HFS.
 
-source("MPAMystery/Social/SourcedScripts/Compute_BigFive_HWB_KC.R")
+source("MPAMystery/Social/SourcedScripts/Compute_bigfive_matching.R")
 
 # ======
 # 4.2 Source variable outcome function
 
-source('MPAMystery/Social/SourcedScripts/Variable_outcome.R')
+source('MPAMystery/Social/SourcedScripts/Function_variable_outcome.R')
 
 
 # ======
@@ -1703,8 +1703,8 @@ rm(assets.outcome,bias.adjust,Children.HH,covariates,dampier,dummy.match,
    attach.misool,attach.seascape,attach.seascape.sens,attach.telma,attach.telma.sens,attach.tntc,
    attach.tntc.sens,caliper10,caliper7,dummy.balance,enrol.dampier,enrol.kaimana,enrol.kofiau,
    enrol.kofiau.sens,enrol.misool,enrol.seascape,enrol.telma,enrol.telma.sens,enrol.tntc,enrol.tntc.sens,
-   hfs.dampier,hfs.dampier.sens,hfs.kaimana,hfs.kaimana.sens,hfs.kofiau,hfs.kofiau.sense,hfs.misool,
-   hfs.misool.sens,hfs.seascape,hfs.seascape.sens,hfs.telma,hfs.telma.sens,hfs.tntc,hfs.tntc.sens,im10,
+   hfs.dampier,hfs.dampier.sens,hfs.kaimana,hfs.kaimana.sens,hfs.kofiau,hfs.kofiau.sens,hfs.misool,
+   hfs.misool.sens,hfs.seascape,hfs.seascape.sens,hfs.telma,hfs.telma.sens,hfs.tntc,im10,
    imb1,ips,ipsm1,m2,mb2,tenure.dampier,tenure.dampier.sens,tenure.kaimana,tenure.kaimana.sens,
    tenure.kofiau,tenure.misool,tenure.misool.sens,tenure.seascape,tenure.seascape.sens,tenure.telma,
    tenure.telma.sens,tenure.tntc,tenure.tntc.sens,Tr,X,xm7,xmb7,xps,xpsm1,Y)

@@ -1,15 +1,19 @@
-# Compute 'BIG FIVE' human well-being outcomes
-
-
+# 
+# code: Compute 'BIG FIVE' human well-being outcomes
+# 
+# author: Louise Glew, louise.glew@gmail.com
+# 
+# 
+# 
 # 1.1 Call in R Source Code
-source("MPAMystery/Social/SourcedScripts/ExportXlsx.R")
+source("MPAMystery/Social/SourcedScripts/Function_export_xlsx.R")
 
 ## 1.2 IMPORT RAW DATA
-HH.data <- read.delim("MPAMystery/Social/FlatDataFiles/Seascape_HH_wellbeing_2015_0715.txt")
-DE.data <-read.delim("MPAMystery/Social/FlatDataFiles/Seascape_DE_data_2015_0716.txt") #fix path
-district.data <-read.delim("MPAMystery/Social/FlatDataFiles/District_2015_0715.txt")
-settlement.data <-read.delim("MPAMystery/Social/FlatDataFiles/Settlement_2015_0715.txt")
-ethnic<- read.delim ("MPAMystery/Social/FlatDataFiles/State_Seascape_2015_ethnicities_2015_0716.txt") 
+HH.data <- read.delim("MPAMystery/Social/FlatDataFiles/BHS/Seascape_HH_wellbeing_2015_0715.txt")
+DE.data <-read.delim("MPAMystery/Social/FlatDataFiles/BHS/Seascape_DE_data_2015_0716.txt") #fix path
+district.data <-read.delim("MPAMystery/Social/FlatDataFiles/BHS/District_2015_0715.txt")
+settlement.data <-read.delim("MPAMystery/Social/FlatDataFiles/BHS/Settlement_2015_0715.txt")
+ethnic<- read.delim ("MPAMystery/Social/FlatDataFiles/BHS/State_Seascape_2015_ethnicities_2015_0716.txt") 
 
 
 ##  JOIN DATASETS 

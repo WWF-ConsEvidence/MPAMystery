@@ -10,7 +10,7 @@
 # 
 # 
 # ---- inputs ----
-#  1) Source MPA.Mystery.R 
+#  Dependencies: BHS_MPA_Mystery.R 
 # 
 # ---- code sections ----
 #  1) Import Data
@@ -34,7 +34,7 @@ MPA.TechReport.SigTest.Data <-
             HHLivelihood[,c(1,15)],
             by="HouseholdID")
 
-# --- "MPA Household Data" dataset
+# - "MPA Household Data" dataset
 TNTC.TechReport.MPAHouseholdData <- 
   left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$Treatment==1 &
                                           MPA.TechReport.SigTest.Data$MonitoringYear== "4 Year Post" &
@@ -47,7 +47,7 @@ TNTC.TechReport.MPAHouseholdData <-
 TNTC.TechReport.MPAHouseholdData$SettlementName <- 
   factor(TNTC.TechReport.MPAHouseholdData$SettlementName)
 
-# --- "MPA versus Control" dataset
+# - "MPA versus Control" dataset
 TNTC.TechReport.MPAvControl <- 
   left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$MPAID==2 &
                                           MPA.TechReport.SigTest.Data$MonitoringYear=="4 Year Post",],
@@ -59,7 +59,7 @@ TNTC.TechReport.MPAvControl <-
 TNTC.TechReport.MPAvControl$MPA.v.Control <- 
   factor(ifelse(TNTC.TechReport.MPAvControl$Treatment==1,"MPA","Control"))
 
-# --- "Settlement Means" dataset
+# - "Settlement Means" dataset
 TNTC.TechReport.SettlementMeans <- 
   left_join(BigFive.SettleGroup[BigFive.SettleGroup$Treatment==1 &
                                   BigFive.SettleGroup$MonitoringYear=="4 Year Post" &
@@ -82,7 +82,7 @@ colnames(TNTC.TechReport.SettlementMeans) <- c(colnames(TNTC.TechReport.Settleme
                                                "FSIndex","FSErr","MAIndex","MAErr","PAIndex","PAErr",
                                                "MTIndex","MTErr","SERate","SEErr","TimeMarketClean","DaysUnwell")
 
-# --- "Trend" dataset
+# - "Trend" dataset
 TNTC.Trend.Data <- 
   left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$Treatment==1 &
                                           MPA.TechReport.SigTest.Data$MPAID==2,],
@@ -323,7 +323,7 @@ non.parametric.test.settlements.TNTC <-
                     }))
 
 
-# --- Alphabetize each column of settlement names.  Now all settlement names are in same order.
+# - Alphabetize each column of settlement names.  Now all settlement names are in same order.
 sigvals.Sett.TNTC <- 
   cbind.data.frame(non.parametric.test.settlements.TNTC[order(non.parametric.test.settlements.TNTC$"FSIndex.SettlementName"),
                                                         c("FSIndex.SettlementName","FSIndex.p.value")],
@@ -340,7 +340,7 @@ sigvals.Sett.TNTC <-
                    non.parametric.test.settlements.TNTC[order(non.parametric.test.settlements.TNTC$"DaysUnwell.SettlementName"),
                                                         c("DaysUnwell.SettlementName","DaysUnwell.p.value")])
 
-# --- Remove all settlement name columns except for one. 
+# - Remove all settlement name columns except for one. 
 sigvals.Sett.TNTC <-
   sigvals.Sett.TNTC[,c(1,2,4,6,8,10,12,14)]
 
@@ -367,13 +367,13 @@ null.row.sigvals.TNTC <-
   matrix(rep(NA,length(sigvals.MPA.TNTC)),ncol=length(sigvals.MPA.TNTC),
          dimnames=list(NULL,colnames(sigvals.MPA.TNTC)))
 
-# --- Define data frame with p-values for status plots
-#     (households in each settlement are compared to those in the median settlement for the given variable,
-#      using Mann Whitney U-Test -- so, interpretation is "compared to the median settlement, this settlement 
-#      [is/is not] significantly different")
+# - Define data frame with p-values for status plots
+#   (households in each settlement are compared to those in the median settlement for the given variable,
+#   using Mann Whitney U-Test -- so, interpretation is "compared to the median settlement, this settlement 
+#   [is/is not] significantly different")
 # 
-#      (for MPA p-values, households in the MPA were compared to those in the control settlements (for the MPA),
-#      also using Mann Whitney U-Test)
+#   (for MPA p-values, households in the MPA were compared to those in the control settlements (for the MPA),
+#   also using Mann Whitney U-Test)
 sigvals.TNTC <- 
   rbind.data.frame(sigvals.MPA.TNTC,
                    null.row.sigvals.TNTC,
@@ -393,10 +393,10 @@ trend.non.parametric.test.byMPA.TNTC <-
 
 colnames(trend.non.parametric.test.byMPA.TNTC) <- colnames(sigvals.TNTC[2:8])
 
-# --- Define data frame with p-values for trend plots
-#     (all MPA households from each year of sampling are compared across time for the given variable, 
-#      using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
-#      there [is/is not] a significant difference in this variable across the MPA")
+# - Define data frame with p-values for trend plots
+#   (all MPA households from each year of sampling are compared across time for the given variable, 
+#   using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
+#   there [is/is not] a significant difference in this variable across the MPA")
 trend.sigvals.TNTC <- 
   cbind.data.frame(MonitoringYear="p.value",trend.non.parametric.test.byMPA.TNTC["sl",1],NA,trend.non.parametric.test.byMPA.TNTC["sl",2],
                    NA,trend.non.parametric.test.byMPA.TNTC["sl",3],NA,trend.non.parametric.test.byMPA.TNTC["sl",4],NA,trend.non.parametric.test.byMPA.TNTC["sl",5],
@@ -425,10 +425,10 @@ trend.non.parametric.test.bySett.TNTC <-
 
 colnames(trend.non.parametric.test.bySett.TNTC) <- colnames(sigvals.TNTC)
 
-# --- Define data frame with p-values for annex plots
-#     (households within each settlement from each year of sampling are compared across time for the given 
-#      variable, using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
-#      there [is/is not] a significant difference in this variable across the settlement)
+# - Define data frame with p-values for annex plots
+#   (households within each settlement from each year of sampling are compared across time for the given 
+#   variable, using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
+#   there [is/is not] a significant difference in this variable across the settlement)
 annex.sigvals.TNTC <- 
   rbind.data.frame(cbind.data.frame(SettlementName="MPA",trend.non.parametric.test.byMPA.TNTC["sl",]),
                    null.row.sigvals.TNTC,
