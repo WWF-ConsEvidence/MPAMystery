@@ -1,14 +1,17 @@
----
-title: "WWF-conservation-evidence __READ_ME__"
-output: html_notebook
----
+# WWF-conservation-evidence __READ_ME__
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Welcome to the WWF-conservation-evidence repository! For more detailed information on this repository, please visit the associated [Wiki page](https://github.com/kaclaborn/WWF-conservation-evidence/wiki). When you execute code within the notebook, the results appear beneath the code. 
 
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
 
+
 ```{r}
-plot(cars)
+sample.data <- data.frame(Household=c(1,2,3,4,5),
+                          Year=c(2010,2011,2012,2013,2014),
+                          HHSize=c(3,6,4,7,2))
+
+print(sample.data)
 ```
 
 
