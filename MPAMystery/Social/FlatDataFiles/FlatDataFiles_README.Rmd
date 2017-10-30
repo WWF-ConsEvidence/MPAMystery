@@ -1,15 +1,8 @@
----
-title: "FlatDataFiles_README"
-output: html_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+# FlatDataFiles_README
 
 <br>
 
-__Data to be added to FlatDataFiles must be acquired from WWF__
+__Data to be added to FlatDataFiles must be acquired from WWF.__
 
 Please contact Louise Glew (louise.glew@wwf.org) or Kelly Claborn (kelly.claborn@wwf.org) for permissions.
 
