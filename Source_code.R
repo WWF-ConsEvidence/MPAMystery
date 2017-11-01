@@ -1,7 +1,7 @@
 # 
-# code: Source code for all WWF-conservation-evidence analyses
+# code: Source code for all MPAMystery analyses
 # 
-# github: kaclaborn/WWF-conservation-evidence
+# github: WWF-ConsEvidence/MPAMystery
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: October 2017
@@ -10,7 +10,7 @@
 # 
 # ---- code sections ----
 #  1) Load libraries
-#  2) MPAMystery/Social
+#  2) MPAMystery/2_Social
 # 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -38,30 +38,30 @@ library(Kendall)
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# ---- SECTION 2: MPAMystery/Social ----
+# ---- SECTION 2: MPAMystery/2_Social ----
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
 # ---- 2.1 Required for all BHS analysis ----
 
-source('MPAMystery/Social/SourcedScripts/BHS_MPA_Mystery.R')
+source('2_Social/SourcedScripts/BHS_MPA_Mystery.R')
 # - Dependencies: SQLqueries_AccessODBC.R
 # - Inputs:
 
 
 # ---- 2.2 Required for BHS 2 year impact analysis ----
 
-source('MPAMystery/Social/SourcedScripts/Matching_2yr_impacts.R')
+source('2_Social/SourcedScripts/Matching_2yr_impacts.R')
 # - Dependencies: Compute_bigfive_matching.R
 #                 Function_export_xlsx.R
 #                 Function_variable_outcome.R
 # - Inputs: 
 
-source('MPAMystery/Social/SourcedScripts/BHS_2yr_impact_data.R')
+source('2_Social/SourcedScripts/BHS_2yr_impact_data.R')
 # - Dependencies: Matching_2yr_impacts.R
 # - Inputs:
 
-source('MPAMystery/Social/SourcedScripts/Function_summarise_bigfive_impacts.R')
+source('2_Social/SourcedScripts/Function_summarise_bigfive_impacts.R')
 # - Dependencies: none
 # - Inputs: none
