@@ -1,6 +1,6 @@
 # SQL queries for established ODBC with social MPA Mystery database
 
-HHData <- sqlQuery(BHS.MPAMysteryDB,
+HHData <- sqlQuery(MPAMysteryDB,
 'select 
 HouseholdID, MPAID, SettlementID, InterviewYear, 
 iif((FSDidNotLast=1 or FSDidNotLast=2),1,iif(FSDidNotLast=3,0,990)) as DidNotLastCoded, 
@@ -112,7 +112,7 @@ HHData$RemovecFS <- ifelse(rowSums(HHData[,65:69],na.rm=T)>2969,"Yes","No")
 
 HHData <- HHData[,c(1:10,91,11:27,92,28:44,93,45:55,94,56:65,95,66:83,90,85:89)]
 
-IndDemos <- sqlQuery(BHS.MPAMysteryDB,
+IndDemos <- sqlQuery(MPAMysteryDB,
 'select HouseholdID, 
 iif(IndividualGender=2,0,iif(IndividualGender>989,Null,IndividualGender)) as IndividualGenderClean, 
 IndividualEducation,
@@ -130,4 +130,20 @@ IndDemos$IndividualEducationClean <- ifelse(IndDemos$IndividualEducation=="994" 
                                               IndDemos$IndividualEducation=="998" |
                                               IndDemos$IndividualEducation=="999",NA,
                                             as.character(IndDemos$IndividualEducation))
-IndDemos <- IndDemos[,c(1:2,9,4:8)]
+
+IndDemos <- left_join(IndDemos,HHData[,c("HouseholdID","MPAID")],by="HouseholdID")
+
+
+IndDemos <- IndDemos[IndDemos$MPAID==1 | IndDemos$MPAID==2 | IndDemos$MPAID==3 | 
+                       IndDemos$MPAID==4 | IndDemos$MPAID==5 | IndDemos$MPAID==6,
+                     c(1:2,9,4:8)]
+HHData <- HHData[HHData$MPAID==1 | HHData$MPAID==2 | HHData$MPAID==3 | 
+                   HHData$MPAID==4 | HHData$MPAID==5 | HHData$MPAID==6,]
+
+
+IndDemos <- left_join(IndDemos,HHData[,c("HouseholdID","SettlementID")],by="HouseholdID")
+
+Settlements <- sqlFetch(MPAMysteryDB,"HH_tbl_SETTLEMENT")
+Settlements <- Settlements[Settlements$MPAID==1 | Settlements$MPAID==2 | Settlements$MPAID==3 | 
+                             Settlements$MPAID==4 | Settlements$MPAID==5 | Settlements$MPAID==6,
+                           c(1,3:5)]

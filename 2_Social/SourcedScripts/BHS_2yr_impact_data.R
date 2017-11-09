@@ -23,6 +23,7 @@ colnames(MT.impact.2yr) <- c(colnames(MT.impact.2yr[1:5]),
                              paste("tenure",colnames(MT.impact.2yr[6:8]),sep="."))
 
 SE.impact.2yr <- enrol.ATT[!duplicated(enrol.ATT$HouseholdID),]
+SE.impact.2yr[,2:8] <- SE.impact.2yr[,2:8]/100
 colnames(SE.impact.2yr) <- c(colnames(SE.impact.2yr[1:5]),
                              paste("enrol",colnames(SE.impact.2yr[6:8]),sep="."))
 

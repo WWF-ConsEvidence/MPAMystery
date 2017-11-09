@@ -45,22 +45,17 @@
 # !!! Select ONE option to import data - ONLY CHOOSE ONE
 
 # OPTION 1: Use ODBC connection to access database and import tables
-BHS.MPAMysteryDB <- odbcConnect("BHS.SocMPAMysteryDB")
+MPAMysteryDB <- odbcConnect("Unified.Social.MPAMystery")
 
 source('2_Social/SourcedScripts/SQLqueries_AccessODBC.R')
 
-IndDemos <- left_join(IndDemos,HHData[,c("HouseholdID","SettlementID")],by="HouseholdID")
-
-Settlements <- sqlFetch(BHS.MPAMysteryDB,"HH_tbl_SETTLEMENT")
-Settlements <- Settlements[,c(1,3:5)]
-
 # # OPTION 2: Set working directory and import flat data files (.csv files)
-# HHData <- read.csv('2_Social/FlatDataFiles/BHS/KC_HHData_ForMPAMystery.csv',header=T,sep=',')
+# HHData <- read.csv('2_Social/FlatDataFiles/BHS/BHS_HHData.csv',header=T,sep=',')
 # 
-# IndDemos <- read.csv('2_Social/FlatDataFiles/BHS/KC_IndDemos_ForMPAMystery.csv',header=T,sep=',')
+# IndDemos <- read.csv('2_Social/FlatDataFiles/BHS/BHS_HHDemos.csv',header=T,sep=',')
 # IndDemos <- left_join(IndDemos,HHData[,c("HouseholdID","SettlementID")],by="HouseholdID")
 # 
-# Settlements <- read.csv('2_Social/FlatDataFiles/BHS/HH_tbl_SETTLEMENT.csv',header=T,sep=',')
+# Settlements <- read.csv('2_Social/FlatDataFiles/BHS/BHS_HH_tbl_SETTLEMENT.csv',header=T,sep=',')
 # Settlements <- Settlements[,c(1,3:5)]
 
 # Whichever option you chose above, you will still need to upload Ethnicity data from a flat file
@@ -174,13 +169,15 @@ MA.PA.MT.FS <- left_join(MA,PA,by="HouseholdID")
 MA.PA.MT.FS <- left_join(MA.PA.MT.FS,MT,by="HouseholdID")
 MA.PA.MT.FS <- left_join(MA.PA.MT.FS,FS,by="HouseholdID")
 
-IndDemos.1 <- ddply(IndDemos,"HouseholdID",summarise,
-                    NumberChild=sum(ChildOrAdult,na.rm=T),
-                    EnrolledHH=sum(ChildEnrolled,na.rm=T),
-                    PercentEnrolled=ifelse(NumberChild!=0 & !is.na(EnrolledHH),
-                                           round((EnrolledHH/NumberChild)*100,2),
-                                           ifelse(NumberChild==0,
-                                                  "No School-Aged Children","No Data")))
+IndDemos.1 <- 
+  IndDemos %>%
+  group_by(HouseholdID) %>%
+  summarise(NumberChild=sum(ChildOrAdult,na.rm=T),
+            EnrolledHH=sum(ChildEnrolled,na.rm=T),
+            PercentEnrolled=ifelse(NumberChild!=0 & !is.na(EnrolledHH),
+                                   as.character(round((EnrolledHH/NumberChild)*100,2)),
+                                   ifelse(NumberChild==0,
+                                          "No School-Aged Children","No Data")))
 
 BigFive.allvar <- left_join(MA.PA.MT.FS,IndDemos.1,by="HouseholdID")
 BigFive.allvar <- left_join(BigFive.allvar,Settlements,by=c("SettlementID","MPAID"))
@@ -384,16 +381,12 @@ Techreport.BySett <-
                                                                      !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
             Percent.PrimaryOcc.WageLabor=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==7 &
                                                                           !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-            Percent.PrimaryOcc.Aqua=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==4 &
-                                                                     !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
             Percent.PrimaryOcc.HarvestForest=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==2 &
                                                                               !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-            Percent.PrimaryOcc.ExtractResource=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==5 &
-                                                                                !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
             Percent.PrimaryOcc.Tourism=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==6 &
                                                                         !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-            Percent.PrimaryOcc.Other=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==996 &
-                                                                      !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            Percent.PrimaryOcc.Other=(length(PrimaryLivelihoodClean[(PrimaryLivelihoodClean==996 | PrimaryLivelihoodClean==4 | 
+                                                                       PrimaryLivelihoodClean==5) & !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
             Prop.Fish.AlmostNever=(length(FreqFishClean[FreqFishClean==1 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
             Prop.Fish.FewTimesPer6Mo=(length(FreqFishClean[FreqFishClean==2 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
             Prop.Fish.FewTimesPerMo=(length(FreqFishClean[FreqFishClean==3 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
@@ -416,7 +409,7 @@ Techreport.BySett <-
             Prop.FishTech.MobileLine=(length(MajFishTechniqueClean[MajFishTechniqueClean==5 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
             Child.FS.no=(length(Child.FS.category[Child.FS.category=="No or insufficient evidence" & !is.na(Child.FS.category)])/length(Child.FS.category[!is.na(Child.FS.category)]))*100,
             Child.FS.yes=(length(Child.FS.category[Child.FS.category=="Evidence" & !is.na(Child.FS.category)])/length(Child.FS.category[!is.na(Child.FS.category)]))*100,
-            TimeMarket=mean(TimeMarketClean,na.rm=T),
+            TimeMarketMean=mean(TimeMarketClean,na.rm=T),
             TimeMarketErr=sd(TimeMarketClean,na.rm=T)/sqrt(length(TimeMarketClean)))
 
 Techreport.BySett <- rbind.data.frame(Techreport.BySett,
@@ -428,8 +421,8 @@ Techreport.BySett <- rbind.data.frame(Techreport.BySett,
                                                                                                                            BigFive.SettleGroup$SettlementID>100])),
                                                                   as.character(unique(BigFive.SettleGroup$SettlementName[BigFive.SettleGroup$MPAID==3 &
                                                                                                                            BigFive.SettleGroup$SettlementID>110]))),
-                                                 as.data.frame(matrix(rep(NA,38),ncol=38,nrow=13,
-                                                                      dimnames=list(NULL,colnames(Techreport.BySett[5:42]))))))
+                                                 as.data.frame(matrix(rep(NA,36),ncol=36,nrow=13,
+                                                                      dimnames=list(NULL,colnames(Techreport.BySett[5:40]))))))
 Techreport.BySett <- Techreport.BySett[!is.na(Techreport.BySett$SettlementID),]
 
 
@@ -455,16 +448,12 @@ Techreport.ByMPA <-
                                                                      !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
             Percent.PrimaryOcc.WageLabor=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==7 &
                                                                           !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-            Percent.PrimaryOcc.Aqua=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==4 &
-                                                                     !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
             Percent.PrimaryOcc.HarvestForest=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==2 &
                                                                               !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-            Percent.PrimaryOcc.ExtractResource=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==5 &
-                                                                                !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
             Percent.PrimaryOcc.Tourism=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==6 &
                                                                         !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-            Percent.PrimaryOcc.Other=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==996 &
-                                                                      !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            Percent.PrimaryOcc.Other=(length(PrimaryLivelihoodClean[(PrimaryLivelihoodClean==996 | PrimaryLivelihoodClean==4 | 
+                                                                       PrimaryLivelihoodClean==5) & !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
             Prop.Fish.AlmostNever=(length(FreqFishClean[FreqFishClean==1 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
             Prop.Fish.FewTimesPer6Mo=(length(FreqFishClean[FreqFishClean==2 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
             Prop.Fish.FewTimesPerMo=(length(FreqFishClean[FreqFishClean==3 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
@@ -487,7 +476,7 @@ Techreport.ByMPA <-
             Prop.FishTech.MobileLine=(length(MajFishTechniqueClean[MajFishTechniqueClean==5 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
             Child.FS.no=(length(Child.FS.category[Child.FS.category=="No or insufficient evidence" & !is.na(Child.FS.category)])/length(Child.FS.category[!is.na(Child.FS.category)]))*100,
             Child.FS.yes=(length(Child.FS.category[Child.FS.category=="Evidence" & !is.na(Child.FS.category)])/length(Child.FS.category[!is.na(Child.FS.category)]))*100,
-            TimeMarket=mean(TimeMarketClean,na.rm=T),
+            TimeMarketMean=mean(TimeMarketClean,na.rm=T),
             TimeMarketErr=sd(TimeMarketClean,na.rm=T)/sqrt(length(TimeMarketClean)))
 
 Techreport.ByMPA <- Techreport.ByMPA[!is.na(Techreport.ByMPA$MPAID),]
@@ -496,57 +485,53 @@ Techreport.ByMPA <- Techreport.ByMPA[!is.na(Techreport.ByMPA$MPAID),]
 #     (not used in any significance tests or data frames, just for comparing proportional variables by sight)
 Techreport.ByMPA.control <- group_by(CurrentDemos.control,MPAID)
 Techreport.ByMPA.control <- summarise(Techreport.ByMPA.control,
-                                       HHH.female=(length(HeadofHH.gender[HeadofHH.gender==0 &
-                                                                            !is.na(HeadofHH.gender)])/length(HeadofHH.gender[!is.na(HeadofHH.gender)]))*100,
-                                       HHH.male=(length(HeadofHH.gender[HeadofHH.gender==1 &
-                                                                          !is.na(HeadofHH.gender)])/length(HeadofHH.gender[!is.na(HeadofHH.gender)]))*100,
-                                       Percent.Rel.Christian=(length(ReligionClean[ReligionClean==1 &
-                                                                                     !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
-                                       Percent.Rel.Muslim=(length(ReligionClean[ReligionClean==2 &
-                                                                                  !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
-                                       Percent.Rel.Other=(length(ReligionClean[ReligionClean!=1 & ReligionClean!=2 &
+                                      HHH.female=(length(HeadofHH.gender[HeadofHH.gender==0 &
+                                                                           !is.na(HeadofHH.gender)])/length(HeadofHH.gender[!is.na(HeadofHH.gender)]))*100,
+                                      HHH.male=(length(HeadofHH.gender[HeadofHH.gender==1 &
+                                                                         !is.na(HeadofHH.gender)])/length(HeadofHH.gender[!is.na(HeadofHH.gender)]))*100,
+                                      Percent.Rel.Christian=(length(ReligionClean[ReligionClean==1 &
+                                                                                    !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
+                                      Percent.Rel.Muslim=(length(ReligionClean[ReligionClean==2 &
                                                                                  !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
-                                       Num.EthnicGroups=length(unique(Eth.Iso[!is.na(Eth.Iso)])),
-                                       Percent.PrimaryOcc.Fish=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
-                                                                                                !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-                                       Percent.PrimaryOcc.Farm=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==1 &
-                                                                                                !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-                                       Percent.PrimaryOcc.WageLabor=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==7 &
-                                                                                                     !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-                                       Percent.PrimaryOcc.Aqua=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==4 &
-                                                                                                !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-                                       Percent.PrimaryOcc.HarvestForest=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==2 &
-                                                                                                         !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-                                       Percent.PrimaryOcc.ExtractResource=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==5 &
-                                                                                                           !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-                                       Percent.PrimaryOcc.Tourism=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==6 &
-                                                                                                   !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-                                       Percent.PrimaryOcc.Other=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==996 &
-                                                                                                 !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-                                       Prop.Fish.AlmostNever=(length(FreqFishClean[FreqFishClean==1 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
-                                       Prop.Fish.FewTimesPer6Mo=(length(FreqFishClean[FreqFishClean==2 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
-                                       Prop.Fish.FewTimesPerMo=(length(FreqFishClean[FreqFishClean==3 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
-                                       Prop.Fish.FewTimesPerWk=(length(FreqFishClean[FreqFishClean==4 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
-                                       Prop.Fish.MoreFewTimesWk=(length(FreqFishClean[FreqFishClean==5 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
-                                       Prop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
-                                       Prop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
-                                       Prop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
-                                       Prop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
-                                       Prop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
-                                       Prop.IncFish.None=(length(PercentIncFishClean[PercentIncFishClean==1 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
-                                       Prop.IncFish.Some=(length(PercentIncFishClean[PercentIncFishClean==2 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
-                                       Prop.IncFish.Half=(length(PercentIncFishClean[PercentIncFishClean==3 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
-                                       Prop.IncFish.Most=(length(PercentIncFishClean[PercentIncFishClean==4 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
-                                       Prop.IncFish.All=(length(PercentIncFishClean[PercentIncFishClean==5 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
-                                       Prop.FishTech.ByHand=(length(MajFishTechniqueClean[MajFishTechniqueClean==1 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
-                                       Prop.FishTech.StatNet=(length(MajFishTechniqueClean[MajFishTechniqueClean==2 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
-                                       Prop.FishTech.MobileNet=(length(MajFishTechniqueClean[MajFishTechniqueClean==3 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
-                                       Prop.FishTech.StatLine=(length(MajFishTechniqueClean[MajFishTechniqueClean==4 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
-                                       Prop.FishTech.MobileLine=(length(MajFishTechniqueClean[MajFishTechniqueClean==5 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
-                                       Child.FS.no=(length(Child.FS.category[Child.FS.category=="No or insufficient evidence" & !is.na(Child.FS.category)])/length(Child.FS.category[!is.na(Child.FS.category)]))*100,
-                                       Child.FS.yes=(length(Child.FS.category[Child.FS.category=="Evidence" & !is.na(Child.FS.category)])/length(Child.FS.category[!is.na(Child.FS.category)]))*100,
-                                       TimeMarket=mean(TimeMarketClean,na.rm=T),
-                                       TimeMarketErr=sd(TimeMarketClean,na.rm=T)/sqrt(length(TimeMarketClean)))
+                                      Percent.Rel.Other=(length(ReligionClean[ReligionClean!=1 & ReligionClean!=2 &
+                                                                                !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
+                                      Num.EthnicGroups=length(unique(Eth.Iso[!is.na(Eth.Iso)])),
+                                      Percent.PrimaryOcc.Fish=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
+                                                                                               !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+                                      Percent.PrimaryOcc.Farm=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==1 &
+                                                                                               !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+                                      Percent.PrimaryOcc.WageLabor=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==7 &
+                                                                                                    !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+                                      Percent.PrimaryOcc.HarvestForest=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==2 &
+                                                                                                        !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+                                      Percent.PrimaryOcc.Tourism=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==6 &
+                                                                                                  !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+                                      Percent.PrimaryOcc.Other=(length(PrimaryLivelihoodClean[(PrimaryLivelihoodClean==996 | PrimaryLivelihoodClean==4 | 
+                                                                                                 PrimaryLivelihoodClean==5) & !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+                                      Prop.Fish.AlmostNever=(length(FreqFishClean[FreqFishClean==1 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
+                                      Prop.Fish.FewTimesPer6Mo=(length(FreqFishClean[FreqFishClean==2 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
+                                      Prop.Fish.FewTimesPerMo=(length(FreqFishClean[FreqFishClean==3 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
+                                      Prop.Fish.FewTimesPerWk=(length(FreqFishClean[FreqFishClean==4 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
+                                      Prop.Fish.MoreFewTimesWk=(length(FreqFishClean[FreqFishClean==5 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
+                                      Prop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+                                      Prop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+                                      Prop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+                                      Prop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+                                      Prop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+                                      Prop.IncFish.None=(length(PercentIncFishClean[PercentIncFishClean==1 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
+                                      Prop.IncFish.Some=(length(PercentIncFishClean[PercentIncFishClean==2 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
+                                      Prop.IncFish.Half=(length(PercentIncFishClean[PercentIncFishClean==3 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
+                                      Prop.IncFish.Most=(length(PercentIncFishClean[PercentIncFishClean==4 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
+                                      Prop.IncFish.All=(length(PercentIncFishClean[PercentIncFishClean==5 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
+                                      Prop.FishTech.ByHand=(length(MajFishTechniqueClean[MajFishTechniqueClean==1 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
+                                      Prop.FishTech.StatNet=(length(MajFishTechniqueClean[MajFishTechniqueClean==2 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
+                                      Prop.FishTech.MobileNet=(length(MajFishTechniqueClean[MajFishTechniqueClean==3 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
+                                      Prop.FishTech.StatLine=(length(MajFishTechniqueClean[MajFishTechniqueClean==4 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
+                                      Prop.FishTech.MobileLine=(length(MajFishTechniqueClean[MajFishTechniqueClean==5 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
+                                      Child.FS.no=(length(Child.FS.category[Child.FS.category=="No or insufficient evidence" & !is.na(Child.FS.category)])/length(Child.FS.category[!is.na(Child.FS.category)]))*100,
+                                      Child.FS.yes=(length(Child.FS.category[Child.FS.category=="Evidence" & !is.na(Child.FS.category)])/length(Child.FS.category[!is.na(Child.FS.category)]))*100,
+                                      TimeMarketMean=mean(TimeMarketClean,na.rm=T),
+                                      TimeMarketErr=sd(TimeMarketClean,na.rm=T)/sqrt(length(TimeMarketClean)))
 
 
 # 
@@ -728,22 +713,22 @@ Days.unwell.treatment <- Days.unwell[Days.unwell$Treatment==1,]
 Days.unwell.ByMPA <- 
   Days.unwell.treatment %>%
   group_by(MPAID,MonitoringYear) %>%
-  summarise(Days.unwell=mean(DaysUnwell,na.rm=T),
-            Days.unwell.err=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)))
+  summarise(UnwellMean=mean(DaysUnwell,na.rm=T),
+            UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)))
 
 # ---Days unwell, by settlement ("Days.unwell.BySett" is most current cross-section of data)
 Days.unwell.BySett <- 
   Days.unwell.treatment %>%
   group_by(SettlementID,MPAID,MonitoringYear) %>%
-  summarise(Days.unwell=mean(DaysUnwell,na.rm=T),
-            Days.unwell.err=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)))
+  summarise(UnwellMean=mean(DaysUnwell,na.rm=T),
+            UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)))
 
 Days.unwell.control <- 
   Days.unwell[Days.unwell$InterviewYear==Days.unwell$CurrentYear &
                 Days.unwell$Treatment==0,] %>%
   group_by(MPAID) %>%
-  summarise(Days.unwell=mean(DaysUnwell,na.rm=T),
-            Days.unwell.err=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)))
+  summarise(UnwellMean=mean(DaysUnwell,na.rm=T),
+            UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)))
 
 
 # Compare.prop.data <- rbind.data.frame(data.frame(Treatment="MPA",Techreport.BySett.MPA[,-4]),
@@ -1053,32 +1038,74 @@ AgeGenderDemos.ByMPA <- AgeGenderDemos.ByMPA[!is.na(AgeGenderDemos.ByMPA$MPAID),
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-# ---- 5.1 MPA Technical Report plot theme ----
+
+# ---- 5.1 MPA Technical Report plot themes ----
+
 plot.theme <- theme(axis.ticks=element_blank(),
-                    plot.title=element_text(face="bold",
-                                            colour="#303030",
-                                            hjust=0.5),
                     panel.background=element_rect(fill="white",
                                                   colour="#909090"),
                     panel.border=element_rect(fill=NA,
                                               size=0.25,
                                               colour="#C0C0C0"),
                     panel.grid.major.x=element_line(colour="#C0C0C0",
-                                                    size=0.25),
-                    panel.grid.major.y=element_line(colour="#C0C0C0",
                                                     size=0.25,
                                                     linetype=3),
+                    panel.grid.major.y=element_blank(),
+                    plot.margin=margin(t=0,r=20,b=5,l=5,unit="pt"),
                     axis.title=element_text(size=10,
                                             angle=0,
                                             face="bold",
                                             colour="#303030"),
                     axis.text=element_text(size=8,
                                            angle=0,
-                                           colour="#303030"))
+                                           colour="#303030"),
+                    legend.position="top",
+                    legend.justification="right",
+                    legend.box.spacing=unit(0.1,"cm"))
+
+fillcols.status <- c("NotDummy"=alpha("#2C7FB8",0.95),"Dummy"=alpha("#FFFFFF",0))
+fillcols.trend <- c(alpha("#2C7FB8",0.95))
+
+errcols.status <- c("NotDummy"=alpha("#21577C",0.95),"Dummy"=alpha("#FFFFFF",0))
+errcols.trend <- c(alpha("#21577C",0.95))
+
+multianswer.fillcols.status <- list(Gender=c("HHH.male"=alpha("#253494",0.95),
+                                             "HHH.female"=alpha("#7FCDBB",0.95)),
+                                    Religion=c("Percent.Rel.Christian"=alpha("#253494",0.95),
+                                               "Percent.Rel.Muslim"=alpha("#7FCDBB",0.95),
+                                               "Percent.Rel.Other"=alpha("#FDC086",0.95)),
+                                    PrimaryOcc=c("Percent.PrimaryOcc.Farm"=alpha("#7FC97F",0.95),
+                                                 "Percent.PrimaryOcc.HarvestForest"=alpha("#BEAED4",0.95),
+                                                 "Percent.PrimaryOcc.Fish"=alpha("#FDC086",0.95),
+                                                 "Percent.PrimaryOcc.Tourism"=alpha("#E1E198",0.95),
+                                                 "Percent.PrimaryOcc.WageLabor"=alpha("#386CB0",0.95),
+                                                 "Percent.PrimaryOcc.Other"=alpha("#C23737",0.95)),
+                                    FreqFish=c("Prop.Fish.AlmostNever"=alpha("#E1E198",0.95),
+                                               "Prop.Fish.FewTimesPer6Mo"=alpha("#7FCDBB",0.95),
+                                               "Prop.Fish.FewTimesPerMo"=alpha("#2CA9B8",0.95),
+                                               "Prop.Fish.FewTimesPerWk"=alpha("#2C7FB8",0.95),
+                                               "Prop.Fish.MoreFewTimesWk"=alpha("#253494",0.95)),
+                                    FreqSellFish=c("Prop.SellFish.AlmostNever"=alpha("#E1E198",0.95),
+                                                   "Prop.SellFish.FewTimesPer6Mo"=alpha("#7FCDBB",0.95),
+                                                   "Prop.SellFish.FewTimesPerMo"=alpha("#2CA9B8",0.95),
+                                                   "Prop.SellFish.FewTimesPerWk"=alpha("#2C7FB8",0.95),
+                                                   "Prop.SellFish.MoreFewTimesWk"=alpha("#253494",0.95)),
+                                    IncFish=c("Prop.IncFish.None"=alpha("#E1E198",0.95),
+                                              "Prop.IncFish.Some"=alpha("#7FCDBB",0.95),
+                                              "Prop.IncFish.Half"=alpha("#2CA9B8",0.95),
+                                              "Prop.IncFish.Most"=alpha("#2C7FB8",0.95),
+                                              "Prop.IncFish.All"=alpha("#253494",0.95)),
+                                    FishTech=c("Prop.FishTech.ByHand"=alpha("#7FC97F",0.95),
+                                               "Prop.FishTech.StatNet"=alpha("#BEAED4",0.95),
+                                               "Prop.FishTech.MobileNet"=alpha("#FDC086",0.95),
+                                               "Prop.FishTech.StatLine"=alpha("#E1E198",0.95),
+                                               "Prop.FishTech.MobileLine"=alpha("#386CB0",0.95)),
+                                    ChildFS=c("Child.FS.no"=alpha("#253494",0.95),
+                                              "Child.FS.yes"=alpha("#7FCDBB",0.95)))
 
 # ---- 5.2 MPA Impact Summary plot themes ----
-fill.cols.MPAimpact.summ <- c("MPA"=alpha("#1B448B",0.85),"Control"=alpha("#6B6B6B",0.4))
 
+fill.cols.MPAimpact.summ <- c("MPA"=alpha("#1B448B",0.85),"Control"=alpha("#6B6B6B",0.4))
 err.cols.MPAimpact.summ <- c(alpha("#0A1D4E",0.5),alpha("#242424",0.25))
 
 snapshot.plot.theme.MPAimpact.summ <- theme(panel.background=element_blank(),
@@ -1143,7 +1170,61 @@ fs.st.plot.theme.MPAimpact.summ <- theme(axis.ticks.x=element_blank(),
                                    panel.border=element_rect(fill=NA,
                                                              colour="#D0D0D0"))
 
-# ---- 5.3 MPA Impact Summary plot legend guide ----
+
+# ---- 5.3 MPA Technical Report plot legend guide ----
+
+plot.guides.techreport <- guides(alpha=guide_legend(title.hjust=1,
+                                                    title.theme=element_text(face="bold",
+                                                                             size=rel(8),
+                                                                             angle=0,
+                                                                             colour="#505050",
+                                                                             lineheight=0.75),
+                                                    label.vjust=0.5,
+                                                    label.theme=element_text(size=rel(7),
+                                                                             angle=0,
+                                                                             colour="#505050",
+                                                                             lineheight=0.75),
+                                                    direction="horizontal",
+                                                    ncol=3,
+                                                    title.position="left",
+                                                    label.position="right",
+                                                    keywidth=unit(0.75,"cm"),
+                                                    keyheight=unit(0.5,"cm")),
+                                     fill=guide_legend(title.hjust=1,
+                                                       title.theme=element_text(face="bold",
+                                                                                size=rel(8),
+                                                                                angle=0,
+                                                                                colour="#505050",
+                                                                                lineheight=0.75),
+                                                       label.vjust=0.5,
+                                                       label.theme=element_text(size=rel(7),
+                                                                                angle=0,
+                                                                                colour="#505050",
+                                                                                lineheight=0.75),
+                                                       direction="horizontal",
+                                                       ncol=3,
+                                                       title.position="left",
+                                                       label.position="right",
+                                                       keywidth=unit(0.75,"cm"),
+                                                       keyheight=unit(0.5,"cm"),
+                                                       reverse=T),
+                                     colour=guide_legend(title=element_blank(),
+                                                         label.position="bottom",
+                                                         label.theme=element_text(size=9,
+                                                                                  angle=0,
+                                                                                  colour="#505050"),
+                                                         label.hjust=0.5,
+                                                         keywidth=unit(2.5,"cm")),
+                                     shape=guide_legend(title=element_blank(),
+                                                        label.position="right",
+                                                        label.theme=element_text(size=9,
+                                                                                 angle=0,
+                                                                                 colour="#505050"),
+                                                        label.hjust=0.6))
+
+
+# ---- 5.4 MPA Impact Summary plot legend guide ----
+
 plot.guides.MPAimpact.summ <- guides(size=guide_legend(title=element_blank(),
                                                   label.theme=element_text(size=9,
                                                                            angle=0,
@@ -1207,7 +1288,9 @@ snapshot.plot.guide.MPAimpact.summ <- guides(fill=guide_legend(order=1,
                                                               title.hjust=0.5,
                                                               label=F))
 
-# ---- 5.4 MPA continuous variables distribution plot theme ----
+
+# ---- 5.5 MPA continuous variables distribution plot theme ----
+
 dist.plot.theme <- theme(axis.ticks=element_blank(),
                          plot.title=element_text(face="bold",
                                                  colour="#303030",
@@ -1230,7 +1313,40 @@ dist.plot.theme <- theme(axis.ticks=element_blank(),
                                                 angle=0,
                                                 colour="#303030"))
 
-# ---- 5.5 MPA Impact Summary "Big Five" plot labels ----
+
+# ---- 5.6 MPA Technical Report plot labels ----
+
+Statusplot.labs <- list(FS=labs(y="Mean household food security",x="Settlement"),
+                        MA=labs(y="Mean household assets",x="Settlement"),
+                        PA=labs(y="Mean place attachment",x="Settlement"),
+                        MT=labs(y="Mean household marine tenure",x="Settlement"),
+                        SE=labs(y="School enrollment (% children ages 5-18 years old)",x="Settlement"),
+                        Time=labs(y="Mean travel time to closest market (hours)",x="Settlement"),
+                        Unwell=labs(y="Mean time suffering from illness or injury in past 4 weeks (days)",
+                                    x="Settlement"),
+                        Gender=labs(y="Gender (% head of household)",x="Settlement"),
+                        Religion=labs(y="Religion (% households)",x="Settlement"),
+                        PrimaryOcc=labs(y="Primary occupation (% households)",x="Settlement"),
+                        FreqFish=labs(y="Frequency of fishing (% households)",x="Settlement"),
+                        FreqSellFish=labs(y="Frequency of selling at least some catch (% households)",
+                                          x="Settlement"),
+                        IncFish=labs(y="Income from fishing in past 6 months (% households)",
+                                     x="Settlement"),
+                        FishTech=labs(y="Fishing technique most often used in past 6 months (% households)",
+                                      x="Settlement"),
+                        ChildFS=labs(y="Child hunger (% households)",x="Settlement"))
+
+continuous.variables.plotlabs <- c("Mean household food security","Mean household assets",
+                                   "Mean place attachment","Mean household marine tenure",
+                                   "School enrollment (% children ages 5-18 years old)",
+                                   "Mean travel time to closest market (hours)",
+                                   "Mean time suffering from illness or injury in past 4 weeks (days)")
+
+monitoringyear.xlabs <- c("Baseline"="Baseline","2 Year Post"="2 Year Post\nBaseline",
+                          "4 Year Post"="4 Year Post\nBaseline")
+
+# ---- 5.7 MPA Impact Summary "Big Five" plot labels ----
+
 plot.fs.labs.st <- labs(y="Household Food Security\n ",title="STATUS AND TREND")
 plot.ma.labs.st <- labs(y="Household Material Assets\n ",title="STATUS AND TREND")
 plot.pa.labs.st <- labs(y="Household Place Attachment\n ",title="STATUS AND TREND")
@@ -1244,6 +1360,7 @@ plot.mt.labs.i <- labs(y="Change in Household Marine Tenure\nsince Baseline",tit
 plot.se.labs.i <- labs(y="Change in Enrollment Rate\nsince Baseline",title="IMPACT")
 
 impact.x.labs <- c("MPA\nHouseholds","Control\nHouseholds")
+
 
 
 ### HOW TO CREATE HIGH RES IMAGES

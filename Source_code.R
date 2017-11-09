@@ -23,6 +23,7 @@
 library(plyr)
 library(dplyr)
 library(ggplot2)
+library(reshape2)
 library(varhandle)
 library(xlsx)
 library(RODBC)
@@ -63,5 +64,12 @@ source('2_Social/SourcedScripts/BHS_2yr_impact_data.R')
 # - Inputs:
 
 source('2_Social/SourcedScripts/Function_summarise_bigfive_impacts.R')
+# - Dependencies: none
+# - Inputs: none
+
+
+# ---- 2.3 Required for all figure plotting ----
+
+source('2_Social/SourcedScripts/Function_define_asteriskplotting.R')
 # - Dependencies: none
 # - Inputs: none
