@@ -20,21 +20,9 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-library(plyr)
-library(dplyr)
-library(ggplot2)
-library(reshape2)
-library(varhandle)
-library(xlsx)
-library(RODBC)
-library(Matching)
-library(optmatch)
-library(tidyr)
-library(RItools)
-library(Hmisc)
-library(MBESS)
-library(rbounds)
-library(Kendall)
+pacman::p_load(plyr,dplyr,ggplot2,reshape2,reldist,grid,gridExtra,varhandle,xlsx,
+               RODBC,Matching,optmatch,tidyr,RItools,Hmisc,MBESS,rbounds,Kendall)
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

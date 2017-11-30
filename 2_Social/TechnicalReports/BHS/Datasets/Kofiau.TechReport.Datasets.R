@@ -6,7 +6,7 @@
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2016
-# modified: October 2017
+# modified: November 2017
 # 
 # 
 # ---- inputs ----
@@ -45,8 +45,11 @@ Days.unwell.Kofiau.ByMPA <-
 # ---- 1.3 Subset Proportional Data of Age/Gender for Kofiau ----
 
 Kofiau.AgeGender <- 
-  data.frame(AgeCat=c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
-                      "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+  data.frame(AgeCat=factor(c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
+                             "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+                           levels=c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
+                                    "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+                           ordered=T),
              Male.Baseline=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==4 &
                                                     AgeGenderDemos.ByMPA$MonitoringYear=="Baseline",
                                                   seq(3,41,by=2)]),
@@ -71,34 +74,34 @@ Kofiau.AgeGender <-
 # ---- 1.4 MPA-level Proportional data (row to be added to bottom of status and annex plots in tech report) ----
 
 Kofiau.level.PropData.status <- 
-  data.frame(c(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="MPA",
+  data.frame(c(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Kofiau dan\nPulau Boo MPA",
                Techreport.ByMPA[Techreport.ByMPA$MPAID==4 &
-                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:38]))
+                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:36]))
 Kofiau.level.PropData.annex <- 
   cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
-                   SettlementID=0,SettlementName="MPA",
-                   Techreport.ByMPA[Techreport.ByMPA$MPAID==4,3:38])
+                   SettlementID=0,SettlementName="Kofiau dan\nPulau Boo MPA",
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==4,3:36])
 
 null.row.PropData <- 
-  matrix(rep(NA,39),ncol=39,dimnames=list(NULL,colnames(Kofiau.level.PropData.status)))
+  matrix(rep(NA,37),ncol=37,dimnames=list(NULL,colnames(Kofiau.level.PropData.status)))
 
 
 # ---- 1.5 MPA-level Continuous data (row to be added to bottom of status and annex plots in tech report) ----
 
 Kofiau.level.ContData.status <- 
-  cbind.data.frame(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="MPA",
+  cbind.data.frame(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Kofiau dan\nPulau Boo MPA",
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==4 &
                                       BigFive.MPAGroup$MonitoringYear=="4 Year Post",6:15],
                    Techreport.ByMPA[Techreport.ByMPA$MPAID==4 &
-                                      Techreport.ByMPA$MonitoringYear=="4 Year Post",39:40],
+                                      Techreport.ByMPA$MonitoringYear=="4 Year Post",c("TimeMarketMean","TimeMarketErr")],
                    Days.unwell.Kofiau.ByMPA[Days.unwell.Kofiau.ByMPA$MonitoringYear=="4 Year Post",
-                                             c("Days.unwell","Days.unwell.err")])
+                                            c("UnwellMean","UnwellErr")])
 Kofiau.level.ContData.annex <- 
   cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
-                   SettlementID=0,SettlementName="MPA",
+                   SettlementID=0,SettlementName="Kofiau dan\nPulau Boo MPA",
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==4,6:15],
-                   Techreport.ByMPA[Techreport.ByMPA$MPAID==4,39:40],
-                   Days.unwell.Kofiau.ByMPA[,c("Days.unwell","Days.unwell.err")])
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==4,c("TimeMarketMean","TimeMarketErr")],
+                   Days.unwell.Kofiau.ByMPA[,c("UnwellMean","UnwellErr")])
 
 null.row.ContData <- 
   matrix(rep(NA,17),ncol=17,dimnames=list(NULL,colnames(Kofiau.level.ContData.status)))
@@ -117,14 +120,28 @@ null.row.ContData <-
 
 Kofiau.PropData.Techreport.status <- 
   Techreport.BySett[Techreport.BySett$MPAID==4 &
-                      Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:40)]
+                      Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:38)]
 Kofiau.PropData.Techreport.status <- 
   Kofiau.PropData.Techreport.status[rev(order(Kofiau.PropData.Techreport.status$SettlementName)),]
 
 Kofiau.PropData.Techreport.status.PLOTFORMAT <- 
-  rbind.data.frame(Kofiau.level.PropData.status[2:39],
-                   null.row.PropData[1:37],
+  rbind.data.frame(Kofiau.level.PropData.status[2:37],
+                   null.row.PropData[1:35],
                    Kofiau.PropData.Techreport.status)
+
+# - make SettlementName an ordered factor for plotting
+Kofiau.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Kofiau.PropData.Techreport.status.PLOTFORMAT$SettlementName),"",
+         as.character(Kofiau.PropData.Techreport.status.PLOTFORMAT$SettlementName))
+
+Kofiau.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  factor(Kofiau.PropData.Techreport.status.PLOTFORMAT$SettlementName,
+         levels=unique(Kofiau.PropData.Techreport.status.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+Kofiau.PropData.Techreport.status.PLOTFORMAT$Dummy <- 
+  ifelse(Kofiau.PropData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
 
 
 # ---- 2.2 Status dataset for Kofiau, continuous data (with p values) ----
@@ -136,7 +153,7 @@ Kofiau.ContData.Techreport.status <-
                                   !is.na(BigFive.SettleGroup$SettlementID),
                                 c(1,2,6:15)],
             Techreport.BySett[Techreport.BySett$MPAID==4 &
-                                Techreport.BySett$MonitoringYear=="4 Year Post",c(1,41:42)],
+                                Techreport.BySett$MonitoringYear=="4 Year Post",c("SettlementID","TimeMarketMean","TimeMarketErr")],
             by="SettlementID")
 
 Kofiau.ContData.Techreport.status <- 
@@ -152,17 +169,29 @@ Kofiau.ContData.Techreport.status.withMPA <-
                    null.row.ContData[2:17],
                    Kofiau.ContData.Techreport.status)
 
-Kofiau.ContData.Techreport.status.withMPA$SettlementName <- 
-  factor(Kofiau.ContData.Techreport.status.withMPA$SettlementName)
-
+# - plot-formatted dataset
 Kofiau.ContData.Techreport.status.PLOTFORMAT <- 
   left_join(Kofiau.ContData.Techreport.status.withMPA,
             sigvals.Kof,by="SettlementName")
 
+# - make SettlementName an ordered factor for plotting
+Kofiau.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Kofiau.ContData.Techreport.status.PLOTFORMAT$SettlementName),"",
+         Kofiau.ContData.Techreport.status.PLOTFORMAT$SettlementName)
+
+Kofiau.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
+  factor(Kofiau.ContData.Techreport.status.PLOTFORMAT$SettlementName,
+         levels=unique(Kofiau.ContData.Techreport.status.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+Kofiau.ContData.Techreport.status.PLOTFORMAT$SettLevel <- 
+  ifelse(Kofiau.ContData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
+
 
 # ---- 2.3 Trend dataset for Kofiau, MPA-level proportional data ----
 Kofiau.TrendPropData.Techreport.PLOTFORMAT <- 
-  Techreport.ByMPA[Techreport.ByMPA$MPAID==4,c(2,1,3:38)]
+  Techreport.ByMPA[Techreport.ByMPA$MPAID==4,c(2,1,3:36)]
 
 
 # ---- 2.4 Trend dataset for Kofiau, MPA-level continuous data (with p values) ----
@@ -171,12 +200,18 @@ Kofiau.TrendContData.Techreport.PLOTFORMAT <-
   rbind.data.frame(Kofiau.level.ContData.annex[,c(1,4:17)],
                    trend.sigvals.Kof)
 
+# - make MonitoringYear an ordered factor for plotting
+Kofiau.TrendContData.Techreport.PLOTFORMAT$MonitoringYear <-
+  factor(Kofiau.TrendContData.Techreport.PLOTFORMAT$MonitoringYear,
+         levels=c("Baseline","2 Year Post","4 Year Post"),
+         ordered=T)
+
 
 # ---- 2.5 Annex dataset for Kofiau, Settlement-level proportional data ----
 
 Kofiau.AnnexPropData.Techreport <- 
   Techreport.BySett[Techreport.BySett$MPAID==4 &
-                      !is.na(Techreport.BySett$SettlementID),c(2,1,4:40)]
+                      !is.na(Techreport.BySett$SettlementID),c(2,1,4:38)]
 
 Kofiau.AnnexPropData.Techreport <- 
   Kofiau.AnnexPropData.Techreport[rev(order(Kofiau.AnnexPropData.Techreport$SettlementName,
@@ -196,7 +231,7 @@ Kofiau.AnnexContData.Techreport <-
   left_join(BigFive.SettleGroup[BigFive.SettleGroup$MPAID==4 &
                                   BigFive.SettleGroup$Treatment==1,
                                 c(5,1,2,6:15)],
-            Techreport.BySett[Techreport.BySett$MPAID==4,c(1,2,41,42)],
+            Techreport.BySett[Techreport.BySett$MPAID==4,c("SettlementID","MonitoringYear","TimeMarketMean","TimeMarketErr")],
             by=c("SettlementID","MonitoringYear"))
 
 Kofiau.AnnexContData.Techreport <- 
@@ -219,6 +254,26 @@ Kofiau.AnnexContData.Techreport.PLOTFORMAT <-
                    null.row.ContData,
                    Kofiau.AnnexContData.Techreport)
 
+# - make MonitoringYear an ordered factor for plotting
+Kofiau.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear <-
+  factor(Kofiau.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear,
+         levels=c("Baseline","2 Year Post","4 Year Post"),
+         ordered=T)
+
+# - make SettlementName an ordered factor for plotting
+Kofiau.AnnexContData.Techreport.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Kofiau.AnnexContData.Techreport.PLOTFORMAT$SettlementName),"",
+         Kofiau.AnnexContData.Techreport.PLOTFORMAT$SettlementName)
+
+Kofiau.AnnexContData.Techreport.PLOTFORMAT$SettlementName <-
+  factor(Kofiau.AnnexContData.Techreport.PLOTFORMAT$SettlementName,
+         levels=unique(Kofiau.AnnexContData.Techreport.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+Kofiau.AnnexContData.Techreport.PLOTFORMAT$SettLevel <- 
+  ifelse(Kofiau.AnnexContData.Techreport.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -231,7 +286,7 @@ Kofiau.AnnexContData.Techreport.PLOTFORMAT <-
 
 # ---- 3.1 Define filename for Excel spreadsheet ----
 
-FileName <- paste(paste("MPAMystery/Social/FlatDataFiles/BHS/TechReportOutput/Kofiau/Kofiau_TechReportData--produced",
+FileName <- paste(paste("2_Social/FlatDataFiles/BHS/TechReportOutput/Kofiau/Kofiau_TechReportData--produced",
                         format(Sys.Date(),format="%Y_%m_%d"),sep="_"),
                   "xlsx",sep=".")
 
@@ -240,7 +295,7 @@ FileName <- paste(paste("MPAMystery/Social/FlatDataFiles/BHS/TechReportOutput/Ko
 
 write.xlsx(Kofiau.PropData.Techreport.status.PLOTFORMAT,FileName,sheetName='PropData_StatusPlots',row.names=F)
 write.xlsx(Kofiau.ContData.Techreport.status.PLOTFORMAT,FileName,sheetName='ContData_StatusPlots_withpvals',row.names=F,append=T)
-write.xlsx(Kofiau.TrendPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_TrendPlots',row.names=F,append=T)
+write.xlsx(as.data.frame(Kofiau.TrendPropData.Techreport.PLOTFORMAT),FileName,sheetName='PropData_TrendPlots',row.names=F,append=T)
 write.xlsx(Kofiau.TrendContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_TrendPlots_withpvals',row.names=F,append=T)
 write.xlsx(Kofiau.AnnexPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_AnnexPlots',row.names=F,append=T)
 write.xlsx(Kofiau.AnnexContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_AnnexPlots',row.names=F,append=T)

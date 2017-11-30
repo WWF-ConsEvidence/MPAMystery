@@ -6,7 +6,7 @@
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2016
-# modified: October 2017
+# modified: November 2017
 # 
 # 
 # ---- inputs ----
@@ -39,8 +39,8 @@ Days.unwell.TNTC.BySett <-
                                         !is.na(Days.unwell.BySett$SettlementID),c(1,3,4,5)],
                    cbind.data.frame(MonitoringYear=rep("Baseline",9),
                                     SettlementID=seq(104,112,by=1),
-                                    Days.unwell=rep(NA,9),
-                                    Days.unwell.err=rep(NA,9)))
+                                    UnwellMean=rep(NA,9),
+                                    UnwellErr=rep(NA,9)))
 
 Days.unwell.TNTC.ByMPA <- 
   Days.unwell.ByMPA[Days.unwell.ByMPA$MPAID==2 &
@@ -50,8 +50,11 @@ Days.unwell.TNTC.ByMPA <-
 # ---- 1.3 Subset Proportional Data of Age/Gender for TNTC ----
 
 TNTC.AgeGender <- 
-  data.frame(AgeCat=c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
-                      "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+  data.frame(AgeCat=factor(c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
+                             "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+                           levels=c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
+                                    "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+                           ordered=T),
              Male.Baseline=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==2 &
                                                     AgeGenderDemos.ByMPA$MonitoringYear=="Baseline",
                                                   seq(3,41,by=2)]),
@@ -76,34 +79,34 @@ TNTC.AgeGender <-
 # ---- 1.4 MPA-level Proportional data (row to be added to bottom of status and annex plots in tech report) ----
 
 TNTC.level.PropData.status <- 
-  data.frame(c(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="MPA",
+  data.frame(c(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Teluk Cenderawasih\nNational Park",
                Techreport.ByMPA[Techreport.ByMPA$MPAID==2 &
-                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:38]))
+                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:36]))
 TNTC.level.PropData.annex <- 
   cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
-                   SettlementID=0,SettlementName="MPA",
-                   Techreport.ByMPA[Techreport.ByMPA$MPAID==2,3:38])
+                   SettlementID=0,SettlementName="Teluk Cenderawasih\nNational Park",
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==2,3:36])
 
 null.row.PropData <- 
-  matrix(rep(NA,39),ncol=39,dimnames=list(NULL,colnames(TNTC.level.PropData.status)))
+  matrix(rep(NA,37),ncol=37,dimnames=list(NULL,colnames(TNTC.level.PropData.status)))
 
 
 # ---- 1.5 MPA-level Continuous data (row to be added to bottom of status and annex plots in tech report) ----
 
 TNTC.level.ContData.status <- 
-  cbind.data.frame(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="MPA",
+  cbind.data.frame(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Teluk Cenderawasih\nNational Park",
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==2 &
                                       BigFive.MPAGroup$MonitoringYear=="4 Year Post",6:15],
                    Techreport.ByMPA[Techreport.ByMPA$MPAID==2 &
-                                      Techreport.ByMPA$MonitoringYear=="4 Year Post",39:40],
+                                      Techreport.ByMPA$MonitoringYear=="4 Year Post",c("TimeMarketMean","TimeMarketErr")],
                    Days.unwell.TNTC.ByMPA[Days.unwell.TNTC.ByMPA$MonitoringYear=="4 Year Post",
-                                          c("Days.unwell","Days.unwell.err")])
+                                          c("UnwellMean","UnwellErr")])
 TNTC.level.ContData.annex <- 
   cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
-                   SettlementID=0,SettlementName="MPA",
+                   SettlementID=0,SettlementName="Teluk Cenderawasih\nNational Park",
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==2,6:15],
-                   Techreport.ByMPA[Techreport.ByMPA$MPAID==2,39:40],
-                   Days.unwell.TNTC.ByMPA[,c("Days.unwell","Days.unwell.err")])
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==2,c("TimeMarketMean","TimeMarketErr")],
+                   Days.unwell.TNTC.ByMPA[,c("UnwellMean","UnwellErr")])
 
 null.row.ContData <- 
   matrix(rep(NA,17),ncol=17,dimnames=list(NULL,colnames(TNTC.level.ContData.status)))
@@ -122,15 +125,30 @@ null.row.ContData <-
 
 TNTC.PropData.Techreport.status <- 
   Techreport.BySett[Techreport.BySett$MPAID==2 &
-                      Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:40)]
+                      Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:38)]
 
 TNTC.PropData.Techreport.status <- 
   TNTC.PropData.Techreport.status[rev(order(TNTC.PropData.Techreport.status$SettlementName)),]
 
 TNTC.PropData.Techreport.status.PLOTFORMAT <- 
-  rbind.data.frame(TNTC.level.PropData.status[2:39],
-                   null.row.PropData[1:37],
+  rbind.data.frame(TNTC.level.PropData.status[2:37],
+                   null.row.PropData[1:35],
                    TNTC.PropData.Techreport.status)
+
+# - make SettlementName an ordered factor for plotting
+TNTC.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(TNTC.PropData.Techreport.status.PLOTFORMAT$SettlementName),"",
+         as.character(TNTC.PropData.Techreport.status.PLOTFORMAT$SettlementName))
+
+TNTC.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  factor(TNTC.PropData.Techreport.status.PLOTFORMAT$SettlementName,
+         levels=unique(TNTC.PropData.Techreport.status.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+TNTC.PropData.Techreport.status.PLOTFORMAT$Dummy <- 
+  ifelse(TNTC.PropData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
+
 
 
 # ---- 2.2 Status dataset for TNTC, continuous data (with p values) ----
@@ -141,12 +159,14 @@ TNTC.ContData.Techreport.status <-
                                   BigFive.SettleGroup$MPAID==2,
                                 c(1,2,6:15)],
             Techreport.BySett[Techreport.BySett$MPAID==2 &
-                                Techreport.BySett$MonitoringYear=="4 Year Post",c(1,41:42)],
+                                Techreport.BySett$MonitoringYear=="4 Year Post",c("SettlementID","TimeMarketMean","TimeMarketErr")],
             by="SettlementID")
+
 TNTC.ContData.Techreport.status <- 
   left_join(TNTC.ContData.Techreport.status,
             Days.unwell.TNTC.BySett[Days.unwell.TNTC.BySett$MonitoringYear=="4 Year Post",c(1,3,4)],
             by="SettlementID")
+
 TNTC.ContData.Techreport.status <- 
   TNTC.ContData.Techreport.status[rev(order(TNTC.ContData.Techreport.status$SettlementName)),]
 
@@ -154,18 +174,31 @@ TNTC.ContData.Techreport.status.withMPA <-
   rbind.data.frame(TNTC.level.ContData.status[2:17],
                    null.row.ContData[2:17],
                    TNTC.ContData.Techreport.status)
-TNTC.ContData.Techreport.status.withMPA$SettlementName <-
-  factor(TNTC.ContData.Techreport.status.withMPA$SettlementName)
 
+# - plot-formatted dataset
 TNTC.ContData.Techreport.status.PLOTFORMAT <- 
   left_join(TNTC.ContData.Techreport.status.withMPA,
             sigvals.TNTC,by="SettlementName")
+
+# - make SettlementName an ordered factor for plotting
+TNTC.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(TNTC.ContData.Techreport.status.PLOTFORMAT$SettlementName),"",
+         TNTC.ContData.Techreport.status.PLOTFORMAT$SettlementName)
+
+TNTC.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
+  factor(TNTC.ContData.Techreport.status.PLOTFORMAT$SettlementName,
+         levels=unique(TNTC.ContData.Techreport.status.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+TNTC.ContData.Techreport.status.PLOTFORMAT$SettLevel <- 
+  ifelse(TNTC.ContData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
 
 
 # ---- 2.3 Trend dataset for TNTC, MPA-level proportional data ----
 
 TNTC.TrendPropData.Techreport.PLOTFORMAT <- 
-  Techreport.ByMPA[Techreport.ByMPA$MPAID==2,c(2,1,3:38)]
+  Techreport.ByMPA[Techreport.ByMPA$MPAID==2,c(2,1,3:36)]
 
 
 # ---- 2.4 Trend dataset for TNTC, MPA-level continuous data (with p values) ----
@@ -174,11 +207,17 @@ TNTC.TrendContData.Techreport.PLOTFORMAT <-
   rbind.data.frame(TNTC.level.ContData.annex[,c(1,4:17)],
                    trend.sigvals.TNTC)
 
+# - make MonitoringYear an ordered factor for plotting
+TNTC.TrendContData.Techreport.PLOTFORMAT$MonitoringYear <-
+  factor(TNTC.TrendContData.Techreport.PLOTFORMAT$MonitoringYear,
+         levels=c("Baseline","2 Year Post","4 Year Post"),
+         ordered=T)
+
 
 # ---- 2.5 Annex dataset for TNTC, Settlement-level proportional data ----
 
 TNTC.AnnexPropData.Techreport <- 
-  Techreport.BySett[Techreport.BySett$MPAID==2,c(2,1,4:40)]
+  Techreport.BySett[Techreport.BySett$MPAID==2,c(2,1,4:38)]
 
 TNTC.AnnexPropData.Techreport <- 
   TNTC.AnnexPropData.Techreport[rev(order(TNTC.AnnexPropData.Techreport$SettlementName)),]
@@ -197,8 +236,9 @@ TNTC.AnnexContData.Techreport <-
   left_join(BigFive.SettleGroup[BigFive.SettleGroup$MPAID==2 &
                                   BigFive.SettleGroup$Treatment==1,
                                 c(5,1,2,6:15)],
-            Techreport.BySett[Techreport.BySett$MPAID==2,c(1,2,41,42)],
+            Techreport.BySett[Techreport.BySett$MPAID==2,c("SettlementID","MonitoringYear","TimeMarketMean","TimeMarketErr")],
             by=c("SettlementID","MonitoringYear"))
+
 TNTC.AnnexContData.Techreport <- 
   left_join(TNTC.AnnexContData.Techreport,
             Days.unwell.TNTC.BySett,
@@ -219,6 +259,26 @@ TNTC.AnnexContData.Techreport.PLOTFORMAT <-
                    null.row.ContData,
                    TNTC.AnnexContData.Techreport)
 
+# - make MonitoringYear an ordered factor for plotting
+TNTC.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear <-
+  factor(TNTC.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear,
+         levels=c("Baseline","2 Year Post","4 Year Post"),
+         ordered=T)
+
+# - make SettlementName an ordered factor for plotting
+TNTC.AnnexContData.Techreport.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(TNTC.AnnexContData.Techreport.PLOTFORMAT$SettlementName),"",
+         TNTC.AnnexContData.Techreport.PLOTFORMAT$SettlementName)
+
+TNTC.AnnexContData.Techreport.PLOTFORMAT$SettlementName <-
+  factor(TNTC.AnnexContData.Techreport.PLOTFORMAT$SettlementName,
+         levels=unique(TNTC.AnnexContData.Techreport.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+TNTC.AnnexContData.Techreport.PLOTFORMAT$SettLevel <- 
+  ifelse(TNTC.AnnexContData.Techreport.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -231,7 +291,7 @@ TNTC.AnnexContData.Techreport.PLOTFORMAT <-
 
 # ---- 3.1 Define filename for Excel spreadsheet ----
 
-FileName <- paste(paste("MPAMystery/Social/FlatDataFiles/BHS/TechReportOutput/TNTC/TNTC_TechReportData--produced",
+FileName <- paste(paste("2_Social/FlatDataFiles/BHS/TechReportOutput/TNTC/TNTC_TechReportData--produced",
                         format(Sys.Date(),format="%Y_%m_%d"),sep="_"),
                   "xlsx",sep=".")
 
@@ -240,7 +300,7 @@ FileName <- paste(paste("MPAMystery/Social/FlatDataFiles/BHS/TechReportOutput/TN
 
 write.xlsx(TNTC.PropData.Techreport.status.PLOTFORMAT,FileName,sheetName='PropData_StatusPlots',row.names=F)
 write.xlsx(TNTC.ContData.Techreport.status.PLOTFORMAT,FileName,sheetName='ContData_StatusPlots_withpvals',row.names=F,append=T)
-write.xlsx(TNTC.TrendPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_TrendPlots',row.names=F,append=T)
+write.xlsx(as.data.frame(TNTC.TrendPropData.Techreport.PLOTFORMAT),FileName,sheetName='PropData_TrendPlots',row.names=F,append=T)
 write.xlsx(TNTC.TrendContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_TrendPlots_withpvals',row.names=F,append=T)
 write.xlsx(TNTC.AnnexPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_AnnexPlots',row.names=F,append=T)
 write.xlsx(TNTC.AnnexContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_AnnexPlots',row.names=F,append=T)

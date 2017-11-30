@@ -1,11 +1,13 @@
 
 
-
+# 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 # ---- SECTION 1: Define function to summarise big five impact data
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
 
 summarise.bigfive <- function(x) {
   results <- data.frame(Treatment=factor(rep.int(c("MPA","Control"),3),

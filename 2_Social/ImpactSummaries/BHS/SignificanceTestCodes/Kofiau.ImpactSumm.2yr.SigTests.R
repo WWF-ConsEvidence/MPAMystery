@@ -137,14 +137,33 @@ Kof.impact.arrows <- cbind.data.frame(Kof.impact.arrows,
 Kof.sig.pos <- data.frame(mapply(i=Kof.2yr.impacts[Kof.2yr.impacts$Treatment=="MPA",c("PA","SE","MT","FS","MA")],
                                   j=Kof.2yr.impacts[Kof.2yr.impacts$Treatment=="Control",c("PA","SE","MT","FS","MA")],
                                   k=Kof.sig.labs$impact.labs,
-                                  outcome.sd=sapply(impact.2yr[impact.2yr$MPAID==4 & !is.na(impact.2yr$MPAID),
-                                                               c("attach.ATT","enrol.ATT","tenure.ATT","HFS.ATT","assets.ATT")],sd,na.rm=T),
-                                  function(i,j,k,outcome.sd){
-                                    if(k=="*\n*\n*" & i<j) {i-0.02*outcome.sd} else
-                                      if(k=="*\n*\n*" & i>j) {i+0.02*outcome.sd} else
-                                        if(k=="*\n*" & i<j) {i-0.01*outcome.sd} else
-                                          if(k=="*\n*" & i>j) {i+0.01*outcome.sd} else
-                                            if(k=="*" & i<j) {i-0.005*outcome.sd} else
-                                              if(k=="*" & i>j) {i+0.005*outcome.sd} else {0}
+                                  range=mapply(i=mapply(a=Kof.2yr.impacts[Kof.2yr.impacts$Treatment=="MPA",
+                                                                          c("PA","SE","MT","FS","MA")],
+                                                        b=Kof.2yr.impacts[Kof.2yr.impacts$Treatment=="MPA",
+                                                                          c("PAErr","SEErr","MTErr","FSErr","MAErr")],
+                                                        function(a,b){
+                                                          ifelse(a<0,a-b,a+b)
+                                                        }),
+                                               j=mapply(a=Kof.2yr.impacts[Kof.2yr.impacts$Treatment=="Control",
+                                                                          c("PA","SE","MT","FS","MA")],
+                                                        b=Kof.2yr.impacts[Kof.2yr.impacts$Treatment=="Control",
+                                                                          c("PAErr","SEErr","MTErr","FSErr","MAErr")],
+                                                        function(a,b){
+                                                          ifelse(a<0,a-b,a+b)
+                                                        }),
+                                               function(i,j){
+                                                 max <- ifelse((i>0 & j<0) | (i>0 & j>0 & i>j),i,
+                                                               ifelse((i<0 & j>0) | (i>0 & j>0 & i<j),j,0))
+                                                 min <- ifelse((i<0 & j>0) | (i<0 & j<0 & i<j),i,
+                                                               ifelse((i>0 & j<0) | (i<0 & j<0 & i>j),j,0))
+                                                 abs(max)+abs(min)
+                                               }),
+                                  function(i,j,k,range){
+                                    if(k=="*\n*\n*" & i<j) {i-0.015*range} else
+                                      if(k=="*\n*\n*" & i>j) {i+0.015*range} else
+                                        if(k=="*\n*" & i<j) {i-0.01*range} else
+                                          if(k=="*\n*" & i>j) {i+0.01*range} else
+                                            if(k=="*" & i<j) {i-0.05*range} else
+                                              if(k=="*" & i>j) {i+0.05*range} else {0}
                                   }))
 row.names(Kof.sig.pos) <- c("PA","SE","MT","FS","MA")

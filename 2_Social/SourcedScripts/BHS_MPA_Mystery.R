@@ -303,7 +303,8 @@ cFS$cFS <- ifelse(cFS$RemovecFS=="No",
                   rowSums(cFS[,6:13],
                           na.rm=TRUE),
                   NA)
-cFS$cat.cFS <- ifelse(cFS$cFS>=6.9,"Evidence",ifelse(cFS$cFS<6.9,"No or insufficient evidence",NA))
+cFS$cat.cFS <- ifelse(cFS$cFS>=6.9,"Evidence",
+                      ifelse(cFS$cFS<6.9,"No or insufficient evidence",NA))
 
 MPANames <- data.frame(MPAID=seq(1:6),
                        MPAName=c("Mayalibit","TNTC","Kaimana","Kofiau","Dampier","Misool"))
@@ -691,6 +692,107 @@ MPAimpact.intro.context$Percent.MajorityEthnic5 <- mapply(i=MPAimpact.intro.cont
                                                           })
 
 
+# - Fish consumption by settlement or MPA, per monitoring year, 
+#   to glean some insight into primary occupation and fishing behavior changes
+
+FishProtein.BySett <- 
+  HHDemos.context %>%
+  group_by(SettlementID,MonitoringYear) %>%
+  summarise(MPAID=unique(MPAID),
+            SettlementName=unique(SettlementName),
+            Percent.EatFish.RareOrNever=(length(FreqEatFishClean[FreqEatFishClean==1 &
+                                                                   !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.FewTimesPer6Mo=(length(FreqEatFishClean[FreqEatFishClean==2 &
+                                                                      !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.FewTimesPerMo=(length(FreqEatFishClean[FreqEatFishClean==3 &
+                                                                     !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.FewTimesPerWk=(length(FreqEatFishClean[FreqEatFishClean==4 &
+                                                                     !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.MoreFewTimesWk=(length(FreqEatFishClean[FreqEatFishClean==5 &
+                                                                      !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            ProteinFish.None=(length(PercentProteinFishClean[PercentProteinFishClean==1 &
+                                                        !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.Some=(length(PercentProteinFishClean[PercentProteinFishClean==2 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.Half=(length(PercentProteinFishClean[PercentProteinFishClean==3 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.Most=(length(PercentProteinFishClean[PercentProteinFishClean==4 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.All=(length(PercentProteinFishClean[PercentProteinFishClean==5 &
+                                                              !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100)
+  
+
+FishProtein.ByMPA <- 
+  HHDemos.context %>%
+  group_by(MPAID,MonitoringYear) %>%
+  summarise(Percent.EatFish.RareOrNever=(length(FreqEatFishClean[FreqEatFishClean==1 &
+                                                                   !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.FewTimesPer6Mo=(length(FreqEatFishClean[FreqEatFishClean==2 &
+                                                                      !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.FewTimesPerMo=(length(FreqEatFishClean[FreqEatFishClean==3 &
+                                                                     !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.FewTimesPerWk=(length(FreqEatFishClean[FreqEatFishClean==4 &
+                                                                     !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.MoreFewTimesWk=(length(FreqEatFishClean[FreqEatFishClean==5 &
+                                                                      !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            ProteinFish.None=(length(PercentProteinFishClean[PercentProteinFishClean==1 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.Some=(length(PercentProteinFishClean[PercentProteinFishClean==2 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.Half=(length(PercentProteinFishClean[PercentProteinFishClean==3 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.Most=(length(PercentProteinFishClean[PercentProteinFishClean==4 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.All=(length(PercentProteinFishClean[PercentProteinFishClean==5 &
+                                                              !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100)  
+  
+
+# - Number years resident by settlement, to look for signs of rapid immigration 
+# - Changes in social conflict by settlement
+# - Marine tenure components by settlement
+Synth.techreport.bySett <-
+  left_join(HHDemos.context,extra.HHData[,c("HouseholdID","SocialConflict")]) %>%
+  left_join(MT) %>%
+  left_join(BigFive[,c("HouseholdID","MAIndex","FSIndex")]) %>%
+  group_by(SettlementID,MPAID,MonitoringYear) %>%
+  summarise(SettlementName=unique(SettlementName),
+            YrResident=mean(YrResidentClean,na.rm=T),
+            Percent.Increased.SocConflict=(length(SocialConflict[(SocialConflict==1 | SocialConflict==2) &
+                                                    !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            Percent.Decreased.SocConflict=(length(SocialConflict[(SocialConflict==4 | SocialConflict==5) &
+                                                           !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            Percent.NoChange.SocConflict=(length(SocialConflict[SocialConflict==3 &
+                                                          !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            MTManage=mean(RightsManageClean,na.rm=T),
+            MTHarvest=mean(RightsHarvestClean,na.rm=T),
+            MatAssets.gini=gini(MAIndex),
+            MAIndex=mean(MAIndex,na.rm=T),
+            Percent.FoodSecure=(length(HouseholdID[FSIndex>=4.02 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
+            Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex<=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
+            Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100)
+
+# - same data as above, by MPA
+Synth.techreport.byMPA <-
+  left_join(HHDemos.context,extra.HHData[,c("HouseholdID","SocialConflict")]) %>%
+  left_join(MT) %>%
+  left_join(BigFive[,c("HouseholdID","MAIndex","FSIndex")]) %>%
+  group_by(MPAID,MonitoringYear) %>%
+  summarise(YrResident=mean(YrResidentClean,na.rm=T),
+            Percent.Increased.SocConflict=(length(SocialConflict[(SocialConflict==1 | SocialConflict==2) &
+                                                                !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            Percent.Decreased.SocConflict=(length(SocialConflict[(SocialConflict==4 | SocialConflict==5) &
+                                                                !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            Percent.NoChange.SocConflict=(length(SocialConflict[SocialConflict==3 &
+                                                               !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            MTManage=mean(RightsManageClean,na.rm=T),
+            MTHarvest=mean(RightsHarvestClean,na.rm=T),
+            MatAssets.gini=gini(MAIndex),
+            MAIndex=mean(MAIndex,na.rm=T),
+            Percent.FoodSecure=(length(HouseholdID[FSIndex>=4.02 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
+            Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex<=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
+            Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100)
+
+
 # # Sampling Frame info -- develop estimates for settlement populations
 # SamplingFrame <- read.delim("Social impacts, BHS -- Kelly/R codes & data/SamplingFrameMPA.csv",header=T,sep=",")
 # SamplingFrame$TotalPop <- SamplingFrame$TotalHouseholds*MPAimpact.intro.context$HH.size
@@ -1052,16 +1154,40 @@ plot.theme <- theme(axis.ticks=element_blank(),
                                                     linetype=3),
                     panel.grid.major.y=element_blank(),
                     plot.margin=margin(t=0,r=20,b=5,l=5,unit="pt"),
-                    axis.title=element_text(size=10,
+                    axis.title=element_text(size=rel(0.9),
                                             angle=0,
                                             face="bold",
                                             colour="#303030"),
-                    axis.text=element_text(size=8,
+                    axis.text=element_text(size=rel(0.9),
                                            angle=0,
                                            colour="#303030"),
                     legend.position="top",
                     legend.justification="right",
                     legend.box.spacing=unit(0.1,"cm"))
+
+
+age.gender.plot.theme <- theme(axis.ticks=element_blank(),
+                               panel.background=element_rect(fill="white",
+                                                             colour="#909090"),
+                               panel.border=element_rect(fill=NA,
+                                                         size=0.25,
+                                                         colour="#C0C0C0"),
+                               panel.grid.major.x=element_line(colour="#C0C0C0",
+                                                               size=0.25,
+                                                               linetype=3),
+                               panel.grid.major.y=element_blank(),
+                               axis.title=element_text(size=rel(0.8),
+                                                       angle=0,
+                                                       face="bold",
+                                                       colour="#303030"),
+                               axis.text=element_text(size=rel(0.6),
+                                                      angle=0,
+                                                      colour="#303030"),
+                               legend.position="top",
+                               legend.justification="right",
+                               legend.box.spacing=unit(0.1,"cm"))
+
+
 
 fillcols.status <- c("NotDummy"=alpha("#2C7FB8",0.95),"Dummy"=alpha("#FFFFFF",0))
 fillcols.trend <- c(alpha("#2C7FB8",0.95))
@@ -1175,12 +1301,12 @@ fs.st.plot.theme.MPAimpact.summ <- theme(axis.ticks.x=element_blank(),
 
 plot.guides.techreport <- guides(alpha=guide_legend(title.hjust=1,
                                                     title.theme=element_text(face="bold",
-                                                                             size=rel(8),
+                                                                             size=rel(9),
                                                                              angle=0,
                                                                              colour="#505050",
                                                                              lineheight=0.75),
                                                     label.vjust=0.5,
-                                                    label.theme=element_text(size=rel(7),
+                                                    label.theme=element_text(size=rel(8),
                                                                              angle=0,
                                                                              colour="#505050",
                                                                              lineheight=0.75),
@@ -1192,17 +1318,17 @@ plot.guides.techreport <- guides(alpha=guide_legend(title.hjust=1,
                                                     keyheight=unit(0.5,"cm")),
                                      fill=guide_legend(title.hjust=1,
                                                        title.theme=element_text(face="bold",
-                                                                                size=rel(8),
+                                                                                size=rel(9),
                                                                                 angle=0,
                                                                                 colour="#505050",
                                                                                 lineheight=0.75),
                                                        label.vjust=0.5,
-                                                       label.theme=element_text(size=rel(7),
+                                                       label.theme=element_text(size=rel(9),
                                                                                 angle=0,
                                                                                 colour="#505050",
                                                                                 lineheight=0.75),
                                                        direction="horizontal",
-                                                       ncol=3,
+                                                       ncol=2,
                                                        title.position="left",
                                                        label.position="right",
                                                        keywidth=unit(0.75,"cm"),
@@ -1222,6 +1348,12 @@ plot.guides.techreport <- guides(alpha=guide_legend(title.hjust=1,
                                                                                  colour="#505050"),
                                                         label.hjust=0.6))
 
+# - Function to create common legend between multiple ggplots
+g_legend<- function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)}
 
 # ---- 5.4 MPA Impact Summary plot legend guide ----
 
@@ -1325,7 +1457,7 @@ Statusplot.labs <- list(FS=labs(y="Mean household food security",x="Settlement")
                         Unwell=labs(y="Mean time suffering from illness or injury in past 4 weeks (days)",
                                     x="Settlement"),
                         Gender=labs(y="Gender (% head of household)",x="Settlement"),
-                        Religion=labs(y="Religion (% households)",x="Settlement"),
+                        Religion=labs(y="Religion (% head of household)",x="Settlement"),
                         PrimaryOcc=labs(y="Primary occupation (% households)",x="Settlement"),
                         FreqFish=labs(y="Frequency of fishing (% households)",x="Settlement"),
                         FreqSellFish=labs(y="Frequency of selling at least some catch (% households)",
@@ -1342,8 +1474,6 @@ continuous.variables.plotlabs <- c("Mean household food security","Mean househol
                                    "Mean travel time to closest market (hours)",
                                    "Mean time suffering from illness or injury in past 4 weeks (days)")
 
-monitoringyear.xlabs <- c("Baseline"="Baseline","2 Year Post"="2 Year Post\nBaseline",
-                          "4 Year Post"="4 Year Post\nBaseline")
 
 # ---- 5.7 MPA Impact Summary "Big Five" plot labels ----
 

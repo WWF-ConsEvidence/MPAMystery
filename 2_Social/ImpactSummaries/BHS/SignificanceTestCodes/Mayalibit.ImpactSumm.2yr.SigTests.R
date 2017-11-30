@@ -136,16 +136,35 @@ Maya.impact.arrows <- cbind.data.frame(Maya.impact.arrows,
 # ---- 2.4 Create vector of (x,y) positions for significance asterisks on impact plots ----
 
 Maya.sig.pos <- data.frame(mapply(i=Maya.2yr.impacts[Maya.2yr.impacts$Treatment=="MPA",c("PA","SE","MT","FS","MA")],
-                                  j=Maya.2yr.impacts[Maya.2yr.impacts$Treatment=="Control",c("PA","SE","MT","FS","MA")],
-                                  k=Maya.sig.labs$impact.labs,
-                                  outcome.sd=sapply(impact.2yr[impact.2yr$MPAID==1 & !is.na(impact.2yr$MPAID),
-                                                               c("attach.ATT","enrol.ATT","tenure.ATT","HFS.ATT","assets.ATT")],sd,na.rm=T),
-                                  function(i,j,k,outcome.sd){
-                                    if(k=="*\n*\n*" & i<j) {i-0.02*outcome.sd} else
-                                      if(k=="*\n*\n*" & i>j) {i+0.02*outcome.sd} else
-                                        if(k=="*\n*" & i<j) {i-0.01*outcome.sd} else
-                                          if(k=="*\n*" & i>j) {i+0.01*outcome.sd} else
-                                            if(k=="*" & i<j) {i-0.005*outcome.sd} else
-                                              if(k=="*" & i>j) {i+0.005*outcome.sd} else {0}
-                                  }))
+                                 j=Maya.2yr.impacts[Maya.2yr.impacts$Treatment=="Control",c("PA","SE","MT","FS","MA")],
+                                 k=Maya.sig.labs$impact.labs,
+                                 range=mapply(i=mapply(a=Maya.2yr.impacts[Maya.2yr.impacts$Treatment=="MPA",
+                                                                         c("PA","SE","MT","FS","MA")],
+                                                       b=Maya.2yr.impacts[Maya.2yr.impacts$Treatment=="MPA",
+                                                                         c("PAErr","SEErr","MTErr","FSErr","MAErr")],
+                                                       function(a,b){
+                                                         ifelse(a<0,a-b,a+b)
+                                                       }),
+                                              j=mapply(a=Maya.2yr.impacts[Maya.2yr.impacts$Treatment=="Control",
+                                                                         c("PA","SE","MT","FS","MA")],
+                                                       b=Maya.2yr.impacts[Maya.2yr.impacts$Treatment=="Control",
+                                                                         c("PAErr","SEErr","MTErr","FSErr","MAErr")],
+                                                       function(a,b){
+                                                         ifelse(a<0,a-b,a+b)
+                                                       }),
+                                              function(i,j){
+                                                max <- ifelse((i>0 & j<0) | (i>0 & j>0 & i>j),i,
+                                                              ifelse((i<0 & j>0) | (i>0 & j>0 & i<j),j,0))
+                                                min <- ifelse((i<0 & j>0) | (i<0 & j<0 & i<j),i,
+                                                              ifelse((i>0 & j<0) | (i<0 & j<0 & i>j),j,0))
+                                                abs(max)+abs(min)
+                                              }),
+                                 function(i,j,k,range){
+                                   if(k=="*\n*\n*" & i<j) {i-0.015*range} else
+                                     if(k=="*\n*\n*" & i>j) {i+0.015*range} else
+                                       if(k=="*\n*" & i<j) {i-0.01*range} else
+                                         if(k=="*\n*" & i>j) {i+0.01*range} else
+                                           if(k=="*" & i<j) {i-0.05*range} else
+                                             if(k=="*" & i>j) {i+0.05*range} else {0}
+                                 }))
 row.names(Maya.sig.pos) <- c("PA","SE","MT","FS","MA")

@@ -6,7 +6,7 @@
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2016
-# modified: October 2017
+# modified: November 2017
 # 
 # 
 # ---- inputs ----
@@ -39,8 +39,8 @@ Days.unwell.Dampier.BySett <-
                                         !is.na(Days.unwell.BySett$SettlementID),c(1,3,4,5)],
                    cbind.data.frame(MonitoringYear="Baseline",
                                     SettlementID=72,
-                                    Days.unwell=NA,
-                                    Days.unwell.err=NA))
+                                    UnwellMean=NA,
+                                    UnwellErr=NA))
 
 Days.unwell.Dampier.ByMPA <- 
   Days.unwell.ByMPA[Days.unwell.ByMPA$MPAID==5 &
@@ -50,8 +50,11 @@ Days.unwell.Dampier.ByMPA <-
 # ---- 1.3 Subset Proportional Data of Age/Gender for Dampier ----
 
 Dampier.AgeGender <- 
-  data.frame(AgeCat=c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
+  data.frame(AgeCat=factor(c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
                       "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+                      levels=c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
+                                "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+                      ordered=T),
              Male.Baseline=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==5 &
                                                     AgeGenderDemos.ByMPA$MonitoringYear=="Baseline",
                                                   seq(3,41,by=2)]),
@@ -76,37 +79,37 @@ Dampier.AgeGender <-
 # ---- 1.4 MPA-level Proportional data (row to be added to bottom of status and annex plots in tech report) ----
 
 Dampier.level.PropData.status <- 
-  data.frame(c(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="MPA",
+  data.frame(c(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Selat Dampier\nMPA",
                Techreport.ByMPA[Techreport.ByMPA$MPAID==5 &
-                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:38]))
+                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:36]))
 Dampier.level.PropData.annex <- 
   cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
-                   SettlementID=0,SettlementName="MPA",
-                   Techreport.ByMPA[Techreport.ByMPA$MPAID==5,3:38])
+                   SettlementID=0,SettlementName="Selat Dampier\nMPA",
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==5,3:36])
 
 null.row.PropData <- 
-  matrix(rep(NA,39),ncol=39,dimnames=list(NULL,colnames(Dampier.level.PropData.status)))
+  matrix(rep(NA,37),ncol=37,dimnames=list(NULL,colnames(Dampier.level.PropData.status)))
 
 
 # ---- 1.5 MPA-level Continuous data (row to be added to bottom of status and annex plots in tech report) ----
 
 Dampier.level.ContData.status <- 
-  cbind.data.frame(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="MPA",
+  cbind.data.frame(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Selat Dampier\nMPA",
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==5 &
                                       BigFive.MPAGroup$MonitoringYear=="4 Year Post",6:15],
                    Techreport.ByMPA[Techreport.ByMPA$MPAID==5 &
-                                      Techreport.ByMPA$MonitoringYear=="4 Year Post",39:40],
+                                      Techreport.ByMPA$MonitoringYear=="4 Year Post",c("TimeMarketMean","TimeMarketErr")],
                    Days.unwell.Dampier.ByMPA[Days.unwell.Dampier.ByMPA$MonitoringYear=="4 Year Post",
-                                             c("Days.unwell","Days.unwell.err")])
+                                             c("UnwellMean","UnwellErr")])
 Dampier.level.ContData.annex <- 
   cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
-                   SettlementID=0,SettlementName="MPA",
+                   SettlementID=0,SettlementName="Selat Dampier\nMPA",
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==5,6:15],
-                   Techreport.ByMPA[Techreport.ByMPA$MPAID==5,39:40],
-                   Days.unwell.Dampier.ByMPA[,c("Days.unwell","Days.unwell.err")])
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==5,c("TimeMarketMean","TimeMarketErr")],
+                   Days.unwell.Dampier.ByMPA[,c("UnwellMean","UnwellErr")])
 
 null.row.ContData <- 
-  matrix(rep(NA,17),ncol=17,dimnames=list(NULL,colnames(Dampier.level.ContData.status)))
+  cbind.data.frame(matrix(rep(NA,17),ncol=17,dimnames=list(NULL,colnames(Dampier.level.ContData.status))))
 
 
 # 
@@ -122,14 +125,28 @@ null.row.ContData <-
 
 Dampier.PropData.Techreport.status <- 
   Techreport.BySett[Techreport.BySett$MPAID==5 &
-                      Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:40)]
+                      Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:38)]
 Dampier.PropData.Techreport.status <- 
   Dampier.PropData.Techreport.status[rev(order(Dampier.PropData.Techreport.status$SettlementName)),]
 
 Dampier.PropData.Techreport.status.PLOTFORMAT <- 
-  rbind.data.frame(Dampier.level.PropData.status[2:39],
-                   null.row.PropData[1:37],
+  rbind.data.frame(Dampier.level.PropData.status[2:37],
+                   null.row.PropData[1:35],
                    Dampier.PropData.Techreport.status)
+
+# - make SettlementName an ordered factor for plotting
+Dampier.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Dampier.PropData.Techreport.status.PLOTFORMAT$SettlementName),"",
+         as.character(Dampier.PropData.Techreport.status.PLOTFORMAT$SettlementName))
+
+Dampier.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  factor(Dampier.PropData.Techreport.status.PLOTFORMAT$SettlementName,
+         levels=unique(Dampier.PropData.Techreport.status.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+Dampier.PropData.Techreport.status.PLOTFORMAT$Dummy <- 
+  ifelse(Dampier.PropData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
 
 
 # ---- 2.2 Status dataset for Dampier, continuous data (with p values) ----
@@ -140,7 +157,7 @@ Dampier.ContData.Techreport.status <-
                                   BigFive.SettleGroup$MPAID==5,
                                 c(1,2,6:15)],
             Techreport.BySett[Techreport.BySett$MPAID==5 &
-                                Techreport.BySett$MonitoringYear=="4 Year Post",c(1,41:42)],
+                                Techreport.BySett$MonitoringYear=="4 Year Post",c("SettlementID","TimeMarketMean","TimeMarketErr")],
             by="SettlementID")
 
 Dampier.ContData.Techreport.status <- 
@@ -156,18 +173,30 @@ Dampier.ContData.Techreport.status.withMPA <-
                    null.row.ContData[2:17],
                    Dampier.ContData.Techreport.status)
 
-Dampier.ContData.Techreport.status.withMPA$SettlementName <- 
-  factor(Dampier.ContData.Techreport.status.withMPA$SettlementName)
-
+# - plot-formatted dataset
 Dampier.ContData.Techreport.status.PLOTFORMAT <- 
   left_join(Dampier.ContData.Techreport.status.withMPA,
             sigvals.Damp,by="SettlementName")
+
+# - make SettlementName an ordered factor for plotting
+Dampier.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Dampier.ContData.Techreport.status.PLOTFORMAT$SettlementName),"",
+         Dampier.ContData.Techreport.status.PLOTFORMAT$SettlementName)
+
+Dampier.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
+  factor(Dampier.ContData.Techreport.status.PLOTFORMAT$SettlementName,
+         levels=unique(Dampier.ContData.Techreport.status.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+Dampier.ContData.Techreport.status.PLOTFORMAT$SettLevel <- 
+  ifelse(Dampier.ContData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
 
 
 # ---- 2.3 Trend dataset for Dampier, MPA-level proportional data ----
 
 Dampier.TrendPropData.Techreport.PLOTFORMAT <- 
-  Techreport.ByMPA[Techreport.ByMPA$MPAID==5,c(2,1,3:38)]
+  Techreport.ByMPA[Techreport.ByMPA$MPAID==5,c(2,1,3:36)]
 
 
 # ---- 2.4 Trend dataset for Dampier, MPA-level continuous data (with p values) ----
@@ -176,11 +205,17 @@ Dampier.TrendContData.Techreport.PLOTFORMAT <-
   rbind.data.frame(Dampier.level.ContData.annex[,c(1,4:17)],
                    trend.sigvals.Damp)
 
+# - make MonitoringYear an ordered factor for plotting
+Dampier.TrendContData.Techreport.PLOTFORMAT$MonitoringYear <-
+  factor(Dampier.TrendContData.Techreport.PLOTFORMAT$MonitoringYear,
+         levels=c("Baseline","2 Year Post","4 Year Post"),
+         ordered=T)
+
 
 # ---- 2.5 Annex dataset for Dampier, Settlement-level proportional data ----
 
 Dampier.AnnexPropData.Techreport <- 
-  Techreport.BySett[Techreport.BySett$MPAID==5,c(2,1,4:40)]
+  Techreport.BySett[Techreport.BySett$MPAID==5,c(2,1,4:38)]
 
 Dampier.AnnexPropData.Techreport <- 
   Dampier.AnnexPropData.Techreport[rev(order(Dampier.AnnexPropData.Techreport$SettlementName)),]
@@ -199,7 +234,7 @@ Dampier.AnnexContData.Techreport <-
   left_join(BigFive.SettleGroup[BigFive.SettleGroup$MPAID==5 &
                                   BigFive.SettleGroup$Treatment==1,
                                 c(5,1,2,6:15)],
-            Techreport.BySett[Techreport.BySett$MPAID==5,c(1,2,41,42)],
+            Techreport.BySett[Techreport.BySett$MPAID==5,c("SettlementID","MonitoringYear","TimeMarketMean","TimeMarketErr")],
             by=c("SettlementID","MonitoringYear"))
 
 Dampier.AnnexContData.Techreport <- 
@@ -222,6 +257,26 @@ Dampier.AnnexContData.Techreport.PLOTFORMAT <-
                    null.row.ContData,
                    Dampier.AnnexContData.Techreport)
 
+# - make MonitoringYear an ordered factor for plotting
+Dampier.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear <-
+  factor(Dampier.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear,
+         levels=c("Baseline","2 Year Post","4 Year Post"),
+         ordered=T)
+
+# - make SettlementName an ordered factor for plotting
+Dampier.AnnexContData.Techreport.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Dampier.AnnexContData.Techreport.PLOTFORMAT$SettlementName),"",
+         Dampier.AnnexContData.Techreport.PLOTFORMAT$SettlementName)
+
+Dampier.AnnexContData.Techreport.PLOTFORMAT$SettlementName <-
+  factor(Dampier.AnnexContData.Techreport.PLOTFORMAT$SettlementName,
+         levels=unique(Dampier.AnnexContData.Techreport.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+Dampier.AnnexContData.Techreport.PLOTFORMAT$SettLevel <- 
+  ifelse(Dampier.AnnexContData.Techreport.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -234,7 +289,7 @@ Dampier.AnnexContData.Techreport.PLOTFORMAT <-
 
 # ---- 3.1 Define filename for Excel spreadsheet ----
 
-FileName <- paste(paste("MPAMystery/Social/FlatDataFiles/BHS/TechReportOutput/Dampier/Dampier_TechReportData--produced",
+FileName <- paste(paste("2_Social/FlatDataFiles/BHS/TechReportOutput/Dampier/Dampier_TechReportData--produced",
                         format(Sys.Date(),format="%Y_%m_%d"),sep="_"),
                   "xlsx",sep=".")
 
@@ -243,7 +298,7 @@ FileName <- paste(paste("MPAMystery/Social/FlatDataFiles/BHS/TechReportOutput/Da
 
 write.xlsx(Dampier.PropData.Techreport.status.PLOTFORMAT,FileName,sheetName='PropData_StatusPlots',row.names=F)
 write.xlsx(Dampier.ContData.Techreport.status.PLOTFORMAT,FileName,sheetName='ContData_StatusPlots_withpvals',row.names=F,append=T)
-write.xlsx(Dampier.TrendPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_TrendPlots',row.names=F,append=T)
+write.xlsx(as.data.frame(Dampier.TrendPropData.Techreport.PLOTFORMAT),FileName,sheetName='PropData_TrendPlots',row.names=F,append=T)
 write.xlsx(Dampier.TrendContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_TrendPlots_withpvals',row.names=F,append=T)
 write.xlsx(Dampier.AnnexPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_AnnexPlots',row.names=F,append=T)
 write.xlsx(Dampier.AnnexContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_AnnexPlots',row.names=F,append=T)
@@ -251,6 +306,40 @@ write.xlsx(annex.sigvals.Damp,FileName,sheetName='Pvals_ContData_AnnexPlots',row
 write.xlsx(Dampier.AgeGender,FileName,sheetName='AgeGender',row.names=F,append=T)
 
 
+# ---- 3.3 Additional data to better interpret and synthesize technical report results ----
+
+# - Fish consumption in Dampier, to glean some insight into primary occupation and fishing behavior changes
+ProteinFish.Dampier.BySett <- FishProtein.BySett[FishProtein.BySett$MPAID==5,]
+ProteinFish.Dampier.ByMPA <- FishProtein.ByMPA[FishProtein.ByMPA$MPAID==5,]
+
+
+# - Tech report data synthesis aid -- years resident, categorical food security, changes in social conflict, 
+#   material assets gini coefficient, mean material assets, % fishers, 
+#   % wage labor, marine tenure manage and harvest components
+Dampier.level.synth <- data.frame(SettlementID=NA,
+                                  Synth.techreport.byMPA[Synth.techreport.byMPA$MPAID==5,c("MPAID","MonitoringYear")],
+                                  SettlementName="MPA",
+                                  Synth.techreport.byMPA[Synth.techreport.byMPA$MPAID==5,3:13])
+Dampier.level.synth <- left_join(Dampier.level.synth,
+                                 Techreport.ByMPA[c("MPAID","MonitoringYear",
+                                                    "Percent.PrimaryOcc.Fish",
+                                                    "Percent.PrimaryOcc.WageLabor")],
+                                 by=c("MPAID","MonitoringYear"))
+
+null.row.synth <- matrix(NA,ncol=length(colnames(Dampier.level.synth)),
+                         dimnames=list(NULL,colnames(Dampier.level.synth)))
+
+Dampier.setts.synth <- Synth.techreport.bySett[Synth.techreport.bySett$MPAID==5,]
+Dampier.setts.synth <- left_join(Dampier.setts.synth,Techreport.BySett[,c("SettlementID","MonitoringYear",
+                                                                          "Percent.PrimaryOcc.Fish",
+                                                                          "Percent.PrimaryOcc.WageLabor")],
+                                 by=c("SettlementID","MonitoringYear"))
+
+
+# Output for data synthesis/interpretation
+Dampier.synth.techreport <- rbind.data.frame(Dampier.level.synth,
+                                             null.row.synth,
+                                             Dampier.setts.synth)
 
 
 
@@ -268,4 +357,7 @@ rm(Dampier.ContData.Techreport.status)
 rm(Dampier.AnnexPropData.Techreport)
 rm(Dampier.AnnexContData.Techreport)
 rm(Dampier.ContData.Techreport.status.withMPA)
+rm(Dampier.level.synth)
+rm(null.row.synth)
+rm(Dampier.setts.synth)
 rm(FileName)

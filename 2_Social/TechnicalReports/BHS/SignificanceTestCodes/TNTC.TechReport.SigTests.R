@@ -6,7 +6,7 @@
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2016
-# modified: October 2017
+# modified: November 2017
 # 
 # 
 # ---- inputs ----
@@ -66,7 +66,7 @@ TNTC.TechReport.SettlementMeans <-
                                   BigFive.SettleGroup$MPAID==2,],
             Techreport.BySett[Techreport.BySett$MPAID==2 &
                                 Techreport.BySett$MonitoringYear=="4 Year Post",
-                              c(1,4,41)],  
+                              c("SettlementID","SettlementName","TimeMarketMean")],  
             by=c("SettlementID","SettlementName"))
 
 TNTC.TechReport.SettlementMeans <- 
@@ -112,31 +112,73 @@ even.number.setts.function.TNTC <-
          b=TNTC.TechReport.MPAHouseholdData[,c("FSIndex","MAIndex","PAIndex","MTIndex","SERate","TimeMarketClean","DaysUnwell")],
          function(a,b){
            med <- median(a,na.rm=T)
+           equal <- c(a[which(a==med)])
            upper <- c(a[which(a>med)]) 
            upper <- min(upper,na.rm=T)
            lower <- c(a[which(a<med)]) 
            lower <- max(lower,na.rm=T)
            upper.sett <- TNTC.TechReport.SettlementMeans$SettlementName[a==upper]
-           upper.sett <- ifelse(length(upper.sett)>1,
-                                ifelse((sd(b[TNTC.TechReport.SettlementMeans$SettlementName==upper.sett[1]],na.rm=T)/
-                                          sqrt(length(b[TNTC.TechReport.SettlementMeans$SettlementName==upper.sett[1] & !is.na(b)])))<
-                                         (sd(b[TNTC.TechReport.SettlementMeans$SettlementName==upper.sett[2]],na.rm=T)/
-                                            sqrt(length(b[TNTC.TechReport.SettlementMeans$SettlementName==upper.sett[2] & !is.na(b)]))),
+           upper.sett <- ifelse(length(upper.sett)>1 & length(upper.sett)<3,
+                                ifelse((sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[1]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[1] & !is.na(b)])))<
+                                         (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[2]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[2] & !is.na(b)]))),
                                        as.character(upper.sett[1]),as.character(upper.sett[2])),
-                                as.character(upper.sett))
+                                ifelse(length(upper.sett)>1 & length(upper.sett)<4,
+                                       ifelse((sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[1]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[1] & !is.na(b)])))<
+                                                (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[2]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[2] & !is.na(b)]))) &
+                                                (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[1]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[1] & !is.na(b)])))<
+                                                (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[3]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[3] & !is.na(b)]))),
+                                              as.character(upper.sett[1]),
+                                              ifelse((sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[2]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[2] & !is.na(b)])))<
+                                                       (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[1]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[1] & !is.na(b)]))) &
+                                                       (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[2]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[2] & !is.na(b)])))<
+                                                       (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[3]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett[3] & !is.na(b)]))),
+                                                     as.character(upper.sett[2]),
+                                                     as.character(upper.sett[3]))),
+                                       as.character(upper.sett)))
            lower.sett <- TNTC.TechReport.SettlementMeans$SettlementName[a==lower]
-           lower.sett <- ifelse(length(lower.sett)>1,
-                                ifelse((sd(b[TNTC.TechReport.SettlementMeans$SettlementName==lower.sett[1]],na.rm=T)/
-                                          sqrt(length(b[TNTC.TechReport.SettlementMeans$SettlementName==lower.sett[1] & !is.na(b)])))<
-                                         (sd(b[TNTC.TechReport.SettlementMeans$SettlementName==lower.sett[2]],na.rm=T)/
-                                            sqrt(length(b[TNTC.TechReport.SettlementMeans$SettlementName==lower.sett[2] & !is.na(b)]))),
+           lower.sett <- ifelse(length(lower.sett)>1 & length(lower.sett)<3,
+                                ifelse((sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[1]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[1] & !is.na(b)])))<
+                                         (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[2]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[2] & !is.na(b)]))),
                                        as.character(lower.sett[1]),as.character(lower.sett[2])),
-                                as.character(lower.sett))
-           median.sett <- ifelse((sd(b[TNTC.TechReport.SettlementMeans$SettlementName==upper.sett],na.rm=T)/
-                                    sqrt(length(b[TNTC.TechReport.SettlementMeans$SettlementName==upper.sett & !is.na(b)])))<
-                                   (sd(b[TNTC.TechReport.SettlementMeans$SettlementName==lower.sett],na.rm=T)/
-                                      sqrt(length(b[TNTC.TechReport.SettlementMeans$SettlementName==lower.sett & !is.na(b)]))),
-                                 as.character(upper.sett),as.character(lower.sett))
+                                ifelse(length(lower.sett)>1 & length(lower.sett)<4,
+                                       ifelse((sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[1]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[1] & !is.na(b)])))<
+                                                (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[2]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[2] & !is.na(b)]))) &
+                                                (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[1]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[1] & !is.na(b)])))<
+                                                (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[3]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[3] & !is.na(b)]))),
+                                              as.character(lower.sett[1]),
+                                              ifelse((sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[2]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[2] & !is.na(b)])))<
+                                                       (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[1]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[1] & !is.na(b)]))) &
+                                                       (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[2]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[2] & !is.na(b)])))<
+                                                       (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[3]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett[3] & !is.na(b)]))),
+                                                     as.character(lower.sett[2]),
+                                                     as.character(lower.sett[3]))),
+                                       as.character(lower.sett)))
+           sett.equal.med <- TNTC.TechReport.SettlementMeans$SettlementName[a==equal]
+           sett.equal.med <- ifelse(length(sett.equal.med)>1 & length(sett.equal.med)<3,
+                                    ifelse((sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[1]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[1] & !is.na(b)])))<
+                                             (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[2]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[2] & !is.na(b)]))),
+                                           as.character(sett.equal.med[1]),as.character(sett.equal.med[2])),
+                                    ifelse(length(sett.equal.med)>2 & length(sett.equal.med)<4,
+                                           ifelse((sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[1]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[1] & !is.na(b)])))<
+                                                    (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[2]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[2] & !is.na(b)]))) &
+                                                    (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[1]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[1] & !is.na(b)])))<
+                                                    (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[3]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[3] & !is.na(b)]))),
+                                                  as.character(sett.equal.med[1]),
+                                                  ifelse((sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[2]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[2] & !is.na(b)])))<
+                                                           (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[1]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[1] & !is.na(b)]))) &
+                                                           (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[2]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[2] & !is.na(b)])))<
+                                                           (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[3]],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==sett.equal.med[3] & !is.na(b)]))),
+                                                         as.character(sett.equal.med[2]),
+                                                         as.character(sett.equal.med[3]))),
+                                           ifelse(is.na(sett.equal.med),
+                                                  NA,
+                                                  as.character(sett.equal.med))))
+           median.sett <- ifelse(!is.na(sett.equal.med),
+                                 as.character(sett.equal.med),
+                                 ifelse((sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==upper.sett & !is.na(b)])))<
+                                          (sd(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett],na.rm=T)/sqrt(length(b[TNTC.TechReport.MPAHouseholdData$SettlementName==lower.sett & !is.na(b)]))),
+                                        as.character(upper.sett),
+                                        as.character(lower.sett)))
          })
 
 median.setts.TNTC <- 
@@ -350,16 +392,16 @@ colnames(sigvals.Sett.TNTC) <- c("SettlementName","FS.pval","MA.pval","PA.pval",
 # ---- 4.2 Create function that will output significance values for non-parametric variables, MPA VS. CONTROL ----
 #          (for status plots, comparing MPA households to control households)
 
-non.parametric.test.MPAvControl.TNTC <- 
-  data.frame(mapply(a=c("FSIndex","MAIndex","PAIndex","MTIndex","SERate","TimeMarketClean","DaysUnwell"),
-                    function(a){
-                      var <- TNTC.TechReport.MPAvControl[,a]
-                      wilcox.test(var~MPA.v.Control,
-                                  data=TNTC.TechReport.MPAvControl,
-                                  exact=F)}))["p.value",]
+# non.parametric.test.MPAvControl.TNTC <- 
+#   data.frame(mapply(a=c("FSIndex","MAIndex","PAIndex","MTIndex","SERate","TimeMarketClean","DaysUnwell"),
+#                     function(a){
+#                       var <- TNTC.TechReport.MPAvControl[,a]
+#                       wilcox.test(var~MPA.v.Control,
+#                                   data=TNTC.TechReport.MPAvControl,
+#                                   exact=F)}))["p.value",]
 
 sigvals.MPA.TNTC <- 
-  cbind.data.frame("MPA",non.parametric.test.MPAvControl.TNTC)
+  cbind.data.frame("Teluk Cenderawasih\nNational Park",matrix(rep(NA,7),ncol=7))
 
 colnames(sigvals.MPA.TNTC) <- colnames(sigvals.Sett.TNTC)
 
@@ -378,6 +420,8 @@ sigvals.TNTC <-
   rbind.data.frame(sigvals.MPA.TNTC,
                    null.row.sigvals.TNTC,
                    sigvals.Sett.TNTC[rev(order(sigvals.Sett.TNTC$SettlementName)),])
+
+sigvals.TNTC[,2:8] <- unlist(sigvals.TNTC[,2:8])
 
 
 # ---- 4.3 Create function that will output TREND significance values for non-parametric variables, BY MPA ----
@@ -403,7 +447,9 @@ trend.sigvals.TNTC <-
                    NA,trend.non.parametric.test.byMPA.TNTC["sl",6],NA,trend.non.parametric.test.byMPA.TNTC["sl",7],NA)
 
 colnames(trend.sigvals.TNTC) <- c("MonitoringYear","FSMean","FSErr","MAMean","MAErr","PAMean","PAErr","MTMean","MTErr","SEMean","SEErr",
-                                  "TimeMarket","TimeMarketErr","Days.unwell","Days.unwell.err")
+                                  "TimeMarketMean","TimeMarketErr","UnwellMean","UnwellErr")
+
+trend.sigvals.TNTC <- unlist(trend.sigvals.TNTC)
 
 
 # ---- 4.4 Create function that will output TREND significance values for non-parametric variables, BY SETTLEMENT ----
@@ -430,11 +476,11 @@ colnames(trend.non.parametric.test.bySett.TNTC) <- colnames(sigvals.TNTC)
 #   variable, using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
 #   there [is/is not] a significant difference in this variable across the settlement)
 annex.sigvals.TNTC <- 
-  rbind.data.frame(cbind.data.frame(SettlementName="MPA",trend.non.parametric.test.byMPA.TNTC["sl",]),
+  rbind.data.frame(cbind.data.frame(SettlementName="Teluk Cenderawasih\nNational Park",trend.non.parametric.test.byMPA.TNTC["sl",]),
                    null.row.sigvals.TNTC,
                    trend.non.parametric.test.bySett.TNTC[rev(order(trend.non.parametric.test.bySett.TNTC$SettlementName)),])
 
-
+annex.sigvals.TNTC[2:8] <- unlist(annex.sigvals.TNTC[2:8])
 
 
 
@@ -445,7 +491,6 @@ rm(TNTC.TechReport.MPAvControl)
 rm(TNTC.TechReport.SettlementMeans)
 rm(TNTC.Trend.Data)
 rm(even.number.setts.function.TNTC)
-rm(median.setts.TNTC)
 rm(non.parametric.test.settlements.TNTC)
 rm(non.parametric.test.MPAvControl.TNTC)
 rm(trend.non.parametric.test.byMPA.TNTC)

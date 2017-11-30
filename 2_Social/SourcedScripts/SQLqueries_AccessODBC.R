@@ -1,5 +1,6 @@
 # SQL queries for established ODBC with social MPA Mystery database
 
+# Call HHData
 HHData <- sqlQuery(MPAMysteryDB,
 'select 
 HouseholdID, MPAID, SettlementID, InterviewYear, 
@@ -105,13 +106,15 @@ HHData$EconomicStatusReasonClean <- ifelse(HHData$EconomicStatusReason=="994" |
                                             as.character(HHData$EconomicStatusReason))
 
 HHData$RemoveFS <- ifelse(rowSums(HHData[,5:10],na.rm=T)>3959,"Yes","No")
-HHData$RemoveMA <- ifelse(rowSums(HHData[,18:28],na.rm=T)>=10890,"Yes","No")
-HHData$RemovePA <- ifelse(rowSums(HHData[,41:46],na.rm=T)>=5940,"Yes","No")
-HHData$RemoveMT <- ifelse(rowSums(HHData[,54:58],na.rm=T)>=4950,"Yes","No")
-HHData$RemovecFS <- ifelse(rowSums(HHData[,65:69],na.rm=T)>2969,"Yes","No")
+HHData$RemoveMA <- ifelse(rowSums(HHData[,17:27],na.rm=T)>=10890,"Yes","No")
+HHData$RemovePA <- ifelse(rowSums(HHData[,39:44],na.rm=T)>=5940,"Yes","No")
+HHData$RemoveMT <- ifelse(rowSums(HHData[,51:55],na.rm=T)>=4950,"Yes","No")
+HHData$RemovecFS <- ifelse(rowSums(HHData[,61:65],na.rm=T)>2969,"Yes","No")
 
 HHData <- HHData[,c(1:10,91,11:27,92,28:44,93,45:55,94,56:65,95,66:83,90,85:89)]
 
+
+# Call IndDemos
 IndDemos <- sqlQuery(MPAMysteryDB,
 'select HouseholdID, 
 iif(IndividualGender=2,0,iif(IndividualGender>989,Null,IndividualGender)) as IndividualGenderClean, 
@@ -143,7 +146,17 @@ HHData <- HHData[HHData$MPAID==1 | HHData$MPAID==2 | HHData$MPAID==3 |
 
 IndDemos <- left_join(IndDemos,HHData[,c("HouseholdID","SettlementID")],by="HouseholdID")
 
+# Call Settlements
 Settlements <- sqlFetch(MPAMysteryDB,"HH_tbl_SETTLEMENT")
 Settlements <- Settlements[Settlements$MPAID==1 | Settlements$MPAID==2 | Settlements$MPAID==3 | 
                              Settlements$MPAID==4 | Settlements$MPAID==5 | Settlements$MPAID==6,
                            c(1,3:5)]
+
+# Call extra variables, for data interpretation and synthesis
+extra.HHData <- 
+  sqlQuery(MPAMysteryDB,
+'select HouseholdID, MPAID, SettlementID, InterviewYear, SocialConflict
+from HH_tbl_WELLBEING')
+
+extra.HHData <- extra.HHData[extra.HHData$MPAID==1 | extra.HHData$MPAID==2 | extra.HHData$MPAID==3 | 
+                               extra.HHData$MPAID==4 | extra.HHData$MPAID==5 | extra.HHData$MPAID==6,]

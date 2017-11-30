@@ -39,8 +39,8 @@ Days.unwell.Kaimana.BySett <-
                                         !is.na(Days.unwell.BySett$SettlementID),c(1,3,4,5)],
                    cbind.data.frame(MonitoringYear="Baseline",
                                     SettlementID=c(113,114,115),
-                                    Days.unwell=NA,
-                                    Days.unwell.err=NA))
+                                    UnwellMean=NA,
+                                    UnwellErr=NA))
 
 Days.unwell.Kaimana.ByMPA <- 
   Days.unwell.ByMPA[Days.unwell.ByMPA$MPAID==3 &
@@ -50,8 +50,11 @@ Days.unwell.Kaimana.ByMPA <-
 # ---- 1.3 Subset Proportional Data of Age/Gender for Kaimana ----
 
 Kaimana.AgeGender <- 
-  data.frame(AgeCat=c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
-                      "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+  data.frame(AgeCat=factor(c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
+                             "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+                           levels=c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
+                                    "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+                           ordered=T),
              Male.Baseline=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==3 &
                                                     AgeGenderDemos.ByMPA$MonitoringYear=="Baseline",
                                                   seq(3,41,by=2)]),
@@ -76,34 +79,34 @@ Kaimana.AgeGender <-
 # ---- 1.4 MPA-level Proportional data (row to be added to bottom of status and annex plots in tech report) ----
 
 Kaimana.level.PropData.status <- 
-  data.frame(c(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="MPA",
+  data.frame(c(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Kaimana MPA",
                Techreport.ByMPA[Techreport.ByMPA$MPAID==3 &
-                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:38]))
+                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:36]))
 Kaimana.level.PropData.annex <- 
   cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
-                   SettlementID=0,SettlementName="MPA",
-                   Techreport.ByMPA[Techreport.ByMPA$MPAID==3,3:38])
+                   SettlementID=0,SettlementName="Kaimana MPA",
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==3,3:36])
 
 null.row.PropData <- 
-  matrix(rep(NA,39),ncol=39,dimnames=list(NULL,colnames(Kaimana.level.PropData.status)))
+  matrix(rep(NA,37),ncol=37,dimnames=list(NULL,colnames(Kaimana.level.PropData.status)))
 
 
 # ---- 1.5 MPA-level Continuous data (row to be added to bottom of status and annex plots in tech report) ----
 
 Kaimana.level.ContData.status <- 
-  cbind.data.frame(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="MPA",
+  cbind.data.frame(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Kaimana MPA",
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==3 &
                                       BigFive.MPAGroup$MonitoringYear=="4 Year Post",6:15],
                    Techreport.ByMPA[Techreport.ByMPA$MPAID==3 &
-                                      Techreport.ByMPA$MonitoringYear=="4 Year Post",39:40],
+                                      Techreport.ByMPA$MonitoringYear=="4 Year Post",c("TimeMarketMean","TimeMarketErr")],
                    Days.unwell.Kaimana.ByMPA[Days.unwell.Kaimana.ByMPA$MonitoringYear=="4 Year Post",
-                                             c("Days.unwell","Days.unwell.err")])
+                                             c("UnwellMean","UnwellErr")])
 Kaimana.level.ContData.annex <- 
   cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
                    SettlementID=0,SettlementName="MPA",
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==3,6:15],
-                   Techreport.ByMPA[Techreport.ByMPA$MPAID==3,39:40],
-                   Days.unwell.Kaimana.ByMPA[,c("Days.unwell","Days.unwell.err")])
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==3,c("TimeMarketMean","TimeMarketErr")],
+                   Days.unwell.Kaimana.ByMPA[,c("UnwellMean","UnwellErr")])
 
 null.row.ContData <- 
   matrix(rep(NA,17),ncol=17,dimnames=list(NULL,colnames(Kaimana.level.ContData.status)))
@@ -122,14 +125,28 @@ null.row.ContData <-
 
 Kaimana.PropData.Techreport.status <- 
   Techreport.BySett[Techreport.BySett$MPAID==3 &
-                      Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:40)]
+                      Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:38)]
 Kaimana.PropData.Techreport.status <- 
   Kaimana.PropData.Techreport.status[rev(order(Kaimana.PropData.Techreport.status$SettlementName)),]
 
 Kaimana.PropData.Techreport.status.PLOTFORMAT <- 
-  rbind.data.frame(Kaimana.level.PropData.status[2:39],
-                   null.row.PropData[1:37],
+  rbind.data.frame(Kaimana.level.PropData.status[2:37],
+                   null.row.PropData[1:35],
                    Kaimana.PropData.Techreport.status)
+
+# - make SettlementName an ordered factor for plotting
+Kaimana.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Kaimana.PropData.Techreport.status.PLOTFORMAT$SettlementName),"",
+         as.character(Kaimana.PropData.Techreport.status.PLOTFORMAT$SettlementName))
+
+Kaimana.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  factor(Kaimana.PropData.Techreport.status.PLOTFORMAT$SettlementName,
+         levels=unique(Kaimana.PropData.Techreport.status.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+Kaimana.PropData.Techreport.status.PLOTFORMAT$Dummy <- 
+  ifelse(Kaimana.PropData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
 
 
 # ---- 2.2 Status dataset for Kaimana, continuous data (with p values) ----
@@ -141,7 +158,7 @@ Kaimana.ContData.Techreport.status <-
                                   !is.na(BigFive.SettleGroup$SettlementID),
                                 c(1,2,6:15)],
             Techreport.BySett[Techreport.BySett$MPAID==3 &
-                                Techreport.BySett$MonitoringYear=="4 Year Post",c(1,41:42)],
+                                Techreport.BySett$MonitoringYear=="4 Year Post",c("SettlementID","TimeMarketMean","TimeMarketErr")],
             by="SettlementID")
 
 Kaimana.ContData.Techreport.status <- 
@@ -157,18 +174,30 @@ Kaimana.ContData.Techreport.status.withMPA <-
                    null.row.ContData[2:17],
                    Kaimana.ContData.Techreport.status)
 
-Kaimana.ContData.Techreport.status.withMPA$SettlementName <- 
-  factor(Kaimana.ContData.Techreport.status.withMPA$SettlementName)
-
+# - plot-formatted dataset
 Kaimana.ContData.Techreport.status.PLOTFORMAT <- 
   left_join(Kaimana.ContData.Techreport.status.withMPA,
             sigvals.Kai,by="SettlementName")
+
+# - make SettlementName an ordered factor for plotting
+Kaimana.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Kaimana.ContData.Techreport.status.PLOTFORMAT$SettlementName),"",
+         Kaimana.ContData.Techreport.status.PLOTFORMAT$SettlementName)
+
+Kaimana.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
+  factor(Kaimana.ContData.Techreport.status.PLOTFORMAT$SettlementName,
+         levels=unique(Kaimana.ContData.Techreport.status.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+Kaimana.ContData.Techreport.status.PLOTFORMAT$SettLevel <- 
+  ifelse(Kaimana.ContData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
 
 
 # ---- 2.3 Trend dataset for Kaimana, MPA-level proportional data ----
 
 Kaimana.TrendPropData.Techreport.PLOTFORMAT <- 
-  Techreport.ByMPA[Techreport.ByMPA$MPAID==3,c(2,1,3:38)]
+  Techreport.ByMPA[Techreport.ByMPA$MPAID==3,c(2,1,3:36)]
 
 
 # ---- 2.4 Trend dataset for Kaimana, MPA-level continuous data (with p values) ----
@@ -182,7 +211,7 @@ Kaimana.TrendContData.Techreport.PLOTFORMAT <-
 
 Kaimana.AnnexPropData.Techreport <- 
   Techreport.BySett[Techreport.BySett$MPAID==3 &
-                      !is.na(Techreport.BySett$SettlementID),c(2,1,4:40)]
+                      !is.na(Techreport.BySett$SettlementID),c(2,1,4:38)]
 
 Kaimana.AnnexPropData.Techreport <- 
   Kaimana.AnnexPropData.Techreport[rev(order(Kaimana.AnnexPropData.Techreport$SettlementName,
@@ -202,7 +231,7 @@ Kaimana.AnnexContData.Techreport <-
   left_join(BigFive.SettleGroup[BigFive.SettleGroup$MPAID==3 &
                                   BigFive.SettleGroup$Treatment==1,
                                 c(5,1,2,6:15)],
-            Techreport.BySett[Techreport.BySett$MPAID==3,c(1,2,41,42)],
+            Techreport.BySett[Techreport.BySett$MPAID==3,c("SettlementID","MonitoringYear","TimeMarketMean","TimeMarketErr")],
             by=c("SettlementID","MonitoringYear"))
 
 Kaimana.AnnexContData.Techreport <- 
@@ -225,6 +254,27 @@ Kaimana.AnnexContData.Techreport.PLOTFORMAT <-
                    null.row.ContData,
                    Kaimana.AnnexContData.Techreport)
 
+# - make MonitoringYear an ordered factor for plotting
+Kaimana.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear <-
+  factor(Kaimana.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear,
+         levels=c("Baseline","2 Year Post","4 Year Post"),
+         ordered=T)
+
+# - make SettlementName an ordered factor for plotting
+Kaimana.AnnexContData.Techreport.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Kaimana.AnnexContData.Techreport.PLOTFORMAT$SettlementName),"",
+         Kaimana.AnnexContData.Techreport.PLOTFORMAT$SettlementName)
+
+Kaimana.AnnexContData.Techreport.PLOTFORMAT$SettlementName <-
+  factor(Kaimana.AnnexContData.Techreport.PLOTFORMAT$SettlementName,
+         levels=unique(Kaimana.AnnexContData.Techreport.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+Kaimana.AnnexContData.Techreport.PLOTFORMAT$SettLevel <- 
+  ifelse(Kaimana.AnnexContData.Techreport.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
+
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -237,7 +287,7 @@ Kaimana.AnnexContData.Techreport.PLOTFORMAT <-
 
 # ---- 3.1 Define filename for Excel spreadsheet ----
 
-FileName <- paste(paste("MPAMystery/Social/FlatDataFiles/BHS/TechReportOutput/Kaimana/Kaimana_TechReportData--produced",
+FileName <- paste(paste("2_Social/FlatDataFiles/BHS/TechReportOutput/Kaimana/Kaimana_TechReportData--produced",
                         format(Sys.Date(),format="%Y_%m_%d"),sep="_"),
                   "xlsx",sep=".")
 
@@ -246,7 +296,7 @@ FileName <- paste(paste("MPAMystery/Social/FlatDataFiles/BHS/TechReportOutput/Ka
 
 write.xlsx(Kaimana.PropData.Techreport.status.PLOTFORMAT,FileName,sheetName='PropData_StatusPlots',row.names=F)
 write.xlsx(Kaimana.ContData.Techreport.status.PLOTFORMAT,FileName,sheetName='ContData_StatusPlots_withpvals',row.names=F,append=T)
-write.xlsx(Kaimana.TrendPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_TrendPlots',row.names=F,append=T)
+write.xlsx(as.data.frame(Kaimana.TrendPropData.Techreport.PLOTFORMAT),FileName,sheetName='PropData_TrendPlots',row.names=F,append=T)
 write.xlsx(Kaimana.TrendContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_TrendPlots_withpvals',row.names=F,append=T)
 write.xlsx(Kaimana.AnnexPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_AnnexPlots',row.names=F,append=T)
 write.xlsx(Kaimana.AnnexContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_AnnexPlots',row.names=F,append=T)

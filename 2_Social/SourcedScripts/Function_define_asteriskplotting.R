@@ -79,3 +79,21 @@ define.annexplot.settname.labels <- function(x) {
   colnames(result) <- c("SettlementName","FS","MA","PA","MT","SE","Time","Unwell")
   result
 }
+
+# Define Year/Monitoring Year column for axis & legend labels
+define.year.monitoryear.column <- function(annex.data) {
+  result <- annex.data[5:10,c("SettlementID","MonitoringYear")]
+  result <- left_join(result,HHData[,c("SettlementID","InterviewYear","MonitoringYear")],
+                    by=c("SettlementID","MonitoringYear"))
+  result$MonitoringYear <- ifelse(result$MonitoringYear=="2 Year Post" |
+                                    result$MonitoringYear=="4 Year Post",paste(result$MonitoringYear,"\nBaseline",sep=""),
+                                  as.character(result$MonitoringYear))
+  result$Monitoryear.year <- c(NA)
+  for(i in 1:length(result$MonitoringYear)){
+    result$Monitoryear.year[i] <- paste(result$MonitoringYear[i],"\n","(",result$InterviewYear[i],")",sep="")
+  }
+  result.final <- c(unique(result$Monitoryear.year))
+  result.final
+}
+
+

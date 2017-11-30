@@ -137,14 +137,44 @@ Damp.impact.arrows <- cbind.data.frame(Damp.impact.arrows,
 Damp.sig.pos <- data.frame(mapply(i=Damp.2yr.impacts[Damp.2yr.impacts$Treatment=="MPA",c("PA","SE","MT","FS","MA")],
                                   j=Damp.2yr.impacts[Damp.2yr.impacts$Treatment=="Control",c("PA","SE","MT","FS","MA")],
                                   k=Damp.sig.labs$impact.labs,
-                                  outcome.sd=sapply(impact.2yr[impact.2yr$MPAID==5 & !is.na(impact.2yr$MPAID),
-                                                               c("attach.ATT","enrol.ATT","tenure.ATT","HFS.ATT","assets.ATT")],sd,na.rm=T),
-                                  function(i,j,k,outcome.sd){
-                                    if(k=="*\n*\n*" & i<j) {i-0.03*outcome.sd} else
-                                      if(k=="*\n*\n*" & i>j) {i+0.03*outcome.sd} else
-                                        if(k=="*\n*" & i<j) {i-0.02*outcome.sd} else
-                                          if(k=="*\n*" & i>j) {i+0.02*outcome.sd} else
-                                            if(k=="*" & i<j) {i-0.01*outcome.sd} else
-                                              if(k=="*" & i>j) {i+0.01*outcome.sd} else {0}
+                                  range=mapply(imin=mapply(a=Damp.2yr.impacts[Damp.2yr.impacts$Treatment=="MPA",
+                                                                           c("PA","SE","MT","FS","MA")],
+                                                        b=Damp.2yr.impacts[Damp.2yr.impacts$Treatment=="MPA",
+                                                                           c("PAErr","SEErr","MTErr","FSErr","MAErr")],
+                                                        function(a,b){
+                                                          a-b}),
+                                               imax=mapply(a=Damp.2yr.impacts[Damp.2yr.impacts$Treatment=="MPA",
+                                                                              c("PA","SE","MT","FS","MA")],
+                                                           b=Damp.2yr.impacts[Damp.2yr.impacts$Treatment=="MPA",
+                                                                              c("PAErr","SEErr","MTErr","FSErr","MAErr")],
+                                                           function(a,b){
+                                                             a+b}),
+                                               jmin=mapply(a=Damp.2yr.impacts[Damp.2yr.impacts$Treatment=="Control",
+                                                                              c("PA","SE","MT","FS","MA")],
+                                                           b=Damp.2yr.impacts[Damp.2yr.impacts$Treatment=="Control",
+                                                                              c("PAErr","SEErr","MTErr","FSErr","MAErr")],
+                                                           function(a,b){
+                                                             a-b}),
+                                               jmax=mapply(a=Damp.2yr.impacts[Damp.2yr.impacts$Treatment=="Control",
+                                                                              c("PA","SE","MT","FS","MA")],
+                                                           b=Damp.2yr.impacts[Damp.2yr.impacts$Treatment=="Control",
+                                                                              c("PAErr","SEErr","MTErr","FSErr","MAErr")],
+                                                           function(a,b){
+                                                             a+b}),
+                                               function(imin,imax,jmin,jmax){
+                                                 max <- ifelse((imax>0 & jmax<=0) | (imax>0 & jmax>0 & imax>jmax),imax,
+                                                               ifelse((imax<=0 & jmax>0) | (imax>0 & jmax>0 & imax<jmax),jmax,0))
+                                                 min <- ifelse((imin<0 & jmin>0) | (imin<0 & jmin<0 & imin<jmin),imin,
+                                                               ifelse((imin>0 & jmin<0) | (imin<0 & jmin<0 & imin>jmin),jmin,0))
+                                                 abs(max)+abs(min)
+                                               }),
+                                  function(i,j,k,range){
+                                    if(k=="*\n*\n*" & i<j) {i-0.015*range} else
+                                      if(k=="*\n*\n*" & i>j) {i+0.015*range} else
+                                        if(k=="*\n*" & i<j) {i-0.01*range} else
+                                          if(k=="*\n*" & i>j) {i+0.01*range} else
+                                            if(k=="*" & i<j) {i-0.05*range} else
+                                              if(k=="*" & i>j) {i+0.05*range} else {0}
                                   }))
 row.names(Damp.sig.pos) <- c("PA","SE","MT","FS","MA")
+

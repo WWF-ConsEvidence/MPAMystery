@@ -6,7 +6,7 @@
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2016
-# modified: October 2017
+# modified: November 2017
 # 
 # 
 # ---- inputs ----
@@ -46,8 +46,11 @@ Days.unwell.Mayalibit.ByMPA <-
 # ---- 1.3 Subset Proportional Data of Age/Gender for Mayalibit ----
 
 Mayalibit.AgeGender <- 
-  data.frame(AgeCat=c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
-                      "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+  data.frame(AgeCat=factor(c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
+                             "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+                           levels=c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
+                                    "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+                           ordered=T),
              Male.Baseline=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==1 &
                                                     AgeGenderDemos.ByMPA$MonitoringYear=="Baseline",
                                                   seq(3,41,by=2)]),
@@ -72,34 +75,34 @@ Mayalibit.AgeGender <-
 # ---- 1.4 MPA-level Proportional data (row to be added to bottom of status and annex plots in tech report) ----
 
 Mayalibit.level.PropData.status <- 
-  data.frame(c(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="MPA",
+  data.frame(c(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Teluk Mayalibit\nMPA",
                Techreport.ByMPA[Techreport.ByMPA$MPAID==1 &
-                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:38]))
+                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:36]))
 Mayalibit.level.PropData.annex <- 
   cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
-                   SettlementID=0,SettlementName="MPA",
-                   Techreport.ByMPA[Techreport.ByMPA$MPAID==1,3:38])
+                   SettlementID=0,SettlementName="Teluk Mayalibit\nMPA",
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==1,3:36])
 
 null.row.PropData <- 
-  matrix(rep(NA,39),ncol=39,dimnames=list(NULL,colnames(Mayalibit.level.PropData.status)))
+  matrix(rep(NA,37),ncol=37,dimnames=list(NULL,colnames(Mayalibit.level.PropData.status)))
 
 
 # ---- 1.5 MPA-level Continuous data (row to be added to bottom of status and annex plots in tech report) ----
 
 Mayalibit.level.ContData.status <- 
-  cbind.data.frame(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="MPA",
+  cbind.data.frame(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Teluk Mayalibit\nMPA",
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==1 &
                                       BigFive.MPAGroup$MonitoringYear=="4 Year Post",6:15],
                    Techreport.ByMPA[Techreport.ByMPA$MPAID==1 &
-                                      Techreport.ByMPA$MonitoringYear=="4 Year Post",39:40],
+                                      Techreport.ByMPA$MonitoringYear=="4 Year Post",c("TimeMarketMean","TimeMarketErr")],
                    Days.unwell.Mayalibit.ByMPA[Days.unwell.Mayalibit.ByMPA$MonitoringYear=="4 Year Post",
-                                             c("Days.unwell","Days.unwell.err")])
+                                               c("UnwellMean","UnwellErr")])
 Mayalibit.level.ContData.annex <- 
   cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
-                   SettlementID=0,SettlementName="MPA",
+                   SettlementID=0,SettlementName="Teluk Mayalibit\nMPA",
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==1,6:15],
-                   Techreport.ByMPA[Techreport.ByMPA$MPAID==1,39:40],
-                   Days.unwell.Mayalibit.ByMPA[,c("Days.unwell","Days.unwell.err")])
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==1,c("TimeMarketMean","TimeMarketErr")],
+                   Days.unwell.Mayalibit.ByMPA[,c("UnwellMean","UnwellErr")])
 
 null.row.ContData <- 
   matrix(rep(NA,17),ncol=17,dimnames=list(NULL,colnames(Mayalibit.level.ContData.status)))
@@ -118,14 +121,29 @@ null.row.ContData <-
 
 Mayalibit.PropData.Techreport.status <- 
   Techreport.BySett[Techreport.BySett$MPAID==1 &
-                      Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:40)]
+                      Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:38)]
 Mayalibit.PropData.Techreport.status <- 
   Mayalibit.PropData.Techreport.status[rev(order(Mayalibit.PropData.Techreport.status$SettlementName)),]
 
 Mayalibit.PropData.Techreport.status.PLOTFORMAT <- 
-  rbind.data.frame(Mayalibit.level.PropData.status[2:39],
-                   null.row.PropData[1:37],
+  rbind.data.frame(Mayalibit.level.PropData.status[2:37],
+                   null.row.PropData[1:35],
                    Mayalibit.PropData.Techreport.status)
+
+# - make SettlementName an ordered factor for plotting
+Mayalibit.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Mayalibit.PropData.Techreport.status.PLOTFORMAT$SettlementName),"",
+         as.character(Mayalibit.PropData.Techreport.status.PLOTFORMAT$SettlementName))
+
+Mayalibit.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  factor(Mayalibit.PropData.Techreport.status.PLOTFORMAT$SettlementName,
+         levels=unique(Mayalibit.PropData.Techreport.status.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+Mayalibit.PropData.Techreport.status.PLOTFORMAT$Dummy <- 
+  ifelse(Mayalibit.PropData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
+
 
 
 # ---- 2.2 Status dataset for Mayalibit, continuous data (with p values) ----
@@ -136,7 +154,7 @@ Mayalibit.ContData.Techreport.status <-
                                   BigFive.SettleGroup$MPAID==1,
                                 c(1,2,6:15)],
             Techreport.BySett[Techreport.BySett$MPAID==1 &
-                                Techreport.BySett$MonitoringYear=="4 Year Post",c(1,41:42)],
+                                Techreport.BySett$MonitoringYear=="4 Year Post",c("SettlementID","TimeMarketMean","TimeMarketErr")],
             by="SettlementID")
 
 Mayalibit.ContData.Techreport.status <- 
@@ -152,18 +170,30 @@ Mayalibit.ContData.Techreport.status.withMPA <-
                    null.row.ContData[2:17],
                    Mayalibit.ContData.Techreport.status)
 
-Mayalibit.ContData.Techreport.status.withMPA$SettlementName <- 
-  factor(Mayalibit.ContData.Techreport.status.withMPA$SettlementName)
-
+# - plot-formatted dataset
 Mayalibit.ContData.Techreport.status.PLOTFORMAT <- 
   left_join(Mayalibit.ContData.Techreport.status.withMPA,
             sigvals.Maya,by="SettlementName")
+
+# - make SettlementName an ordered factor for plotting
+Mayalibit.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Mayalibit.ContData.Techreport.status.PLOTFORMAT$SettlementName),"",
+         Mayalibit.ContData.Techreport.status.PLOTFORMAT$SettlementName)
+
+Mayalibit.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
+  factor(Mayalibit.ContData.Techreport.status.PLOTFORMAT$SettlementName,
+         levels=unique(Mayalibit.ContData.Techreport.status.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+Mayalibit.ContData.Techreport.status.PLOTFORMAT$SettLevel <- 
+  ifelse(Mayalibit.ContData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
 
 
 # ---- 2.3 Trend dataset for Mayalibit, MPA-level proportional data ----
 
 Mayalibit.TrendPropData.Techreport.PLOTFORMAT <- 
-  Techreport.ByMPA[Techreport.ByMPA$MPAID==1,c(2,1,3:38)]
+  Techreport.ByMPA[Techreport.ByMPA$MPAID==1,c(2,1,3:36)]
 
 
 # ---- 2.4 Trend dataset for Mayalibit, MPA-level continuous data (with p values) ----
@@ -172,11 +202,17 @@ Mayalibit.TrendContData.Techreport.PLOTFORMAT <-
   rbind.data.frame(Mayalibit.level.ContData.annex[,c(1,4:17)],
                    trend.sigvals.Maya)
 
+# - make MonitoringYear an ordered factor for plotting
+Mayalibit.TrendContData.Techreport.PLOTFORMAT$MonitoringYear <-
+  factor(Mayalibit.TrendContData.Techreport.PLOTFORMAT$MonitoringYear,
+         levels=c("Baseline","2 Year Post","4 Year Post"),
+         ordered=T)
+
 
 # ---- 2.5 Annex dataset for Mayalibit, Settlement-level proportional data ----
 
 Mayalibit.AnnexPropData.Techreport <- 
-  Techreport.BySett[Techreport.BySett$MPAID==1,c(2,1,4:40)]
+  Techreport.BySett[Techreport.BySett$MPAID==1,c(2,1,4:38)]
 
 Mayalibit.AnnexPropData.Techreport <- 
   Mayalibit.AnnexPropData.Techreport[rev(order(Mayalibit.AnnexPropData.Techreport$SettlementName)),]
@@ -195,7 +231,7 @@ Mayalibit.AnnexContData.Techreport <-
   left_join(BigFive.SettleGroup[BigFive.SettleGroup$MPAID==1 &
                                   BigFive.SettleGroup$Treatment==1,
                                 c(5,1,2,6:15)],
-            Techreport.BySett[Techreport.BySett$MPAID==1,c(1,2,41,42)],
+            Techreport.BySett[Techreport.BySett$MPAID==1,c("SettlementID","MonitoringYear","TimeMarketMean","TimeMarketErr")],
             by=c("SettlementID","MonitoringYear"))
 
 Mayalibit.AnnexContData.Techreport <- 
@@ -218,6 +254,26 @@ Mayalibit.AnnexContData.Techreport.PLOTFORMAT <-
                    null.row.ContData,
                    Mayalibit.AnnexContData.Techreport)
 
+# - make MonitoringYear an ordered factor for plotting
+Mayalibit.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear <-
+  factor(Mayalibit.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear,
+         levels=c("Baseline","2 Year Post","4 Year Post"),
+         ordered=T)
+
+# - make SettlementName an ordered factor for plotting
+Mayalibit.AnnexContData.Techreport.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Mayalibit.AnnexContData.Techreport.PLOTFORMAT$SettlementName),"",
+         Mayalibit.AnnexContData.Techreport.PLOTFORMAT$SettlementName)
+
+Mayalibit.AnnexContData.Techreport.PLOTFORMAT$SettlementName <-
+  factor(Mayalibit.AnnexContData.Techreport.PLOTFORMAT$SettlementName,
+         levels=unique(Mayalibit.AnnexContData.Techreport.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+Mayalibit.AnnexContData.Techreport.PLOTFORMAT$SettLevel <- 
+  ifelse(Mayalibit.AnnexContData.Techreport.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -230,7 +286,7 @@ Mayalibit.AnnexContData.Techreport.PLOTFORMAT <-
 
 # ---- 3.1 Define filename for Excel spreadsheet ----
 
-FileName <- paste(paste("MPAMystery/Social/FlatDataFiles/BHS/TechReportOutput/Mayalibit/Mayalibit_TechReportData--produced",
+FileName <- paste(paste("2_Social/FlatDataFiles/BHS/TechReportOutput/Mayalibit/Mayalibit_TechReportData--produced",
                         format(Sys.Date(),format="%Y_%m_%d"),sep="_"),
                   "xlsx",sep=".")
 
@@ -239,7 +295,7 @@ FileName <- paste(paste("MPAMystery/Social/FlatDataFiles/BHS/TechReportOutput/Ma
 
 write.xlsx(Mayalibit.PropData.Techreport.status.PLOTFORMAT,FileName,sheetName='PropData_StatusPlots',row.names=F)
 write.xlsx(Mayalibit.ContData.Techreport.status.PLOTFORMAT,FileName,sheetName='ContData_StatusPlots_withpvals',row.names=F,append=T)
-write.xlsx(Mayalibit.TrendPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_TrendPlots',row.names=F,append=T)
+write.xlsx(as.data.frame(Mayalibit.TrendPropData.Techreport.PLOTFORMAT),FileName,sheetName='PropData_TrendPlots',row.names=F,append=T)
 write.xlsx(Mayalibit.TrendContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_TrendPlots_withpvals',row.names=F,append=T)
 write.xlsx(Mayalibit.AnnexPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_AnnexPlots',row.names=F,append=T)
 write.xlsx(Mayalibit.AnnexContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_AnnexPlots',row.names=F,append=T)
