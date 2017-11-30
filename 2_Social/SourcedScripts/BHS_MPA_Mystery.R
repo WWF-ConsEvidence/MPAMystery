@@ -42,12 +42,13 @@
 
 # ---- 1.1 Import data ----
 
-# !!! Select ONE option to import data - ONLY CHOOSE ONE
+# !!! Select ONE option to import data - ONLY CHOOSE ONE !!!
 
 # OPTION 1: Use ODBC connection to access database and import tables
 MPAMysteryDB <- odbcConnect("Unified.Social.MPAMystery")
 
 source('2_Social/SourcedScripts/SQLqueries_AccessODBC.R')
+
 
 # # OPTION 2: Set working directory and import flat data files (.csv files)
 # HHData <- read.csv('2_Social/FlatDataFiles/BHS/BHS_HHData.csv',header=T,sep=',')
@@ -57,6 +58,7 @@ source('2_Social/SourcedScripts/SQLqueries_AccessODBC.R')
 # 
 # Settlements <- read.csv('2_Social/FlatDataFiles/BHS/BHS_HH_tbl_SETTLEMENT.csv',header=T,sep=',')
 # Settlements <- Settlements[,c(1,3:5)]
+
 
 # Whichever option you chose above, you will still need to upload Ethnicity data from a flat file
 HHEthnicity <- read.delim ("2_Social/FlatDataFiles/BHS/Ethnic_2015_0705.txt")
@@ -128,7 +130,7 @@ PA <- HHData[,c(1,47:53)]
 MT <- HHData[,c(1,59:64)]
 
 HHLivelihood <- HHData[,c(1:3,79:90)]
-HHDemos <- HHData[,c(1:3,91:95)]
+HHDemos <- HHData[,c(1:3,91:94,96)]
 HeadOfHH <- IndDemos[IndDemos$RelationHHH==0 &
                        !is.na(IndDemos$RelationHHH),1:4]
 
@@ -751,7 +753,7 @@ FishProtein.ByMPA <-
 # - Changes in social conflict by settlement
 # - Marine tenure components by settlement
 Synth.techreport.bySett <-
-  left_join(HHDemos.context,extra.HHData[,c("HouseholdID","SocialConflict")]) %>%
+  left_join(HHDemos.context,HHData[,c("HouseholdID","SocialConflict")]) %>%
   left_join(MT) %>%
   left_join(BigFive[,c("HouseholdID","MAIndex","FSIndex")]) %>%
   group_by(SettlementID,MPAID,MonitoringYear) %>%
@@ -773,7 +775,7 @@ Synth.techreport.bySett <-
 
 # - same data as above, by MPA
 Synth.techreport.byMPA <-
-  left_join(HHDemos.context,extra.HHData[,c("HouseholdID","SocialConflict")]) %>%
+  left_join(HHDemos.context,HHData[,c("HouseholdID","SocialConflict")]) %>%
   left_join(MT) %>%
   left_join(BigFive[,c("HouseholdID","MAIndex","FSIndex")]) %>%
   group_by(MPAID,MonitoringYear) %>%

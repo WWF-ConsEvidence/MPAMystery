@@ -94,7 +94,8 @@ iif(TimeMarket>989,Null,TimeMarket) as TimeMarketClean,
 iif(Religion>989,Null,Religion) as ReligionClean, 
 iif(YearsResident>989,Null,YearsResident) as YrResidentClean, 
 iif(HouseholdDeath>989,Null,HouseholdDeath) as HHDeathClean, 
-iif(HouseholdBirth>989,Null,HouseholdBirth) as HHBirthClean
+iif(HouseholdBirth>989,Null,HouseholdBirth) as HHBirthClean,
+SocialConflict
 from HH_tbl_WELLBEING')
 
 HHData$EconomicStatusReasonClean <- ifelse(HHData$EconomicStatusReason=="994" |
@@ -151,12 +152,3 @@ Settlements <- sqlFetch(MPAMysteryDB,"HH_tbl_SETTLEMENT")
 Settlements <- Settlements[Settlements$MPAID==1 | Settlements$MPAID==2 | Settlements$MPAID==3 | 
                              Settlements$MPAID==4 | Settlements$MPAID==5 | Settlements$MPAID==6,
                            c(1,3:5)]
-
-# Call extra variables, for data interpretation and synthesis
-extra.HHData <- 
-  sqlQuery(MPAMysteryDB,
-'select HouseholdID, MPAID, SettlementID, InterviewYear, SocialConflict
-from HH_tbl_WELLBEING')
-
-extra.HHData <- extra.HHData[extra.HHData$MPAID==1 | extra.HHData$MPAID==2 | extra.HHData$MPAID==3 | 
-                               extra.HHData$MPAID==4 | extra.HHData$MPAID==5 | extra.HHData$MPAID==6,]
