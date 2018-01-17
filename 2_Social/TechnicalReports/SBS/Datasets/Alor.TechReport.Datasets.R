@@ -11,7 +11,7 @@
 # 
 # ---- inputs ----
 #  1) Source Alor.TechReport.SigTests.R 
-#     - Dependencies: SBS_MPA_Mystery_2018-0116.R
+#     - Dependencies: SBS_MPA_Mystery.R
 # 
 # ---- code sections ----
 #  1) Data Sourcing, Configuration, and Subsetting
