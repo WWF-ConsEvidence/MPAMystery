@@ -17,6 +17,7 @@
 #  1) Data Sourcing, Configuration, and Subsetting
 #  2) Define Datasets for Status, Trend, and Annex Plots for Export
 #  3) Export Data to Excel
+#  4) Synthesize other social data for interpretation/context
 # 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -75,16 +76,20 @@ Misool.AgeGender <-
 # ---- 1.4 MPA-level Proportional data (row to be added to bottom of status and annex plots in tech report) ----
 
 Misool.level.PropData.status <- 
-  data.frame(c(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Misool Selatan\nTimur MPA",
+  data.frame(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Misool Selatan\nTimur MPA",
                Techreport.ByMPA[Techreport.ByMPA$MPAID==6 &
-                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:36]))
+                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:36],
+               FishProtein.ByMPA[FishProtein.ByMPA$MPAID==6 &
+                                   FishProtein.ByMPA$MonitoringYear=="4 Year Post",8:12],
+             MPAimpact.intro.context[MPAimpact.intro.context$MPAID==6,c(12:15,33:36)])
 Misool.level.PropData.annex <- 
   cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
                    SettlementID=0,SettlementName="Misool Selatan\nTimur MPA",
-                   Techreport.ByMPA[Techreport.ByMPA$MPAID==6,3:36])
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==6,3:36],
+                   FishProtein.ByMPA[FishProtein.ByMPA$MPAID==6,8:12])
 
 null.row.PropData <- 
-  matrix(rep(NA,37),ncol=37,dimnames=list(NULL,colnames(Misool.level.PropData.status)))
+  matrix(rep(NA,50),ncol=50,dimnames=list(NULL,colnames(Misool.level.PropData.status)))
 
 
 # ---- 1.5 MPA-level Continuous data (row to be added to bottom of status and annex plots in tech report) ----
@@ -120,14 +125,18 @@ null.row.ContData <-
 # ---- 2.1 Status dataset for Misool, proportional data ----
 
 Misool.PropData.Techreport.status <- 
-  Techreport.BySett[Techreport.BySett$MPAID==6 &
-                      Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:38)]
+  left_join(Techreport.BySett[Techreport.BySett$MPAID==6 &
+                                Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:38,41:48)],
+            FishProtein.BySett[FishProtein.BySett$MPAID==6 &
+                                 FishProtein.BySett$MonitoringYear=="4 Year Post",c(1,4,10:14)],
+            by=c("SettlementID","SettlementName"))
+
 Misool.PropData.Techreport.status <- 
   Misool.PropData.Techreport.status[rev(order(Misool.PropData.Techreport.status$SettlementName)),]
 
 Misool.PropData.Techreport.status.PLOTFORMAT <- 
-  rbind.data.frame(Misool.level.PropData.status[2:37],
-                   null.row.PropData[1:35],
+  rbind.data.frame(Misool.level.PropData.status[2:50],
+                   null.row.PropData[2:50],
                    Misool.PropData.Techreport.status)
 
 # - make SettlementName an ordered factor for plotting
@@ -193,7 +202,9 @@ Misool.ContData.Techreport.status.PLOTFORMAT$SettLevel <-
 # ---- 2.3 Trend dataset for Misool, MPA-level proportional data ----
 
 Misool.TrendPropData.Techreport.PLOTFORMAT <- 
-  Techreport.ByMPA[Techreport.ByMPA$MPAID==6,c(2,1,3:36)]
+  left_join(Techreport.ByMPA[Techreport.ByMPA$MPAID==6,c(2,1,3:36)],
+            FishProtein.ByMPA[FishProtein.ByMPA$MPAID==6,c(2,8:12)],
+            by="MonitoringYear")
 
 
 # ---- 2.4 Trend dataset for Misool, MPA-level continuous data (with p values) ----
@@ -212,7 +223,9 @@ Misool.TrendContData.Techreport.PLOTFORMAT$MonitoringYear <-
 # ---- 2.5 Annex dataset for Misool, Settlement-level proportional data ----
 
 Misool.AnnexPropData.Techreport <- 
-  Techreport.BySett[Techreport.BySett$MPAID==6,c(2,1,4:38)]
+  left_join(Techreport.BySett[Techreport.BySett$MPAID==6,c(2,1,4:38)],
+            FishProtein.BySett[FishProtein.BySett$MPAID==6,c(2,1,4,10:14)],
+            by=c("SettlementID","SettlementName","MonitoringYear"))
 
 Misool.AnnexPropData.Techreport <- 
   Misool.AnnexPropData.Techreport[rev(order(Misool.AnnexPropData.Techreport$SettlementName)),]
@@ -221,7 +234,7 @@ Misool.AnnexPropData.Techreport.PLOTFORMAT <-
   rbind.data.frame(Misool.level.PropData.annex[Misool.level.PropData.annex$MonitoringYear=="4 Year Post",],
                    Misool.level.PropData.annex[Misool.level.PropData.annex$MonitoringYear=="2 Year Post",],
                    Misool.level.PropData.annex[Misool.level.PropData.annex$MonitoringYear=="Baseline",],
-                   null.row.PropData,
+                   null.row.PropData[,-43:-51],
                    Misool.AnnexPropData.Techreport)
 
 
@@ -296,6 +309,7 @@ FileName <- paste(paste("2_Social/FlatDataFiles/BHS/TechReportOutput/Misool/Miso
 write.xlsx(Misool.PropData.Techreport.status.PLOTFORMAT,FileName,sheetName='PropData_StatusPlots',row.names=F)
 write.xlsx(Misool.ContData.Techreport.status.PLOTFORMAT,FileName,sheetName='ContData_StatusPlots_withpvals',row.names=F,append=T)
 write.xlsx(as.data.frame(Misool.TrendPropData.Techreport.PLOTFORMAT),FileName,sheetName='PropData_TrendPlots',row.names=F,append=T)
+write.xlsx(propdata.trend.test.Mis,FileName,sheetName='PropData_TrendPlot_pvals',row.names=F,append=T)
 write.xlsx(Misool.TrendContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_TrendPlots_withpvals',row.names=F,append=T)
 write.xlsx(Misool.AnnexPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_AnnexPlots',row.names=F,append=T)
 write.xlsx(Misool.AnnexContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_AnnexPlots',row.names=F,append=T)
@@ -303,6 +317,129 @@ write.xlsx(annex.sigvals.Mis,FileName,sheetName='Pvals_ContData_AnnexPlots',row.
 write.xlsx(Misool.AgeGender,FileName,sheetName='AgeGender',row.names=F,append=T)
 
 
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+# ---- SECTION 4: Synthesize other social data for interpretation/context ----
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+# ---- 4.1 Tech report data synthesis aid ---- 
+#   years resident, categorical food security, changes in social conflict, 
+#   material assets gini coefficient, mean material assets, % fishers, 
+#   % wage labor, marine tenure manage and harvest components
+
+Misool.level.synth <- data.frame(SettlementID=NA,
+                                  Synth.techreport.byMPA[Synth.techreport.byMPA$MPAID==6,c("MPAID","MonitoringYear")],
+                                  SettlementName="MPA",
+                                  Synth.techreport.byMPA[Synth.techreport.byMPA$MPAID==6,3:16],
+                                 AgeGender.AvgAge.byMPA[AgeGender.AvgAge.byMPA$MPAID==6,3])
+Misool.level.synth <- left_join(Misool.level.synth,
+                                 Techreport.ByMPA[c("MPAID","MonitoringYear",
+                                                    "Percent.PrimaryOcc.Fish",
+                                                    "Percent.PrimaryOcc.WageLabor")],
+                                 by=c("MPAID","MonitoringYear"))
+
+null.row.synth <- matrix(NA,ncol=length(colnames(Misool.level.synth)),
+                         dimnames=list(NULL,colnames(Misool.level.synth)))
+
+Misool.setts.synth <- 
+  Synth.techreport.bySett[Synth.techreport.bySett$MPAID==6,] %>%
+  left_join(Techreport.BySett[,c("SettlementID","MonitoringYear",
+                                 "Percent.PrimaryOcc.Fish",
+                                 "Percent.PrimaryOcc.WageLabor")],
+            by=c("SettlementID","MonitoringYear")) %>%
+  left_join(AgeGender.AvgAge.bySett[,c("SettlementName","MonitoringYear","AvgAge")])
+
+
+# ---- 4.2 Output for data synthesis/interpretation ----
+
+Misool.synth.techreport <- rbind.data.frame(Misool.level.synth,
+                                             null.row.synth,
+                                             Misool.setts.synth)
+
+
+write.xlsx(Misool.synth.techreport,FileName,sheetName='Extra_data',row.names=F,append=T)
+
+
+# ---- 4.3 Playing around ----
+
+# Compare frequency of fishing sales for entire population vs. only fishing households
+Misool.FreqSellFish.bySett <- 
+  HHDemos.context[HHDemos.context$MPAID==6,] %>%
+  group_by(SettlementID,MonitoringYear) %>%
+  summarise(SettlementName=unique(SettlementName),
+            Prop.FishingHouseholds=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
+                                                                    !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean) &
+                                                                     PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                             !is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean) &
+                                                                        PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                                !is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean) &
+                                                                       PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                               !is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean) &
+                                                                       PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                               !is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean) &
+                                                                        PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                                !is.na(PrimaryLivelihoodClean)]))*100)
+Misool.FreqSellFish <- 
+  HHDemos.context[HHDemos.context$MPAID==6,] %>%
+  group_by(MonitoringYear) %>%
+  summarise(Prop.FishingHouseholds=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
+                                                                    !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean) &
+                                                                     PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                             !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                             PrimaryLivelihoodClean==3]))*100,
+            WholePop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean) &
+                                                                        PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                                !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                                PrimaryLivelihoodClean==3]))*100,
+            WholePop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean) &
+                                                                       PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                               !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                               PrimaryLivelihoodClean==3]))*100,
+            WholePop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean) &
+                                                                       PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                               !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                               PrimaryLivelihoodClean==3]))*100,
+            WholePop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean) &
+                                                                        PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                                !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                                PrimaryLivelihoodClean==3]))*100)
+
+# Is food security status linked to occupation?
+Misool.foodsec.byocc <-
+  left_join(BigFive[BigFive$Treatment==1,c("HouseholdID","MonitoringYear","SettlementID","MPAID","FSIndex")],
+            HHDemos.context[,c("HouseholdID","SettlementName","PrimaryLivelihoodClean")],by="HouseholdID") %>%
+  subset(MPAID==6) %>%
+  group_by(SettlementID,MonitoringYear) %>%
+  summarise(SettlementName=unique(SettlementName),
+            PropFishers=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            PropWageLabor=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==7 & !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            FoodSec.Fishers=mean(FSIndex[PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)],na.rm=T),
+            FoodSecErr.Fishers=sd(FSIndex[PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)],na.rm=T)/sqrt(length(FSIndex[PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])),
+            FoodSec.WageLabor=mean(FSIndex[PrimaryLivelihoodClean==7 & !is.na(PrimaryLivelihoodClean)],na.rm=T),
+            FoodSecErr.WageLabor=sd(FSIndex[PrimaryLivelihoodClean==7 & !is.na(PrimaryLivelihoodClean)],na.rm=T)/sqrt(length(FSIndex[PrimaryLivelihoodClean==7 & !is.na(PrimaryLivelihoodClean)])))
+
+Misool.foodsec.byocc$SettlementName <- factor(Misool.foodsec.byocc$SettlementName,
+                                               levels=c(as.character(rev(sort(unique(Misool.foodsec.byocc$SettlementName)))),"  "),
+                                               ordered=T)
 
 
 
@@ -321,4 +458,8 @@ rm(Misool.ContData.Techreport.status)
 rm(Misool.AnnexPropData.Techreport)
 rm(Misool.AnnexContData.Techreport)
 rm(Misool.ContData.Techreport.status.withMPA)
+rm(Misool.level.synth)
+rm(null.row.synth)
+rm(Misool.setts.synth)
+rm(Misool.synth.techreport)
 rm(FileName)

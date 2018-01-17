@@ -79,16 +79,21 @@ TNTC.AgeGender <-
 # ---- 1.4 MPA-level Proportional data (row to be added to bottom of status and annex plots in tech report) ----
 
 TNTC.level.PropData.status <- 
-  data.frame(c(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Teluk Cenderawasih\nNational Park",
+  data.frame(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Teluk Cenderawasih\nNational Park",
                Techreport.ByMPA[Techreport.ByMPA$MPAID==2 &
-                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:36]))
+                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:36],
+               FishProtein.ByMPA[FishProtein.ByMPA$MPAID==2 &
+                                   FishProtein.ByMPA$MonitoringYear=="4 Year Post",8:12],
+             MPAimpact.intro.context[MPAimpact.intro.context$MPAID==2,c(12:15,33:36)])
+             
 TNTC.level.PropData.annex <- 
   cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
                    SettlementID=0,SettlementName="Teluk Cenderawasih\nNational Park",
-                   Techreport.ByMPA[Techreport.ByMPA$MPAID==2,3:36])
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==2,3:36],
+                   FishProtein.ByMPA[FishProtein.ByMPA$MPAID==2,8:12])
 
 null.row.PropData <- 
-  matrix(rep(NA,37),ncol=37,dimnames=list(NULL,colnames(TNTC.level.PropData.status)))
+  matrix(rep(NA,50),ncol=50,dimnames=list(NULL,colnames(TNTC.level.PropData.status)))
 
 
 # ---- 1.5 MPA-level Continuous data (row to be added to bottom of status and annex plots in tech report) ----
@@ -124,15 +129,19 @@ null.row.ContData <-
 # ---- 2.1 Status dataset for TNTC, proportional data ----
 
 TNTC.PropData.Techreport.status <- 
-  Techreport.BySett[Techreport.BySett$MPAID==2 &
-                      Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:38)]
+  left_join(Techreport.BySett[Techreport.BySett$MPAID==2 &
+                                Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:38,41:48)],
+            FishProtein.BySett[FishProtein.BySett$MPAID==2 &
+                                 FishProtein.BySett$MonitoringYear=="4 Year Post",c(1,4,10:14)],
+            by=c("SettlementID","SettlementName"))
+
 
 TNTC.PropData.Techreport.status <- 
   TNTC.PropData.Techreport.status[rev(order(TNTC.PropData.Techreport.status$SettlementName)),]
 
 TNTC.PropData.Techreport.status.PLOTFORMAT <- 
-  rbind.data.frame(TNTC.level.PropData.status[2:37],
-                   null.row.PropData[1:35],
+  rbind.data.frame(TNTC.level.PropData.status[2:50],
+                   null.row.PropData[2:50],
                    TNTC.PropData.Techreport.status)
 
 # - make SettlementName an ordered factor for plotting
@@ -198,8 +207,9 @@ TNTC.ContData.Techreport.status.PLOTFORMAT$SettLevel <-
 # ---- 2.3 Trend dataset for TNTC, MPA-level proportional data ----
 
 TNTC.TrendPropData.Techreport.PLOTFORMAT <- 
-  Techreport.ByMPA[Techreport.ByMPA$MPAID==2,c(2,1,3:36)]
-
+  left_join(Techreport.ByMPA[Techreport.ByMPA$MPAID==2,c(2,1,3:36)],
+            FishProtein.ByMPA[FishProtein.ByMPA$MPAID==2,c(2,8:12)],
+            by="MonitoringYear")
 
 # ---- 2.4 Trend dataset for TNTC, MPA-level continuous data (with p values) ----
 
@@ -217,7 +227,9 @@ TNTC.TrendContData.Techreport.PLOTFORMAT$MonitoringYear <-
 # ---- 2.5 Annex dataset for TNTC, Settlement-level proportional data ----
 
 TNTC.AnnexPropData.Techreport <- 
-  Techreport.BySett[Techreport.BySett$MPAID==2,c(2,1,4:38)]
+  left_join(Techreport.BySett[Techreport.BySett$MPAID==2,c(2,1,4:38)],
+            FishProtein.BySett[FishProtein.BySett$MPAID==2,c(2,1,4,10:14)],
+            by=c("SettlementID","SettlementName","MonitoringYear"))
 
 TNTC.AnnexPropData.Techreport <- 
   TNTC.AnnexPropData.Techreport[rev(order(TNTC.AnnexPropData.Techreport$SettlementName)),]
@@ -226,7 +238,7 @@ TNTC.AnnexPropData.Techreport.PLOTFORMAT <-
   rbind.data.frame(TNTC.level.PropData.annex[TNTC.level.PropData.annex$MonitoringYear=="4 Year Post",],
                    TNTC.level.PropData.annex[TNTC.level.PropData.annex$MonitoringYear=="2 Year Post",],
                    TNTC.level.PropData.annex[TNTC.level.PropData.annex$MonitoringYear=="Baseline",],
-                   null.row.PropData,
+                   null.row.PropData[,-43:-51],
                    TNTC.AnnexPropData.Techreport)
 
 
@@ -301,12 +313,138 @@ FileName <- paste(paste("2_Social/FlatDataFiles/BHS/TechReportOutput/TNTC/TNTC_T
 write.xlsx(TNTC.PropData.Techreport.status.PLOTFORMAT,FileName,sheetName='PropData_StatusPlots',row.names=F)
 write.xlsx(TNTC.ContData.Techreport.status.PLOTFORMAT,FileName,sheetName='ContData_StatusPlots_withpvals',row.names=F,append=T)
 write.xlsx(as.data.frame(TNTC.TrendPropData.Techreport.PLOTFORMAT),FileName,sheetName='PropData_TrendPlots',row.names=F,append=T)
+write.xlsx(propdata.trend.test.TNTC,FileName,sheetName='PropData_TrendPlot_pvals',row.names=F,append=T)
 write.xlsx(TNTC.TrendContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_TrendPlots_withpvals',row.names=F,append=T)
 write.xlsx(TNTC.AnnexPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_AnnexPlots',row.names=F,append=T)
 write.xlsx(TNTC.AnnexContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_AnnexPlots',row.names=F,append=T)
 write.xlsx(annex.sigvals.TNTC,FileName,sheetName='Pvals_ContData_AnnexPlots',row.names=F,append=T)
 write.xlsx(TNTC.AgeGender,FileName,sheetName='AgeGender',row.names=F,append=T)
 
+
+
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+# ---- SECTION 4: Synthesize other social data for interpretation/context ----
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+# ---- 4.1 Tech report data synthesis aid ---- 
+#   years resident, categorical food security, changes in social conflict, 
+#   material assets gini coefficient, mean material assets, % fishers, 
+#   % wage labor, marine tenure manage and harvest components
+
+TNTC.level.synth <- data.frame(SettlementID=NA,
+                                  Synth.techreport.byMPA[Synth.techreport.byMPA$MPAID==2,c("MPAID","MonitoringYear")],
+                                  SettlementName="MPA",
+                                  Synth.techreport.byMPA[Synth.techreport.byMPA$MPAID==2,3:length(Synth.techreport.byMPA)],
+                                  AgeGender.AvgAge.byMPA[AgeGender.AvgAge.byMPA$MPAID==2,3])
+TNTC.level.synth <- left_join(TNTC.level.synth,
+                                 Techreport.ByMPA[c("MPAID","MonitoringYear",
+                                                    "Percent.PrimaryOcc.Fish",
+                                                    "Percent.PrimaryOcc.WageLabor")],
+                                 by=c("MPAID","MonitoringYear"))
+
+null.row.synth <- matrix(NA,ncol=length(colnames(TNTC.level.synth)),
+                         dimnames=list(NULL,colnames(TNTC.level.synth)))
+
+TNTC.setts.synth <- 
+  Synth.techreport.bySett[Synth.techreport.bySett$MPAID==2,] %>%
+  left_join(Techreport.BySett[,c("SettlementID","MonitoringYear",
+                                 "Percent.PrimaryOcc.Fish",
+                                 "Percent.PrimaryOcc.WageLabor")],
+            by=c("SettlementID","MonitoringYear")) %>%
+  left_join(AgeGender.AvgAge.bySett[,c("SettlementName","MonitoringYear","AvgAge")])
+
+
+# ---- 4.2 Output for data synthesis/interpretation ----
+
+TNTC.synth.techreport <- rbind.data.frame(TNTC.level.synth,
+                                             null.row.synth,
+                                             TNTC.setts.synth)
+
+
+write.xlsx(TNTC.synth.techreport,FileName,sheetName='Extra_data',row.names=F,append=T)
+
+
+# ---- 4.3 Playing around ----
+
+# Compare frequency of fishing sales for entire population vs. only fishing households
+TNTC.FreqSellFish.bySett <- 
+  HHDemos.context[HHDemos.context$MPAID==2,] %>%
+  group_by(SettlementID,MonitoringYear) %>%
+  summarise(SettlementName=unique(SettlementName),
+            Prop.FishingHouseholds=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
+                                                                    !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean) &
+                                                                     PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                             !is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean) &
+                                                                        PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                                !is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean) &
+                                                                       PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                               !is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean) &
+                                                                       PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                               !is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean) &
+                                                                        PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                                !is.na(PrimaryLivelihoodClean)]))*100)
+TNTC.FreqSellFish <- 
+  HHDemos.context[HHDemos.context$MPAID==2,] %>%
+  group_by(MonitoringYear) %>%
+  summarise(Prop.FishingHouseholds=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
+                                                                    !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean) &
+                                                                     PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                             !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                             PrimaryLivelihoodClean==3]))*100,
+            WholePop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean) &
+                                                                        PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                                !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                                PrimaryLivelihoodClean==3]))*100,
+            WholePop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean) &
+                                                                       PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                               !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                               PrimaryLivelihoodClean==3]))*100,
+            WholePop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean) &
+                                                                       PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                               !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                               PrimaryLivelihoodClean==3]))*100,
+            WholePop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean) &
+                                                                        PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                                !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                                PrimaryLivelihoodClean==3]))*100)
+
+# Is food security status linked to occupation?
+TNTC.foodsec.byocc <-
+  left_join(BigFive[BigFive$Treatment==1,c("HouseholdID","MonitoringYear","SettlementID","MPAID","FSIndex")],
+            HHDemos.context[,c("HouseholdID","SettlementName","PrimaryLivelihoodClean")],by="HouseholdID") %>%
+  subset(MPAID==2) %>%
+  group_by(SettlementID,MonitoringYear) %>%
+  summarise(SettlementName=unique(SettlementName),
+            PropFishers=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            PropWageLabor=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==7 & !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            FoodSec.Fishers=mean(FSIndex[PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)],na.rm=T),
+            FoodSecErr.Fishers=sd(FSIndex[PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)],na.rm=T)/sqrt(length(FSIndex[PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])),
+            FoodSec.WageLabor=mean(FSIndex[PrimaryLivelihoodClean==7 & !is.na(PrimaryLivelihoodClean)],na.rm=T),
+            FoodSecErr.WageLabor=sd(FSIndex[PrimaryLivelihoodClean==7 & !is.na(PrimaryLivelihoodClean)],na.rm=T)/sqrt(length(FSIndex[PrimaryLivelihoodClean==7 & !is.na(PrimaryLivelihoodClean)])))
+
+TNTC.foodsec.byocc$SettlementName <- factor(TNTC.foodsec.byocc$SettlementName,
+                                               levels=c(as.character(rev(sort(unique(TNTC.foodsec.byocc$SettlementName)))),"  "),
+                                               ordered=T)
 
 
 
@@ -324,4 +462,8 @@ rm(TNTC.ContData.Techreport.status)
 rm(TNTC.AnnexPropData.Techreport)
 rm(TNTC.AnnexContData.Techreport)
 rm(TNTC.ContData.Techreport.status.withMPA)
+rm(TNTC.level.synth)
+rm(null.row.synth)
+rm(TNTC.setts.synth)
+rm(TNTC.synth.techreport)
 rm(FileName)

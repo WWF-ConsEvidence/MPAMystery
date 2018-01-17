@@ -53,33 +53,34 @@ TNTC.statusplot.sigpos <-
 
 TNTC.trendplot.monitoryear.labs <- rev(define.year.monitoryear.column(TNTC.AnnexContData.Techreport.PLOTFORMAT))
 
-TNTC.trendplot.ylabs <- 
-  define.trendplot.ylabels.withasterisks(TNTC.TrendContData.Techreport.PLOTFORMAT
-                                         [is.na(TNTC.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
-                                           c("FSMean","MAMean","PAMean","MTMean",
-                                             "SEMean","TimeMarketMean","UnwellMean")])
+TNTC.conttrendplot.ylabs <- 
+  define.conttrendplot.ylabels.withasterisks(TNTC.TrendContData.Techreport.PLOTFORMAT
+                                             [is.na(TNTC.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
+                                               c("FSMean","MAMean","PAMean","MTMean",
+                                                 "SEMean","TimeMarketMean","UnwellMean")])
+
+TNTC.proptrendplot.ylabs <- 
+  define.proptrendplot.ylabels.withasterisks(propdata.trend.test.TNTC)
 
 
-TNTC.trendplot.labs <- list(FS=labs(y=as.character(TNTC.trendplot.ylabs["FSMean"]),x="Monitoring Year"),
-                            MA=labs(y=as.character(TNTC.trendplot.ylabs["MAMean"]),x="Monitoring Year"),
-                            PA=labs(y=as.character(TNTC.trendplot.ylabs["PAMean"]),x="Monitoring Year"),
-                            MT=labs(y=as.character(TNTC.trendplot.ylabs["MTMean"]),x="Monitoring Year"),
-                            SE=labs(y=as.character(TNTC.trendplot.ylabs["SEMean"]),x="Monitoring Year"),
-                            Time=labs(y=as.character(TNTC.trendplot.ylabs["TimeMarketMean"]),
+TNTC.trendplot.labs <- list(FS=labs(y=as.character(TNTC.conttrendplot.ylabs["FSMean"]),x="Monitoring Year"),
+                            MA=labs(y=as.character(TNTC.conttrendplot.ylabs["MAMean"]),x="Monitoring Year"),
+                            PA=labs(y=as.character(TNTC.conttrendplot.ylabs["PAMean"]),x="Monitoring Year"),
+                            MT=labs(y=as.character(TNTC.conttrendplot.ylabs["MTMean"]),x="Monitoring Year"),
+                            SE=labs(y=as.character(TNTC.conttrendplot.ylabs["SEMean"]),x="Monitoring Year"),
+                            Time=labs(y=as.character(TNTC.conttrendplot.ylabs["TimeMarketMean"]),
                                       x="Monitoring Year"),
-                            Unwell=labs(y=as.character(TNTC.trendplot.ylabs["UnwellMean"]),
+                            Unwell=labs(y=as.character(TNTC.conttrendplot.ylabs["UnwellMean"]),
                                         x="Monitoring Year"),
                             Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
                             Religion=labs(y="Religion (% households)",x="Monitoring Year"),
-                            PrimaryOcc=labs(y="Primary occupation (% households)",x="Monitoring Year"),
-                            FreqFish=labs(y="Frequency of fishing (% households)",x="Monitoring Year"),
-                            FreqSellFish=labs(y="Frequency of selling at least some catch (% households)",
-                                              x="Monitoring Year"),
-                            IncFish=labs(y="Income from fishing in past 6 months (% households)",
-                                         x="Monitoring Year"),
-                            FishTech=labs(y="Fishing technique most often used in past 6 months (% households)",
-                                          x="Monitoring Year"),
-                            ChildFS=labs(y="Child hunger (% households)",x="Monitoring Year"))
+                            PrimaryOcc=labs(y=as.character(TNTC.proptrendplot.ylabs["PrimaryOcc"]),x="Monitoring Year"),
+                            FreqFish=labs(y=as.character(TNTC.proptrendplot.ylabs["FreqFish"]),x="Monitoring Year"),
+                            FreqSellFish=labs(y=as.character(TNTC.proptrendplot.ylabs["SellFish"]),x="Monitoring Year"),
+                            IncFish=labs(y=as.character(TNTC.proptrendplot.ylabs["IncFish"]),x="Monitoring Year"),
+                            FishTech=labs(y=as.character(TNTC.proptrendplot.ylabs["FishTech"]),x="Monitoring Year"),
+                            ChildFS=labs(y=as.character(TNTC.proptrendplot.ylabs["ChildFS"]),x="Monitoring Year"),
+                            Protein=labs(y=as.character(TNTC.proptrendplot.ylabs["Protein"]),x="Monitoring Year"))
 
 TNTC.annexplot.settnames <- 
   define.annexplot.settname.labels(annex.sigvals.TNTC)
@@ -394,7 +395,7 @@ TNTC.mt.statusplot <- ggplot(data=TNTC.ContData.Techreport.status.PLOTFORMAT,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["MT"] + plot.theme
@@ -481,7 +482,6 @@ TNTC.time.statusplot <- ggplot(data=TNTC.ContData.Techreport.status.PLOTFORMAT,
   coord_flip() + Statusplot.labs["Time"] + plot.theme
 
 # - DAYS UNWELL
-
 TNTC.unwell.statusplot <- ggplot(data=TNTC.ContData.Techreport.status.PLOTFORMAT,
                                  aes(x=SettlementName)) +
   geom_bar(aes(y=UnwellMean,
@@ -521,6 +521,26 @@ TNTC.unwell.statusplot <- ggplot(data=TNTC.ContData.Techreport.status.PLOTFORMAT
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["Unwell"] + plot.theme
+
+# - NUMBER UNIQUE ETHNIC GROUPS
+TNTC.ethnic.statusplot <- ggplot(data=TNTC.PropData.Techreport.status.PLOTFORMAT,
+                                aes(x=SettlementName)) +
+  geom_bar(aes(y=Num.EthnicGroups,
+               fill=Dummy),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_vline(aes(xintercept=2),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(TNTC.PropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T)+
+                                0.03*max(TNTC.PropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T))) +
+  scale_fill_manual(values=fillcols.status) +
+  coord_flip() + Statusplot.labs["Ethnicity"] + plot.theme
+
 
 # ---- 3.2 Proportional data plots ----
 
@@ -726,6 +746,29 @@ TNTC.childfs.statusplot <-
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
   coord_flip() + plot.theme + Statusplot.labs["ChildFS"] + plot.guides.techreport
 
+# - PROTEIN FROM FISH
+TNTC.proteinfish.statusplot <- 
+  melt(TNTC.PropData.Techreport.status.PLOTFORMAT,
+       id.vars="SettlementName",measure.vars=c("ProteinFish.All","ProteinFish.Most",
+                                               "ProteinFish.Half","ProteinFish.Some",
+                                               "ProteinFish.None")) %>%
+  ggplot(aes(x=SettlementName,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=2),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Protein"]],
+                    labels=c("All","Most","About half","Some","None")) +
+  coord_flip() + plot.theme + Statusplot.labs["Protein"] + plot.guides.techreport
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -842,7 +885,7 @@ TNTC.mt.trendplot <-
                 size=0.5,
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   scale_x_discrete(labels=TNTC.trendplot.monitoryear.labs) +
   coord_flip() + TNTC.trendplot.labs["MT"] + plot.theme
 
@@ -863,7 +906,8 @@ TNTC.se.trendplot <-
                 size=0.5,
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
-                     labels=scales::percent_format()) +
+                     labels=scales::percent_format(),
+                     limits=c(0,1)) +
   scale_x_discrete(labels=TNTC.trendplot.monitoryear.labs) +
   coord_flip() + TNTC.trendplot.labs["SE"] + plot.theme
 
@@ -1092,6 +1136,26 @@ TNTC.childfs.trendplot <-
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
   coord_flip() + plot.theme + TNTC.trendplot.labs["ChildFS"] + plot.guides.techreport
 
+# - PROTEIN FROM FISH
+TNTC.proteinfish.trendplot <- 
+  melt(TNTC.TrendPropData.Techreport.PLOTFORMAT,
+       id.vars="MonitoringYear",measure.vars=c("ProteinFish.All","ProteinFish.Most",
+                                               "ProteinFish.Half","ProteinFish.Some",
+                                               "ProteinFish.None")) %>%
+  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.65,
+           size=0.15,
+           colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_x_discrete(labels=TNTC.trendplot.monitoryear.labs) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Protein"]],
+                    labels=c("All","Most","About half","Some","None")) +
+  coord_flip() + plot.theme + TNTC.trendplot.labs["Protein"] + plot.guides.techreport
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1279,7 +1343,7 @@ TNTC.mt.annexplot <-
   scale_colour_manual(values=errcols.status) +
   scale_x_discrete(labels=TNTC.annexplot.settnames[,"MT"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   coord_flip() + Statusplot.labs["MT"] + plot.guides.techreport + plot.theme
 
 
@@ -1642,7 +1706,20 @@ plot(TNTC.childfs.trendplot)
 dev.off()
 
 
-# ---- 6.16 Age/Gender ----
+# ---- 6.16 Protein from fish ----
+
+png(paste(FigureFileName,"FishProtein.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(TNTC.proteinfish.statusplot)
+dev.off()
+
+png(paste(FigureFileName,"FishProtein.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(TNTC.proteinfish.trendplot)
+dev.off()
+
+
+# ---- 6.17 Age/Gender ----
 
 png(paste(FigureFileName,"Age.gender.png",sep="/"),
     units="in",height=10,width=4,res=400)
@@ -1651,12 +1728,19 @@ grid.draw(TNTC.age.gender.plot)
 dev.off()
 
 
+# ---- 6.18 Number ethnic groups ----
+
+png(paste(FigureFileName,"Num.Ethnic.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(TNTC.ethnic.statusplot)
+dev.off()
 
 
 
 # ---- Remove all plot objects from environment ----
 rm(median.setts.TNTC,TNTC.statusplot.asterisks,TNTC.statusplot.sigpos,
-   TNTC.trendplot.monitoryear.labs,TNTC.trendplot.ylabs,TNTC.trendplot.labs,TNTC.annexplot.settnames,
+   TNTC.trendplot.monitoryear.labs,TNTC.conttrendplot.ylabs,TNTC.proptrendplot.ylabs,
+   TNTC.trendplot.labs,TNTC.annexplot.settnames,
    TNTC.age.gender.baseline,TNTC.age.gender.2yr,TNTC.age.gender.4yr,
    TNTC.agegender.legend.plot,TNTC.agegender.legend,TNTC.age.gender.plot,
    TNTC.fs.statusplot,TNTC.fs.trendplot,TNTC.fs.annexplot,
@@ -1670,7 +1754,8 @@ rm(median.setts.TNTC,TNTC.statusplot.asterisks,TNTC.statusplot.sigpos,
    TNTC.religion.trendplot,TNTC.primaryocc.statusplot,TNTC.primaryocc.trendplot,
    TNTC.freqfish.statusplot,TNTC.freqsellfish.statusplot,TNTC.freqsellfish.trendplot,
    TNTC.incfish.statusplot,TNTC.incfish.trendplot,TNTC.fishtech.statusplot,
-   TNTC.fishtech.trendplot,TNTC.childfs.statusplot,TNTC.childfs.trendplot)
+   TNTC.fishtech.trendplot,TNTC.childfs.statusplot,TNTC.childfs.trendplot,
+   TNTC.proteinfish.statusplot,TNTC.proteinfish.trendplot,TNTC.ethnic.statusplot)
 
 # ---- Remove all tech report datasets from environment ----
 rm(TNTC.AgeGender,
@@ -1678,5 +1763,5 @@ rm(TNTC.AgeGender,
    TNTC.PropData.Techreport.status.PLOTFORMAT,
    TNTC.TrendContData.Techreport.PLOTFORMAT,TNTC.TrendPropData.Techreport.PLOTFORMAT,
    TNTC.AnnexContData.Techreport.PLOTFORMAT,TNTC.AnnexPropData.Techreport.PLOTFORMAT,
-   sigvals.TNTC,trend.sigvals.TNTC,annex.sigvals.TNTC,
+   sigvals.TNTC,trend.sigvals.TNTC,annex.sigvals.TNTC,propdata.trend.test.TNTC,
    dist.TNTC.FS,dist.TNTC.MA,dist.TNTC.PA,dist.TNTC.MT,dist.TNTC.SE,dist.TNTC.TimeMarket,dist.TNTC.DaysUnwell)

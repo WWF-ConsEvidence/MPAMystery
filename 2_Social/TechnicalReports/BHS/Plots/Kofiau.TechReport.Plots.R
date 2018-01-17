@@ -53,33 +53,34 @@ Kof.statusplot.sigpos <-
 
 Kof.trendplot.monitoryear.labs <- rev(define.year.monitoryear.column(Kofiau.AnnexContData.Techreport.PLOTFORMAT))
 
-Kof.trendplot.ylabs <- 
-  define.trendplot.ylabels.withasterisks(Kofiau.TrendContData.Techreport.PLOTFORMAT
-                                         [is.na(Kofiau.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
-                                           c("FSMean","MAMean","PAMean","MTMean",
-                                             "SEMean","TimeMarketMean","UnwellMean")])
+Kof.conttrendplot.ylabs <- 
+  define.conttrendplot.ylabels.withasterisks(Kofiau.TrendContData.Techreport.PLOTFORMAT
+                                             [is.na(Kofiau.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
+                                               c("FSMean","MAMean","PAMean","MTMean",
+                                                 "SEMean","TimeMarketMean","UnwellMean")])
+
+Kof.proptrendplot.ylabs <- 
+  define.proptrendplot.ylabels.withasterisks(propdata.trend.test.Kof)
 
 
-Kof.trendplot.labs <- list(FS=labs(y=as.character(Kof.trendplot.ylabs["FSMean"]),x="Monitoring Year"),
-                            MA=labs(y=as.character(Kof.trendplot.ylabs["MAMean"]),x="Monitoring Year"),
-                            PA=labs(y=as.character(Kof.trendplot.ylabs["PAMean"]),x="Monitoring Year"),
-                            MT=labs(y=as.character(Kof.trendplot.ylabs["MTMean"]),x="Monitoring Year"),
-                            SE=labs(y=as.character(Kof.trendplot.ylabs["SEMean"]),x="Monitoring Year"),
-                            Time=labs(y=as.character(Kof.trendplot.ylabs["TimeMarketMean"]),
+Kof.trendplot.labs <- list(FS=labs(y=as.character(Kof.conttrendplot.ylabs["FSMean"]),x="Monitoring Year"),
+                            MA=labs(y=as.character(Kof.conttrendplot.ylabs["MAMean"]),x="Monitoring Year"),
+                            PA=labs(y=as.character(Kof.conttrendplot.ylabs["PAMean"]),x="Monitoring Year"),
+                            MT=labs(y=as.character(Kof.conttrendplot.ylabs["MTMean"]),x="Monitoring Year"),
+                            SE=labs(y=as.character(Kof.conttrendplot.ylabs["SEMean"]),x="Monitoring Year"),
+                            Time=labs(y=as.character(Kof.conttrendplot.ylabs["TimeMarketMean"]),
                                       x="Monitoring Year"),
-                            Unwell=labs(y=as.character(Kof.trendplot.ylabs["UnwellMean"]),
+                            Unwell=labs(y=as.character(Kof.conttrendplot.ylabs["UnwellMean"]),
                                         x="Monitoring Year"),
                             Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
                             Religion=labs(y="Religion (% households)",x="Monitoring Year"),
-                            PrimaryOcc=labs(y="Primary occupation (% households)",x="Monitoring Year"),
-                            FreqFish=labs(y="Frequency of fishing (% households)",x="Monitoring Year"),
-                            FreqSellFish=labs(y="Frequency of selling at least some catch (% households)",
-                                              x="Monitoring Year"),
-                            IncFish=labs(y="Income from fishing in past 6 months (% households)",
-                                         x="Monitoring Year"),
-                            FishTech=labs(y="Fishing technique most often used in past 6 months (% households)",
-                                          x="Monitoring Year"),
-                            ChildFS=labs(y="Child hunger (% households)",x="Monitoring Year"))
+                            PrimaryOcc=labs(y=as.character(Kof.proptrendplot.ylabs["PrimaryOcc"]),x="Monitoring Year"),
+                            FreqFish=labs(y=as.character(Kof.proptrendplot.ylabs["FreqFish"]),x="Monitoring Year"),
+                            FreqSellFish=labs(y=as.character(Kof.proptrendplot.ylabs["SellFish"]),x="Monitoring Year"),
+                            IncFish=labs(y=as.character(Kof.proptrendplot.ylabs["IncFish"]),x="Monitoring Year"),
+                            FishTech=labs(y=as.character(Kof.proptrendplot.ylabs["FishTech"]),x="Monitoring Year"),
+                            ChildFS=labs(y=as.character(Kof.proptrendplot.ylabs["ChildFS"]),x="Monitoring Year"),
+                            Protein=labs(y=as.character(Kof.proptrendplot.ylabs["Protein"]),x="Monitoring Year"))
 
 Kof.annexplot.settnames <- 
   define.annexplot.settname.labels(annex.sigvals.Kof)
@@ -394,7 +395,7 @@ Kof.mt.statusplot <- ggplot(data=Kofiau.ContData.Techreport.status.PLOTFORMAT,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["MT"] + plot.theme
@@ -479,7 +480,6 @@ Kof.time.statusplot <- ggplot(data=Kofiau.ContData.Techreport.status.PLOTFORMAT,
   coord_flip() + Statusplot.labs["Time"] + plot.theme
 
 # - DAYS UNWELL
-
 Kof.unwell.statusplot <- ggplot(data=Kofiau.ContData.Techreport.status.PLOTFORMAT,
                                  aes(x=SettlementName)) +
   geom_bar(aes(y=UnwellMean,
@@ -519,6 +519,26 @@ Kof.unwell.statusplot <- ggplot(data=Kofiau.ContData.Techreport.status.PLOTFORMA
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["Unwell"] + plot.theme
+
+# - NUMBER UNIQUE ETHNIC GROUPS
+Kof.ethnic.statusplot <- ggplot(data=Kofiau.PropData.Techreport.status.PLOTFORMAT,
+                                aes(x=SettlementName)) +
+  geom_bar(aes(y=Num.EthnicGroups,
+               fill=Dummy),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_vline(aes(xintercept=2),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(Kofiau.PropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T)+
+                                0.03*max(Kofiau.PropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T))) +
+  scale_fill_manual(values=fillcols.status) +
+  coord_flip() + Statusplot.labs["Ethnicity"] + plot.theme
+
 
 # ---- 3.2 Proportional data plots ----
 
@@ -724,6 +744,29 @@ Kof.childfs.statusplot <-
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
   coord_flip() + plot.theme + Statusplot.labs["ChildFS"] + plot.guides.techreport
 
+# - PROTEIN FROM FISH
+Kof.proteinfish.statusplot <- 
+  melt(Kofiau.PropData.Techreport.status.PLOTFORMAT,
+       id.vars="SettlementName",measure.vars=c("ProteinFish.All","ProteinFish.Most",
+                                               "ProteinFish.Half","ProteinFish.Some",
+                                               "ProteinFish.None")) %>%
+  ggplot(aes(x=SettlementName,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=2),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Protein"]],
+                    labels=c("All","Most","About half","Some","None")) +
+  coord_flip() + plot.theme + Statusplot.labs["Protein"] + plot.guides.techreport
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -840,7 +883,7 @@ Kof.mt.trendplot <-
                 size=0.5,
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   scale_x_discrete(labels=Kof.trendplot.monitoryear.labs) +
   coord_flip() + Kof.trendplot.labs["MT"] + plot.theme
 
@@ -861,7 +904,8 @@ Kof.se.trendplot <-
                 size=0.5,
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
-                     labels=scales::percent_format()) +
+                     labels=scales::percent_format(),
+                     limits=c(0,1)) +
   scale_x_discrete(labels=Kof.trendplot.monitoryear.labs) +
   coord_flip() + Kof.trendplot.labs["SE"] + plot.theme
 
@@ -1090,6 +1134,26 @@ Kof.childfs.trendplot <-
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
   coord_flip() + plot.theme + Kof.trendplot.labs["ChildFS"] + plot.guides.techreport
 
+# - PROTEIN FROM FISH
+Kof.proteinfish.trendplot <- 
+  melt(Kofiau.TrendPropData.Techreport.PLOTFORMAT,
+       id.vars="MonitoringYear",measure.vars=c("ProteinFish.All","ProteinFish.Most",
+                                               "ProteinFish.Half","ProteinFish.Some",
+                                               "ProteinFish.None")) %>%
+  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.65,
+           size=0.15,
+           colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_x_discrete(labels=Kof.trendplot.monitoryear.labs) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Protein"]],
+                    labels=c("All","Most","About half","Some","None")) +
+  coord_flip() + plot.theme + Kof.trendplot.labs["Protein"] + plot.guides.techreport
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1277,7 +1341,7 @@ Kof.mt.annexplot <-
   scale_colour_manual(values=errcols.status) +
   scale_x_discrete(labels=Kof.annexplot.settnames[,"MT"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   coord_flip() + Statusplot.labs["MT"] + plot.guides.techreport + plot.theme
 
 
@@ -1640,7 +1704,20 @@ plot(Kof.childfs.trendplot)
 dev.off()
 
 
-# ---- 6.16 Age/Gender ----
+# ---- 6.16 Protein from fish ----
+
+png(paste(FigureFileName,"FishProtein.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Kof.proteinfish.statusplot)
+dev.off()
+
+png(paste(FigureFileName,"FishProtein.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Kof.proteinfish.trendplot)
+dev.off()
+
+
+# ---- 6.17 Age/Gender ----
 
 png(paste(FigureFileName,"Age.gender.png",sep="/"),
     units="in",height=10,width=4,res=400)
@@ -1649,12 +1726,19 @@ grid.draw(Kof.age.gender.plot)
 dev.off()
 
 
+# ---- 6.18 Number ethnic groups ----
+
+png(paste(FigureFileName,"Num.Ethnic.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Kof.ethnic.statusplot)
+dev.off()
 
 
 
 # ---- Remove all plot objects from environment ----
 rm(median.setts.Kof,Kof.statusplot.asterisks,Kof.statusplot.sigpos,
-   Kof.trendplot.monitoryear.labs,Kof.trendplot.ylabs,Kof.trendplot.labs,Kof.annexplot.settnames,
+   Kof.trendplot.monitoryear.labs,Kof.conttrendplot.ylabs,Kof.proptrendplot.ylabs,
+   Kof.trendplot.labs,Kof.annexplot.settnames,
    Kof.age.gender.baseline,Kof.age.gender.2yr,Kof.age.gender.4yr,
    Kof.agegender.legend.plot,Kof.agegender.legend,Kof.age.gender.plot,
    Kof.fs.statusplot,Kof.fs.trendplot,Kof.fs.annexplot,
@@ -1668,7 +1752,8 @@ rm(median.setts.Kof,Kof.statusplot.asterisks,Kof.statusplot.sigpos,
    Kof.religion.trendplot,Kof.primaryocc.statusplot,Kof.primaryocc.trendplot,
    Kof.freqfish.statusplot,Kof.freqsellfish.statusplot,Kof.freqsellfish.trendplot,
    Kof.incfish.statusplot,Kof.incfish.trendplot,Kof.fishtech.statusplot,
-   Kof.fishtech.trendplot,Kof.childfs.statusplot,Kof.childfs.trendplot)
+   Kof.fishtech.trendplot,Kof.childfs.statusplot,Kof.childfs.trendplot,
+   Kof.proteinfish.statusplot,Kof.proteinfish.trendplot,Kof.ethnic.statusplot)
 
 # ---- Remove all tech report datasets from environment ----
 rm(Kofiau.AgeGender,
@@ -1676,5 +1761,5 @@ rm(Kofiau.AgeGender,
    Kofiau.PropData.Techreport.status.PLOTFORMAT,
    Kofiau.TrendContData.Techreport.PLOTFORMAT,Kofiau.TrendPropData.Techreport.PLOTFORMAT,
    Kofiau.AnnexContData.Techreport.PLOTFORMAT,Kofiau.AnnexPropData.Techreport.PLOTFORMAT,
-   sigvals.Kof,trend.sigvals.Kof,annex.sigvals.Kof,
+   sigvals.Kof,trend.sigvals.Kof,annex.sigvals.Kof,propdata.trend.test.Kof,
    dist.Kof.FS,dist.Kof.MA,dist.Kof.PA,dist.Kof.MT,dist.Kof.SE,dist.Kof.TimeMarket,dist.Kof.DaysUnwell)

@@ -53,33 +53,34 @@ Maya.statusplot.sigpos <-
 
 Maya.trendplot.monitoryear.labs <- rev(define.year.monitoryear.column(Mayalibit.AnnexContData.Techreport.PLOTFORMAT))
 
-Maya.trendplot.ylabs <- 
-  define.trendplot.ylabels.withasterisks(Mayalibit.TrendContData.Techreport.PLOTFORMAT
-                                         [is.na(Mayalibit.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
-                                           c("FSMean","MAMean","PAMean","MTMean",
-                                             "SEMean","TimeMarketMean","UnwellMean")])
+Maya.conttrendplot.ylabs <- 
+  define.conttrendplot.ylabels.withasterisks(Mayalibit.TrendContData.Techreport.PLOTFORMAT
+                                             [is.na(Mayalibit.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
+                                               c("FSMean","MAMean","PAMean","MTMean",
+                                                 "SEMean","TimeMarketMean","UnwellMean")])
+
+Maya.proptrendplot.ylabs <- 
+  define.proptrendplot.ylabels.withasterisks(propdata.trend.test.Maya)
 
 
-Maya.trendplot.labs <- list(FS=labs(y=as.character(Maya.trendplot.ylabs["FSMean"]),x="Monitoring Year"),
-                            MA=labs(y=as.character(Maya.trendplot.ylabs["MAMean"]),x="Monitoring Year"),
-                            PA=labs(y=as.character(Maya.trendplot.ylabs["PAMean"]),x="Monitoring Year"),
-                            MT=labs(y=as.character(Maya.trendplot.ylabs["MTMean"]),x="Monitoring Year"),
-                            SE=labs(y=as.character(Maya.trendplot.ylabs["SEMean"]),x="Monitoring Year"),
-                            Time=labs(y=as.character(Maya.trendplot.ylabs["TimeMarketMean"]),
+Maya.trendplot.labs <- list(FS=labs(y=as.character(Maya.conttrendplot.ylabs["FSMean"]),x="Monitoring Year"),
+                            MA=labs(y=as.character(Maya.conttrendplot.ylabs["MAMean"]),x="Monitoring Year"),
+                            PA=labs(y=as.character(Maya.conttrendplot.ylabs["PAMean"]),x="Monitoring Year"),
+                            MT=labs(y=as.character(Maya.conttrendplot.ylabs["MTMean"]),x="Monitoring Year"),
+                            SE=labs(y=as.character(Maya.conttrendplot.ylabs["SEMean"]),x="Monitoring Year"),
+                            Time=labs(y=as.character(Maya.conttrendplot.ylabs["TimeMarketMean"]),
                                       x="Monitoring Year"),
-                            Unwell=labs(y=as.character(Maya.trendplot.ylabs["UnwellMean"]),
+                            Unwell=labs(y=as.character(Maya.conttrendplot.ylabs["UnwellMean"]),
                                         x="Monitoring Year"),
                             Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
                             Religion=labs(y="Religion (% households)",x="Monitoring Year"),
-                            PrimaryOcc=labs(y="Primary occupation (% households)",x="Monitoring Year"),
-                            FreqFish=labs(y="Frequency of fishing (% households)",x="Monitoring Year"),
-                            FreqSellFish=labs(y="Frequency of selling at least some catch (% households)",
-                                              x="Monitoring Year"),
-                            IncFish=labs(y="Income from fishing in past 6 months (% households)",
-                                         x="Monitoring Year"),
-                            FishTech=labs(y="Fishing technique most often used in past 6 months (% households)",
-                                          x="Monitoring Year"),
-                            ChildFS=labs(y="Child hunger (% households)",x="Monitoring Year"))
+                            PrimaryOcc=labs(y=as.character(Maya.proptrendplot.ylabs["PrimaryOcc"]),x="Monitoring Year"),
+                            FreqFish=labs(y=as.character(Maya.proptrendplot.ylabs["FreqFish"]),x="Monitoring Year"),
+                            FreqSellFish=labs(y=as.character(Maya.proptrendplot.ylabs["SellFish"]),x="Monitoring Year"),
+                            IncFish=labs(y=as.character(Maya.proptrendplot.ylabs["IncFish"]),x="Monitoring Year"),
+                            FishTech=labs(y=as.character(Maya.proptrendplot.ylabs["FishTech"]),x="Monitoring Year"),
+                            ChildFS=labs(y=as.character(Maya.proptrendplot.ylabs["ChildFS"]),x="Monitoring Year"),
+                            Protein=labs(y=as.character(Maya.proptrendplot.ylabs["Protein"]),x="Monitoring Year"))
 
 Maya.annexplot.settnames <- 
   define.annexplot.settname.labels(annex.sigvals.Maya)
@@ -394,7 +395,7 @@ Maya.mt.statusplot <- ggplot(data=Mayalibit.ContData.Techreport.status.PLOTFORMA
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["MT"] + plot.theme
@@ -481,7 +482,6 @@ Maya.time.statusplot <- ggplot(data=Mayalibit.ContData.Techreport.status.PLOTFOR
   coord_flip() + Statusplot.labs["Time"] + plot.theme
 
 # - DAYS UNWELL
-
 Maya.unwell.statusplot <- ggplot(data=Mayalibit.ContData.Techreport.status.PLOTFORMAT,
                                  aes(x=SettlementName)) +
   geom_bar(aes(y=UnwellMean,
@@ -521,6 +521,26 @@ Maya.unwell.statusplot <- ggplot(data=Mayalibit.ContData.Techreport.status.PLOTF
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["Unwell"] + plot.theme
+
+# - NUMBER UNIQUE ETHNIC GROUPS
+Maya.ethnic.statusplot <- ggplot(data=Mayalibit.PropData.Techreport.status.PLOTFORMAT,
+                                aes(x=SettlementName)) +
+  geom_bar(aes(y=Num.EthnicGroups,
+               fill=Dummy),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_vline(aes(xintercept=2),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(Mayalibit.PropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T)+
+                                0.03*max(Mayalibit.PropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T))) +
+  scale_fill_manual(values=fillcols.status) +
+  coord_flip() + Statusplot.labs["Ethnicity"] + plot.theme
+
 
 # ---- 3.2 Proportional data plots ----
 
@@ -726,6 +746,29 @@ Maya.childfs.statusplot <-
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
   coord_flip() + plot.theme + Statusplot.labs["ChildFS"] + plot.guides.techreport
 
+# - PROTEIN FROM FISH
+Maya.proteinfish.statusplot <- 
+  melt(Mayalibit.PropData.Techreport.status.PLOTFORMAT,
+       id.vars="SettlementName",measure.vars=c("ProteinFish.All","ProteinFish.Most",
+                                               "ProteinFish.Half","ProteinFish.Some",
+                                               "ProteinFish.None")) %>%
+  ggplot(aes(x=SettlementName,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=2),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Protein"]],
+                    labels=c("All","Most","About half","Some","None")) +
+  coord_flip() + plot.theme + Statusplot.labs["Protein"] + plot.guides.techreport
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -842,7 +885,7 @@ Maya.mt.trendplot <-
                 size=0.5,
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   scale_x_discrete(labels=Maya.trendplot.monitoryear.labs) +
   coord_flip() + Maya.trendplot.labs["MT"] + plot.theme
 
@@ -863,7 +906,8 @@ Maya.se.trendplot <-
                 size=0.5,
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
-                     labels=scales::percent_format()) +
+                     labels=scales::percent_format(),
+                     limits=c(0,1)) +
   scale_x_discrete(labels=Maya.trendplot.monitoryear.labs) +
   coord_flip() + Maya.trendplot.labs["SE"] + plot.theme
 
@@ -1092,6 +1136,26 @@ Maya.childfs.trendplot <-
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
   coord_flip() + plot.theme + Maya.trendplot.labs["ChildFS"] + plot.guides.techreport
 
+# - PROTEIN FROM FISH
+Maya.proteinfish.trendplot <- 
+  melt(Mayalibit.TrendPropData.Techreport.PLOTFORMAT,
+       id.vars="MonitoringYear",measure.vars=c("ProteinFish.All","ProteinFish.Most",
+                                               "ProteinFish.Half","ProteinFish.Some",
+                                               "ProteinFish.None")) %>%
+  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.65,
+           size=0.15,
+           colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_x_discrete(labels=Maya.trendplot.monitoryear.labs) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Protein"]],
+                    labels=c("All","Most","About half","Some","None")) +
+  coord_flip() + plot.theme + Maya.trendplot.labs["Protein"] + plot.guides.techreport
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1279,7 +1343,7 @@ Maya.mt.annexplot <-
   scale_colour_manual(values=errcols.status) +
   scale_x_discrete(labels=Maya.annexplot.settnames[,"MT"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   coord_flip() + Statusplot.labs["MT"] + plot.guides.techreport + plot.theme
 
 
@@ -1642,7 +1706,20 @@ plot(Maya.childfs.trendplot)
 dev.off()
 
 
-# ---- 6.16 Age/Gender ----
+# ---- 6.16 Protein from fish ----
+
+png(paste(FigureFileName,"FishProtein.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Maya.proteinfish.statusplot)
+dev.off()
+
+png(paste(FigureFileName,"FishProtein.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Maya.proteinfish.trendplot)
+dev.off()
+
+
+# ---- 6.17 Age/Gender ----
 
 png(paste(FigureFileName,"Age.gender.png",sep="/"),
     units="in",height=10,width=4,res=400)
@@ -1651,12 +1728,19 @@ grid.draw(Maya.age.gender.plot)
 dev.off()
 
 
+# ---- 6.18 Number ethnic groups ----
+
+png(paste(FigureFileName,"Num.Ethnic.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Maya.ethnic.statusplot)
+dev.off()
 
 
 
 # ---- Remove all plot objects from environment ----
 rm(median.setts.Maya,Maya.statusplot.asterisks,Maya.statusplot.sigpos,
-   Maya.trendplot.monitoryear.labs,Maya.trendplot.ylabs,Maya.trendplot.labs,Maya.annexplot.settnames,
+   Maya.trendplot.monitoryear.labs,Maya.conttrendplot.ylabs,Maya.proptrendplot.ylabs,
+   Maya.trendplot.labs,Maya.annexplot.settnames,
    Maya.age.gender.baseline,Maya.age.gender.2yr,Maya.age.gender.4yr,
    Maya.agegender.legend.plot,Maya.agegender.legend,Maya.age.gender.plot,
    Maya.fs.statusplot,Maya.fs.trendplot,Maya.fs.annexplot,
@@ -1670,7 +1754,8 @@ rm(median.setts.Maya,Maya.statusplot.asterisks,Maya.statusplot.sigpos,
    Maya.religion.trendplot,Maya.primaryocc.statusplot,Maya.primaryocc.trendplot,
    Maya.freqfish.statusplot,Maya.freqsellfish.statusplot,Maya.freqsellfish.trendplot,
    Maya.incfish.statusplot,Maya.incfish.trendplot,Maya.fishtech.statusplot,
-   Maya.fishtech.trendplot,Maya.childfs.statusplot,Maya.childfs.trendplot)
+   Maya.fishtech.trendplot,Maya.childfs.statusplot,Maya.childfs.trendplot,
+   Maya.proteinfish.statusplot,Maya.proteinfish.trendplot,Maya.ethnic.statusplot)
 
 # ---- Remove all tech report datasets from environment ----
 rm(Mayalibit.AgeGender,
@@ -1678,5 +1763,5 @@ rm(Mayalibit.AgeGender,
    Mayalibit.PropData.Techreport.status.PLOTFORMAT,
    Mayalibit.TrendContData.Techreport.PLOTFORMAT,Mayalibit.TrendPropData.Techreport.PLOTFORMAT,
    Mayalibit.AnnexContData.Techreport.PLOTFORMAT,Mayalibit.AnnexPropData.Techreport.PLOTFORMAT,
-   sigvals.Maya,trend.sigvals.Maya,annex.sigvals.Maya,
+   sigvals.Maya,trend.sigvals.Maya,annex.sigvals.Maya,propdata.trend.test.Maya,
    dist.Maya.FS,dist.Maya.MA,dist.Maya.PA,dist.Maya.MT,dist.Maya.SE,dist.Maya.TimeMarket,dist.Maya.DaysUnwell)

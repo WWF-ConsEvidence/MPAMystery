@@ -98,7 +98,7 @@ iif(HouseholdBirth>989,Null,HouseholdBirth) as HHBirthClean,
 SocialConflict
 from HH_tbl_WELLBEING')
 
-HHData$EconomicStatusReasonClean <- ifelse(HHData$EconomicStatusReason=="994" |
+HHData$EconomicStatusReason <- ifelse(HHData$EconomicStatusReason=="994" |
                                               HHData$EconomicStatusReason=="995" |
                                               HHData$EconomicStatusReason=="996" |
                                               HHData$EconomicStatusReason=="997" |
@@ -112,7 +112,7 @@ HHData$RemovePA <- ifelse(rowSums(HHData[,39:44],na.rm=T)>=5940,"Yes","No")
 HHData$RemoveMT <- ifelse(rowSums(HHData[,51:55],na.rm=T)>=4950,"Yes","No")
 HHData$RemovecFS <- ifelse(rowSums(HHData[,61:65],na.rm=T)>2969,"Yes","No")
 
-HHData <- HHData[,c(1:10,91,11:27,92,28:44,93,45:55,94,56:65,95,66:83,90,85:89)]
+HHData <- HHData[,c(1:10,91,11:27,92,28:44,93,45:55,94,56:65,95,66:90)]
 
 
 # Call IndDemos

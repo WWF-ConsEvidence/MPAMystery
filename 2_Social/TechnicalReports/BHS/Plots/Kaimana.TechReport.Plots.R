@@ -53,33 +53,34 @@ Kai.statusplot.sigpos <-
 
 Kai.trendplot.monitoryear.labs <- rev(define.year.monitoryear.column(Kaimana.AnnexContData.Techreport.PLOTFORMAT))
 
-Kai.trendplot.ylabs <- 
-  define.trendplot.ylabels.withasterisks(Kaimana.TrendContData.Techreport.PLOTFORMAT
-                                         [is.na(Kaimana.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
-                                           c("FSMean","MAMean","PAMean","MTMean",
-                                             "SEMean","TimeMarketMean","UnwellMean")])
+Kai.conttrendplot.ylabs <- 
+  define.conttrendplot.ylabels.withasterisks(Kaimana.TrendContData.Techreport.PLOTFORMAT
+                                             [is.na(Kaimana.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
+                                               c("FSMean","MAMean","PAMean","MTMean",
+                                                 "SEMean","TimeMarketMean","UnwellMean")])
+
+Kai.proptrendplot.ylabs <- 
+  define.proptrendplot.ylabels.withasterisks(propdata.trend.test.Kai)
 
 
-Kai.trendplot.labs <- list(FS=labs(y=as.character(Kai.trendplot.ylabs["FSMean"]),x="Monitoring Year"),
-                            MA=labs(y=as.character(Kai.trendplot.ylabs["MAMean"]),x="Monitoring Year"),
-                            PA=labs(y=as.character(Kai.trendplot.ylabs["PAMean"]),x="Monitoring Year"),
-                            MT=labs(y=as.character(Kai.trendplot.ylabs["MTMean"]),x="Monitoring Year"),
-                            SE=labs(y=as.character(Kai.trendplot.ylabs["SEMean"]),x="Monitoring Year"),
-                            Time=labs(y=as.character(Kai.trendplot.ylabs["TimeMarketMean"]),
+Kai.trendplot.labs <- list(FS=labs(y=as.character(Kai.conttrendplot.ylabs["FSMean"]),x="Monitoring Year"),
+                            MA=labs(y=as.character(Kai.conttrendplot.ylabs["MAMean"]),x="Monitoring Year"),
+                            PA=labs(y=as.character(Kai.conttrendplot.ylabs["PAMean"]),x="Monitoring Year"),
+                            MT=labs(y=as.character(Kai.conttrendplot.ylabs["MTMean"]),x="Monitoring Year"),
+                            SE=labs(y=as.character(Kai.conttrendplot.ylabs["SEMean"]),x="Monitoring Year"),
+                            Time=labs(y=as.character(Kai.conttrendplot.ylabs["TimeMarketMean"]),
                                       x="Monitoring Year"),
-                            Unwell=labs(y=as.character(Kai.trendplot.ylabs["UnwellMean"]),
+                            Unwell=labs(y=as.character(Kai.conttrendplot.ylabs["UnwellMean"]),
                                         x="Monitoring Year"),
                             Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
                             Religion=labs(y="Religion (% households)",x="Monitoring Year"),
-                            PrimaryOcc=labs(y="Primary occupation (% households)",x="Monitoring Year"),
-                            FreqFish=labs(y="Frequency of fishing (% households)",x="Monitoring Year"),
-                            FreqSellFish=labs(y="Frequency of selling at least some catch (% households)",
-                                              x="Monitoring Year"),
-                            IncFish=labs(y="Income from fishing in past 6 months (% households)",
-                                         x="Monitoring Year"),
-                            FishTech=labs(y="Fishing technique most often used in past 6 months (% households)",
-                                          x="Monitoring Year"),
-                            ChildFS=labs(y="Child hunger (% households)",x="Monitoring Year"))
+                            PrimaryOcc=labs(y=as.character(Kai.proptrendplot.ylabs["PrimaryOcc"]),x="Monitoring Year"),
+                            FreqFish=labs(y=as.character(Kai.proptrendplot.ylabs["FreqFish"]),x="Monitoring Year"),
+                            FreqSellFish=labs(y=as.character(Kai.proptrendplot.ylabs["SellFish"]),x="Monitoring Year"),
+                            IncFish=labs(y=as.character(Kai.proptrendplot.ylabs["IncFish"]),x="Monitoring Year"),
+                            FishTech=labs(y=as.character(Kai.proptrendplot.ylabs["FishTech"]),x="Monitoring Year"),
+                            ChildFS=labs(y=as.character(Kai.proptrendplot.ylabs["ChildFS"]),x="Monitoring Year"),
+                            Protein=labs(y=as.character(Kai.proptrendplot.ylabs["Protein"]),x="Monitoring Year"))
 
 Kai.annexplot.settnames <- 
   define.annexplot.settname.labels(annex.sigvals.Kai)
@@ -394,7 +395,7 @@ Kai.mt.statusplot <- ggplot(data=Kaimana.ContData.Techreport.status.PLOTFORMAT,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["MT"] + plot.theme
@@ -481,7 +482,6 @@ Kai.time.statusplot <- ggplot(data=Kaimana.ContData.Techreport.status.PLOTFORMAT
   coord_flip() + Statusplot.labs["Time"] + plot.theme
 
 # - DAYS UNWELL
-
 Kai.unwell.statusplot <- ggplot(data=Kaimana.ContData.Techreport.status.PLOTFORMAT,
                                  aes(x=SettlementName)) +
   geom_bar(aes(y=UnwellMean,
@@ -521,6 +521,26 @@ Kai.unwell.statusplot <- ggplot(data=Kaimana.ContData.Techreport.status.PLOTFORM
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["Unwell"] + plot.theme
+
+# - NUMBER UNIQUE ETHNIC GROUPS
+Kai.ethnic.statusplot <- ggplot(data=Kaimana.PropData.Techreport.status.PLOTFORMAT,
+                                 aes(x=SettlementName)) +
+  geom_bar(aes(y=Num.EthnicGroups,
+               fill=Dummy),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_vline(aes(xintercept=2),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(Kaimana.PropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T)+
+                                0.03*max(Kaimana.PropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T))) +
+  scale_fill_manual(values=fillcols.status) +
+  coord_flip() + Statusplot.labs["Ethnicity"] + plot.theme
+
 
 # ---- 3.2 Proportional data plots ----
 
@@ -726,6 +746,29 @@ Kai.childfs.statusplot <-
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
   coord_flip() + plot.theme + Statusplot.labs["ChildFS"] + plot.guides.techreport
 
+# - PROTEIN FROM FISH
+Kai.proteinfish.statusplot <- 
+  melt(Kaimana.PropData.Techreport.status.PLOTFORMAT,
+       id.vars="SettlementName",measure.vars=c("ProteinFish.All","ProteinFish.Most",
+                                               "ProteinFish.Half","ProteinFish.Some",
+                                               "ProteinFish.None")) %>%
+  ggplot(aes(x=SettlementName,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=2),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Protein"]],
+                    labels=c("All","Most","About half","Some","None")) +
+  coord_flip() + plot.theme + Statusplot.labs["Protein"] + plot.guides.techreport
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -842,7 +885,7 @@ Kai.mt.trendplot <-
                 size=0.5,
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   scale_x_discrete(labels=Kai.trendplot.monitoryear.labs) +
   coord_flip() + Kai.trendplot.labs["MT"] + plot.theme
 
@@ -863,7 +906,8 @@ Kai.se.trendplot <-
                 size=0.5,
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
-                     labels=scales::percent_format()) +
+                     labels=scales::percent_format(),
+                     limits=c(0,1)) +
   scale_x_discrete(labels=Kai.trendplot.monitoryear.labs) +
   coord_flip() + Kai.trendplot.labs["SE"] + plot.theme
 
@@ -1092,6 +1136,26 @@ Kai.childfs.trendplot <-
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
   coord_flip() + plot.theme + Kai.trendplot.labs["ChildFS"] + plot.guides.techreport
 
+# - PROTEIN FROM FISH
+Kai.proteinfish.trendplot <- 
+  melt(Kaimana.TrendPropData.Techreport.PLOTFORMAT,
+       id.vars="MonitoringYear",measure.vars=c("ProteinFish.All","ProteinFish.Most",
+                                               "ProteinFish.Half","ProteinFish.Some",
+                                               "ProteinFish.None")) %>%
+  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.65,
+           size=0.15,
+           colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_x_discrete(labels=Kai.trendplot.monitoryear.labs) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Protein"]],
+                    labels=c("All","Most","About half","Some","None")) +
+  coord_flip() + plot.theme + Kai.trendplot.labs["Protein"] + plot.guides.techreport
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1279,7 +1343,7 @@ Kai.mt.annexplot <-
   scale_colour_manual(values=errcols.status) +
   scale_x_discrete(labels=Kai.annexplot.settnames[,"MT"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   coord_flip() + Statusplot.labs["MT"] + plot.guides.techreport + plot.theme
 
 
@@ -1642,7 +1706,20 @@ plot(Kai.childfs.trendplot)
 dev.off()
 
 
-# ---- 6.16 Age/Gender ----
+# ---- 6.16 Protein from fish ----
+
+png(paste(FigureFileName,"FishProtein.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Kai.proteinfish.statusplot)
+dev.off()
+
+png(paste(FigureFileName,"FishProtein.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Kai.proteinfish.trendplot)
+dev.off()
+
+
+# ---- 6.17 Age/Gender ----
 
 png(paste(FigureFileName,"Age.gender.png",sep="/"),
     units="in",height=10,width=4,res=400)
@@ -1651,12 +1728,19 @@ grid.draw(Kai.age.gender.plot)
 dev.off()
 
 
+# ---- 6.18 Number ethnic groups ----
+
+png(paste(FigureFileName,"Num.Ethnic.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Kai.ethnic.statusplot)
+dev.off()
 
 
 
 # ---- Remove all plot objects from environment ----
 rm(median.setts.Kai,Kai.statusplot.asterisks,Kai.statusplot.sigpos,
-   Kai.trendplot.monitoryear.labs,Kai.trendplot.ylabs,Kai.trendplot.labs,Kai.annexplot.settnames,
+   Kai.trendplot.monitoryear.labs,Kai.conttrendplot.ylabs,Kai.proptrendplot.ylabs,
+   Kai.trendplot.labs,Kai.annexplot.settnames,
    Kai.age.gender.baseline,Kai.age.gender.2yr,Kai.age.gender.4yr,
    Kai.agegender.legend.plot,Kai.agegender.legend,Kai.age.gender.plot,
    Kai.fs.statusplot,Kai.fs.trendplot,Kai.fs.annexplot,
@@ -1670,7 +1754,8 @@ rm(median.setts.Kai,Kai.statusplot.asterisks,Kai.statusplot.sigpos,
    Kai.religion.trendplot,Kai.primaryocc.statusplot,Kai.primaryocc.trendplot,
    Kai.freqfish.statusplot,Kai.freqsellfish.statusplot,Kai.freqsellfish.trendplot,
    Kai.incfish.statusplot,Kai.incfish.trendplot,Kai.fishtech.statusplot,
-   Kai.fishtech.trendplot,Kai.childfs.statusplot,Kai.childfs.trendplot)
+   Kai.fishtech.trendplot,Kai.childfs.statusplot,Kai.childfs.trendplot,
+   Kai.proteinfish.statusplot,Kai.proteinfish.trendplot,Kai.ethnic.statusplot)
 
 # ---- Remove all tech report datasets from environment ----
 rm(Kaimana.AgeGender,
@@ -1678,5 +1763,5 @@ rm(Kaimana.AgeGender,
    Kaimana.PropData.Techreport.status.PLOTFORMAT,
    Kaimana.TrendContData.Techreport.PLOTFORMAT,Kaimana.TrendPropData.Techreport.PLOTFORMAT,
    Kaimana.AnnexContData.Techreport.PLOTFORMAT,Kaimana.AnnexPropData.Techreport.PLOTFORMAT,
-   sigvals.Kai,trend.sigvals.Kai,annex.sigvals.Kai,
+   sigvals.Kai,trend.sigvals.Kai,annex.sigvals.Kai,propdata.trend.test.Kai,
    dist.Kai.FS,dist.Kai.MA,dist.Kai.PA,dist.Kai.MT,dist.Kai.SE,dist.Kai.TimeMarket,dist.Kai.DaysUnwell)

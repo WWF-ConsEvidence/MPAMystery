@@ -48,10 +48,23 @@ define.statusplot.asterisk.pos <- function(x,asterisks) {
 }
 
 
-# Define y labels, with asterisks -- trend plots
-define.trendplot.ylabels.withasterisks <- function(x) {
+# Define y labels, with asterisks -- continuous variables trend plots
+define.conttrendplot.ylabels.withasterisks <- function(x) {
   result <- x
   labs <- continuous.variables.plotlabs
+  for(a in 1:7) {
+    result[a] <- ifelse(as.numeric(x[a])<0.01,paste(labs[a],"***",sep=" "),
+                        ifelse(as.numeric(x[a])<0.05 & as.numeric(x[a])>=0.01,paste(labs[a],"**",sep=" "),
+                               ifelse(as.numeric(x[a])<0.1 & as.numeric(x[a])>=0.05,paste(labs[a],"*",sep=" "),
+                                      labs[a])))
+  }
+  result
+}
+
+# Define y labels, with asterisks -- proportional variables trend plots
+define.proptrendplot.ylabels.withasterisks <- function(x) {
+  result <- x
+  labs <- proportional.variables.plotlabs
   for(a in 1:7) {
     result[a] <- ifelse(as.numeric(x[a])<0.01,paste(labs[a],"***",sep=" "),
                         ifelse(as.numeric(x[a])<0.05 & as.numeric(x[a])>=0.01,paste(labs[a],"**",sep=" "),
@@ -85,8 +98,10 @@ define.year.monitoryear.column <- function(annex.data) {
   result <- annex.data[5:10,c("SettlementID","MonitoringYear")]
   result <- left_join(result,HHData[,c("SettlementID","InterviewYear","MonitoringYear")],
                     by=c("SettlementID","MonitoringYear"))
+  result <- result[!is.na(result$MonitoringYear) &
+                     !is.na(result$InterviewYear),]
   result$MonitoringYear <- ifelse(result$MonitoringYear=="2 Year Post" |
-                                    result$MonitoringYear=="4 Year Post",paste(result$MonitoringYear,"\nBaseline",sep=""),
+                                    result$MonitoringYear=="4 Year Post", paste(result$MonitoringYear,"\nBaseline",sep=""),
                                   as.character(result$MonitoringYear))
   result$Monitoryear.year <- c(NA)
   for(i in 1:length(result$MonitoringYear)){

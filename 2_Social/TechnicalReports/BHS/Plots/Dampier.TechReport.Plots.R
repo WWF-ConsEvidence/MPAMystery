@@ -53,33 +53,34 @@ Damp.statusplot.sigpos <-
 
 Damp.trendplot.monitoryear.labs <- rev(define.year.monitoryear.column(Dampier.AnnexContData.Techreport.PLOTFORMAT))
 
-Damp.trendplot.ylabs <- 
-  define.trendplot.ylabels.withasterisks(Dampier.TrendContData.Techreport.PLOTFORMAT
-                                         [is.na(Dampier.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
-                                           c("FSMean","MAMean","PAMean","MTMean",
-                                             "SEMean","TimeMarketMean","UnwellMean")])
+Damp.conttrendplot.ylabs <- 
+  define.conttrendplot.ylabels.withasterisks(Dampier.TrendContData.Techreport.PLOTFORMAT
+                                             [is.na(Dampier.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
+                                               c("FSMean","MAMean","PAMean","MTMean",
+                                                 "SEMean","TimeMarketMean","UnwellMean")])
+
+Damp.proptrendplot.ylabs <- 
+  define.proptrendplot.ylabels.withasterisks(propdata.trend.test.Damp)
 
 
-Damp.trendplot.labs <- list(FS=labs(y=as.character(Damp.trendplot.ylabs["FSMean"]),x="Monitoring Year"),
-                            MA=labs(y=as.character(Damp.trendplot.ylabs["MAMean"]),x="Monitoring Year"),
-                            PA=labs(y=as.character(Damp.trendplot.ylabs["PAMean"]),x="Monitoring Year"),
-                            MT=labs(y=as.character(Damp.trendplot.ylabs["MTMean"]),x="Monitoring Year"),
-                            SE=labs(y=as.character(Damp.trendplot.ylabs["SEMean"]),x="Monitoring Year"),
-                            Time=labs(y=as.character(Damp.trendplot.ylabs["TimeMarketMean"]),
+Damp.trendplot.labs <- list(FS=labs(y=as.character(Damp.conttrendplot.ylabs["FSMean"]),x="Monitoring Year"),
+                            MA=labs(y=as.character(Damp.conttrendplot.ylabs["MAMean"]),x="Monitoring Year"),
+                            PA=labs(y=as.character(Damp.conttrendplot.ylabs["PAMean"]),x="Monitoring Year"),
+                            MT=labs(y=as.character(Damp.conttrendplot.ylabs["MTMean"]),x="Monitoring Year"),
+                            SE=labs(y=as.character(Damp.conttrendplot.ylabs["SEMean"]),x="Monitoring Year"),
+                            Time=labs(y=as.character(Damp.conttrendplot.ylabs["TimeMarketMean"]),
                                       x="Monitoring Year"),
-                            Unwell=labs(y=as.character(Damp.trendplot.ylabs["UnwellMean"]),
+                            Unwell=labs(y=as.character(Damp.conttrendplot.ylabs["UnwellMean"]),
                                         x="Monitoring Year"),
                             Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
                             Religion=labs(y="Religion (% households)",x="Monitoring Year"),
-                            PrimaryOcc=labs(y="Primary occupation (% households)",x="Monitoring Year"),
-                            FreqFish=labs(y="Frequency of fishing (% households)",x="Monitoring Year"),
-                            FreqSellFish=labs(y="Frequency of selling at least some catch (% households)",
-                                              x="Monitoring Year"),
-                            IncFish=labs(y="Income from fishing in past 6 months (% households)",
-                                         x="Monitoring Year"),
-                            FishTech=labs(y="Fishing technique most often used in past 6 months (% households)",
-                                          x="Monitoring Year"),
-                            ChildFS=labs(y="Child hunger (% households)",x="Monitoring Year"))
+                            PrimaryOcc=labs(y=as.character(Damp.proptrendplot.ylabs["PrimaryOcc"]),x="Monitoring Year"),
+                            FreqFish=labs(y=as.character(Damp.proptrendplot.ylabs["FreqFish"]),x="Monitoring Year"),
+                            FreqSellFish=labs(y=as.character(Damp.proptrendplot.ylabs["SellFish"]),x="Monitoring Year"),
+                            IncFish=labs(y=as.character(Damp.proptrendplot.ylabs["IncFish"]),x="Monitoring Year"),
+                            FishTech=labs(y=as.character(Damp.proptrendplot.ylabs["FishTech"]),x="Monitoring Year"),
+                            ChildFS=labs(y=as.character(Damp.proptrendplot.ylabs["ChildFS"]),x="Monitoring Year"),
+                            Protein=labs(y=as.character(Damp.proptrendplot.ylabs["Protein"]),x="Monitoring Year"))
 
 Damp.annexplot.settnames <- 
   define.annexplot.settname.labels(annex.sigvals.Damp)
@@ -394,7 +395,7 @@ Damp.mt.statusplot <- ggplot(data=Dampier.ContData.Techreport.status.PLOTFORMAT,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["MT"] + plot.theme
@@ -481,7 +482,6 @@ Damp.time.statusplot <- ggplot(data=Dampier.ContData.Techreport.status.PLOTFORMA
   coord_flip() + Statusplot.labs["Time"] + plot.theme
 
 # - DAYS UNWELL
-
 Damp.unwell.statusplot <- ggplot(data=Dampier.ContData.Techreport.status.PLOTFORMAT,
                              aes(x=SettlementName)) +
   geom_bar(aes(y=UnwellMean,
@@ -521,6 +521,25 @@ Damp.unwell.statusplot <- ggplot(data=Dampier.ContData.Techreport.status.PLOTFOR
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["Unwell"] + plot.theme
+
+# - NUMBER UNIQUE ETHNIC GROUPS
+Damp.ethnic.statusplot <- ggplot(data=Dampier.PropData.Techreport.status.PLOTFORMAT,
+                                 aes(x=SettlementName)) +
+  geom_bar(aes(y=Num.EthnicGroups,
+               fill=Dummy),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_vline(aes(xintercept=2),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(Dampier.PropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T)+
+                                0.03*max(Dampier.PropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T))) +
+  scale_fill_manual(values=fillcols.status) +
+  coord_flip() + Statusplot.labs["Ethnicity"] + plot.theme
 
 # ---- 3.2 Proportional data plots ----
 
@@ -726,6 +745,59 @@ Damp.childfs.statusplot <-
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
   coord_flip() + plot.theme + Statusplot.labs["ChildFS"] + plot.guides.techreport
 
+# - PROTEIN FROM FISH
+Damp.proteinfish.statusplot <- 
+  melt(Dampier.PropData.Techreport.status.PLOTFORMAT,
+       id.vars="SettlementName",measure.vars=c("ProteinFish.All","ProteinFish.Most",
+                                               "ProteinFish.Half","ProteinFish.Some",
+                                               "ProteinFish.None")) %>%
+  ggplot(aes(x=SettlementName,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=2),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Protein"]],
+                    labels=c("All","Most","About half","Some","None")) +
+  coord_flip() + plot.theme + Statusplot.labs["Protein"] + plot.guides.techreport
+
+# # - SPREAD OF ETHNIC GROUPS
+# Damp.ethnicspread.statusplot <-
+#   left_join(cbind.data.frame(melt(Dampier.PropData.Techreport.status.PLOTFORMAT,
+#        id.vars="SettlementName",measure.vars=c("Prop.Majority.Ethnic4","Prop.Majority.Ethnic3",
+#                                                "Prop.Majority.Ethnic2","Prop.Majority.Ethnic1",
+#                                                "Prop.OtherEthnic"),
+#        variable.name="Prop.Ethnic",value.name="Prop"),RandomID=1:(length(Dampier.PropData.Techreport.status.PLOTFORMAT$SettlementName)*5)),
+#        cbind.data.frame(melt(Dampier.PropData.Techreport.status.PLOTFORMAT,
+#             id.vars="SettlementName",measure.vars=c("Majority.Ethnic4","Majority.Ethnic3",
+#                                                     "Majority.Ethnic2","Majority.Ethnic1"),
+#        variable.name="Ethnic.Group",value.name="Ethnicity"),
+#        RandomID=1:(length(Dampier.PropData.Techreport.status.PLOTFORMAT$SettlementName)*4))) %>%
+#   ggplot(aes(x=SettlementName,y=Prop,fill=Ethnicity)) +
+#   geom_bar(stat="identity",
+#            position="fill",
+#            width=0.75,
+#            size=0.15,
+#            colour="#505050") +
+#   geom_vline(aes(xintercept=2),
+#              linetype=2,
+#              size=0.35,
+#              colour="#505050") +
+#   scale_y_continuous(expand=c(0,0),
+#                      labels=scales::percent_format()) +
+#   # scale_fill_manual(name="",
+#   #                   values=multianswer.fillcols.status[["Protein"]],
+#   #                   labels=c("All","Most","About half","Some","None")) +
+#   coord_flip() + plot.theme  + plot.guides.techreport
+
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -842,7 +914,7 @@ Damp.mt.trendplot <-
                 size=0.5,
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   scale_x_discrete(labels=Damp.trendplot.monitoryear.labs) +
   coord_flip() + Damp.trendplot.labs["MT"] + plot.theme
 
@@ -863,7 +935,8 @@ Damp.se.trendplot <-
                 size=0.5,
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
-                     labels=scales::percent_format()) +
+                     labels=scales::percent_format(),
+                     limits=c(0,1)) +
   scale_x_discrete(labels=Damp.trendplot.monitoryear.labs) +
   coord_flip() + Damp.trendplot.labs["SE"] + plot.theme
 
@@ -1092,6 +1165,26 @@ Damp.childfs.trendplot <-
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
   coord_flip() + plot.theme + Damp.trendplot.labs["ChildFS"] + plot.guides.techreport
 
+# - PROTEIN FROM FISH
+Damp.proteinfish.trendplot <- 
+  melt(Dampier.TrendPropData.Techreport.PLOTFORMAT,
+       id.vars="MonitoringYear",measure.vars=c("ProteinFish.All","ProteinFish.Most",
+                                               "ProteinFish.Half","ProteinFish.Some",
+                                               "ProteinFish.None")) %>%
+  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.65,
+           size=0.15,
+           colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_x_discrete(labels=Damp.trendplot.monitoryear.labs) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Protein"]],
+                    labels=c("All","Most","About half","Some","None")) +
+  coord_flip() + plot.theme + Damp.trendplot.labs["Protein"] + plot.guides.techreport
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1279,7 +1372,7 @@ Damp.mt.annexplot <-
   scale_colour_manual(values=errcols.status) +
   scale_x_discrete(labels=Damp.annexplot.settnames[,"MT"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   coord_flip() + Statusplot.labs["MT"] + plot.guides.techreport + plot.theme
 
 
@@ -1642,7 +1735,20 @@ plot(Damp.childfs.trendplot)
 dev.off()
 
 
-# ---- 6.16 Age/Gender ----
+# ---- 6.16 Protein from fish ----
+
+png(paste(FigureFileName,"FishProtein.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Damp.proteinfish.statusplot)
+dev.off()
+
+png(paste(FigureFileName,"FishProtein.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Damp.proteinfish.trendplot)
+dev.off()
+
+
+# ---- 6.17 Age/Gender ----
 
 png(paste(FigureFileName,"Age.gender.png",sep="/"),
     units="in",height=10,width=4,res=400)
@@ -1651,12 +1757,20 @@ grid.draw(Damp.age.gender.plot)
 dev.off()
 
 
+# ---- 6.18 Number ethnic groups ----
+
+png(paste(FigureFileName,"Num.Ethnic.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Damp.ethnic.statusplot)
+dev.off()
+
 
 
 
 # ---- Remove all plot objects from environment ----
 rm(median.setts.Damp,Damp.statusplot.asterisks,Damp.statusplot.sigpos,
-   Damp.trendplot.monitoryear.labs,Damp.trendplot.ylabs,Damp.trendplot.labs,Damp.annexplot.settnames,
+   Damp.trendplot.monitoryear.labs,Damp.conttrendplot.ylabs,Damp.proptrendplot.ylabs,
+   Damp.trendplot.labs,Damp.annexplot.settnames,
    Damp.age.gender.baseline,Damp.age.gender.2yr,Damp.age.gender.4yr,
    Damp.agegender.legend.plot,Damp.agegender.legend,Damp.age.gender.plot,
    Damp.fs.statusplot,Damp.fs.trendplot,Damp.fs.annexplot,
@@ -1670,7 +1784,8 @@ rm(median.setts.Damp,Damp.statusplot.asterisks,Damp.statusplot.sigpos,
    Damp.religion.trendplot,Damp.primaryocc.statusplot,Damp.primaryocc.trendplot,
    Damp.freqfish.statusplot,Damp.freqsellfish.statusplot,Damp.freqsellfish.trendplot,
    Damp.incfish.statusplot,Damp.incfish.trendplot,Damp.fishtech.statusplot,
-   Damp.fishtech.trendplot,Damp.childfs.statusplot,Damp.childfs.trendplot)
+   Damp.fishtech.trendplot,Damp.childfs.statusplot,Damp.childfs.trendplot,
+   Damp.proteinfish.statusplot,Damp.proteinfish.trendplot,Damp.ethnic.statusplot)
 
 # ---- Remove all tech report datasets from environment ----
 rm(Dampier.AgeGender,
@@ -1678,5 +1793,5 @@ rm(Dampier.AgeGender,
    Dampier.PropData.Techreport.status.PLOTFORMAT,
    Dampier.TrendContData.Techreport.PLOTFORMAT,Dampier.TrendPropData.Techreport.PLOTFORMAT,
    Dampier.AnnexContData.Techreport.PLOTFORMAT,Dampier.AnnexPropData.Techreport.PLOTFORMAT,
-   sigvals.Damp,trend.sigvals.Damp,annex.sigvals.Damp,
+   sigvals.Damp,trend.sigvals.Damp,annex.sigvals.Damp,propdata.trend.test.Damp,
    dist.Damp.FS,dist.Damp.MA,dist.Damp.PA,dist.Damp.MT,dist.Damp.SE,dist.Damp.TimeMarket,dist.Damp.DaysUnwell)

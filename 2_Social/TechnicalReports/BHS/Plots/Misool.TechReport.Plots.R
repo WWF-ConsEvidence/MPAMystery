@@ -53,33 +53,34 @@ Mis.statusplot.sigpos <-
 
 Mis.trendplot.monitoryear.labs <- rev(define.year.monitoryear.column(Misool.AnnexContData.Techreport.PLOTFORMAT))
 
-Mis.trendplot.ylabs <- 
-  define.trendplot.ylabels.withasterisks(Misool.TrendContData.Techreport.PLOTFORMAT
-                                         [is.na(Misool.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
-                                           c("FSMean","MAMean","PAMean","MTMean",
-                                             "SEMean","TimeMarketMean","UnwellMean")])
+Mis.conttrendplot.ylabs <- 
+  define.conttrendplot.ylabels.withasterisks(Misool.TrendContData.Techreport.PLOTFORMAT
+                                             [is.na(Misool.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
+                                               c("FSMean","MAMean","PAMean","MTMean",
+                                                 "SEMean","TimeMarketMean","UnwellMean")])
+
+Mis.proptrendplot.ylabs <- 
+  define.proptrendplot.ylabels.withasterisks(propdata.trend.test.Mis)
 
 
-Mis.trendplot.labs <- list(FS=labs(y=as.character(Mis.trendplot.ylabs["FSMean"]),x="Monitoring Year"),
-                            MA=labs(y=as.character(Mis.trendplot.ylabs["MAMean"]),x="Monitoring Year"),
-                            PA=labs(y=as.character(Mis.trendplot.ylabs["PAMean"]),x="Monitoring Year"),
-                            MT=labs(y=as.character(Mis.trendplot.ylabs["MTMean"]),x="Monitoring Year"),
-                            SE=labs(y=as.character(Mis.trendplot.ylabs["SEMean"]),x="Monitoring Year"),
-                            Time=labs(y=as.character(Mis.trendplot.ylabs["TimeMarketMean"]),
+Mis.trendplot.labs <- list(FS=labs(y=as.character(Mis.conttrendplot.ylabs["FSMean"]),x="Monitoring Year"),
+                            MA=labs(y=as.character(Mis.conttrendplot.ylabs["MAMean"]),x="Monitoring Year"),
+                            PA=labs(y=as.character(Mis.conttrendplot.ylabs["PAMean"]),x="Monitoring Year"),
+                            MT=labs(y=as.character(Mis.conttrendplot.ylabs["MTMean"]),x="Monitoring Year"),
+                            SE=labs(y=as.character(Mis.conttrendplot.ylabs["SEMean"]),x="Monitoring Year"),
+                            Time=labs(y=as.character(Mis.conttrendplot.ylabs["TimeMarketMean"]),
                                       x="Monitoring Year"),
-                            Unwell=labs(y=as.character(Mis.trendplot.ylabs["UnwellMean"]),
+                            Unwell=labs(y=as.character(Mis.conttrendplot.ylabs["UnwellMean"]),
                                         x="Monitoring Year"),
                             Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
                             Religion=labs(y="Religion (% households)",x="Monitoring Year"),
-                            PrimaryOcc=labs(y="Primary occupation (% households)",x="Monitoring Year"),
-                            FreqFish=labs(y="Frequency of fishing (% households)",x="Monitoring Year"),
-                            FreqSellFish=labs(y="Frequency of selling at least some catch (% households)",
-                                              x="Monitoring Year"),
-                            IncFish=labs(y="Income from fishing in past 6 months (% households)",
-                                         x="Monitoring Year"),
-                            FishTech=labs(y="Fishing technique most often used in past 6 months (% households)",
-                                          x="Monitoring Year"),
-                            ChildFS=labs(y="Child hunger (% households)",x="Monitoring Year"))
+                            PrimaryOcc=labs(y=as.character(Mis.proptrendplot.ylabs["PrimaryOcc"]),x="Monitoring Year"),
+                            FreqFish=labs(y=as.character(Mis.proptrendplot.ylabs["FreqFish"]),x="Monitoring Year"),
+                            FreqSellFish=labs(y=as.character(Mis.proptrendplot.ylabs["SellFish"]),x="Monitoring Year"),
+                            IncFish=labs(y=as.character(Mis.proptrendplot.ylabs["IncFish"]),x="Monitoring Year"),
+                            FishTech=labs(y=as.character(Mis.proptrendplot.ylabs["FishTech"]),x="Monitoring Year"),
+                            ChildFS=labs(y=as.character(Mis.proptrendplot.ylabs["ChildFS"]),x="Monitoring Year"),
+                            Protein=labs(y=as.character(Mis.proptrendplot.ylabs["Protein"]),x="Monitoring Year"))
 
 Mis.annexplot.settnames <- 
   define.annexplot.settname.labels(annex.sigvals.Mis)
@@ -394,7 +395,7 @@ Mis.mt.statusplot <- ggplot(data=Misool.ContData.Techreport.status.PLOTFORMAT,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["MT"] + plot.theme
@@ -481,7 +482,6 @@ Mis.time.statusplot <- ggplot(data=Misool.ContData.Techreport.status.PLOTFORMAT,
   coord_flip() + Statusplot.labs["Time"] + plot.theme
 
 # - DAYS UNWELL
-
 Mis.unwell.statusplot <- ggplot(data=Misool.ContData.Techreport.status.PLOTFORMAT,
                                  aes(x=SettlementName)) +
   geom_bar(aes(y=UnwellMean,
@@ -521,6 +521,26 @@ Mis.unwell.statusplot <- ggplot(data=Misool.ContData.Techreport.status.PLOTFORMA
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["Unwell"] + plot.theme
+
+# - NUMBER UNIQUE ETHNIC GROUPS
+Mis.ethnic.statusplot <- ggplot(data=Misool.PropData.Techreport.status.PLOTFORMAT,
+                                aes(x=SettlementName)) +
+  geom_bar(aes(y=Num.EthnicGroups,
+               fill=Dummy),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_vline(aes(xintercept=2),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(Misool.PropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T)+
+                                0.03*max(Misool.PropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T))) +
+  scale_fill_manual(values=fillcols.status) +
+  coord_flip() + Statusplot.labs["Ethnicity"] + plot.theme
+
 
 # ---- 3.2 Proportional data plots ----
 
@@ -726,6 +746,29 @@ Mis.childfs.statusplot <-
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
   coord_flip() + plot.theme + Statusplot.labs["ChildFS"] + plot.guides.techreport
 
+# - PROTEIN FROM FISH
+Mis.proteinfish.statusplot <- 
+  melt(Misool.PropData.Techreport.status.PLOTFORMAT,
+       id.vars="SettlementName",measure.vars=c("ProteinFish.All","ProteinFish.Most",
+                                               "ProteinFish.Half","ProteinFish.Some",
+                                               "ProteinFish.None")) %>%
+  ggplot(aes(x=SettlementName,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=2),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Protein"]],
+                    labels=c("All","Most","About half","Some","None")) +
+  coord_flip() + plot.theme + Statusplot.labs["Protein"] + plot.guides.techreport
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -842,7 +885,7 @@ Mis.mt.trendplot <-
                 size=0.5,
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   scale_x_discrete(labels=Mis.trendplot.monitoryear.labs) +
   coord_flip() + Mis.trendplot.labs["MT"] + plot.theme
 
@@ -863,7 +906,8 @@ Mis.se.trendplot <-
                 size=0.5,
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
-                     labels=scales::percent_format()) +
+                     labels=scales::percent_format(),
+                     limits=c(0,1)) +
   scale_x_discrete(labels=Mis.trendplot.monitoryear.labs) +
   coord_flip() + Mis.trendplot.labs["SE"] + plot.theme
 
@@ -1092,6 +1136,26 @@ Mis.childfs.trendplot <-
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
   coord_flip() + plot.theme + Mis.trendplot.labs["ChildFS"] + plot.guides.techreport
 
+# - PROTEIN FROM FISH
+Mis.proteinfish.trendplot <- 
+  melt(Misool.TrendPropData.Techreport.PLOTFORMAT,
+       id.vars="MonitoringYear",measure.vars=c("ProteinFish.All","ProteinFish.Most",
+                                               "ProteinFish.Half","ProteinFish.Some",
+                                               "ProteinFish.None")) %>%
+  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.65,
+           size=0.15,
+           colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_x_discrete(labels=Mis.trendplot.monitoryear.labs) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Protein"]],
+                    labels=c("All","Most","About half","Some","None")) +
+  coord_flip() + plot.theme + Mis.trendplot.labs["Protein"] + plot.guides.techreport
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1279,7 +1343,7 @@ Mis.mt.annexplot <-
   scale_colour_manual(values=errcols.status) +
   scale_x_discrete(labels=Mis.annexplot.settnames[,"MT"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,4)) +
+                     limits=c(0,5)) +
   coord_flip() + Statusplot.labs["MT"] + plot.guides.techreport + plot.theme
 
 
@@ -1641,8 +1705,20 @@ png(paste(FigureFileName,"ChildFS.trend.png",sep="/"),
 plot(Mis.childfs.trendplot)
 dev.off()
 
+# ---- 6.16 Protein from fish ----
 
-# ---- 6.16 Age/Gender ----
+png(paste(FigureFileName,"FishProtein.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Mis.proteinfish.statusplot)
+dev.off()
+
+png(paste(FigureFileName,"FishProtein.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Mis.proteinfish.trendplot)
+dev.off()
+
+
+# ---- 6.17 Age/Gender ----
 
 png(paste(FigureFileName,"Age.gender.png",sep="/"),
     units="in",height=10,width=4,res=400)
@@ -1651,12 +1727,19 @@ grid.draw(Mis.age.gender.plot)
 dev.off()
 
 
+# ---- 6.18 Number ethnic groups ----
+
+png(paste(FigureFileName,"Num.Ethnic.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Mis.ethnic.statusplot)
+dev.off()
 
 
 
 # ---- Remove all plot objects from environment ----
 rm(median.setts.Mis,Mis.statusplot.asterisks,Mis.statusplot.sigpos,
-   Mis.trendplot.monitoryear.labs,Mis.trendplot.ylabs,Mis.trendplot.labs,Mis.annexplot.settnames,
+   Mis.trendplot.monitoryear.labs,Mis.conttrendplot.ylabs,Mis.proptrendplot.ylabs,
+   Mis.trendplot.labs,Mis.annexplot.settnames,
    Mis.age.gender.baseline,Mis.age.gender.2yr,Mis.age.gender.4yr,
    Mis.agegender.legend.plot,Mis.agegender.legend,Mis.age.gender.plot,
    Mis.fs.statusplot,Mis.fs.trendplot,Mis.fs.annexplot,
@@ -1670,7 +1753,8 @@ rm(median.setts.Mis,Mis.statusplot.asterisks,Mis.statusplot.sigpos,
    Mis.religion.trendplot,Mis.primaryocc.statusplot,Mis.primaryocc.trendplot,
    Mis.freqfish.statusplot,Mis.freqsellfish.statusplot,Mis.freqsellfish.trendplot,
    Mis.incfish.statusplot,Mis.incfish.trendplot,Mis.fishtech.statusplot,
-   Mis.fishtech.trendplot,Mis.childfs.statusplot,Mis.childfs.trendplot)
+   Mis.fishtech.trendplot,Mis.childfs.statusplot,Mis.childfs.trendplot,
+   Mis.proteinfish.statusplot,Mis.proteinfish.trendplot,Mis.ethnic.statusplot)
 
 # ---- Remove all tech report datasets from environment ----
 rm(Misool.AgeGender,
@@ -1678,5 +1762,5 @@ rm(Misool.AgeGender,
    Misool.PropData.Techreport.status.PLOTFORMAT,
    Misool.TrendContData.Techreport.PLOTFORMAT,Misool.TrendPropData.Techreport.PLOTFORMAT,
    Misool.AnnexContData.Techreport.PLOTFORMAT,Misool.AnnexPropData.Techreport.PLOTFORMAT,
-   sigvals.Mis,trend.sigvals.Mis,annex.sigvals.Mis,
+   sigvals.Mis,trend.sigvals.Mis,annex.sigvals.Mis,propdata.trend.test.Mis,
    dist.Mis.FS,dist.Mis.MA,dist.Mis.PA,dist.Mis.MT,dist.Mis.SE,dist.Mis.TimeMarket,dist.Mis.DaysUnwell)

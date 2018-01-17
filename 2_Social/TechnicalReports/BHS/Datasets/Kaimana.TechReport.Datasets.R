@@ -6,7 +6,7 @@
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2016
-# modified: October 2017
+# modified: November 2017
 # 
 # 
 # ---- inputs ----
@@ -17,6 +17,7 @@
 #  1) Data Sourcing, Configuration, and Subsetting
 #  2) Define Datasets for Status, Trend, and Annex Plots for Export
 #  3) Export Data to Excel
+#  4) Synthesize other social data for interpretation/context
 # 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -79,16 +80,21 @@ Kaimana.AgeGender <-
 # ---- 1.4 MPA-level Proportional data (row to be added to bottom of status and annex plots in tech report) ----
 
 Kaimana.level.PropData.status <- 
-  data.frame(c(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Kaimana MPA",
+  data.frame(MonitoringYear="4 Year Post",SettlementID=0,SettlementName="Kaimana MPA",
                Techreport.ByMPA[Techreport.ByMPA$MPAID==3 &
-                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:36]))
+                                  Techreport.ByMPA$MonitoringYear=="4 Year Post",3:36],
+               FishProtein.ByMPA[FishProtein.ByMPA$MPAID==3 &
+                                   FishProtein.ByMPA$MonitoringYear=="4 Year Post",8:12],
+             MPAimpact.intro.context[MPAimpact.intro.context$MPAID==3,c(12:15,33:36)])
+
 Kaimana.level.PropData.annex <- 
   cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
                    SettlementID=0,SettlementName="Kaimana MPA",
-                   Techreport.ByMPA[Techreport.ByMPA$MPAID==3,3:36])
+                   Techreport.ByMPA[Techreport.ByMPA$MPAID==3,3:36],
+                   FishProtein.ByMPA[FishProtein.ByMPA$MPAID==3,8:12])
 
 null.row.PropData <- 
-  matrix(rep(NA,37),ncol=37,dimnames=list(NULL,colnames(Kaimana.level.PropData.status)))
+  matrix(rep(NA,50),ncol=50,dimnames=list(NULL,colnames(Kaimana.level.PropData.status)))
 
 
 # ---- 1.5 MPA-level Continuous data (row to be added to bottom of status and annex plots in tech report) ----
@@ -124,14 +130,18 @@ null.row.ContData <-
 # ---- 2.1 Status dataset for Kaimana, proportional data ----
 
 Kaimana.PropData.Techreport.status <- 
-  Techreport.BySett[Techreport.BySett$MPAID==3 &
-                      Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:38)]
+  left_join(Techreport.BySett[Techreport.BySett$MPAID==3 &
+                                Techreport.BySett$MonitoringYear=="4 Year Post",c(1,4:38,41:48)],
+            FishProtein.BySett[FishProtein.BySett$MPAID==3 &
+                                 FishProtein.BySett$MonitoringYear=="4 Year Post",c(1,4,10:14)],
+            by=c("SettlementID","SettlementName"))
+
 Kaimana.PropData.Techreport.status <- 
   Kaimana.PropData.Techreport.status[rev(order(Kaimana.PropData.Techreport.status$SettlementName)),]
 
 Kaimana.PropData.Techreport.status.PLOTFORMAT <- 
-  rbind.data.frame(Kaimana.level.PropData.status[2:37],
-                   null.row.PropData[1:35],
+  rbind.data.frame(Kaimana.level.PropData.status[2:50],
+                   null.row.PropData[2:50],
                    Kaimana.PropData.Techreport.status)
 
 # - make SettlementName an ordered factor for plotting
@@ -197,7 +207,9 @@ Kaimana.ContData.Techreport.status.PLOTFORMAT$SettLevel <-
 # ---- 2.3 Trend dataset for Kaimana, MPA-level proportional data ----
 
 Kaimana.TrendPropData.Techreport.PLOTFORMAT <- 
-  Techreport.ByMPA[Techreport.ByMPA$MPAID==3,c(2,1,3:36)]
+  left_join(Techreport.ByMPA[Techreport.ByMPA$MPAID==3,c(2,1,3:36)],
+            FishProtein.ByMPA[FishProtein.ByMPA$MPAID==3,c(2,8:12)],
+            by="MonitoringYear")
 
 
 # ---- 2.4 Trend dataset for Kaimana, MPA-level continuous data (with p values) ----
@@ -206,12 +218,18 @@ Kaimana.TrendContData.Techreport.PLOTFORMAT <-
   rbind.data.frame(Kaimana.level.ContData.annex[,c(1,4:17)],
                    trend.sigvals.Kai)
 
+# - make MonitoringYear an ordered factor for plotting
+Kaimana.TrendContData.Techreport.PLOTFORMAT$MonitoringYear <-
+  factor(Kaimana.TrendContData.Techreport.PLOTFORMAT$MonitoringYear,
+         levels=c("Baseline","2 Year Post","4 Year Post"),
+         ordered=T)
 
 # ---- 2.5 Annex dataset for Kaimana, Settlement-level proportional data ----
 
 Kaimana.AnnexPropData.Techreport <- 
-  Techreport.BySett[Techreport.BySett$MPAID==3 &
-                      !is.na(Techreport.BySett$SettlementID),c(2,1,4:38)]
+  left_join(Techreport.BySett[Techreport.BySett$MPAID==3,c(2,1,4:38)],
+            FishProtein.BySett[FishProtein.BySett$MPAID==3,c(2,1,4,10:14)],
+            by=c("SettlementID","SettlementName","MonitoringYear"))
 
 Kaimana.AnnexPropData.Techreport <- 
   Kaimana.AnnexPropData.Techreport[rev(order(Kaimana.AnnexPropData.Techreport$SettlementName,
@@ -221,7 +239,7 @@ Kaimana.AnnexPropData.Techreport.PLOTFORMAT <-
   rbind.data.frame(Kaimana.level.PropData.annex[Kaimana.level.PropData.annex$MonitoringYear=="4 Year Post",],
                    Kaimana.level.PropData.annex[Kaimana.level.PropData.annex$MonitoringYear=="2 Year Post",],
                    Kaimana.level.PropData.annex[Kaimana.level.PropData.annex$MonitoringYear=="Baseline",],
-                   null.row.PropData,
+                   null.row.PropData[,-43:-51],
                    Kaimana.AnnexPropData.Techreport)
 
 
@@ -297,6 +315,7 @@ FileName <- paste(paste("2_Social/FlatDataFiles/BHS/TechReportOutput/Kaimana/Kai
 write.xlsx(Kaimana.PropData.Techreport.status.PLOTFORMAT,FileName,sheetName='PropData_StatusPlots',row.names=F)
 write.xlsx(Kaimana.ContData.Techreport.status.PLOTFORMAT,FileName,sheetName='ContData_StatusPlots_withpvals',row.names=F,append=T)
 write.xlsx(as.data.frame(Kaimana.TrendPropData.Techreport.PLOTFORMAT),FileName,sheetName='PropData_TrendPlots',row.names=F,append=T)
+write.xlsx(propdata.trend.test.Kai,FileName,sheetName='PropData_TrendPlot_pvals',row.names=F,append=T)
 write.xlsx(Kaimana.TrendContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_TrendPlots_withpvals',row.names=F,append=T)
 write.xlsx(Kaimana.AnnexPropData.Techreport.PLOTFORMAT,FileName,sheetName='PropData_AnnexPlots',row.names=F,append=T)
 write.xlsx(Kaimana.AnnexContData.Techreport.PLOTFORMAT,FileName,sheetName='ContData_AnnexPlots',row.names=F,append=T)
@@ -304,6 +323,129 @@ write.xlsx(annex.sigvals.Kai,FileName,sheetName='Pvals_ContData_AnnexPlots',row.
 write.xlsx(Kaimana.AgeGender,FileName,sheetName='AgeGender',row.names=F,append=T)
 
 
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+# ---- SECTION 4: Synthesize other social data for interpretation/context ----
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+# ---- 4.1 Tech report data synthesis aid ---- 
+#   years resident, categorical food security, changes in social conflict, 
+#   material assets gini coefficient, mean material assets, % fishers, 
+#   % wage labor, marine tenure manage and harvest components
+
+Kaimana.level.synth <- data.frame(SettlementID=NA,
+                                  Synth.techreport.byMPA[Synth.techreport.byMPA$MPAID==3,c("MPAID","MonitoringYear")],
+                                  SettlementName="MPA",
+                                  Synth.techreport.byMPA[Synth.techreport.byMPA$MPAID==3,3:16],
+                                  AgeGender.AvgAge.byMPA[AgeGender.AvgAge.byMPA$MPAID==3,3])
+Kaimana.level.synth <- left_join(Kaimana.level.synth,
+                                 Techreport.ByMPA[c("MPAID","MonitoringYear",
+                                                    "Percent.PrimaryOcc.Fish",
+                                                    "Percent.PrimaryOcc.WageLabor")],
+                                 by=c("MPAID","MonitoringYear"))
+
+null.row.synth <- matrix(NA,ncol=length(colnames(Kaimana.level.synth)),
+                         dimnames=list(NULL,colnames(Kaimana.level.synth)))
+
+Kaimana.setts.synth <- 
+  Synth.techreport.bySett[Synth.techreport.bySett$MPAID==3,] %>%
+  left_join(Techreport.BySett[,c("SettlementID","MonitoringYear",
+                                 "Percent.PrimaryOcc.Fish",
+                                 "Percent.PrimaryOcc.WageLabor")],
+            by=c("SettlementID","MonitoringYear")) %>%
+  left_join(AgeGender.AvgAge.bySett[,c("SettlementName","MonitoringYear","AvgAge")])
+
+
+# ---- 4.2 Output for data synthesis/interpretation ----
+
+Kaimana.synth.techreport <- rbind.data.frame(Kaimana.level.synth,
+                                             null.row.synth,
+                                             Kaimana.setts.synth)
+
+
+write.xlsx(Kaimana.synth.techreport,FileName,sheetName='Extra_data',row.names=F,append=T)
+
+
+# ---- 4.3 Playing around ----
+
+# Compare frequency of fishing sales for entire population vs. only fishing households
+Kaimana.FreqSellFish.bySett <- 
+  HHDemos.context[HHDemos.context$MPAID==3,] %>%
+  group_by(SettlementID,MonitoringYear) %>%
+  summarise(SettlementName=unique(SettlementName),
+            Prop.FishingHouseholds=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
+                                                                    !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean) &
+                                                                     PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                             !is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean) &
+                                                                        PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                                !is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean) &
+                                                                       PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                               !is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean) &
+                                                                       PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                               !is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean) &
+                                                                        PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                                !is.na(PrimaryLivelihoodClean)]))*100)
+Kaimana.FreqSellFish <- 
+  HHDemos.context[HHDemos.context$MPAID==3,] %>%
+  group_by(MonitoringYear) %>%
+  summarise(Prop.FishingHouseholds=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
+                                                                    !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            WholePop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean) &
+                                                                     PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                             !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                             PrimaryLivelihoodClean==3]))*100,
+            WholePop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean) &
+                                                                        PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                                !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                                PrimaryLivelihoodClean==3]))*100,
+            WholePop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean) &
+                                                                       PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                               !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                               PrimaryLivelihoodClean==3]))*100,
+            WholePop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean) &
+                                                                       PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                               !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                               PrimaryLivelihoodClean==3]))*100,
+            WholePop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            FishPop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean) &
+                                                                        PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean) & 
+                                                                                                                                                                !is.na(PrimaryLivelihoodClean) &
+                                                                                                                                                                PrimaryLivelihoodClean==3]))*100)
+
+# Is food security status linked to occupation?
+Kaimana.foodsec.byocc <-
+  left_join(BigFive[BigFive$Treatment==1,c("HouseholdID","MonitoringYear","SettlementID","MPAID","FSIndex")],
+            HHDemos.context[,c("HouseholdID","SettlementName","PrimaryLivelihoodClean")],by="HouseholdID") %>%
+  subset(MPAID==3) %>%
+  group_by(SettlementID,MonitoringYear) %>%
+  summarise(SettlementName=unique(SettlementName),
+            PropFishers=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            PropWageLabor=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==7 & !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            FoodSec.Fishers=mean(FSIndex[PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)],na.rm=T),
+            FoodSecErr.Fishers=sd(FSIndex[PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)],na.rm=T)/sqrt(length(FSIndex[PrimaryLivelihoodClean==3 & !is.na(PrimaryLivelihoodClean)])),
+            FoodSec.WageLabor=mean(FSIndex[PrimaryLivelihoodClean==7 & !is.na(PrimaryLivelihoodClean)],na.rm=T),
+            FoodSecErr.WageLabor=sd(FSIndex[PrimaryLivelihoodClean==7 & !is.na(PrimaryLivelihoodClean)],na.rm=T)/sqrt(length(FSIndex[PrimaryLivelihoodClean==7 & !is.na(PrimaryLivelihoodClean)])))
+
+Kaimana.foodsec.byocc$SettlementName <- factor(Kaimana.foodsec.byocc$SettlementName,
+                                               levels=c(as.character(rev(sort(unique(Kaimana.foodsec.byocc$SettlementName)))),"  "),
+                                               ordered=T)
 
 
 
@@ -322,4 +464,8 @@ rm(Kaimana.ContData.Techreport.status)
 rm(Kaimana.AnnexPropData.Techreport)
 rm(Kaimana.AnnexContData.Techreport)
 rm(Kaimana.ContData.Techreport.status.withMPA)
+rm(Kaimana.level.synth)
+rm(null.row.synth)
+rm(Kaimana.setts.synth)
+rm(Kaimana.synth.techreport)
 rm(FileName)

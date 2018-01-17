@@ -6,7 +6,7 @@
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2016
-# modified: November 2017
+# modified: December 2017
 # 
 # 
 # ---- inputs ----
@@ -17,6 +17,7 @@
 #  2) Define Lists of Settlements, to be used in functions
 #  3) Plot Variable Distributions (to test normality assumption)
 #  4) Non-parametric Significance Test Functions (using Mann-Whitney U test)
+#  5) Chi-square Tests for Categorical Variables
 # 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -47,17 +48,21 @@ Kof.TechReport.MPAHouseholdData <-
 Kof.TechReport.MPAHouseholdData$SettlementName <- 
   factor(Kof.TechReport.MPAHouseholdData$SettlementName)
 
-# - "MPA versus Control" dataset
-Kof.TechReport.MPAvControl <- 
-  left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$MPAID==4 &
-                                          MPA.TechReport.SigTest.Data$MonitoringYear=="4 Year Post",],
-            Days.unwell[Days.unwell$MPAID==4 &
-                          Days.unwell$MonitoringYear=="4 Year Post",
-                        c("HouseholdID","DaysUnwell")],
-            by="HouseholdID")
-
-Kof.TechReport.MPAvControl$MPA.v.Control <- 
-  factor(ifelse(Kof.TechReport.MPAvControl$Treatment==1,"MPA","Control"))
+# - "MPA versus BHS" dataset
+Kof.TechReport.MPAvBHS <- 
+  rbind.data.frame(cbind.data.frame(left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$MPAID==4 &
+                                                                            MPA.TechReport.SigTest.Data$MonitoringYear=="4 Year Post" &
+                                                                            MPA.TechReport.SigTest.Data$Treatment==1,],
+                                              Days.unwell[Days.unwell$MPAID==4 &
+                                                            Days.unwell$MonitoringYear=="4 Year Post" &
+                                                            Days.unwell$Treatment==1,
+                                                          c("HouseholdID","DaysUnwell")],
+                                              by="HouseholdID"),MPAvBHS="MPA"),
+                   cbind.data.frame(left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$MonitoringYear=="4 Year Post" &
+                                                                            MPA.TechReport.SigTest.Data$Treatment==1,],
+                                              Days.unwell[Days.unwell$MonitoringYear=="4 Year Post" & Days.unwell$Treatment==1,
+                                                          c("HouseholdID","DaysUnwell")],
+                                              by="HouseholdID"),MPAvBHS="BHS"))
 
 # - "Settlement Means" dataset
 Kof.TechReport.SettlementMeans <- 
@@ -90,6 +95,70 @@ Kof.Trend.Data <-
                           Days.unwell$Treatment==1,1:2],
             by="HouseholdID") 
 
+# ---- 1.2 Define list of settlement names in MPA ----
+
+sett.names.Kof <- factor(Kof.TechReport.SettlementMeans$SettlementName)
+
+
+# ---- 1.3 Subset categorical variable frequency tables from BHS_MPA_Mystery.R ----
+
+# - "Trend" dataset
+Kof.FreqTables <- 
+  HHDemos.context[HHDemos.context$MPAID==4,] %>%
+  group_by(MonitoringYear) %>%
+  summarise(PrimaryOcc.Fish=length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
+                                                            !is.na(PrimaryLivelihoodClean)]),
+            PrimaryOcc.Farm=length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==1 &
+                                                            !is.na(PrimaryLivelihoodClean)]),
+            PrimaryOcc.WageLabor=length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==7 &
+                                                                 !is.na(PrimaryLivelihoodClean)]),
+            PrimaryOcc.HarvestForest=length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==2 &
+                                                                     !is.na(PrimaryLivelihoodClean)]),
+            PrimaryOcc.Tourism=length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==6 &
+                                                               !is.na(PrimaryLivelihoodClean)]),
+            PrimaryOcc.Other=length(PrimaryLivelihoodClean[(PrimaryLivelihoodClean==996 | PrimaryLivelihoodClean==4 | 
+                                                              PrimaryLivelihoodClean==5) & !is.na(PrimaryLivelihoodClean)]),
+            FreqFish.AlmostNever=length(FreqFishClean[FreqFishClean==1 & !is.na(FreqFishClean)]),
+            FreqFish.FewTimesPer6Mo=length(FreqFishClean[FreqFishClean==2 & !is.na(FreqFishClean)]),
+            FreqFish.FewTimesPerMo=length(FreqFishClean[FreqFishClean==3 & !is.na(FreqFishClean)]),
+            FreqFish.FewTimesPerWk=length(FreqFishClean[FreqFishClean==4 & !is.na(FreqFishClean)]),
+            FreqFish.MoreFewTimesWk=length(FreqFishClean[FreqFishClean==5 & !is.na(FreqFishClean)]),
+            SellFish.AlmostNever=length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean)]),
+            SellFish.FewTimesPer6Mo=length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean)]),
+            SellFish.FewTimesPerMo=length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean)]),
+            SellFish.FewTimesPerWk=length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean)]),
+            SellFish.MoreFewTimesWk=length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean)]),
+            IncFish.None=length(PercentIncFishClean[PercentIncFishClean==1 & !is.na(PercentIncFishClean)]),
+            IncFish.Some=length(PercentIncFishClean[PercentIncFishClean==2 & !is.na(PercentIncFishClean)]),
+            IncFish.Half=length(PercentIncFishClean[PercentIncFishClean==3 & !is.na(PercentIncFishClean)]),
+            IncFish.Most=length(PercentIncFishClean[PercentIncFishClean==4 & !is.na(PercentIncFishClean)]),
+            IncFish.All=length(PercentIncFishClean[PercentIncFishClean==5 & !is.na(PercentIncFishClean)]),
+            FishTech.ByHand=length(MajFishTechniqueClean[MajFishTechniqueClean==1 & !is.na(MajFishTechniqueClean)]),
+            FishTech.StatNet=length(MajFishTechniqueClean[MajFishTechniqueClean==2 & !is.na(MajFishTechniqueClean)]),
+            FishTech.MobileNet=length(MajFishTechniqueClean[MajFishTechniqueClean==3 & !is.na(MajFishTechniqueClean)]),
+            FishTech.StatLine=length(MajFishTechniqueClean[MajFishTechniqueClean==4 & !is.na(MajFishTechniqueClean)]),
+            FishTech.MobileLine=length(MajFishTechniqueClean[MajFishTechniqueClean==5 & !is.na(MajFishTechniqueClean)]),
+            Child.FS.no=length(Child.FS.category[Child.FS.category=="No or insufficient evidence" & !is.na(Child.FS.category)]),
+            Child.FS.yes=length(Child.FS.category[Child.FS.category=="Evidence" & !is.na(Child.FS.category)]),
+            ProteinFish.None=length(PercentProteinFishClean[PercentProteinFishClean==1 & !is.na(PercentProteinFishClean)]),
+            ProteinFish.Some=length(PercentProteinFishClean[PercentProteinFishClean==2 & !is.na(PercentProteinFishClean)]),
+            ProteinFish.Half=length(PercentProteinFishClean[PercentProteinFishClean==3 & !is.na(PercentProteinFishClean)]),
+            ProteinFish.Most=length(PercentProteinFishClean[PercentProteinFishClean==4 & !is.na(PercentProteinFishClean)]),
+            ProteinFish.All=length(PercentProteinFishClean[PercentProteinFishClean==5 &  !is.na(PercentProteinFishClean)]))
+
+Kof.FreqTables <- 
+  as.data.frame(t(Kof.FreqTables[,-1]))
+colnames(Kof.FreqTables) <- c("t0","t2","t4")
+
+Kof.FreqTables$Category <- rownames(Kof.FreqTables)
+Kof.FreqTables$Variable <- ifelse(grepl("PrimaryOcc",Kof.FreqTables$Category)==T,"PrimaryOcc",
+                                   ifelse(grepl("SellFish",Kof.FreqTables$Category)==T,"SellFish",
+                                          ifelse(grepl("IncFish",Kof.FreqTables$Category)==T,"IncFish",
+                                                 ifelse(grepl("FishTech",Kof.FreqTables$Category)==T,"FishTech",
+                                                        ifelse(grepl("FreqFish",Kof.FreqTables$Category)==T,"FreqFish",
+                                                               ifelse(grepl("Child",Kof.FreqTables$Category)==T,"ChildFS",
+                                                                      ifelse(grepl("Protein",Kof.FreqTables$Category)==T,"Protein",NA)))))))
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -100,12 +169,7 @@ Kof.Trend.Data <-
 # 
 
 
-# ---- 2.1 Define list of settlement names in MPA ----
-
-sett.names.Kof <- factor(Kof.TechReport.SettlementMeans$SettlementName)
-
-
-# ---- 2.2 Create list of median settlement for each variable (whether the variable is parametric or non-parametric) ----
+# ---- 2.1 Create list of median settlement for each variable (whether the variable is parametric or non-parametric) ----
 
 even.number.setts.function.Kof <- 
   mapply(a=Kof.TechReport.SettlementMeans[,c("FSIndex","MAIndex","PAIndex","MTIndex","SERate","TimeMarketClean","DaysUnwell")],
@@ -389,19 +453,19 @@ sigvals.Sett.Kof <-
 colnames(sigvals.Sett.Kof) <- c("SettlementName","FS.pval","MA.pval","PA.pval","MT.pval","SE.pval","Time.pval","Unwell.pval")
 
 
-# ---- 4.2 Create function that will output significance values for non-parametric variables, MPA VS. CONTROL ----
-#          (for status plots, comparing MPA households to control households)
+# ---- 4.2 Create function that will output significance values for non-parametric variables, MPA VS. BHS ----
+#          (for status plots, comparing MPA households to all BHS households)
 
-# non.parametric.test.MPAvControl.Kof <- 
-#   data.frame(mapply(a=c("FSIndex","MAIndex","PAIndex","MTIndex","SERate","TimeMarketClean","DaysUnwell"),
-#                     function(a){
-#                       var <- Kof.TechReport.MPAvControl[,a]
-#                       wilcox.test(var~MPA.v.Control,
-#                                   data=Kof.TechReport.MPAvControl,
-#                                   exact=F)}))["p.value",]
+non.parametric.test.MPAvBHS.Kof <-
+  data.frame(mapply(a=c("FSIndex","MAIndex","PAIndex","MTIndex","SERate","TimeMarketClean","DaysUnwell"),
+                    function(a){
+                      var <- Kof.TechReport.MPAvBHS[,a]
+                      wilcox.test(var~MPAvBHS,
+                                  data=Kof.TechReport.MPAvBHS,
+                                  exact=F)}))["p.value",]
 
 sigvals.MPA.Kof <- 
-  cbind.data.frame("Kofiau dan\nPulau Boo MPA",matrix(rep(NA,7),ncol=7))
+  cbind.data.frame("Kofiau dan\nPulau Boo MPA",non.parametric.test.MPAvBHS.Kof)
 
 colnames(sigvals.MPA.Kof) <- colnames(sigvals.Sett.Kof)
 
@@ -481,18 +545,69 @@ annex.sigvals.Kof <-
 annex.sigvals.Kof[2:8] <- unlist(annex.sigvals.Kof[2:8])
 
 
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 5: Chi-square Tests for Categorical Variables ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
 
-# ---- 4.5 Remove all unneeded dataframes from environment, to reduce clutter ----
+# ---- 5.1 Status plot, settlement-level chi-square tests ----
+#          (with MPA-level proportions serving as expected values/probabilities)
+
+# !!! Have not figured out a viable statistical test for settlement-level variation from MPA-level proportions
+#     BECAUSE, sample sizes are too small (and many times zero) per category, at the settlement level
+
+
+# ---- 5.2 Trend plot, chi-square tests on most recent monitoring year ----
+#          (with baseline proportions serving as expected values/probabilities)
+
+propdata.trend.test.Kof <- data.frame(PrimaryOcc=NA,FreqFish=NA,SellFish=NA,IncFish=NA,FishTech=NA,ChildFS=NA,Protein=NA)
+p.for.function <- NA
+data.for.function <- NA
+
+propdata.trend.test.Kof <- 
+  as.data.frame(mapply(a=c("PrimaryOcc","FreqFish","SellFish","IncFish","FishTech","ChildFS","Protein"),
+                       function(a) {
+                         p.for.function <- 
+                           if(sum(Kof.FreqTables$t0[Kof.FreqTables$Variable==a])==0) {
+                             Kof.FreqTables$t2[Kof.FreqTables$Variable==a &
+                                                  Kof.FreqTables$t2!=0] 
+                           } else {Kof.FreqTables$t0[Kof.FreqTables$Variable==a &
+                                                        Kof.FreqTables$t0!=0] }
+                         data.for.function <- 
+                           if(sum(Kof.FreqTables$t0[Kof.FreqTables$Variable==a])==0) {
+                             Kof.FreqTables$t4[Kof.FreqTables$Variable==a &
+                                                  Kof.FreqTables$t2!=0]
+                           } else {Kof.FreqTables$t4[Kof.FreqTables$Variable==a &
+                                                        Kof.FreqTables$t0!=0]}
+                         propdata.trend.test.Kof[a] <- ifelse(length(data.for.function)>1,
+                                                               chisq.test(data.for.function,
+                                                                          p=p.for.function,
+                                                                          rescale.p=TRUE,correct=TRUE)["p.value"],
+                                                               NA)
+                         propdata.trend.test.Kof[a] <- ifelse(is.na(propdata.trend.test.Kof[a]),100,propdata.trend.test.Kof[a])
+                       }))
+
+colnames(propdata.trend.test.Kof) <- c("PrimaryOcc","FreqFish","SellFish","IncFish","FishTech","ChildFS","Protein")
+
+
+
+# ---- Remove all unneeded dataframes from environment, to reduce clutter ----
 rm(MPA.TechReport.SigTest.Data)
 rm(Kof.TechReport.MPAHouseholdData)
-rm(Kof.TechReport.MPAvControl)
+rm(Kof.TechReport.MPAvBHS)
 rm(Kof.TechReport.SettlementMeans)
 rm(Kof.Trend.Data)
+rm(Kof.FreqTables)
 rm(even.number.setts.function.Kof)
 rm(non.parametric.test.settlements.Kof)
-rm(non.parametric.test.MPAvControl.Kof)
+rm(non.parametric.test.MPAvBHS.Kof)
 rm(trend.non.parametric.test.byMPA.Kof)
 rm(trend.non.parametric.test.bySett.Kof)
 rm(null.row.sigvals.Kof)
 rm(sigvals.MPA.Kof)
 rm(sigvals.Sett.Kof)
+rm(p.for.function)
+rm(data.for.function)

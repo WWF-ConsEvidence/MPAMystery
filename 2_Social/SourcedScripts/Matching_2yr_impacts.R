@@ -1429,70 +1429,70 @@ enrol.dampier <- Match(Y=Y,X=X,Tr=Tr,Z=Z )
 
 # p values for MPA-level ATTs
 options("scipen"=100,"digits"=4)
-p.vals.dampier <- data.frame(c("MA","FS","MT","PA","SE"),
+p.vals.dampier.2yr <- data.frame(c("MA","FS","MT","PA","SE"),
                              sapply(list(assets.dampier,hfs.dampier,tenure.dampier,
                                          attach.dampier,enrol.dampier),
                                     function(i){
                                       (1 - pnorm(abs(i$est/i$se))) * 2
                                       }))
-colnames(p.vals.dampier) <- c("Indicator","p.val")
-p.vals.dampier$Indicator <- factor(p.vals.dampier$Indicator,
+colnames(p.vals.dampier.2yr) <- c("Indicator","p.val")
+p.vals.dampier.2yr$Indicator <- factor(p.vals.dampier.2yr$Indicator,
                                    levels=c("PA","SE","MT","FS","MA"),
                                    ordered=T)
 
 
-p.vals.mayalibit <- data.frame(c("MA","FS","MT","PA","SE"),
+p.vals.mayalibit.2yr <- data.frame(c("MA","FS","MT","PA","SE"),
                                sapply(list(assets.telma,hfs.telma,tenure.telma,
                                            attach.telma,enrol.telma),
                                       function(i){
                                         (1 - pnorm(abs(i$est/i$se))) * 2
                                       }))
-colnames(p.vals.mayalibit) <- c("Indicator","p.val")
-p.vals.mayalibit$Indicator <- factor(p.vals.mayalibit$Indicator,
+colnames(p.vals.mayalibit.2yr) <- c("Indicator","p.val")
+p.vals.mayalibit.2yr$Indicator <- factor(p.vals.mayalibit.2yr$Indicator,
                                    levels=c("PA","SE","MT","FS","MA"),
                                    ordered=T)
 
-p.vals.kofiau <- data.frame(c("MA","FS","MT","PA","SE"),
+p.vals.kofiau.2yr <- data.frame(c("MA","FS","MT","PA","SE"),
                             sapply(list(assets.kofiau,hfs.kofiau,tenure.kofiau,
                                         attach.kofiau,enrol.kofiau),
                                    function(i){
                                      (1 - pnorm(abs(i$est/i$se))) * 2
                                    }))
-colnames(p.vals.kofiau) <- c("Indicator","p.val")
-p.vals.kofiau$Indicator <- factor(p.vals.kofiau$Indicator,
+colnames(p.vals.kofiau.2yr) <- c("Indicator","p.val")
+p.vals.kofiau.2yr$Indicator <- factor(p.vals.kofiau.2yr$Indicator,
                                    levels=c("PA","SE","MT","FS","MA"),
                                    ordered=T)
 
-p.vals.tntc <- data.frame(c("MA","FS","MT","PA","SE"),
+p.vals.tntc.2yr <- data.frame(c("MA","FS","MT","PA","SE"),
                           sapply(list(assets.tntc,hfs.tntc,tenure.tntc,
                                       attach.tntc,enrol.tntc),
                                  function(i){
                                    (1 - pnorm(abs(i$est/i$se))) * 2
                                  }))
-colnames(p.vals.tntc) <- c("Indicator","p.val")
-p.vals.tntc$Indicator <- factor(p.vals.tntc$Indicator,
+colnames(p.vals.tntc.2yr) <- c("Indicator","p.val")
+p.vals.tntc.2yr$Indicator <- factor(p.vals.tntc.2yr$Indicator,
                                    levels=c("PA","SE","MT","FS","MA"),
                                    ordered=T)
 
-p.vals.misool <- data.frame(c("MA","FS","MT","PA","SE"),
+p.vals.misool.2yr <- data.frame(c("MA","FS","MT","PA","SE"),
                             sapply(list(assets.misool,hfs.misool,tenure.misool,
                                         attach.misool,enrol.misool),
                                    function(i){
                                      (1 - pnorm(abs(i$est/i$se))) * 2
                                    }))
-colnames(p.vals.misool) <- c("Indicator","p.val")
-p.vals.misool$Indicator <- factor(p.vals.misool$Indicator,
+colnames(p.vals.misool.2yr) <- c("Indicator","p.val")
+p.vals.misool.2yr$Indicator <- factor(p.vals.misool.2yr$Indicator,
                                    levels=c("PA","SE","MT","FS","MA"),
                                    ordered=T)
 
-p.vals.kaimana <- data.frame(c("MA","FS","MT","PA","SE"),
+p.vals.kaimana.2yr <- data.frame(c("MA","FS","MT","PA","SE"),
                              sapply(list(assets.kaimana,hfs.kaimana,tenure.kaimana,
                                          attach.kaimana,enrol.kaimana),
                                     function(i){
                                       (1 - pnorm(abs(i$est/i$se))) * 2
                                     }))
-colnames(p.vals.kaimana) <- c("Indicator","p.val")
-p.vals.kaimana$Indicator <- factor(p.vals.kaimana$Indicator,
+colnames(p.vals.kaimana.2yr) <- c("Indicator","p.val")
+p.vals.kaimana.2yr$Indicator <- factor(p.vals.kaimana.2yr$Indicator,
                                    levels=c("PA","SE","MT","FS","MA"),
                                    ordered=T)
 

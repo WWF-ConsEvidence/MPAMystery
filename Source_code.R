@@ -47,7 +47,7 @@ source('2_Social/SourcedScripts/Matching_2yr_impacts.R')
 #                 Function_variable_outcome.R
 # - Inputs: 
 
-source('2_Social/SourcedScripts/BHS_2yr_impact_data.R')
+source('2_Social/SourcedScripts/BHS_impact_data.R')
 # - Dependencies: Matching_2yr_impacts.R
 # - Inputs:
 

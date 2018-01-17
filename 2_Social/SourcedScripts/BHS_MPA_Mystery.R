@@ -47,6 +47,8 @@
 # OPTION 1: Use ODBC connection to access database and import tables
 MPAMysteryDB <- odbcConnect("Unified.Social.MPAMystery")
 
+Wellbeing <- sqlFetch(MPAMysteryDB,'HH_tbl_WELLBEING')
+
 source('2_Social/SourcedScripts/SQLqueries_AccessODBC.R')
 
 
@@ -61,8 +63,12 @@ source('2_Social/SourcedScripts/SQLqueries_AccessODBC.R')
 
 
 # Whichever option you chose above, you will still need to upload Ethnicity data from a flat file
-HHEthnicity <- read.delim ("2_Social/FlatDataFiles/BHS/Ethnic_2015_0705.txt")
+HHEthnicity <- read.delim("2_Social/FlatDataFiles/BHS/eth_output_kc_2017_1217.txt",sep=",")
 
+HHEthnicity$eth.iso <- ifelse(HHEthnicity$eth.iso=="raj","rja",
+                              ifelse(HHEthnicity$eth.iso=="mal","mlk",
+                                     ifelse(HHEthnicity$eth.iso=="kwi","kwh",
+                                            as.character(HHEthnicity$eth.iso))))
 
 # ---- 1.2 Remove settlements without post-baseline data, re-code Kaimana control settlements ----
 
@@ -324,8 +330,8 @@ HHDemos.context.1 <- left_join(HHDemos.context.1,
                              HHLivelihood[,c(1,4:10,12:13,15)],
                              by="HouseholdID")
 HHDemos.context.1 <- left_join(HHDemos.context.1,
-                             HHEthnicity[c(1,3,5)],
-                             by="HouseholdID")
+                             HHEthnicity,
+                             by=c("HouseholdID","SettlementID"))
 HHDemos.context.1 <- left_join(HHDemos.context.1,
                              cFS[,c(1,15)],
                              by="HouseholdID")
@@ -333,7 +339,7 @@ colnames(HHDemos.context.1) <- c(colnames(HHDemos.context.1)[c(1:7)],
                                "HeadofHH.gender","HeadofHH.educ","HeadofHH.age",
                                colnames(BigFive)[c(4:6,14)],
                                colnames(HHLivelihood)[c(4:10,12:13,15)],
-                               colnames(HHEthnicity)[c(3,5)],
+                               colnames(HHEthnicity)[3],
                                "Child.FS.category")
 HHDemos.context.1$InterviewYear <- factor(HHDemos.context.1$InterviewYear,
                                         levels=c("2010","2011","2012","2013","2014","2015","2016","2017","2018"),
@@ -377,7 +383,7 @@ Techreport.BySett <-
                                                        !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
             Percent.Rel.Other=(length(ReligionClean[ReligionClean!=1 & ReligionClean!=2 &
                                                       !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
-            Num.EthnicGroups=length(unique(Eth.Iso[!is.na(Eth.Iso)])),
+            Num.EthnicGroups=length(unique(eth.iso[!is.na(eth.iso)])),
             Percent.PrimaryOcc.Fish=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
                                                                      !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
             Percent.PrimaryOcc.Farm=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==1 &
@@ -413,7 +419,35 @@ Techreport.BySett <-
             Child.FS.no=(length(Child.FS.category[Child.FS.category=="No or insufficient evidence" & !is.na(Child.FS.category)])/length(Child.FS.category[!is.na(Child.FS.category)]))*100,
             Child.FS.yes=(length(Child.FS.category[Child.FS.category=="Evidence" & !is.na(Child.FS.category)])/length(Child.FS.category[!is.na(Child.FS.category)]))*100,
             TimeMarketMean=mean(TimeMarketClean,na.rm=T),
-            TimeMarketErr=sd(TimeMarketClean,na.rm=T)/sqrt(length(TimeMarketClean)))
+            TimeMarketErr=sd(TimeMarketClean,na.rm=T)/sqrt(length(TimeMarketClean)),
+            Majority.Ethnic1=ifelse(tail(sort(table(eth.iso[!is.na(eth.iso)])), 1)!=0,
+                                    tail(names(sort(table(eth.iso[!is.na(eth.iso)]))), 1),NA),
+            Majority.Ethnic2=ifelse(length(tail(sort(table(eth.iso[!is.na(eth.iso)])), 2))>1,
+                                    tail(names(sort(table(eth.iso[!is.na(eth.iso)]))), 2),"No Data"),
+            Majority.Ethnic3=ifelse(length(tail(sort(table(eth.iso[!is.na(eth.iso)])), 3))>2,
+                                    tail(names(sort(table(eth.iso[!is.na(eth.iso)]))), 3),"No Data"),
+            Majority.Ethnic4=ifelse(length(tail(sort(table(eth.iso[!is.na(eth.iso)])), 4))>3,
+                                    tail(names(sort(table(eth.iso[!is.na(eth.iso)]))), 4),"No Data"))
+
+Techreport.BySett2 <-
+  left_join(HHDemos.context,Techreport.BySett) %>%
+  group_by(SettlementID,MonitoringYear) %>%
+  summarise(Percent.MajorityEthnic1=(length(eth.iso[eth.iso==Majority.Ethnic1 &
+                                                   !is.na(eth.iso)])/length(eth.iso[!is.na(eth.iso)]))*100,
+            Percent.MajorityEthnic2=(length(eth.iso[eth.iso==Majority.Ethnic2 &
+                                                   !is.na(eth.iso)])/length(eth.iso[!is.na(eth.iso)]))*100,
+            Percent.MajorityEthnic3=(length(eth.iso[eth.iso==Majority.Ethnic3 &
+                                                   !is.na(eth.iso)])/length(eth.iso[!is.na(eth.iso)]))*100,
+            Percent.MajorityEthnic4=(length(eth.iso[eth.iso==Majority.Ethnic4 &
+                                                   !is.na(eth.iso)])/length(eth.iso[!is.na(eth.iso)]))*100,
+            Percent.OtherEthnic=(length(eth.iso[eth.iso!=Majority.Ethnic1 &
+                                              eth.iso!=Majority.Ethnic2 &
+                                              eth.iso!=Majority.Ethnic3 &
+                                              eth.iso!=Majority.Ethnic4 &
+                                              !is.na(eth.iso)])/length(eth.iso[!is.na(eth.iso)]))*100)
+
+Techreport.BySett <-
+  left_join(Techreport.BySett,Techreport.BySett2)
 
 Techreport.BySett <- rbind.data.frame(Techreport.BySett,
                                       data.frame(SettlementID=c(72,104:112,113:115),MonitoringYear=rep("Baseline",13),
@@ -424,11 +458,21 @@ Techreport.BySett <- rbind.data.frame(Techreport.BySett,
                                                                                                                            BigFive.SettleGroup$SettlementID>100])),
                                                                   as.character(unique(BigFive.SettleGroup$SettlementName[BigFive.SettleGroup$MPAID==3 &
                                                                                                                            BigFive.SettleGroup$SettlementID>110]))),
-                                                 as.data.frame(matrix(rep(NA,36),ncol=36,nrow=13,
-                                                                      dimnames=list(NULL,colnames(Techreport.BySett[5:40]))))))
+                                                 as.data.frame(matrix(rep(NA,length(colnames(Techreport.BySett))-4),
+                                                                      ncol=length(colnames(Techreport.BySett))-4,nrow=13,
+                                                                      dimnames=list(NULL,colnames(Techreport.BySett[5:length(colnames(Techreport.BySett))]))))))
+
 Techreport.BySett <- Techreport.BySett[!is.na(Techreport.BySett$SettlementID),]
 
 
+# List.unique.ethnicities <- unique(rbind(data.frame(eth.iso=unique(Techreport.BySett$Majority.Ethnic1)),
+#                                         data.frame(eth.iso=unique(Techreport.BySett$Majority.Ethnic2)),
+#                                         data.frame(eth.iso=unique(Techreport.BySett$Majority.Ethnic3)),
+#                                         data.frame(eth.iso=unique(Techreport.BySett$Majority.Ethnic4))))
+# List.unique.ethnicities <- na.omit(List.unique.ethnicities)
+# write.xlsx(List.unique.ethnicities,'2_Social/FlatDataFiles/BHS/unique.ethnicities.list.xlsx')
+       
+                           
 #  ---- 3.3 MPA-level analysis, for trend plots ----
 
 Techreport.ByMPA <- 
@@ -444,7 +488,7 @@ Techreport.ByMPA <-
                                                        !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
             Percent.Rel.Other=(length(ReligionClean[ReligionClean!=1 & ReligionClean!=2 &
                                                       !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
-            Num.EthnicGroups=length(unique(Eth.Iso[!is.na(Eth.Iso)])),
+            Num.EthnicGroups=length(unique(eth.iso[!is.na(eth.iso)])),
             Percent.PrimaryOcc.Fish=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
                                                                      !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
             Percent.PrimaryOcc.Farm=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==1 &
@@ -498,7 +542,7 @@ Techreport.ByMPA.control <- summarise(Techreport.ByMPA.control,
                                                                                  !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
                                       Percent.Rel.Other=(length(ReligionClean[ReligionClean!=1 & ReligionClean!=2 &
                                                                                 !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
-                                      Num.EthnicGroups=length(unique(Eth.Iso[!is.na(Eth.Iso)])),
+                                      Num.EthnicGroups=length(unique(eth.iso[!is.na(eth.iso)])),
                                       Percent.PrimaryOcc.Fish=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
                                                                                                !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
                                       Percent.PrimaryOcc.Farm=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==1 &
@@ -592,17 +636,17 @@ MPAimpact.intro.context <- summarise(MPAimpact.intro.context,
                                                                                 !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
                                      Percent.Rel.Other=(length(ReligionClean[ReligionClean!=1 & ReligionClean!=2 &
                                                                                !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
-                                     Num.EthnicGroups=length(unique(Eth.Iso[!is.na(Eth.Iso)])),
-                                     Majority.Ethnic1=ifelse(tail(sort(table(Eth.Iso[!is.na(Eth.Iso)])), 1)!=0,
-                                                            tail(names(sort(table(Eth.Iso[!is.na(Eth.Iso)]))), 1),"No Data"),
-                                     Majority.Ethnic2=ifelse(tail(sort(table(Eth.Iso[!is.na(Eth.Iso)])), 1)!=0,
-                                                             tail(names(sort(table(Eth.Iso[!is.na(Eth.Iso)]))), 2),"No Data"),
-                                     Majority.Ethnic3=ifelse(tail(sort(table(Eth.Iso[!is.na(Eth.Iso)])), 1)!=0,
-                                                             tail(names(sort(table(Eth.Iso[!is.na(Eth.Iso)]))), 3),"No Data"),
-                                     Majority.Ethnic4=ifelse(tail(sort(table(Eth.Iso[!is.na(Eth.Iso)])), 1)!=0,
-                                                            tail(names(sort(table(Eth.Iso[!is.na(Eth.Iso)]))), 4),"No Data"),
-                                     Majority.Ethnic5=ifelse(tail(sort(table(Eth.Iso[!is.na(Eth.Iso)])), 1)!=0,
-                                                             tail(names(sort(table(Eth.Iso[!is.na(Eth.Iso)]))), 5),"No Data"),
+                                     Num.EthnicGroups=length(unique(eth.iso[!is.na(eth.iso)])),
+                                     Majority.Ethnic1=ifelse(tail(sort(table(eth.iso[!is.na(eth.iso)])), 1)!=0,
+                                                            tail(names(sort(table(eth.iso[!is.na(eth.iso)]))), 1),"No Data"),
+                                     Majority.Ethnic2=ifelse(tail(sort(table(eth.iso[!is.na(eth.iso)])), 1)!=0,
+                                                             tail(names(sort(table(eth.iso[!is.na(eth.iso)]))), 2),"No Data"),
+                                     Majority.Ethnic3=ifelse(tail(sort(table(eth.iso[!is.na(eth.iso)])), 1)!=0,
+                                                             tail(names(sort(table(eth.iso[!is.na(eth.iso)]))), 3),"No Data"),
+                                     Majority.Ethnic4=ifelse(tail(sort(table(eth.iso[!is.na(eth.iso)])), 1)!=0,
+                                                            tail(names(sort(table(eth.iso[!is.na(eth.iso)]))), 4),"No Data"),
+                                     Majority.Ethnic5=ifelse(tail(sort(table(eth.iso[!is.na(eth.iso)])), 1)!=0,
+                                                             tail(names(sort(table(eth.iso[!is.na(eth.iso)]))), 5),"No Data"),
                                      Percent.PrimaryOcc.Fish=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
                                                                                               !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
                                      Percent.PrimaryOcc.Farm=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==1 &
@@ -650,46 +694,46 @@ MPAimpact.intro.context$Settlement.MostFishers <- sapply(MPAimpact.intro.context
 MPAimpact.intro.context$Percent.MajorityEthnic1 <- mapply(i=MPAimpact.intro.context$Majority.Ethnic1,
                                                          j=MPAimpact.intro.context$MPAID,
                                                          function(i,j){
-                                                           (length(CurrentDemos.context$Eth.Iso[CurrentDemos.context$Eth.Iso==i &
-                                                                                                 !is.na(CurrentDemos.context$Eth.Iso) &
+                                                           (length(CurrentDemos.context$eth.iso[CurrentDemos.context$eth.iso==i &
+                                                                                                 !is.na(CurrentDemos.context$eth.iso) &
                                                                                                   CurrentDemos.context$MPAID==j])/
-                                                             length(CurrentDemos.context$Eth.Iso[!is.na(CurrentDemos.context$Eth.Iso) &
+                                                             length(CurrentDemos.context$eth.iso[!is.na(CurrentDemos.context$eth.iso) &
                                                                                                    CurrentDemos.context$MPAID==j]))*100
                                                          })
 MPAimpact.intro.context$Percent.MajorityEthnic2 <- mapply(i=MPAimpact.intro.context$Majority.Ethnic2,
                                                           j=MPAimpact.intro.context$MPAID,
                                                           function(i,j){
-                                                            (length(CurrentDemos.context$Eth.Iso[CurrentDemos.context$Eth.Iso==i &
-                                                                                                   !is.na(CurrentDemos.context$Eth.Iso) &
+                                                            (length(CurrentDemos.context$eth.iso[CurrentDemos.context$eth.iso==i &
+                                                                                                   !is.na(CurrentDemos.context$eth.iso) &
                                                                                                    CurrentDemos.context$MPAID==j])/
-                                                               length(CurrentDemos.context$Eth.Iso[!is.na(CurrentDemos.context$Eth.Iso) &
+                                                               length(CurrentDemos.context$eth.iso[!is.na(CurrentDemos.context$eth.iso) &
                                                                                                      CurrentDemos.context$MPAID==j]))*100
                                                           })
 MPAimpact.intro.context$Percent.MajorityEthnic3 <- mapply(i=MPAimpact.intro.context$Majority.Ethnic3,
                                                           j=MPAimpact.intro.context$MPAID,
                                                           function(i,j){
-                                                            (length(CurrentDemos.context$Eth.Iso[CurrentDemos.context$Eth.Iso==i &
-                                                                                                   !is.na(CurrentDemos.context$Eth.Iso) &
+                                                            (length(CurrentDemos.context$eth.iso[CurrentDemos.context$eth.iso==i &
+                                                                                                   !is.na(CurrentDemos.context$eth.iso) &
                                                                                                    CurrentDemos.context$MPAID==j])/
-                                                               length(CurrentDemos.context$Eth.Iso[!is.na(CurrentDemos.context$Eth.Iso) &
+                                                               length(CurrentDemos.context$eth.iso[!is.na(CurrentDemos.context$eth.iso) &
                                                                                                      CurrentDemos.context$MPAID==j]))*100
                                                           })
 MPAimpact.intro.context$Percent.MajorityEthnic4 <- mapply(i=MPAimpact.intro.context$Majority.Ethnic4,
                                                           j=MPAimpact.intro.context$MPAID,
                                                           function(i,j){
-                                                            (length(CurrentDemos.context$Eth.Iso[CurrentDemos.context$Eth.Iso==i &
-                                                                                                   !is.na(CurrentDemos.context$Eth.Iso) &
+                                                            (length(CurrentDemos.context$eth.iso[CurrentDemos.context$eth.iso==i &
+                                                                                                   !is.na(CurrentDemos.context$eth.iso) &
                                                                                                    CurrentDemos.context$MPAID==j])/
-                                                               length(CurrentDemos.context$Eth.Iso[!is.na(CurrentDemos.context$Eth.Iso) &
+                                                               length(CurrentDemos.context$eth.iso[!is.na(CurrentDemos.context$eth.iso) &
                                                                                                      CurrentDemos.context$MPAID==j]))*100
                                                           })
 MPAimpact.intro.context$Percent.MajorityEthnic5 <- mapply(i=MPAimpact.intro.context$Majority.Ethnic5,
                                                           j=MPAimpact.intro.context$MPAID,
                                                           function(i,j){
-                                                            (length(CurrentDemos.context$Eth.Iso[CurrentDemos.context$Eth.Iso==i &
-                                                                                                   !is.na(CurrentDemos.context$Eth.Iso) &
+                                                            (length(CurrentDemos.context$eth.iso[CurrentDemos.context$eth.iso==i &
+                                                                                                   !is.na(CurrentDemos.context$eth.iso) &
                                                                                                    CurrentDemos.context$MPAID==j])/
-                                                               length(CurrentDemos.context$Eth.Iso[!is.na(CurrentDemos.context$Eth.Iso) &
+                                                               length(CurrentDemos.context$eth.iso[!is.na(CurrentDemos.context$eth.iso) &
                                                                                                      CurrentDemos.context$MPAID==j]))*100
                                                           })
 
@@ -756,43 +800,55 @@ Synth.techreport.bySett <-
   left_join(HHDemos.context,HHData[,c("HouseholdID","SocialConflict")]) %>%
   left_join(MT) %>%
   left_join(BigFive[,c("HouseholdID","MAIndex","FSIndex")]) %>%
+  left_join(HHDemos[,c("HouseholdID","HHBirthClean","HHDeathClean")]) %>%
   group_by(SettlementID,MPAID,MonitoringYear) %>%
   summarise(SettlementName=unique(SettlementName),
             YrResident=mean(YrResidentClean,na.rm=T),
             Percent.Increased.SocConflict=(length(SocialConflict[(SocialConflict==1 | SocialConflict==2) &
-                                                    !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+                                                    !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict) & SocialConflict<989 & SocialConflict!=0]))*100,
             Percent.Decreased.SocConflict=(length(SocialConflict[(SocialConflict==4 | SocialConflict==5) &
-                                                           !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+                                                           !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict) & SocialConflict<989 & SocialConflict!=0]))*100,
             Percent.NoChange.SocConflict=(length(SocialConflict[SocialConflict==3 &
-                                                          !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+                                                          !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict) & SocialConflict<989 & SocialConflict!=0]))*100,
+            MTAccess=mean(RightsAccessClean,na.rm=T),
             MTManage=mean(RightsManageClean,na.rm=T),
             MTHarvest=mean(RightsHarvestClean,na.rm=T),
             MatAssets.gini=gini(MAIndex),
             MAIndex=mean(MAIndex,na.rm=T),
             Percent.FoodSecure=(length(HouseholdID[FSIndex>=4.02 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
-            Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex<=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
-            Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100)
+            Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex>=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
+            Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
+            BirthRate=(sum(HHBirthClean,na.rm=T)/sum(HHsize,na.rm=T))*(1000/sum(HHsize,na.rm=T)),
+            PopGrowthRate=((sum(HHBirthClean,na.rm=T)/sum(HHsize,na.rm=T))*(1000/sum(HHsize,na.rm=T)))-
+              ((sum(HHDeathClean,na.rm=T)/sum(HHsize,na.rm=T))*(1000/sum(HHsize,na.rm=T))),
+            HHsize=mean(HHsize,na.rm=T))
 
 # - same data as above, by MPA
 Synth.techreport.byMPA <-
   left_join(HHDemos.context,HHData[,c("HouseholdID","SocialConflict")]) %>%
   left_join(MT) %>%
   left_join(BigFive[,c("HouseholdID","MAIndex","FSIndex")]) %>%
+  left_join(HHDemos[,c("HouseholdID","HHBirthClean","HHDeathClean")]) %>%
   group_by(MPAID,MonitoringYear) %>%
   summarise(YrResident=mean(YrResidentClean,na.rm=T),
             Percent.Increased.SocConflict=(length(SocialConflict[(SocialConflict==1 | SocialConflict==2) &
-                                                                !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+                                                                   !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict) & SocialConflict<989 & SocialConflict!=0]))*100,
             Percent.Decreased.SocConflict=(length(SocialConflict[(SocialConflict==4 | SocialConflict==5) &
-                                                                !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+                                                                   !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict) & SocialConflict<989 & SocialConflict!=0]))*100,
             Percent.NoChange.SocConflict=(length(SocialConflict[SocialConflict==3 &
-                                                               !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+                                                                  !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict) & SocialConflict<989 & SocialConflict!=0]))*100,
+            MTAccess=mean(RightsAccessClean,na.rm=T),
             MTManage=mean(RightsManageClean,na.rm=T),
             MTHarvest=mean(RightsHarvestClean,na.rm=T),
             MatAssets.gini=gini(MAIndex),
             MAIndex=mean(MAIndex,na.rm=T),
             Percent.FoodSecure=(length(HouseholdID[FSIndex>=4.02 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
-            Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex<=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
-            Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100)
+            Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex>=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
+            Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
+            BirthRate=(sum(HHBirthClean,na.rm=T)/sum(HHsize,na.rm=T))*(1000/sum(HHsize,na.rm=T)),
+            PopGrowthRate=((sum(HHBirthClean,na.rm=T)/sum(HHsize,na.rm=T))*(1000/sum(HHsize,na.rm=T)))-
+              ((sum(HHDeathClean,na.rm=T)/sum(HHsize,na.rm=T))*(1000/sum(HHsize,na.rm=T))),
+            HHsize=mean(HHsize,na.rm=T))
 
 
 # # Sampling Frame info -- develop estimates for settlement populations
@@ -835,21 +891,82 @@ Days.unwell.control <-
             UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)))
 
 
-# Compare.prop.data <- rbind.data.frame(data.frame(Treatment="MPA",Techreport.BySett.MPA[,-4]),
-#                                       data.frame(Treatment="Control",Techreport.BySett.control[,-4]))
-# Compare.prop.data <- Compare.prop.data[order(Compare.prop.data$MPAID),]
-# 
-# Compare.cont.data <- rbind.data.frame(data.frame(Treatment="MPA",BigFive.MPAGroup[,c(31,5,11,17,23,29)],
-#                                                  Techreport.BySett.MPA[,4],Days.unwell.ByMPA[,2]),
-#                                       data.frame(Treatment="Control",BigFive.ControlGroup[,c(31,5,11,17,23,29)],
-#                                                  Techreport.BySett.control[,4],Days.unwell.control[,2]))
-# Compare.cont.data <- Compare.cont.data[order(Compare.cont.data$MPAID),]
+# Compare MPAs/Settlements to BHS means and proportions
+Techreport.BHSmeans <- 
+  left_join(HHDemos.context,BigFive[BigFive$Treatment==1,c("HouseholdID","FSIndex","MAIndex","MTIndex","PAIndex")],by="HouseholdID") %>%
+  left_join(Days.unwell[Days.unwell$Treatment==1,c("HouseholdID","DaysUnwell")],by="HouseholdID") %>%
+  group_by(MonitoringYear) %>%
+  summarise(FSMean=mean(FSIndex,na.rm=T),
+            MAMean=mean(MAIndex,na.rm=T),
+            MTMean=mean(MTIndex,na.rm=T),
+            PAMean=mean(PAIndex,na.rm=T),
+            SEMean=mean(SERate,na.rm=T),
+            HHH.female=(length(HeadofHH.gender[HeadofHH.gender==0 &
+                                                 !is.na(HeadofHH.gender)])/length(HeadofHH.gender[!is.na(HeadofHH.gender)]))*100,
+            HHH.male=(length(HeadofHH.gender[HeadofHH.gender==1 &
+                                               !is.na(HeadofHH.gender)])/length(HeadofHH.gender[!is.na(HeadofHH.gender)]))*100,
+            Percent.Rel.Christian=(length(ReligionClean[ReligionClean==1 &
+                                                          !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
+            Percent.Rel.Muslim=(length(ReligionClean[ReligionClean==2 &
+                                                       !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
+            Percent.Rel.Other=(length(ReligionClean[ReligionClean!=1 & ReligionClean!=2 &
+                                                      !is.na(ReligionClean)])/length(ReligionClean[!is.na(ReligionClean)]))*100,
+            Num.EthnicGroups=length(unique(eth.iso[!is.na(eth.iso)])),
+            Percent.PrimaryOcc.Fish=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
+                                                                     !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            Percent.PrimaryOcc.Farm=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==1 &
+                                                                     !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            Percent.PrimaryOcc.WageLabor=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==7 &
+                                                                          !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            Percent.PrimaryOcc.HarvestForest=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==2 &
+                                                                              !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            Percent.PrimaryOcc.Tourism=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==6 &
+                                                                        !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            Percent.PrimaryOcc.Other=(length(PrimaryLivelihoodClean[(PrimaryLivelihoodClean==996 | PrimaryLivelihoodClean==4 | 
+                                                                       PrimaryLivelihoodClean==5) & !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            Prop.Fish.AlmostNever=(length(FreqFishClean[FreqFishClean==1 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
+            Prop.Fish.FewTimesPer6Mo=(length(FreqFishClean[FreqFishClean==2 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
+            Prop.Fish.FewTimesPerMo=(length(FreqFishClean[FreqFishClean==3 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
+            Prop.Fish.FewTimesPerWk=(length(FreqFishClean[FreqFishClean==4 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
+            Prop.Fish.MoreFewTimesWk=(length(FreqFishClean[FreqFishClean==5 & !is.na(FreqFishClean)])/length(FreqFishClean[!is.na(FreqFishClean)]))*100,
+            Prop.SellFish.AlmostNever=(length(FreqSaleFishClean[FreqSaleFishClean==1 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            Prop.SellFish.FewTimesPer6Mo=(length(FreqSaleFishClean[FreqSaleFishClean==2 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            Prop.SellFish.FewTimesPerMo=(length(FreqSaleFishClean[FreqSaleFishClean==3 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            Prop.SellFish.FewTimesPerWk=(length(FreqSaleFishClean[FreqSaleFishClean==4 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            Prop.SellFish.MoreFewTimesWk=(length(FreqSaleFishClean[FreqSaleFishClean==5 & !is.na(FreqSaleFishClean)])/length(FreqSaleFishClean[!is.na(FreqSaleFishClean)]))*100,
+            Prop.IncFish.None=(length(PercentIncFishClean[PercentIncFishClean==1 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
+            Prop.IncFish.Some=(length(PercentIncFishClean[PercentIncFishClean==2 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
+            Prop.IncFish.Half=(length(PercentIncFishClean[PercentIncFishClean==3 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
+            Prop.IncFish.Most=(length(PercentIncFishClean[PercentIncFishClean==4 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
+            Prop.IncFish.All=(length(PercentIncFishClean[PercentIncFishClean==5 & !is.na(PercentIncFishClean)])/length(PercentIncFishClean[!is.na(PercentIncFishClean)]))*100,
+            Prop.FishTech.ByHand=(length(MajFishTechniqueClean[MajFishTechniqueClean==1 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
+            Prop.FishTech.StatNet=(length(MajFishTechniqueClean[MajFishTechniqueClean==2 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
+            Prop.FishTech.MobileNet=(length(MajFishTechniqueClean[MajFishTechniqueClean==3 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
+            Prop.FishTech.StatLine=(length(MajFishTechniqueClean[MajFishTechniqueClean==4 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
+            Prop.FishTech.MobileLine=(length(MajFishTechniqueClean[MajFishTechniqueClean==5 & !is.na(MajFishTechniqueClean)])/length(MajFishTechniqueClean[!is.na(MajFishTechniqueClean)]))*100,
+            Child.FS.no=(length(Child.FS.category[Child.FS.category=="No or insufficient evidence" & !is.na(Child.FS.category)])/length(Child.FS.category[!is.na(Child.FS.category)]))*100,
+            Child.FS.yes=(length(Child.FS.category[Child.FS.category=="Evidence" & !is.na(Child.FS.category)])/length(Child.FS.category[!is.na(Child.FS.category)]))*100,
+            TimeMarketMean=mean(TimeMarketClean,na.rm=T),
+            TimeMarketErr=sd(TimeMarketClean,na.rm=T)/sqrt(length(TimeMarketClean)),
+            DaysUnwellMean=mean(DaysUnwell,na.rm=T),
+            DaysUnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)))
 
 
 # Individual Age and Gender breakdowns, by MPA
 AgeGenderDemos <- left_join(HHDemos.context[,c(1,3,4,7,11,13)],
                             IndDemos[,c(1,2,4)],
                             by="HouseholdID")
+
+AgeGender.AvgAge.byMPA <-
+  AgeGenderDemos %>%
+  group_by(MPAID,MonitoringYear) %>%
+  summarise(AvgAge=mean(IndividualAgeClean,na.rm=T))
+
+AgeGender.AvgAge.bySett <-
+  AgeGenderDemos %>%
+  group_by(SettlementName,MPAID,MonitoringYear) %>%
+  summarise(AvgAge=mean(IndividualAgeClean,na.rm=T))
+
 
 AgeGenderDemos.ByMPA <- 
   AgeGenderDemos %>%
@@ -1229,7 +1346,12 @@ multianswer.fillcols.status <- list(Gender=c("HHH.male"=alpha("#253494",0.95),
                                                "Prop.FishTech.StatLine"=alpha("#E1E198",0.95),
                                                "Prop.FishTech.MobileLine"=alpha("#386CB0",0.95)),
                                     ChildFS=c("Child.FS.no"=alpha("#253494",0.95),
-                                              "Child.FS.yes"=alpha("#7FCDBB",0.95)))
+                                              "Child.FS.yes"=alpha("#7FCDBB",0.95)),
+                                    Protein=c("ProteinFish.None"=alpha("#E1E198",0.95),
+                                              "ProteinFish.Some"=alpha("#7FCDBB",0.95),
+                                              "ProteinFish.Half"=alpha("#2CA9B8",0.95),
+                                              "ProteinFish.Most"=alpha("#2C7FB8",0.95),
+                                              "ProteinFish.All"=alpha("#253494",0.95)))
 
 # ---- 5.2 MPA Impact Summary plot themes ----
 
@@ -1458,6 +1580,7 @@ Statusplot.labs <- list(FS=labs(y="Mean household food security",x="Settlement")
                         Time=labs(y="Mean travel time to closest market (hours)",x="Settlement"),
                         Unwell=labs(y="Mean time suffering from illness or injury in past 4 weeks (days)",
                                     x="Settlement"),
+                        Ethnicity=labs(y="Number of unique ethnic groups",x="Settlement"),
                         Gender=labs(y="Gender (% head of household)",x="Settlement"),
                         Religion=labs(y="Religion (% head of household)",x="Settlement"),
                         PrimaryOcc=labs(y="Primary occupation (% households)",x="Settlement"),
@@ -1468,13 +1591,22 @@ Statusplot.labs <- list(FS=labs(y="Mean household food security",x="Settlement")
                                      x="Settlement"),
                         FishTech=labs(y="Fishing technique most often used in past 6 months (% households)",
                                       x="Settlement"),
-                        ChildFS=labs(y="Child hunger (% households)",x="Settlement"))
+                        ChildFS=labs(y="Child hunger (% households)",x="Settlement"),
+                        Protein=labs(y="Dietary protein from fish in past 6 months (% households)",
+                                     x="Settlement"))
 
 continuous.variables.plotlabs <- c("Mean household food security","Mean household assets",
                                    "Mean place attachment","Mean household marine tenure",
                                    "School enrollment (% children ages 5-18 years old)",
                                    "Mean travel time to closest market (hours)",
                                    "Mean time suffering from illness or injury in past 4 weeks (days)")
+
+proportional.variables.plotlabs <- c("Primary occupation (% households)","Frequency of fishing (% households)",
+                                     "Frequency of selling at least some catch (% households)",
+                                     "Income from fishing in past 6 months (% households)",
+                                     "Fishing technique most often used in past 6 months (% households)",
+                                     "Child hunger (% households)",
+                                     "Dietary protein from fish in past 6 months (% households)")
 
 
 # ---- 5.7 MPA Impact Summary "Big Five" plot labels ----
@@ -1491,7 +1623,7 @@ plot.pa.labs.i <- labs(y="Change in Household Place Attachment\nsince Baseline",
 plot.mt.labs.i <- labs(y="Change in Household Marine Tenure\nsince Baseline",title="IMPACT")
 plot.se.labs.i <- labs(y="Change in Enrollment Rate\nsince Baseline",title="IMPACT")
 
-impact.x.labs <- c("MPA\nHouseholds","Control\nHouseholds")
+impact.x.labs <- c("Two Year\nPost-Baseline","Four Year\nPost-Baseline")
 
 
 
