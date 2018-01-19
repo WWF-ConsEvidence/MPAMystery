@@ -43,6 +43,10 @@ Days.unwell.Alor.ByMPA <-
   Days.unwell.ByMPA[Days.unwell.ByMPA$MPAID==15 &
                       !is.na(Days.unwell.ByMPA$MPAID),2:4]
 
+Days.unwell.Alor.control <-
+  Days.unwell.control[Days.unwell.control$MPAID==15 &
+                        !is.na(Days.unwell.control$MPAID),2:3]
+
 
 # ---- 1.3 Subset Proportional Data of Age/Gender for Alor ----
 
@@ -64,11 +68,16 @@ Alor.AgeGender <-
 # ---- 1.4 MPA-level Proportional data (row to be added to bottom of status and annex plots in tech report) ----
 
 Alor.level.PropData.status <- 
-  data.frame(MonitoringYear="Baseline",
-             SettlementID=0,
-             SettlementName="Selat Pantar\nMPA",
-               Techreport.ByMPA[Techreport.ByMPA$MPAID==15,3:35],
-               FishProtein.ByMPA[FishProtein.ByMPA$MPAID==15,8:12])
+  rbind.data.frame(data.frame(MonitoringYear="Baseline",
+                              SettlementID=0,
+                              SettlementName="Control\nSettlements",
+                              Techreport.ByMPA.control[Techreport.ByMPA.control$MPAID==15,2:34],
+                              FishProtein.ByMPA.control[FishProtein.ByMPA.control$MPAID==15,7:11]),
+                   data.frame(MonitoringYear="Baseline",
+                              SettlementID=0,
+                              SettlementName="Selat Pantar MPA",
+                              Techreport.ByMPA[Techreport.ByMPA$MPAID==15,3:35],
+                              FishProtein.ByMPA[FishProtein.ByMPA$MPAID==15,8:12]))
 
 null.row.PropData <- 
   matrix(rep(NA,41),ncol=41,dimnames=list(NULL,colnames(Alor.level.PropData.status)))
@@ -77,10 +86,14 @@ null.row.PropData <-
 # ---- 1.5 MPA-level Continuous data (row to be added to bottom of status and annex plots in tech report) ----
 
 Alor.level.ContData.status <- 
-  cbind.data.frame(MonitoringYear="Baseline",SettlementID=0,SettlementName="Selat Pantar\nMPA",
-                   BigFive.MPAGroup[BigFive.MPAGroup$MPAID==15,6:15],
-                   Techreport.ByMPA[Techreport.ByMPA$MPAID==15,c("TimeMarketMean","TimeMarketErr")],
-                   Days.unwell.Alor.ByMPA[,c("UnwellMean","UnwellErr")])
+  rbind.data.frame(cbind.data.frame(MonitoringYear="Baseline",SettlementID=0,SettlementName="Control\nSettlements",
+                                    BigFive.ControlGroup[BigFive.ControlGroup$MPAID==15,6:15],
+                                    Techreport.ByMPA.control[Techreport.ByMPA.control$MPAID==15,c("TimeMarketMean","TimeMarketErr")],
+                                    Days.unwell.Alor.control[,c("UnwellMean","UnwellErr")]),
+                   cbind.data.frame(MonitoringYear="Baseline",SettlementID=0,SettlementName="Selat Pantar MPA",
+                                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==15,6:15],
+                                    Techreport.ByMPA[Techreport.ByMPA$MPAID==15,c("TimeMarketMean","TimeMarketErr")],
+                                    Days.unwell.Alor.ByMPA[,c("UnwellMean","UnwellErr")]))
 
 null.row.ContData <- 
   cbind.data.frame(matrix(rep(NA,17),ncol=17,dimnames=list(NULL,colnames(Alor.level.ContData.status))))
@@ -162,7 +175,7 @@ Alor.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
          levels=unique(Alor.ContData.Techreport.status.PLOTFORMAT$SettlementName),
          ordered=T)
 
-# - add row for plot fill colour formatting
+# - add column for plot fill colour formatting
 Alor.ContData.Techreport.status.PLOTFORMAT$SettLevel <- 
   ifelse(Alor.ContData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
 

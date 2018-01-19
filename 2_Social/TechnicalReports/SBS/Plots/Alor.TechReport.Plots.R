@@ -115,7 +115,7 @@ Alor.fs.statusplot <-
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -174,7 +174,7 @@ Alor.ma.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -215,7 +215,7 @@ Alor.pa.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -254,7 +254,7 @@ Alor.mt.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -293,7 +293,7 @@ Alor.se.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -333,7 +333,7 @@ Alor.time.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -374,7 +374,7 @@ Alor.unwell.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -415,7 +415,7 @@ Alor.gender.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -438,7 +438,7 @@ Alor.religion.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -473,7 +473,7 @@ Alor.primaryocc.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -497,7 +497,7 @@ Alor.freqfish.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -522,7 +522,7 @@ Alor.freqsellfish.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -547,7 +547,7 @@ Alor.incfish.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -570,7 +570,7 @@ Alor.fishtech.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -594,7 +594,7 @@ Alor.childfs.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -617,7 +617,7 @@ Alor.proteinfish.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=2),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -637,7 +637,6 @@ Alor.proteinfish.statusplot <-
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-
 dir.create(paste("2_Social/FlatDataFiles/SBS/TechReportOutput/Alor/Figures--produced",
                  format(Sys.Date(),format="%Y_%m_%d"),sep="_"))
 
@@ -647,7 +646,7 @@ FigureFileName <- paste("2_Social/FlatDataFiles/SBS/TechReportOutput/Alor/Figure
 # ---- 6.1 Food security ----
 
 png(paste(FigureFileName,"FS.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.fs.statusplot)
 dev.off()
 
@@ -655,7 +654,7 @@ dev.off()
 # ---- 6.2 Material assets ----
 
 png(paste(FigureFileName,"MA.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.ma.statusplot)
 dev.off()
 
@@ -663,7 +662,7 @@ dev.off()
 # ---- 6.3 Place attachment ----
 
 png(paste(FigureFileName,"PA.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.pa.statusplot)
 dev.off()
 
@@ -671,7 +670,7 @@ dev.off()
 # ---- 6.4 Marine tenure ----
 
 png(paste(FigureFileName,"MT.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.mt.statusplot)
 dev.off()
 
@@ -679,7 +678,7 @@ dev.off()
 # ---- 6.5 School enrollment ----
 
 png(paste(FigureFileName,"SE.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.se.statusplot)
 dev.off()
 
@@ -687,7 +686,7 @@ dev.off()
 # ---- 6.6 Time to market ----
 
 png(paste(FigureFileName,"TimeMarket.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.time.statusplot)
 dev.off()
 
@@ -695,7 +694,7 @@ dev.off()
 # ---- 6.7 Days unwell ----
 
 png(paste(FigureFileName,"DaysUnwell.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.unwell.statusplot)
 dev.off()
 
@@ -703,7 +702,7 @@ dev.off()
 # ---- 6.8 Gender of head of household ----
 
 png(paste(FigureFileName,"Gender.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.gender.statusplot)
 dev.off()
 
@@ -711,7 +710,7 @@ dev.off()
 # ---- 6.9 Religion ----
 
 png(paste(FigureFileName,"Religion.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.religion.statusplot)
 dev.off()
 
@@ -719,7 +718,7 @@ dev.off()
 # ---- 6.10 Primary occupation ----
 
 png(paste(FigureFileName,"PrimaryOcc.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.primaryocc.statusplot)
 dev.off()
 
@@ -727,7 +726,7 @@ dev.off()
 # ---- 6.11 Fishing frequency ----
 
 png(paste(FigureFileName,"FreqFish.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.freqfish.statusplot)
 dev.off()
 
@@ -735,7 +734,7 @@ dev.off()
 # ---- 6.12 Fish sale frequency ----
 
 png(paste(FigureFileName,"FreqSellFish.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.freqsellfish.statusplot)
 dev.off()
 
@@ -743,7 +742,7 @@ dev.off()
 # ---- 6.13 Income from fishing ----
 
 png(paste(FigureFileName,"IncFish.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.incfish.statusplot)
 dev.off()
 
@@ -751,7 +750,7 @@ dev.off()
 # ---- 6.14 Fishing technique ----
 
 png(paste(FigureFileName,"FishTech.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.fishtech.statusplot)
 dev.off()
 
@@ -759,7 +758,7 @@ dev.off()
 # ---- 6.15 Childhood food security ----
 
 png(paste(FigureFileName,"ChildFS.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.childfs.statusplot)
 dev.off()
 
@@ -767,7 +766,7 @@ dev.off()
 # ---- 6.16 Protein from fish ----
 
 png(paste(FigureFileName,"FishProtein.status.png",sep="/"),
-    units="in",height=4,width=6,res=400)
+    units="in",height=6,width=9,res=400)
 plot(Alor.proteinfish.statusplot)
 dev.off()
 

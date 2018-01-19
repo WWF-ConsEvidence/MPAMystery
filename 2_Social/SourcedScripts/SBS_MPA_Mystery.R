@@ -37,36 +37,19 @@
 #
 
 
-pacman::p_load(plyr,dplyr,ggplot2,reshape2,reldist,grid,gridExtra,varhandle,xlsx,
-               tidyr,RItools,Hmisc,MBESS,rbounds,Kendall)
-
-
 # ---- 1.1 Import data ----
 
-# !!! Select ONE option to import data - ONLY CHOOSE ONE !!!
 
-# OPTION 1: Use ODBC connection to access database and import tables
-#MPAMysteryDB <- odbcConnect("Unified.Social.MPAMystery")
+# Set working directory and import flat data files (.csv files)
 
-#source('2_Social/SourcedScripts/SQLqueries_AccessODBC.R')
+HHData <- read.csv('2_Social/FlatDataFiles/SBS/SBS_HHData.csv',header=T,sep=',')
 
-
-# OPTION 2: Set working directory and import flat data files (.csv files)
-
-setwd("C:/Users/claborn-intern/Dropbox (MPAMystery)/SBS_SOCIAL/4_Analysis/Household_surveys/Flat_data_files")
-
-HHData <- read.csv('SBS_HHData.csv',header=T,sep=',')
-
-IndDemos <- read.csv('SBS_HHDemos.csv',header=T,sep=',')
+IndDemos <- read.csv('2_Social/FlatDataFiles/SBS/SBS_HHDemos.csv',header=T,sep=',')
 IndDemos <- left_join(IndDemos,HHData[,c("HouseholdID","SettlementID")],by="HouseholdID")
 
-Settlements <- read.csv('SBS_HH_tbl_SETTLEMENT.csv',header=T,sep=',')
+Settlements <- read.csv('2_Social/FlatDataFiles/SBS/SBS_HH_tbl_SETTLEMENT.csv',header=T,sep=',')
 Settlements <- Settlements[,c(1,3:5)]
 Settlements$SettlementName <- as.character(Settlements$SettlementName)
-
-# Whichever option you chose above, you will still need to upload Ethnicity data from a flat file
-#HHEthnicity <- read.delim ("2_Social/FlatDataFiles/BHS/Ethnic_2015_0705.txt")
-
 
 
 # ---- 1.2 Define monitoring year for each MPA ----
@@ -89,7 +72,6 @@ HHData$MonitoringYear <- factor(mapply(a=HHData$HouseholdID,
                                 }),
                                 levels=c("Baseline","3 Year Post","6 Year Post"),
                                 ordered=T)
-
 
 # ---- 1.3 Subset variables from HHData for Big Five calculations & descriptive statistics ----
 
@@ -631,6 +613,30 @@ FishProtein.ByMPA <-
             ProteinFish.All=(length(PercentProteinFishClean[PercentProteinFishClean==5 &
                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100)  
   
+FishProtein.ByMPA.control <- 
+  CurrentDemos.control %>%
+  group_by(MPAID) %>%
+  summarise(Percent.EatFish.RareOrNever=(length(FreqEatFishClean[FreqEatFishClean==1 &
+                                                                   !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.FewTimesPer6Mo=(length(FreqEatFishClean[FreqEatFishClean==2 &
+                                                                      !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.FewTimesPerMo=(length(FreqEatFishClean[FreqEatFishClean==3 &
+                                                                     !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.FewTimesPerWk=(length(FreqEatFishClean[FreqEatFishClean==4 &
+                                                                     !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.MoreFewTimesWk=(length(FreqEatFishClean[FreqEatFishClean==5 &
+                                                                      !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            ProteinFish.None=(length(PercentProteinFishClean[PercentProteinFishClean==1 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.Some=(length(PercentProteinFishClean[PercentProteinFishClean==2 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.Half=(length(PercentProteinFishClean[PercentProteinFishClean==3 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.Most=(length(PercentProteinFishClean[PercentProteinFishClean==4 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.All=(length(PercentProteinFishClean[PercentProteinFishClean==5 &
+                                                              !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100)  
+
 
 # - Number years resident by settlement, to look for signs of rapid immigration 
 # - Changes in social conflict by settlement
@@ -1056,7 +1062,8 @@ plot.theme <- theme(axis.ticks=element_blank(),
                                             colour="#303030"),
                     axis.text=element_text(size=rel(0.9),
                                            angle=0,
-                                           colour="#303030"),
+                                           colour="#303030",
+                                           lineheight=0.7),
                     legend.position="top",
                     legend.justification="right",
                     legend.box.spacing=unit(0.1,"cm"))

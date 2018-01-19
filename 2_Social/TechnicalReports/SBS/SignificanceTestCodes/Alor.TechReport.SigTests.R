@@ -46,18 +46,12 @@ Alor.TechReport.MPAHouseholdData <-
 Alor.TechReport.MPAHouseholdData$SettlementName <- 
   factor(Alor.TechReport.MPAHouseholdData$SettlementName)
 
-# - "MPA versus SBS" dataset
-Alor.TechReport.MPAvSBS <- 
-  rbind.data.frame(cbind.data.frame(left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$MPAID==15 &
-                                            MPA.TechReport.SigTest.Data$Treatment==1,],
-            Days.unwell[Days.unwell$MPAID==15 &
-                          Days.unwell$Treatment==1,
-                        c("HouseholdID","DaysUnwell")],
-            by="HouseholdID"),MPAvSBS="MPA"),
-            cbind.data.frame(left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$Treatment==1,],
-                      Days.unwell[Days.unwell$Treatment==1,
-                                  c("HouseholdID","DaysUnwell")],
-                      by="HouseholdID"),MPAvSBS="SBS"))
+# - "MPA versus Control" dataset
+Alor.TechReport.MPAvControl <- 
+  left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$MPAID==15,],
+                                              Days.unwell[Days.unwell$MPAID==15,
+                                                          c("HouseholdID","DaysUnwell")],
+                                              by="HouseholdID")
 
 # - "Settlement Means" dataset
 Alor.TechReport.SettlementMeans <- 
@@ -377,19 +371,19 @@ sigvals.Sett.Alor <-
 colnames(sigvals.Sett.Alor) <- c("SettlementName","FS.pval","MA.pval","PA.pval","MT.pval","SE.pval","Time.pval","Unwell.pval")
 
 
-# ---- 4.2 Create function that will output significance values for non-parametric variables, MPA VS. SBS ----
-#          (for status plots, comparing MPA households to all SBS households)
+# ---- 4.2 Create function that will output significance values for non-parametric variables, MPA VS. Control ----
+#          (for status plots, comparing MPA households to control households)
 
-non.parametric.test.MPAvSBS.Alor <-
+non.parametric.test.MPAvControl.Alor <-
   data.frame(mapply(a=c("FSIndex","MAIndex","PAIndex","MTIndex","SERate","TimeMarketClean","DaysUnwell"),
                     function(a){
-                      var <- Alor.TechReport.MPAvSBS[,a]
-                      wilcox.test(var~MPAvSBS,
-                                  data=Alor.TechReport.MPAvSBS,
+                      var <- Alor.TechReport.MPAvControl[,a]
+                      wilcox.test(var~Treatment,
+                                  data=Alor.TechReport.MPAvControl,
                                   exact=F)}))["p.value",]
 
 sigvals.MPA.Alor <- 
-  cbind.data.frame("Selat Pantar\nMPA",non.parametric.test.MPAvSBS.Alor)
+  cbind.data.frame("Selat Pantar MPA",non.parametric.test.MPAvControl.Alor)
 
 colnames(sigvals.MPA.Alor) <- colnames(sigvals.Sett.Alor)
 
