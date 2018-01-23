@@ -188,7 +188,7 @@ Alor.ContData.Techreport.status.PLOTFORMAT$SettLevel <-
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-setwd('C:/Users/claborn-intern/Dropbox (MPAMystery)/GitHub/MPAMystery')
+
 # ---- 3.1 Define filename for Excel spreadsheet ----
 
 FileName <- paste(paste("2_Social/FlatDataFiles/SBS/TechReportOutput/Alor/Alor_TechReportData--produced",

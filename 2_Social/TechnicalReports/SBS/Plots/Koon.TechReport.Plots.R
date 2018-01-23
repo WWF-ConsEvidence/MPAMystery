@@ -34,7 +34,7 @@
 
 # ---- 1.1 Source data sets from "Koon.TechReport.Datasets.R" ----
 
-source("C:/Users/DeNardo-intern/Documents/MPAMystery/2_Social/TechnicalReports/SBS/Datasets/Koon.TechReport.Datasets.R")
+source("2_Social/TechnicalReports/SBS/Datasets/Koon.TechReport.Datasets.R")
 
 
 # ---- 1.2 Define significance labels and (x,y) coordinates for plots ----
@@ -637,10 +637,10 @@ Koon.proteinfish.statusplot <-
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-dir.create(paste("C:/Users/DeNardo-intern/Documents/MPAMystery/2_Social/FlatDataFiles/SBS/TechReportOutput/Koon/Koon_Figures--produced",
+dir.create(paste("2_Social/FlatDataFiles/SBS/TechReportOutput/Koon/Figures--produced",
                  format(Sys.Date(),format="%Y_%m_%d"),sep="_"))
 
-FigureFileName <- paste("C:/Users/DeNardo-intern/Documents/MPAMystery/2_Social/FlatDataFiles/SBS/TechReportOutput/Koon/Figures--produced",
+FigureFileName <- paste("2_Social/FlatDataFiles/SBS/TechReportOutput/Koon/Figures--produced",
                         format(Sys.Date(),format="%Y_%m_%d"),sep="_")
 
 # ---- 6.1 Food security ----
@@ -778,6 +778,7 @@ png(paste(FigureFileName,"Age.gender.png",sep="/"),
 grid.newpage()
 grid.draw(Koon.age.gender.baseline)
 dev.off()
+
 
 
 

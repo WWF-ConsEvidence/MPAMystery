@@ -30,7 +30,7 @@
 
 # ---- 1.1 Source statistical test results from "Koon.TechReport.SigTests.R" ----
 
-source("C:/Users/DeNardo-intern/Documents/MPAMystery/2_Social/TechnicalReports/SBS/SignificanceTestCodes/Koon.TechReport.SigTests.R")
+source("2_Social/TechnicalReports/SBS/SignificanceTestCodes/Koon.TechReport.SigTests.R")
 
 
 # ---- 1.2 Subset Days Unwell variable by settlement and MPA ----
@@ -188,13 +188,10 @@ Koon.ContData.Techreport.status.PLOTFORMAT$SettLevel <-
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-setwd('C:/Users/DeNardo-intern/Documents/MPAMystery')
+
 # ---- 3.1 Define filename for Excel spreadsheet ----
 
-dir.create(paste("C:/Users/DeNardo-intern/Documents/MPAMystery/2_Social/FlatDataFiles/SBS/TechReportOutput/Koon/Koon_TechReportData--produced",
-                 format(Sys.Date(),format="%Y_%m_%d"),sep="_"))
-
-FileName <- paste(paste("C:/Users/DeNardo-intern/Documents/MPAMystery/2_Social/FlatDataFiles/SBS/TechReportOutput/Koon/Koon_TechReportData--produced",
+FileName <- paste(paste("2_Social/FlatDataFiles/SBS/TechReportOutput/Koon/Koon_TechReportData--produced",
                         format(Sys.Date(),format="%Y_%m_%d"),sep="_"),
                   "xlsx",sep=".")
 
