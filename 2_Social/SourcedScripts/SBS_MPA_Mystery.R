@@ -1130,7 +1130,12 @@ multianswer.fillcols.status <- list(Gender=c("HHH.male"=alpha("#253494",0.95),
                                                "Prop.FishTech.StatLine"=alpha("#E1E198",0.95),
                                                "Prop.FishTech.MobileLine"=alpha("#386CB0",0.95)),
                                     ChildFS=c("Child.FS.no"=alpha("#253494",0.95),
-                                              "Child.FS.yes"=alpha("#7FCDBB",0.95)))
+                                              "Child.FS.yes"=alpha("#7FCDBB",0.95)),
+                                    Protein=c("ProteinFish.None"=alpha("#E1E198",0.95),
+                                              "ProteinFish.Some"=alpha("#7FCDBB",0.95),
+                                              "ProteinFish.Half"=alpha("#2CA9B8",0.95),
+                                              "ProteinFish.Most"=alpha("#2C7FB8",0.95),
+                                              "ProteinFish.All"=alpha("#253494",0.95)))
 
 # ---- 5.2 MPA Impact Summary plot themes ----
 
