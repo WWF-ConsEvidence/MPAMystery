@@ -1,0 +1,236 @@
+---
+title: "Food security causality"
+author: "Louise Glew and David Gill"
+date: "December 5, 2017"
+output: html_document
+---
+Load necessary packages
+```{r eval=FALSE}
+library(plyr)
+library(ggplot2)
+library(reshape2)
+library(varhandle)
+library(xlsx)
+library(RODBC)
+library(Matching)
+library(optmatch)
+library(tidyr)
+library(RItools)
+library(Hmisc)
+library(MBESS)
+library(rbounds)
+library(Kendall)
+library(dplyr)
+library(lavaan)
+library(semPlot)
+```
+Source relevant scripts
+```{r eval=FALSE}
+# 1.2 Source relevant R code 
+script.dir <- 'C:/Users/LocalAdmin/Documents/OneDrive - Conservation International 1/Data analysis/BHS/'
+source('2_Social/SourcedScripts/BHS_MPA_Mystery.R')
+source('2_Social/SourcedScripts/Function_variable_outcome.R') # function to calculate outcomes
+source('2_Social/SourcedScripts/Matching_2yr_impacts_DG.R') # get match pairs (and retain match pairs)
+#source(paste0(script.dir,'Matching 2yr_DG.R')) # get match pairs
+source(paste0(script.dir,'Food security original variables_DG.R')) # get food security table w original indicators
+source('2_Social/SourcedScripts/Function_summarise_bigfive_impacts.R') # get other ATTs
+```
+
+```{r eval=FALSE}
+# -----
+# 1.2 Import raw.data
+# 2 year impact data
+#HH.data <- read.delim("C:/Users/LocalAdmin/Dropbox/BHS/HHdata_raw_2015_0704.txt")
+
+# -----
+# 2.1 Compute fish consumption indicator
+fish.consume<-HHData %>% 
+  select(HouseholdID,FreqEatFishClean) %>%
+### Convert all blind codes to missing values. Note '994' in this context represents non-fishers.
+  mutate(FreqEatFishClean = ifelse(FreqEatFishClean>=995 | FreqEatFishClean==993 |is.na(FreqEatFishClean),
+                              990,FreqEatFishClean),
+         FreqEatFishClean=as.factor(FreqEatFishClean)) %>%
+  rename(fish.consume=FreqEatFishClean)
+summary(fish.consume$fish.consume)
+
+# -----
+# 2.2 Compute fish sale indicator
+fish.sale.outcome<-HHData %>% 
+  select(HouseholdID,FreqSaleFishClean) %>%
+  ### Convert all blind codes to missing values. Note '994' in this context represents non-fishers.
+  mutate(FreqSaleFishClean = ifelse(FreqSaleFishClean>=995 |FreqSaleFishClean==993 |is.na(FreqSaleFishClean),
+                              990,FreqSaleFishClean)) %>%
+  rename(fish.freq.sale=FreqSaleFishClean)
+summary(fish.sale.outcome$fish.freq.sale)
+
+# Pre-process data
+fish.sale.MPA.t2 <- MPA.time.pairs %>%
+  select(HouseholdID) %>%
+  left_join(fish.sale.outcome,by=c("HouseholdID"))
+
+# Time outcome (trend over time in MPA)
+fish.sale.time <-Variable_outcome(MPA.time.pairs,fish.sale.outcome)
+
+# Treatment outcome (across treatment and control)
+fish.sale.tr <-Variable_outcome(MPA.rpt.xsection.pairs,fish.sale.outcome)
+
+# Interaction outcome 
+fish.sale.int <-Variable_outcome(MPA.int.xsection.pairs,fish.sale.outcome)
+
+# Join three outcome sets and MPA at t2
+fish.sale.ATT <- fish.sale.time %>%
+  left_join(fish.sale.tr, by="HouseholdID") %>%
+  left_join(fish.sale.int, by="HouseholdID") %>%
+  left_join(fish.sale.MPA.t2, by="HouseholdID") %>%
+  stats::setNames (c("HouseholdID","sale.mpa.t0","sale.c.t2","sale.c.t0", "sale.mpa.t2")) %>%
+# Compute outcomes
+  mutate(MPA.outcome=sale.mpa.t2 -sale.mpa.t0,
+         control.outcome=sale.c.t2 -sale.c.t0,
+         ATT=MPA.outcome-control.outcome)
+
+```
+
+## SEM models
+Original model
+```{r eval=F}
+sem.data <-read.csv("C:/Users/LocalAdmin/Documents/OneDrive - Conservation International 1/Data analysis/BHS/sem_data.csv", sep=",")
+head(sem.data)
+
+# Original model
+colnames(sem.data)<-c("HouseholdID","Y","MPAID","X","M1","M2","local.fish")
+sem.data.reduced <-na.omit(sem.data)
+model.org <-' # direct effect
+          Y ~ a*X
+          # mediator
+          M1 ~ b*X
+          M2 ~d*X
+          Y ~ c*M1
+          Y ~e*M2
+          #indirect effects
+          bcde := b*c*d*e
+          #total effect
+          total := a+(b*c*d*e)'
+# Y: food security
+# a: MPA to food security
+# b: MPA to biomass (M1)
+# d: MPA to tenure.control (M2)
+# c: biomass to food security
+# e: tenure to food security
+fit.org<-sem(model.org,data=sem.data, std.lv=TRUE)
+summary(fit.org)
+```
+
+Orginal model, rescaling biomass to similar scale to rest of variables
+```{r eval=F}
+colnames(sem.data)<-c("HouseholdID","food.sec","MPAID","MPA","tenure","biomass","local.fish")
+#rescale biomass
+sem.data$biomass1 <- sem.data$biomass/10
+head(sem.data)
+model.rescale <-' # direct effect
+          food.sec ~ a*MPA
+          # mediator
+          biomass1 ~ b*MPA
+          tenure ~d*MPA
+          food.sec ~ c*biomass1
+          food.sec ~e*tenure
+          #indirect effects
+          bcde := b*c*d*e
+          #total effect
+          total := a+(b*c*d*e)'
+fit.rescale <-sem(model.rescale,data=sem.data, std.lv=TRUE)
+summary(fit.rescale)
+```
+Failed: Model where food security is a latent variable, rescaling biomass to similar scale to rest of variables
+```{r eval=F}
+sem.data1 <- sem.data %>%
+  left_join(select(hfoodsec,HouseholdID:FSHungry),by='HouseholdID') 
+#  mutate(FSBalancedDiet1=1-FSBalancedDiet) %>%
+#  select(-FSBalancedDiet)
+#  na.omit()
+
+cov(select(sem.data1,FSDidNotLast:FSHungry))
+model.latentFS <-' 
+# measurement model-food security definition
+    food.sec1 =~ FSDidNotLast + FSBalancedDiet + FSAdultSkip + FSEatLess + FSFreqAdultSkip + FSHungry
+          # direct effect
+          food.sec1 ~ a*MPA
+          # mediator
+          biomass1 ~ b*MPA
+          tenure ~d*MPA
+          food.sec1 ~ c*biomass1
+          food.sec1 ~e*tenure
+          #indirect effects
+          bcde := b*c*d*e
+          #total effect
+          total := a+(b*c*d*e)'
+fit.latentFS <-sem(model.latentFS,data=sem.data1, std.lv=TRUE)
+summary(fit.latentFS)
+semPaths(fit1, "std",edge.label.cex=1.5, curvePivot=T, layout ="spring")
+```
+
+ATT model: Model where food security is a latent variable, rescaling biomass to similar scale to rest of variables
+```{r eval=F}
+add.food.data <-read.csv("C:/Users/LocalAdmin/Documents/OneDrive - Conservation International 1/Data analysis/BHS/additional_foodsec_data.csv", sep=",")
+sem.data2 <- sem.data %>%
+  left_join(add.food.data,by='HouseholdID')%>%
+  left_join(select(fish.sale.ATT,HouseholdID,ATT),by='HouseholdID') %>%
+  rename(fish.sale.ATT=ATT) %>%
+  mutate(fish.sale.ATT=fish.sale.ATT/10) %>%
+  left_join(select(tenure.ATT,HouseholdID,ATT),by='HouseholdID') %>%
+  rename(tenure.ATT=ATT)
+names(sem.data2)
+model.ATT <-' 
+# measurement model-food security definition
+    food.sec1 =~ FSDidNotLast.ATT + FSBalancedDiet.ATT + FSAdultSkip.ATT + FSEatLess.ATT + FSFreqAdultSkip.ATT + FSHungry.ATT
+          # direct effects
+          food.sec1 ~ a*tenure.ATT
+          food.sec1 ~ b*fish.sale.ATT
+        # mediator
+          fish.sale.ATT ~ c*biomass1
+          #total effect
+          total := (b*c)+a
+#correlations
+FSDidNotLast.ATT ~~ FSBalancedDiet.ATT
+FSDidNotLast.ATT ~~ FSAdultSkip.ATT
+FSDidNotLast.ATT ~~ FSEatLess.ATT
+FSDidNotLast.ATT ~~ FSFreqAdultSkip.ATT
+FSDidNotLast.ATT ~~ FSHungry.ATT 
+FSBalancedDiet.ATT ~~ FSAdultSkip.ATT
+FSBalancedDiet.ATT ~~ FSEatLess.ATT
+FSBalancedDiet.ATT ~~ FSFreqAdultSkip.ATT
+FSBalancedDiet.ATT ~~ FSHungry.ATT
+FSAdultSkip.ATT ~~ FSEatLess.ATT
+FSAdultSkip.ATT ~~ FSFreqAdultSkip.ATT
+FSAdultSkip.ATT ~~ FSHungry.ATT
+FSEatLess.ATT ~~ FSFreqAdultSkip.ATT
+FSEatLess.ATT ~~ FSHungry.ATT
+FSFreqAdultSkip.ATT ~~ FSHungry.ATT'
+fit.ATT <-sem(model.ATT,data=sem.data2, std.lv=TRUE)
+varTable(fit.ATT)
+summary(fit.ATT)
+semPaths(fit.ATT, "std",edge.label.cex=1.5, curvePivot=T, layout ="spring")
+
+```
+
+Other models
+```{r eval=F}
+model <- '# direct effect
+          Y ~ a*X
+
+          # mediators
+          M1 ~ d*X
+          M2 ~ c*X
+          M3 ~ b*X
+          M5 ~(e*M1)+(f*M2)
+          M6 ~(g*M2)+(h*M3)
+          Y ~ (j*M5)+(i*M6)
+          
+          # indirect effect      
+          indirect := b*c*d*e*f*g*h*i*j
+
+          #total effect
+          total :=c +(b*c*d*e*f*g*h*i*j)
+'
+fit <-sem(model, data=sem.data, fit.measures=TRUE)
+summary(fit)
+```
