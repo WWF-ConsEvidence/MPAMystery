@@ -683,6 +683,27 @@ Synth.techreport.byMPA <-
             Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex<=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
             Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100)
 
+# - same data as above but for control, by MPA
+Synth.techreport.byMPA.control <-
+  left_join(CurrentDemos.control,HHData[,c("HouseholdID","SocialConflict")]) %>%
+  left_join(MT) %>%
+  left_join(BigFive[,c("HouseholdID","MAIndex","FSIndex")]) %>%
+  group_by(MPAID,MonitoringYear) %>%
+  summarise(YrResident=mean(YrResidentClean,na.rm=T),
+            Percent.Increased.SocConflict=(length(SocialConflict[(SocialConflict==1 | SocialConflict==2) &
+                                                                   !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            Percent.Decreased.SocConflict=(length(SocialConflict[(SocialConflict==4 | SocialConflict==5) &
+                                                                   !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            Percent.NoChange.SocConflict=(length(SocialConflict[SocialConflict==3 &
+                                                                  !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            MTManage=mean(RightsManageClean,na.rm=T),
+            MTHarvest=mean(RightsHarvestClean,na.rm=T),
+            MatAssets.gini=gini(MAIndex),
+            MAIndex=mean(MAIndex,na.rm=T),
+            Percent.FoodSecure=(length(HouseholdID[FSIndex>=4.02 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
+            Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex<=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
+            Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100)
+
 
 # # Sampling Frame info -- develop estimates for settlement populations
 # SamplingFrame <- read.delim("Social impacts, BHS -- Kelly/R codes & data/SamplingFrameMPA.csv",header=T,sep=",")
@@ -740,6 +761,10 @@ AgeGenderDemos <- left_join(HHDemos.context[,c(1:3,6:7,11)],
                             IndDemos[,c(1,2,4)],
                             by="HouseholdID")
 
+AgeGenderDemos.control <- left_join(HHDemos.context.1[HHDemos.context.1$Treatment==0,c(1:3,6:7,11)],
+                            IndDemos[,c(1,2,4)],
+                            by="HouseholdID")
+
 AgeGender.AvgAge.byMPA <-
   AgeGenderDemos %>%
   group_by(MPAID,MonitoringYear) %>%
@@ -748,6 +773,11 @@ AgeGender.AvgAge.byMPA <-
 AgeGender.AvgAge.bySett <-
   AgeGenderDemos %>%
   group_by(SettlementName,MPAID,MonitoringYear) %>%
+  summarise(AvgAge=mean(IndividualAgeClean,na.rm=T))
+
+AgeGender.AvgAge.control <-
+  AgeGenderDemos.control %>%
+  group_by(MPAID,MonitoringYear) %>%
   summarise(AvgAge=mean(IndividualAgeClean,na.rm=T))
 
 

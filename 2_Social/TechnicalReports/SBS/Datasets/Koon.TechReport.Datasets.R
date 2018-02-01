@@ -216,26 +216,24 @@ write.xlsx(Koon.AgeGender,FileName,sheetName='AgeGender',row.names=F,append=T)
 #   material assets gini coefficient, mean material assets, % fishers, 
 #   % wage labor, marine tenure manage and harvest components
 
-Koon.level.synth <- data.frame(SettlementID=NA,
+Koon.level.synth <- rbind.data.frame(cbind.data.frame(SettlementID=NA,
                                   Synth.techreport.byMPA[Synth.techreport.byMPA$MPAID==18,c("MPAID","MonitoringYear")],
                                   SettlementName="MPA",
                                   Synth.techreport.byMPA[Synth.techreport.byMPA$MPAID==18,3:length(Synth.techreport.byMPA)],
-                                  AgeGender.AvgAge.byMPA[AgeGender.AvgAge.byMPA$MPAID==18,3])
-Koon.level.synth <- left_join(Koon.level.synth,
-                                 Techreport.ByMPA[c("MPAID","MonitoringYear",
-                                                    "Percent.PrimaryOcc.Fish",
-                                                    "Percent.PrimaryOcc.WageLabor")],
-                                 by=c("MPAID","MonitoringYear"))
+                                  AgeGender.AvgAge.byMPA[AgeGender.AvgAge.byMPA$MPAID==18,3]),
+                 cbind.data.frame(SettlementID=NA,
+                                  Synth.techreport.byMPA.control[Synth.techreport.byMPA.control$MPAID==18,c("MPAID","MonitoringYear")],
+                                  SettlementName="Control",
+                                  Synth.techreport.byMPA.control[Synth.techreport.byMPA.control$MPAID==18,3:length(Synth.techreport.byMPA.control)],
+                                  AgeGender.AvgAge.control[AgeGender.AvgAge.control$MPAID==18,3]))
+                 
+                 
 
 null.row.synth <- matrix(NA,ncol=length(colnames(Koon.level.synth)),
                          dimnames=list(NULL,colnames(Koon.level.synth)))
 
 Koon.setts.synth <- 
   Synth.techreport.bySett[Synth.techreport.bySett$MPAID==18,] %>%
-  left_join(Techreport.BySett[,c("SettlementID","MonitoringYear",
-                                 "Percent.PrimaryOcc.Fish",
-                                 "Percent.PrimaryOcc.WageLabor")],
-            by=c("SettlementID","MonitoringYear")) %>%
   left_join(AgeGender.AvgAge.bySett[,c("SettlementName","MonitoringYear","AvgAge")])
 
 
