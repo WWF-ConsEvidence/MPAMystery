@@ -1,7 +1,7 @@
 # look for variable names
 grep('market',names(HHData),value=T, ignore.case = T)
 # set directory
-outputdir <- "C:/Users/LocalAdmin/Documents/OneDrive - Conservation International 1/Data analysis/BHS/"
+outputdir <- "C:/Users/dgill6/Documents/Data analysis/BHS/"
 
 # Correlogram
 plot.cor <- function (x){
@@ -47,49 +47,49 @@ is.na(tenure[,2:6])<-tenure[,2:6]>1
 tenure <- tenure[complete.cases(tenure),]
 summary(tenure)
 
+jpeg(paste0(outputdir,'tenure_corr_time.jpg'), width = 1024, height = 480, units = "px")
 par(mfrow=c(1,3))
-baseline <- plot.cor(tenure %>% 
-           filter(MonitoringYear=="Baseline") %>% 
-           dplyr::select(-MonitoringYear))
-two_yr <- plot.cor(tenure %>% 
-           filter(MonitoringYear=="2 Year Post") %>% 
-           dplyr::select(-MonitoringYear))
-four_yr <- plot.cor(tenure %>% 
-           filter(MonitoringYear=="4 Year Post") %>% 
-           dplyr::select(-MonitoringYear))
-ggsave(paste0(outputdir,'tenure_corr_time.png'),width = 10,height = 3)
+corrplot.mixed(cor(tenure %>% 
+             filter(MonitoringYear=="Baseline") %>% 
+             dplyr::select(-MonitoringYear),method='spearman',use="pairwise.complete.obs"),
+             title="Baseline")
+corrplot.mixed(cor(tenure %>% 
+             filter(MonitoringYear=="2 Year Post") %>% 
+             dplyr::select(-MonitoringYear),method='spearman',use="pairwise.complete.obs"),
+             title="two year")
+corrplot.mixed(cor(tenure %>% 
+             filter(MonitoringYear=="4 Year Post") %>% 
+             dplyr::select(-MonitoringYear),method='spearman',use="pairwise.complete.obs"),
+             title="four year")
+dev.off()
 
 # Group and year summaries
 #-------------
-# Food security trends
-food.sec.data <- HHData %>% 
-  left_join(dplyr::select(BigFive,HouseholdID,MAIndex:SERate),by='HouseholdID')  %>% 
-  left_join(MPANames,by='MPAID') %>%
-  filter(!is.na(FSIndex)) 
-# Plot
-food.sec.data2 <- Rmisc::summarySE(food.sec.data, measurevar="FSIndex", groupvars=c('MPAName',"MonitoringYear"),na.rm = T)
 pd <- position_dodge(width=.3) # move them .05 to the left and right
 
-p.foodsec <-  ggplot(food.sec.data2, aes(x=MonitoringYear, y=FSIndex)) + 
+# Food security trends
+p.foodsec <- ggplot(HHData %>% 
+ left_join(dplyr::select(BigFive,HouseholdID,MAIndex:SERate),by='HouseholdID')  %>% 
+ left_join(MPANames,by='MPAID') %>%
+ filter(!is.na(FSIndex)) %>% 
+ Rmisc::summarySE(measurevar="FSIndex", groupvars=c('MPAName',"MonitoringYear"),na.rm = T),
+aes(x=MonitoringYear, y=FSIndex)) + 
   geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
   geom_line( position = pd) +
-  geom_errorbar(aes(ymin=FSIndex- se, ymax=FSIndex+ se), width=0.2, position = pd ) +
- # scale_y_continuous(limits = c(1.5,4.2)) +
+  geom_errorbar(aes(ymin=FSIndex-se, ymax=FSIndex+ se), width=0.2, position = pd ) +
+  # scale_y_continuous(limits = c(1.5,4.2)) +
   ylab("Food Security Index") +
   xlab("MonitoringYear") +
   facet_grid(.~MPAName) 
 p.foodsec
 
 # Tenure trends
-tenure.data <- HHData %>% 
-  left_join(dplyr::select(BigFive,HouseholdID,MAIndex:SERate),by='HouseholdID')  %>% 
-  left_join(MPANames,by='MPAID') %>%
-  filter(!is.na(MTIndex) & MTIndex<=5) 
-# Plot
-tenure.data2 <- Rmisc::summarySE(tenure.data, measurevar="MTIndex", groupvars=c('MPAName',"MonitoringYear"),na.rm = T)
-pd <- position_dodge(width=.3) # move them .05 to the left and right
-
-p.tenure <-  ggplot(tenure.data2, aes(x=MonitoringYear, y=MTIndex)) + 
+p.tenure <- ggplot(HHData %>% 
+   left_join(dplyr::select(BigFive,HouseholdID,MAIndex:SERate),by='HouseholdID')  %>% 
+   left_join(MPANames,by='MPAID') %>%
+   filter(!is.na(MTIndex) & MTIndex<=5) %>% 
+   Rmisc::summarySE(measurevar="MTIndex", groupvars=c('MPAName',"MonitoringYear"),na.rm = T),
+ aes(x=MonitoringYear, y=MTIndex)) + 
   geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
   geom_line( position = pd) +
   geom_errorbar(aes(ymin=MTIndex-se, ymax=MTIndex+ se), width=0.2, position = pd ) +
@@ -97,7 +97,7 @@ p.tenure <-  ggplot(tenure.data2, aes(x=MonitoringYear, y=MTIndex)) +
   ylab("Marine Tenure Index") +
   xlab("MonitoringYear") +
   facet_grid(.~MPAName) 
-  p.tenure
+p.tenure
   
 # Export
 plot_grid(p.foodsec,p.tenure,
@@ -110,8 +110,9 @@ table(HHData$PrimaryLivelihoodClean,HHData$MonitoringYear)
 prim.occ.data <- HHData %>% 
   left_join(dplyr::select(BigFive,HouseholdID,MAIndex:SERate),by='HouseholdID')  %>% 
   left_join(MPANames,by='MPAID') %>%
-  filter(PrimaryLivelihoodClean<=7 & !is.na(PrimaryLivelihoodClean)) %>% 
-  mutate(lvlhds=recode(PrimaryLivelihoodClean,'1'='farming','2'='forest_harvesting','3'='fishing','4'='aquaculture','5'='mining','6'='tourism','7'='wage_labor'))
+  filter(!is.na(PrimaryLivelihoodClean)) %>% 
+  mutate(lvlhds=recode(PrimaryLivelihoodClean,'1'='farming','2'='forest_harvesting','3'='fishing','4'='aquaculture',
+                       '5'='mining','6'='tourism','7'='wage_labor','996'="other"))
 
 # Plot
 prim.occ.data2 <- Rmisc::summarySE(prim.occ.data, measurevar="FSIndex", groupvars=c('MPAName','lvlhds',"MonitoringYear"),na.rm = T)
