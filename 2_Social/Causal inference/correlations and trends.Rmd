@@ -17,6 +17,57 @@ Mode <- function(x) {
  ux[which.max(tabulate(match(x, ux)))]
 }
 
+# groups and summarizes groups into mean,sd,se,se_upper,se_lower
+# my_summarize(data,measurement.var,group1,group2..)
+my_summarize <- function (.data,x,...) {
+  # needed to use variable names in function
+  group_var <- quos(...)
+  enquo_x <- enquo(x)  # measurement variable
+  mean_name <- paste0(quo_name(enquo_x)) # renaming variables
+  # group and summarize
+    .data %>%
+    group_by(!!!group_var) %>% 
+    summarise(m= mean(UQ(enquo_x)), med=median(UQ(enquo_x)),mode=Mode(UQ(enquo_x)),
+              sd= sd(UQ(enquo_x)),n=n(), se=sd/sqrt(n),ci=qt(0.975,df=n-1)*se,
+              se_lower=m-se,se_upper=m+se,ci_lower=m-ci,ci_upper=m+ci)  %>% 
+    rename(!!mean_name:=m)
+}
+# my_barplot(data,'x','y') # Bar plot with standard error bars
+my_barplot_se <- function(.data,x,y){
+ggplot(.data,aes_string(x=x,y=y,label='n')) + 
+  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
+   geom_line( position = pd) +
+   geom_errorbar(aes(ymin=se_upper, ymax=se_lower), width=0.2, position = pd ) +
+  geom_text(size = 3, position = position_stack(vjust = 0.5), col='white') 
+}
+
+# my_barplot_ci(data,'x','y') # Bar plot with 95% confidence intervals
+my_barplot_ci<- function(.data,x,y){
+ggplot(.data,aes_string(x=x,y=y,label='n')) + 
+  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
+   geom_line( position = pd) +
+   geom_errorbar(aes(ymin=ci_upper, ymax=ci_lower), width=0.2, position = pd ) +
+  geom_text(size = 3, position = position_stack(vjust = 0.5), col='white') 
+}
+
+# my_pointplot_se(.data,'x','y','group.var') # plot with points and standard errors
+my_pointplot_se<- function(.data,x,y,group.var){
+ggplot(.data,aes_string(x=x,y=y,group=group.var,label='n')) + 
+  geom_errorbar(aes(ymin=se_lower, ymax=se_upper), width=0, position = pd ) +
+  geom_line(position =pd) +
+  geom_point(size=2, position =pd)+ theme_bw() +
+  geom_text(size = 3, position = position_stack(vjust = 0.5)) 
+}
+
+# my_pointplot_ci(.data,'x','y','group.var') # plot with points and 95% confidence intervals
+my_pointplot_ci<- function(.data,x,y,group.var){
+ggplot(.data,aes_string(x=x,y=y,group=group.var,label='n')) + 
+  geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), width=0, position = pd ) +
+  geom_line(position =pd) +
+  geom_point(size=2, position =pd)+ theme_bw() +
+  geom_text(size = 3, position = position_stack(vjust = 0.5)) 
+}
+
 # Directories
 outputdir <- "C:/Users/dgill6/Documents/Data analysis/BHS/"
 
@@ -25,6 +76,7 @@ pd <- position_dodge(width=.3) # move them .05 to the left and right
 myColors <- matrix(c('deepskyblue3','darkblue'),nrow=1)
 
 ```
+
 
 
 ### Correlations between tenure indicators
@@ -37,8 +89,12 @@ is.na(tenure[,2:6])<-tenure[,2:6]>1
 tenure <- tenure[complete.cases(tenure),]
 summary(tenure)
 
-jpeg(paste0(outputdir,'tenure_corr_time.jpg'), width = 1024, height = 480, units = "px")
-par(mfrow=c(1,3))
+#for continuous variables
+pairs(tenure[,-1])
+
+# Correlograms for the binary tenure variables ()
+#jpeg(paste0(outputdir,'tenure_corr_time.jpg'), width = 1024, height = 480, units = "px")
+#par(mfrow=c(1,3))
 corrplot.mixed(cor(tenure %>% 
              filter(MonitoringYear=="Baseline") %>% 
              dplyr::select(-MonitoringYear),method='spearman',use="pairwise.complete.obs"),
@@ -51,74 +107,54 @@ corrplot.mixed(cor(tenure %>%
              filter(MonitoringYear=="4 Year Post") %>% 
              dplyr::select(-MonitoringYear),method='spearman',use="pairwise.complete.obs"),
              title="four year")
-dev.off()
+#dev.off()
 ```
 
 
-### Group and year summaries
+### Trends summaries
 ```{r eval=F}
 # Food security trends
-p.foodsec <- ggplot(HHData %>% 
+foodsec <- HHData %>% 
  left_join(dplyr::select(BigFive,HouseholdID,MAIndex:SERate),by='HouseholdID')  %>% 
  left_join(MPANames,by='MPAID') %>%
  filter(!is.na(FSIndex)) %>% 
- Rmisc::summarySE(measurevar="FSIndex", groupvars=c('MPAName',"MonitoringYear"),na.rm = T),
-aes(x=MonitoringYear, y=FSIndex)) + 
-  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
-  geom_line( position = pd) +
-  geom_errorbar(aes(ymin=FSIndex-se, ymax=FSIndex+ se), width=0.2, position = pd ) +
-  # scale_y_continuous(limits = c(1.5,4.2)) +
-  ylab("Food Security Index") +
-  xlab("MonitoringYear") +
+ my_summarize(FSIndex,MonitoringYear,MPAName)
+
+p.foodsec <- t.plot(foodsec,'MonitoringYear','FSIndex') +
   facet_grid(.~MPAName) 
 p.foodsec
 
 # Tenure trends
-p.tenure <- ggplot(HHData %>% 
+tenure <- HHData %>% 
    left_join(dplyr::select(BigFive,HouseholdID,MAIndex:SERate),by='HouseholdID')  %>% 
    left_join(MPANames,by='MPAID') %>%
    filter(!is.na(MTIndex) & MTIndex<=5) %>% 
-   Rmisc::summarySE(measurevar="MTIndex", groupvars=c('MPAName',"MonitoringYear"),na.rm = T),
- aes(x=MonitoringYear, y=MTIndex)) + 
-  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
-  geom_line( position = pd) +
-  geom_errorbar(aes(ymin=MTIndex-se, ymax=MTIndex+ se), width=0.2, position = pd ) +
-  # scale_y_continuous(limits = c(1.5,4.2)) +
-  ylab("Marine Tenure Index") +
-  xlab("MonitoringYear") +
+  my_summarize(MTIndex,MonitoringYear,MPAName)
+
+p.tenure <- t.plot(tenure,'MonitoringYear','MTIndex') +
   facet_grid(.~MPAName) 
 p.tenure
 
 # Income from fishing trends
-p.fincome <- ggplot(HHData %>% 
+fincome <- HHData %>% 
    left_join(dplyr::select(BigFive,HouseholdID,MAIndex:SERate),by='HouseholdID')  %>% 
    left_join(MPANames,by='MPAID') %>%
     filter(!is.na(PercentIncFishClean) & PercentIncFishClean!=0) %>% 
-   Rmisc::summarySE(measurevar="PercentIncFishClean", 
-                    groupvars=c('MPAName',"MonitoringYear"),na.rm = T),
- aes(x=MonitoringYear, y=PercentIncFishClean)) + 
-  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
-  geom_line( position = pd) +
-  geom_errorbar(aes(ymin=PercentIncFishClean-se, ymax=PercentIncFishClean+ se), 
-                width=0.2, position = pd ) +
-  # scale_y_continuous(limits = c(1.5,4.2)) +
+  my_summarize(PercentIncFishClean,MonitoringYear,MPAName)
+
+p.fincome <- t.plot(fincome,'MonitoringYear','PercentIncFishClean') +
   ylab("Percent Inc Fishing") +
   xlab("MonitoringYear") +
   facet_grid(.~MPAName) 
 p.fincome
 
-p.fishprot <- ggplot(HHData %>% 
+fishprot <- HHData %>% 
    left_join(dplyr::select(BigFive,HouseholdID,MAIndex:SERate),by='HouseholdID')  %>% 
    left_join(MPANames,by='MPAID') %>%
    filter(!is.na(PercentProteinFishClean)) %>% 
-   Rmisc::summarySE(measurevar="PercentProteinFishClean", 
-                    groupvars=c('MPAName',"MonitoringYear"),na.rm = T),
- aes(x=MonitoringYear, y=PercentProteinFishClean)) + 
-  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
-  geom_line( position = pd) +
-  geom_errorbar(aes(ymin=PercentProteinFishClean-se, ymax=PercentProteinFishClean+ se), 
-                width=0.2, position = pd ) +
-  # scale_y_continuous(limits = c(1.5,4.2)) +
+  my_summarize(PercentProteinFishClean,MonitoringYear,MPAName)
+
+p.fishprot <- t.plot(fishprot,'MonitoringYear','PercentProteinFishClean') +
   ylab("Percent Protein from fish") +
   xlab("MonitoringYear") +
   facet_grid(.~MPAName) 
@@ -140,51 +176,94 @@ prim.occ.data <- HHData %>%
   left_join(MPANames,by='MPAID') %>%
   filter(!is.na(PrimaryLivelihoodClean)) %>% 
   mutate(lvlhds=recode(PrimaryLivelihoodClean,'1'='farming','2'='forest_harvesting','3'='fishing',
-                       '4'='aquaculture','5'='mining','6'='tourism','7'='wage_labor','996'="other")) %>%   Rmisc::summarySE(measurevar="FSIndex", groupvars=c('MPAName','lvlhds',"MonitoringYear"),na.rm = T)
+                       '4'='aquaculture','5'='mining','6'='tourism','7'='wage_labor','996'="other")) %>%   my_summarize(FSIndex,MPAName,lvlhds,MonitoringYear)
 
-p.priocc <-  ggplot(prim.occ.data, aes(x=MonitoringYear, y=FSIndex, group=MPAName)) + 
+p.priocc <-  ggplot(prim.occ.data, aes(x=MonitoringYear, y=FSIndex, group=MPAName,label=n)) + 
               geom_errorbar(aes(ymin=FSIndex- se, ymax=FSIndex+ se), width=0, position = pd ) +
               geom_line(position =pd) +
               geom_point(size=2, position =pd)+ theme_bw() +
+              geom_text(size = 3, position = position_stack(vjust = 0.5)) +
               ylab("FSIndex") +
               xlab("MonitoringYear") +
+              annotate("rect", xmin = 0, xmax = 4, ymin = 0, ymax = 1.5,alpha = .1,fill='red') +
+              annotate("rect", xmin = 0, xmax = 4, ymin = 1.5, ymax = 4,alpha = .1,fill='yellow') +
+              annotate("rect", xmin = 0, xmax = 4, ymin = 4, ymax = 6,alpha = .1,fill='green') +
               facet_grid(lvlhds ~ MPAName) 
 p.priocc
-ggsave(paste0(outputdir,"food security by occupation.png"),width = 10,height = 7)
+
+my_pointplot_ci(prim.occ.data,'MonitoringYear','FSIndex','MPAName') +
+  ylab("FSIndex") +
+  xlab("MonitoringYear") +
+  annotate("rect", xmin = 0, xmax = 4, ymin = 0, ymax = 1.5,alpha = .1,fill='red') +
+  annotate("rect", xmin = 0, xmax = 4, ymin = 1.5, ymax = 4,alpha = .1,fill='yellow') +
+  annotate("rect", xmin = 0, xmax = 4, ymin = 4, ymax = 6,alpha = .1,fill='green') +
+  facet_grid(lvlhds ~ MPAName) 
+
+
+ggsave(paste0(outputdir,"food security by occupation.png"),width = 15,height = 9)
 ```
 
-###### Food security different based on income?
+###### Food security different based on income from fishing?
 ```{r eval=F}
 prim.inc <- HHData %>% 
  left_join(dplyr::select(BigFive,HouseholdID,MAIndex:SERate),by='HouseholdID')  %>% 
  left_join(MPANames,by='MPAID') %>% 
  filter(!is.na(PercentIncFishClean) & PercentIncFishClean!=0) %>% 
- mutate(fish.income=ifelse(PercentIncFishClean>=3,'majority','minority')) %>% 
- Rmisc::summarySE(measurevar="FSIndex", groupvars=c('MPAName','fish.income',"MonitoringYear"),na.rm = T)
+ mutate(fish.inc=recode_factor(PercentIncFishClean,'1'='none','2'='some','3'='almost half',
+                       '4'='most','5'='all',.ordered = T)) %>%
+ mutate(fish.inc1=ifelse(PercentIncFishClean>3,'majority','minority')) %>% 
+ my_summarize(FSIndex,MPAName,fish.inc,MonitoringYear)
+
+
+p.primincD <-  ggplot(prim.inc, aes(x=MonitoringYear, y=FSIndex, group=MPAName,label=n,)) + 
+              geom_errorbar(aes(ymin=FSIndex- se, ymax=FSIndex+ se), width=0, position = pd ) +
+              geom_line(position =pd) +
+              geom_point(size=2, position =pd)+ theme_bw() +
+              geom_text(size = 3, position = position_stack(vjust = 0.5)) +
+               ylab("FSIndex") +
+              xlab("MonitoringYear") +
+              annotate("rect", xmin = 0, xmax = 4, ymin = 0, ymax = 1.5,alpha = .1,fill='red') +
+              annotate("rect", xmin = 0, xmax = 4, ymin = 1.5, ymax = 4,alpha = .1,fill='yellow') +
+              annotate("rect", xmin = 0, xmax = 4, ymin = 4, ymax = 6,alpha = .1,fill='green') +
+              facet_grid(fish.inc ~ MPAName) 
+p.primincD
+ggsave(paste0(outputdir,"food security by occupation-detailed.png"),width = 15,height = 9)
+
+prim.inc1 <- HHData %>% 
+ left_join(dplyr::select(BigFive,HouseholdID,MAIndex:SERate),by='HouseholdID')  %>% 
+ left_join(MPANames,by='MPAID') %>% 
+ filter(!is.na(PercentIncFishClean) & PercentIncFishClean!=0) %>% 
+ mutate(fish.inc1=ifelse(PercentIncFishClean>3,'majority','minority')) %>% 
+summarySE(measurevar="FSIndex", groupvars=c('MPAName','fish.inc1',"MonitoringYear"),na.rm = T) 
 colnames(myColors) <- c("majority","minority")
-colScale <- scale_colour_manual(name = "Fish inc.",values = rev(myColors),breaks=c("majority","minority"))
+colScale <- scale_colour_manual(name = "Fish inc.",values =rev(myColors), breaks=c("majority","minority"))
 
-p.prim.inc <- ggplot(prim.inc, aes(x=MonitoringYear, y=FSIndex,colour=fish.income)) + 
-             #scale_x_discrete(limits = rev(levels(MPAdata2$No_take))) +
-             geom_errorbar(aes(ymin=FSIndex- se, ymax=FSIndex+ se), width=0, position = pd ) +
-             geom_line( position = pd ) +
-             geom_point(size=2, position =pd)+ theme_bw() +
-             ylab("FSIndex") +
-             xlab("MonitoringYear") +
-             facet_grid(. ~ MPAName) +
-             colScale
+p.priminc <-  ggplot(prim.inc1, aes(x=MonitoringYear, y=FSIndex,label=N,color=fish.inc1)) + 
+              geom_errorbar(aes(ymin=FSIndex- se, ymax=FSIndex+ se), width=0, position = pd ) +
+              geom_point(size=2, position =pd)+ theme_bw() +
+              geom_line(position=pd) +
+              geom_text(size = 3, nudge_x=0.5) +
+              ylab("FSIndex") +
+              xlab("MonitoringYear") +
+              annotate("rect", xmin = 0, xmax = 4, ymin = 0, ymax = 1.5,alpha = .1,fill='red') +
+              annotate("rect", xmin = 0, xmax = 4, ymin = 1.5, ymax = 4,alpha = .1,fill='yellow') +
+              annotate("rect", xmin = 0, xmax = 4, ymin = 4, ymax = 6,alpha = .1,fill='green') +
+              facet_grid( ~ MPAName) +
+              colScale
+p.priminc
+ggsave(paste0(outputdir,"food security by occupation.png"),width = 15,height = 7)
+```
 
-
- # Those who rely heavily on fish for protein differ in food security?
+### Those who rely heavily on fish for protein differ in food security?
+```{r eval=F}
 most.prot <- HHData %>% 
  left_join(dplyr::select(BigFive,HouseholdID,MAIndex:SERate),by='HouseholdID')  %>% 
  left_join(MPANames,by='MPAID') %>% 
  filter(!is.na(PercentProteinFishClean)) %>% 
- mutate(reliance=ifelse(PercentProteinFishClean>3,'reliant','less reliant')) %>% 
- Rmisc::summarySE(measurevar="FSIndex", groupvars=c('MPAName','reliance',"MonitoringYear"),na.rm = T)
-
-colnames(myColors) <- c("reliant","less reliant")
-colScale <- scale_colour_manual(name = "Fish prot.",values = myColors,breaks=c("reliant","less reliant"))
+ mutate(reliance=ifelse(PercentProteinFishClean>3,'half or more','less half')) %>% 
+ summarySE(measurevar="FSIndex", groupvars=c('MPAName','reliance',"MonitoringYear"),na.rm = T)
+colnames(myColors) <- c('half or more','less half')
+colScale <- scale_colour_manual(name = "Fish prot.",values = myColors,breaks=c('half or more','less half'))
 
 p.most.prot <- ggplot(most.prot, aes(x=MonitoringYear, y=FSIndex,colour=reliance)) + 
     #scale_x_discrete(limits = rev(levels(MPAdata2$No_take))) +
@@ -203,7 +282,7 @@ mrkt.dist <- HHData %>%
   left_join(MPANames,by='MPAID') %>% 
   filter(!is.na(TimeMarketClean)) %>% 
   mutate(mrktdist=ifelse(TimeMarketClean>=2,'far','near')) %>% 
-  Rmisc::summarySE(measurevar="FSIndex", 
+  summarySE(measurevar="FSIndex", 
                    groupvars=c('MPAName','mrktdist',"MonitoringYear"), na.rm = T)
 colnames(myColors) <- c("far","near")
 colScale <- scale_colour_manual(name = "Group",values = rev(myColors),breaks=c("far","near"))
@@ -237,7 +316,7 @@ t.access <- HHData %>%
   mutate(access=ifelse(RightsAccessCoded==1,'yes','no'))
 
 # Plot all MPAs
-t.access2 <- Rmisc::summarySE(t.access, measurevar="FSIndex", groupvars=c('access',"MonitoringYear"),na.rm = T)
+t.access2 <- summarySE(t.access, measurevar="FSIndex", groupvars=c('access',"MonitoringYear"),na.rm = T)
 pd <- position_dodge(width=.3) # move them .05 to the left and right
 myColors <- matrix(c('deepskyblue3','darkblue'),nrow=1)
 colnames(myColors) <- c("yes","no")
@@ -253,7 +332,7 @@ p.access <- ggplot(t.access2, aes(x=MonitoringYear, y=FSIndex,colour=access)) +
   colScale
 
 # Plot by MPA
-t.access3 <- Rmisc::summarySE(t.access, measurevar="FSIndex", groupvars=c('MPAName','access',"MonitoringYear"),na.rm = T)
+t.access3 <- summarySE(t.access, measurevar="FSIndex", groupvars=c('MPAName','access',"MonitoringYear"),na.rm = T)
 
 p.access.MPA <- ggplot(t.access3, aes(x=MonitoringYear, y=FSIndex,colour=access)) + 
   #scale_x_discrete(limits = rev(levels(MPAdata2$No_take))) +
@@ -273,7 +352,7 @@ t.harvest <- HHData %>%
   mutate(harvest=ifelse(RightsHarvestClean==1,'yes','no'))
 
 # Plot all MPAs
-t.harvest2 <- Rmisc::summarySE(t.harvest, measurevar="FSIndex", groupvars=c('harvest',"MonitoringYear"),na.rm = T)
+t.harvest2 <- summarySE(t.harvest, measurevar="FSIndex", groupvars=c('harvest',"MonitoringYear"),na.rm = T)
 colScale <- scale_colour_manual(name = "harvest",values = myColors,breaks=c("yes","no"))
 
 p.harvest <- ggplot(t.harvest2, aes(x=MonitoringYear, y=FSIndex,colour=harvest)) + 
@@ -286,7 +365,7 @@ p.harvest <- ggplot(t.harvest2, aes(x=MonitoringYear, y=FSIndex,colour=harvest))
   colScale
 
 # Plot by MPA
-t.harvest3 <- Rmisc::summarySE(t.harvest, measurevar="FSIndex", groupvars=c('MPAName','harvest',"MonitoringYear"),na.rm = T)
+t.harvest3 <- summarySE(t.harvest, measurevar="FSIndex", groupvars=c('MPAName','harvest',"MonitoringYear"),na.rm = T)
 
 p.harvest.MPA <- ggplot(t.harvest3, aes(x=MonitoringYear, y=FSIndex,colour=harvest)) + 
   #scale_x_discrete(limits = rev(levels(MPAdata2$No_take))) +
@@ -305,7 +384,7 @@ t.manage <- HHData %>%
   mutate(manage=ifelse(RightsManageClean==1,'yes','no'))
 
 # Plot all MPAs
-t.manage2 <- Rmisc::summarySE(t.manage, measurevar="FSIndex", groupvars=c('manage',"MonitoringYear"),na.rm = T)
+t.manage2 <- summarySE(t.manage, measurevar="FSIndex", groupvars=c('manage',"MonitoringYear"),na.rm = T)
 colScale <- scale_colour_manual(name = "manage",values = myColors,breaks=c("yes","no"))
 
 p.manage <- ggplot(t.manage2, aes(x=MonitoringYear, y=FSIndex,colour=manage)) + 
@@ -318,7 +397,7 @@ p.manage <- ggplot(t.manage2, aes(x=MonitoringYear, y=FSIndex,colour=manage)) +
   colScale
 
 # Plot by MPA
-t.manage3 <- Rmisc::summarySE(t.manage, measurevar="FSIndex", groupvars=c('MPAName','manage',"MonitoringYear"),na.rm = T)
+t.manage3 <- summarySE(t.manage, measurevar="FSIndex", groupvars=c('MPAName','manage',"MonitoringYear"),na.rm = T)
 
 p.manage.MPA <- ggplot(t.manage3, aes(x=MonitoringYear, y=FSIndex,colour=manage)) + 
   #scale_x_discrete(limits = rev(levels(MPAdata2$No_take))) +
@@ -338,7 +417,7 @@ t.exclude <- HHData %>%
   mutate(exclude=ifelse(RightsExcludeClean==1,'yes','no'))
 
 # Plot all MPAs
-t.exclude2 <- Rmisc::summarySE(t.exclude, measurevar="FSIndex", groupvars=c('exclude',"MonitoringYear"),na.rm = T)
+t.exclude2 <- summarySE(t.exclude, measurevar="FSIndex", groupvars=c('exclude',"MonitoringYear"),na.rm = T)
 colScale <- scale_colour_manual(name = "exclude",values = myColors,breaks=c("yes","no"))
 
 p.exclude <- ggplot(t.exclude2, aes(x=MonitoringYear, y=FSIndex,colour=exclude)) + 
@@ -351,7 +430,7 @@ p.exclude <- ggplot(t.exclude2, aes(x=MonitoringYear, y=FSIndex,colour=exclude))
   colScale
 
 # Plot by MPA
-t.exclude3 <- Rmisc::summarySE(t.exclude, measurevar="FSIndex", groupvars=c('MPAName','exclude',"MonitoringYear"),na.rm = T)
+t.exclude3 <- summarySE(t.exclude, measurevar="FSIndex", groupvars=c('MPAName','exclude',"MonitoringYear"),na.rm = T)
 
 p.exclude.MPA <- ggplot(t.exclude3, aes(x=MonitoringYear, y=FSIndex,colour=exclude)) + 
   #scale_x_discrete(limits = rev(levels(MPAdata2$No_take))) +
@@ -371,7 +450,7 @@ t.transfer <- HHData %>%
   mutate(transfer=ifelse(RightsTransferClean==1,'yes','no'))
 
 # Plot all MPAs
-t.transfer2 <- Rmisc::summarySE(t.transfer, measurevar="FSIndex", groupvars=c('transfer',"MonitoringYear"),na.rm = T)
+t.transfer2 <- summarySE(t.transfer, measurevar="FSIndex", groupvars=c('transfer',"MonitoringYear"),na.rm = T)
 colScale <- scale_colour_manual(name = "transfer",values = myColors,breaks=c("yes","no"))
 
 p.transfer <- ggplot(t.transfer2, aes(x=MonitoringYear, y=FSIndex,colour=transfer)) + 
@@ -384,7 +463,7 @@ p.transfer <- ggplot(t.transfer2, aes(x=MonitoringYear, y=FSIndex,colour=transfe
   colScale
 
 # Plot by MPA
-t.transfer3 <- Rmisc::summarySE(t.transfer, measurevar="FSIndex", groupvars=c('MPAName','transfer',"MonitoringYear"),na.rm = T)
+t.transfer3 <- summarySE(t.transfer, measurevar="FSIndex", groupvars=c('MPAName','transfer',"MonitoringYear"),na.rm = T)
 
 p.transfer.MPA <- ggplot(t.transfer3, aes(x=MonitoringYear, y=FSIndex,colour=transfer)) + 
   #scale_x_discrete(limits = rev(levels(MPAdata2$No_take))) +
@@ -422,21 +501,6 @@ plot.cor <- function (x){
   #          p.mat = pval , insig = "blank",cl.pos="n")
    corrplot.mixed(M,order='hclust')
   }
-# Xlabels (need fixing)
-xlabl <- function (x,y){
-  quo_y <- enquo(y)  # needed to use variable names in function
-  A <- x %>%
-    dplyr::select(MPAName:N) %>% 
-    spread(key = !!quo_y, value=N)
-  A <- A %>% 
-    mutate(xlabel=paste0(MonitoringYear,"\n",'(',A[,3],',',A[,4],')')) %>% 
-    select(MPAName, MonitoringYear,xlabel)
-  A <- left_join(x,A,by=c('MPAName'='MPAName', 'MonitoringYear'='MonitoringYear'))
-  
-  pd <- position_dodge(width=.3) # move them .05 to the left and right
-  myColors <- matrix(c('deepskyblue3','darkblue'),nrow=1)
-  colnames(myColors) <- unique(A[,2])
-  colScale <- scale_colour_manual(name = "Group",values = rev(myColors),breaks=unique(A[,2]))
-  return (A)
-}  
+
+
 ```

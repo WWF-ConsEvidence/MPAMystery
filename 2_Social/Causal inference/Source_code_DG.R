@@ -20,7 +20,7 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-pacman::p_load(plyr,ggplot2,reshape2,reldist,grid,gridExtra,varhandle,xlsx,
+pacman::p_load(plyr,ggplot2,reshape2,reldist,grid,gridExtra,varhandle,xlsx,Rmisc,
                RODBC,Matching,optmatch,tidyr,RItools,Hmisc,MBESS,rbounds,Kendall,corrplot,cowplot,dplyr)
 
 
