@@ -1,0 +1,138 @@
+---
+title: "BHS causal mechanisms"
+author: "David Gill & Louise Glew"
+date: "February 23, 2018"
+output: html_document
+---
+
+Create custom functions, set stringsasFactors as false
+```{r eval=F}
+
+# load packages
+pacman::p_load(plyr,ggplot2,reshape2,reldist,grid,gridExtra,varhandle,Rmisc,FD,readxl,
+               RODBC,Matching,optmatch,tidyr,RItools,Hmisc,MBESS,rbounds,Kendall,corrplot,cowplot,dplyr)
+
+# Options
+options(scipen=999,stringsAsFactors = FALSE)
+
+# Functions
+sum2=function(x){sum(x,na.rm=TRUE)}
+mean2=function(x){mean(x,na.rm=TRUE)}
+Mode <- function(x) {
+ ux <- unique(x)
+ ux[which.max(tabulate(match(x, ux)))]
+}
+
+# groups and summarizes groups into mean,sd,se,se_upper,se_lower
+# my_summarize(data,measurement.var,group1,group2..)
+my_summarize <- function (.data,x,...) {
+  # needed to use variable names in function
+  group_var <- quos(...)
+  enquo_x <- enquo(x)  # measurement variable
+  mean_name <- paste0(quo_name(enquo_x)) # renaming variables
+  # group and summarize
+    .data %>%
+    group_by(!!!group_var) %>% 
+    summarise(m= mean(UQ(enquo_x)), med=median(UQ(enquo_x)),mode=Mode(UQ(enquo_x)),
+              sd= sd(UQ(enquo_x)),n=n(), se=sd/sqrt(n),ci=qt(0.975,df=n-1)*se,
+              se_lower=m-se,se_upper=m+se,ci_lower=m-ci,ci_upper=m+ci)  %>% 
+    rename(!!mean_name:=m)
+}
+# my_barplot(data,'x','y') # Bar plot with standard error bars
+my_barplot_se <- function(.data,x,y){
+ggplot(.data,aes_string(x=x,y=y,label='n')) + 
+  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
+   geom_line( position = pd) +
+   geom_errorbar(aes(ymin=se_upper, ymax=se_lower), width=0.2, position = pd ) +
+  geom_text(size = 3, position = position_stack(vjust = 0.5), col='white') 
+}
+
+# my_barplot_ci(data,'x','y') # Bar plot with 95% confidence intervals
+my_barplot_ci<- function(.data,x,y){
+ggplot(.data,aes_string(x=x,y=y,label='n')) + 
+  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
+   geom_line( position = pd) +
+   geom_errorbar(aes(ymin=ci_upper, ymax=ci_lower), width=0.2, position = pd ) +
+  geom_text(size = 3, position = position_stack(vjust = 0.5), col='white') 
+}
+
+# my_pointplot_se(.data,'x','y','group.var') # plot with points and standard errors
+my_pointplot_se<- function(.data,x,y,group.var){
+ggplot(.data,aes_string(x=x,y=y,group=group.var,label='n')) + 
+  geom_errorbar(aes(ymin=se_lower, ymax=se_upper), width=0, position = pd ) +
+  geom_line(position =pd) +
+  geom_point(size=2, position =pd)+ theme_bw() +
+  geom_text(size = 3, position = position_stack(vjust = 0.5)) 
+}
+
+# my_pointplot_ci(.data,'x','y','group.var') # plot with points and 95% confidence intervals
+my_pointplot_ci<- function(.data,x,y,group.var){
+ggplot(.data,aes_string(x=x,y=y,group=group.var,label='n')) + 
+  geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), width=0, position = pd ) +
+  geom_line(position =pd) +
+  geom_point(size=2, position =pd)+ theme_bw() +
+  geom_text(size = 3, position = position_stack(vjust = 0.5)) 
+}
+
+# Directories
+outputdir <- "C:/Users/dgill6/Documents/Data analysis/BHS/"
+dropbox <- "C:/Users/dgill6/Dropbox/BHS/"
+
+# ggplot variables
+pd <- position_dodge(width=.3) # move them .05 to the left and right
+myColors <- matrix(c('deepskyblue3','darkblue'),nrow=1)
+
+# Gender of household head
+HHgender<-read.csv(file = "C:/Users/dgill6/Dropbox/BHS/clean_gender_HHH.csv", header = TRUE) 
+nmds_scores<-read.csv(file = "C:/Users/dgill6/Dropbox/BHS/DG_nmds_scores.csv", header = TRUE) 
+
+# Source HH data
+source('2_Social/SourcedScripts/BHS_MPA_Mystery.R')
+```
+
+Compile important variables
+```{r eval=F}
+#grep("HH",names(data),value = T,ignore.case = T)
+
+data <- HHData %>% 
+ left_join(dplyr::select(BigFive,HouseholdID,MAIndex:SERate),by='HouseholdID')  %>% 
+ left_join(MPANames,by='MPAID')  %>% 
+ left_join(dplyr::select(Settlements,SettlementID,SettlementName,Treatment),by='SettlementID')  %>% 
+ left_join(HHgender,by='HouseholdID') %>% 
+ left_join(nmds_scores,by='HouseholdID') %>% 
+ filter(!is.na(PrimaryLivelihoodClean) & !is.na(FSIndex)) %>% 
+ mutate(w.quintile=as.numeric(cut2(MAIndex, g=5)),
+    fish.dep=ifelse(PrimaryLivelihoodClean==3,3,
+              ifelse(SecondaryLivelihoodClean==3 | TertiaryLivelihoodClean==3,2,1)),
+    tourism.dep=ifelse(PrimaryLivelihoodClean%in%c(6,7),3,
+              ifelse(SecondaryLivelihoodClean%in%c(6,7) | TertiaryLivelihoodClean%in%c(6,7),2,1)))%>% 
+ rename(genderHH=IndividualGender) %>% 
+  select(HouseholdID:InterviewYear,MonitoringYear,Treatment,SettlementName,MPAName,
+         PrimaryLivelihoodClean:TertiaryLivelihoodClean,
+         FreqFishClean:PercentIncFishClean,FreqEatFishClean,PercentProteinFishClean,
+         RightsAccessClean:RightsTransferClean,
+         MAIndex:MTIndex,fish.dep,tourism.dep,genderHH,w.quintile,nmds1,nmds2) 
+
+plot(data$MAIndex~data$w.quintile) # should be positively correlated
+summary(data)
+```
+
+### Get ATTs  
+(incomplete, but the idea is to join the assets ATTs and data from above)
+```{r eval=F}
+hfs2yr <- read_excel(paste0(dropbox,'t2_fake_the_panel_A/fake_panel_A_outcomes_t2.xlsx'), sheet = 'hfs_outcome_t2') 
+names(hfs2yr)<- c('HouseholdID','hfs.MPA.outcome','hfs.crl.outcome','hfs.ATT')
+asset2yr <- read_excel(paste0(dropbox,'t2_fake_the_panel_A/fake_panel_A_outcomes_t2.xlsx'), sheet = 'asset_outcome_t2') 
+names(asset2yr)<- c('HouseholdID','ast.MPA.outcome','ast.crl.outcome','ast.ATT')
+# hfs4yr <- read_excel(paste0(dropbox,'t4_fake_the_panel_A/fake_panel_A_outcomes_t2.xlsx'), sheet = 'hfs_outcome_t4') 
+# asset4yr <- read_excel(paste0(dropbox,'t4_fake_the_panel_A/fake_panel_A_outcomes_t2.xlsx'), sheet = 'asset_outcome_t4') 
+
+
+data1 <- hfs2yr %>% 
+  left_join(asset2yr,by='HouseholdID') %>% 
+  left_join(data,by='HouseholdID') %>% 
+
+
+
+head(hfs2yr)
+```

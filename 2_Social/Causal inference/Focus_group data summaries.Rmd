@@ -1,0 +1,139 @@
+---
+title: "BHS fishing activity"
+author: "David Gill"
+date: "February 23, 2018"
+output: html_document
+---
+Create custom functions, set stringsasFactors as false
+```{r eval=F}
+
+# load packages
+pacman::p_load(plyr,ggplot2,reshape2,reldist,grid,gridExtra,varhandle,Rmisc,FD,readxl,
+               RODBC,Matching,optmatch,tidyr,RItools,Hmisc,MBESS,rbounds,Kendall,corrplot,cowplot,dplyr)
+
+# Options
+options(scipen=999,stringsAsFactors = FALSE)
+
+# Functions
+sum2=function(x){sum(x,na.rm=TRUE)}
+mean2=function(x){mean(x,na.rm=TRUE)}
+Mode <- function(x) {
+ ux <- unique(x)
+ ux[which.max(tabulate(match(x, ux)))]
+}
+
+# groups and summarizes groups into mean,sd,se,se_upper,se_lower
+# my_summarize(data,measurement.var,group1,group2..)
+my_summarize <- function (.data,x,...) {
+  # needed to use variable names in function
+  group_var <- quos(...)
+  enquo_x <- enquo(x)  # measurement variable
+  mean_name <- paste0(quo_name(enquo_x)) # renaming variables
+  # group and summarize
+    .data %>%
+    group_by(!!!group_var) %>% 
+    summarise(m= mean(UQ(enquo_x)), med=median(UQ(enquo_x)),mode=Mode(UQ(enquo_x)),
+              sd= sd(UQ(enquo_x)),n=n(), se=sd/sqrt(n),ci=qt(0.975,df=n-1)*se,
+              se_lower=m-se,se_upper=m+se,ci_lower=m-ci,ci_upper=m+ci)  %>% 
+    rename(!!mean_name:=m)
+}
+# my_barplot(data,'x','y') # Bar plot with standard error bars
+my_barplot_se <- function(.data,x,y){
+ggplot(.data,aes_string(x=x,y=y,label='n')) + 
+  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
+   geom_line( position = pd) +
+   geom_errorbar(aes(ymin=se_upper, ymax=se_lower), width=0.2, position = pd ) +
+  geom_text(size = 3, position = position_stack(vjust = 0.5), col='white') 
+}
+
+# my_barplot_ci(data,'x','y') # Bar plot with 95% confidence intervals
+my_barplot_ci<- function(.data,x,y){
+ggplot(.data,aes_string(x=x,y=y,label='n')) + 
+  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
+   geom_line( position = pd) +
+   geom_errorbar(aes(ymin=ci_upper, ymax=ci_lower), width=0.2, position = pd ) +
+  geom_text(size = 3, position = position_stack(vjust = 0.5), col='white') 
+}
+
+# my_pointplot_se(.data,'x','y','group.var') # plot with points and standard errors
+my_pointplot_se<- function(.data,x,y,group.var){
+ggplot(.data,aes_string(x=x,y=y,group=group.var,label='n')) + 
+  geom_errorbar(aes(ymin=se_lower, ymax=se_upper), width=0, position = pd ) +
+  geom_line(position =pd) +
+  geom_point(size=2, position =pd)+ theme_bw() +
+  geom_text(size = 3, position = position_stack(vjust = 0.5)) 
+}
+
+# my_pointplot_ci(.data,'x','y','group.var') # plot with points and 95% confidence intervals
+my_pointplot_ci<- function(.data,x,y,group.var){
+ggplot(.data,aes_string(x=x,y=y,group=group.var,label='n')) + 
+  geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), width=0, position = pd ) +
+  geom_line(position =pd) +
+  geom_point(size=2, position =pd)+ theme_bw() +
+  geom_text(size = 3, position = position_stack(vjust = 0.5)) 
+}
+
+# Directories
+outputdir <- "C:/Users/dgill6/Documents/Data analysis/BHS/"
+dropbox <- "C:/Users/dgill6/Dropbox/BHS/"
+
+# ggplot variables
+pd <- position_dodge(width=.3) # move them .05 to the left and right
+myColors <- matrix(c('deepskyblue3','darkblue'),nrow=1)
+
+# Source HH data
+source('2_Social/SourcedScripts/BHS_MPA_Mystery.R')
+```
+
+### Focus group data
+#### species
+```{r eval=F}
+FGspecies<-read.csv(paste0(outputdir,"Telma_FGD_Species.csv"), header = TRUE) 
+summary(FGspecies)
+apply(FGspecies, 2, function(x) sum(is.na(x))/nrow(FGspecies))
+
+FGspecies1 <- FGspecies %>% 
+  left_join(Settlements,by=c("SettlementCode"="SettlementID")) %>% 
+  filter(!is.na(SpeciesLFamily) & SpeciesLFamily!="") %>% 
+  group_by(MPAID,SpeciesLFamily) %>% 
+  summarise(num=n())%>% 
+  arrange(-num,MPAID,SpeciesLFamily)
+head(FGspecies1)
+
+ggplot(FGspecies1,aes(reorder(SpeciesLFamily, num),num)) + 
+  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
+  ylab("count") +
+  xlab("Families") +
+  coord_flip()
+ggsave(paste0(outputdir,"Telma_FG_impt_species.png"),width = 10,height = 6)
+```
+#### users
+ Next step is to assign the Settlement ID to the PlaceRefName
+```{r eval=F}
+FGusers<-read.csv(paste0(outputdir,"Telma_FGD_Users_PlaceReference.csv"), header = TRUE) 
+summary(FGusers)
+apply(FGusers, 2, function(x) sum(is.na(x))/nrow(FGspecies))
+
+FGusers1 <- FGusers %>% 
+  filter(!is.na(PlaceRefName) & PlaceRefName!="") %>% 
+  group_by(MPAID,PlaceRefName) %>% 
+  summarise(num=n())%>% 
+  arrange(-num,MPAID,PlaceRefName)
+head(FGusers1)
+
+ggplot(FGusers1,aes(reorder(PlaceRefName, num),num)) + 
+  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
+  ylab("count") +
+  xlab("Place reference") +
+  coord_flip()
+ggsave(paste0(outputdir,"Telma_FG_impt_outsiders.png"),width = 10,height = 6)
+
+# search Settlement name IDs
+test <- FGusers1$PlaceRefName[FGusers1$PlaceRefName%in%Settlements$SettlementName]
+
+for(i in (1:nrow(FGusers1))){
+ A <- agrep(FGusers1$PlaceRefName[i],Settlements$SettlementName,ignore.case=T,value =T,max.distance = 0.1)
+ print(paste0("Settlment: ",FGusers1$PlaceRefName[i]))
+ print (A)
+  }
+```

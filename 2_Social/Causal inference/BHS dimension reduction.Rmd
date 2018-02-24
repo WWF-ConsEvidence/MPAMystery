@@ -1,0 +1,110 @@
+---
+title: "BHS dimension reduction"
+author: "David Gill & Louise Glew"
+date: "February 13, 2018"
+output: html_document
+---
+Create custom functions, set stringsasFactors as false
+```{r eval=F}
+
+# load packages
+pacman::p_load(plyr,ggplot2,reshape2,reldist,grid,gridExtra,varhandle,Rmisc,FD,
+               RODBC,Matching,optmatch,tidyr,RItools,Hmisc,MBESS,rbounds,Kendall,corrplot,cowplot,dplyr)
+
+# Options
+options(scipen=999,stringsAsFactors = FALSE)
+
+# Functions
+sum2=function(x){sum(x,na.rm=TRUE)}
+mean2=function(x){mean(x,na.rm=TRUE)}
+Mode <- function(x) {
+ ux <- unique(x)
+ ux[which.max(tabulate(match(x, ux)))]
+}
+
+# Directories
+outputdir <- "C:/Users/dgill6/Documents/Data analysis/BHS/"
+
+# ggplot variables
+pd <- position_dodge(width=.3) # move them .05 to the left and right
+myColors <- matrix(c('deepskyblue3','darkblue'),nrow=1)
+
+# Gender of household head
+HHgender<-read.csv(file = "C:/Users/dgill6/Dropbox/BHS/clean_gender_HHH.csv", header = TRUE) 
+
+```
+
+### Compute variables for dimension reduction
+Create 3 variables to compute social stratification scores (2 dimensions) from multiple variables in multi-dimensional space.
+
+ 1. fishing dependence (1:low, 3: high)
+ 2. gender of household head (1: male, 2: female)
+ 3. poverty quinitles/reverse material assets index 
+
+```{r eval=F}
+#grep("HH",names(data),value = T,ignore.case = T)
+# Compute wealth quntiles
+data <- HHData %>% 
+ left_join(dplyr::select(BigFive,HouseholdID,MAIndex:SERate),by='HouseholdID')  %>% 
+ left_join(MPANames,by='MPAID')  %>% 
+ left_join(HHgender,by='HouseholdID') %>% 
+  filter(!is.na(PrimaryLivelihoodClean)) %>% 
+  filter(MonitoringYear=='Baseline') %>% 
+ mutate(revMAIndex=-MAIndex,
+        pov.quintile=as.numeric(cut2(-MAIndex, g=5)),
+        fish.dep=ifelse(PrimaryLivelihoodClean==3,3,
+                        ifelse(SecondaryLivelihoodClean==3 | TertiaryLivelihoodClean==3,2,1))) %>% 
+  select(HouseholdID,MPAName,MAIndex,FSIndex,revMAIndex,fish.dep,IndividualGender,pov.quintile) %>% 
+  filter(complete.cases(.))
+plot(data$revMAIndex~data$pov.quintile) # should be negatively correlated
+```
+### create nMDS plots and export scores
+We need to decide if we want to include more variables. Given that there are only 3 variables with few levels, there isn't much variation between individuals. I used a reverse of the MAIndex but some ugly plots came out!
+```{r eval=F}
+###- using poverty quintiles
+
+# calculate gower distance (better for ordinal data) 
+data_gow <- gowdis(select(data,fish.dep,IndividualGender,pov.quintile), ord = "podani")
+#nMDS # 2 dimensions
+nmds<-metaMDS(data_gow,center=T, trymax = 20, autotransform =F, k=2,pc=TRUE)
+stressplot(nmds,main="Stress plot")
+plot(nmds,main="Non-metric MDS (Gower Distance)")
+ord.mds1 <- envfit(nmds ~ MAIndex, data=data, perm=999,na.rm = TRUE)
+plot(ord.mds1)
+abline(v=0);abline(h=0)
+# rotate the graph so that one axis is correlated to the wealth index
+nmds.varimax <- MDSrotate(nmds,data$MAIndex,na.rm=T) #rotate to have DA be its own axis
+plot(nmds.varimax$points,main="Rotated nMDS")
+ord.mds2 <- envfit(nmds.varimax$points ~ MAIndex, data=data, perm=999,na.rm = TRUE) 
+plot(ord.mds2)
+abline(v=0);abline(h=0)
+
+###- using reverse MAIndex
+# dissimilarity matrix: 
+# data_gow <- gowdis(select(data,fish.dep,IndividualGender,revMAIndex), ord = "podani")
+# #nMDS # 2 dimensions
+# nmds<-metaMDS(data_gow,center=T, trymax = 20, autotransform =F, k=2,pc=TRUE)
+# stressplot(nmds,main="Stress plot")
+# plot(nmds,main="Non-metric MDS (Gower Distance)")
+# ord.mds1 <- envfit(nmds ~ MAIndex, data=data, perm=999,na.rm = TRUE)
+# plot(ord.mds1)
+# abline(v=0);abline(h=0)
+# # rotate the graph so that one axis is correlated to the wealth index
+# nmds.varimax <- MDSrotate(nmds,data$MAIndex,na.rm=T) #rotate to have DA be its own axis
+# plot(nmds.varimax$points,main="Rotated nMDS")
+# ord.mds2 <- envfit(nmds.varimax$points ~ MAIndex, data=data, perm=999,na.rm = TRUE) 
+# plot(ord.mds2)
+# abline(v=0);abline(h=0)
+
+# export scores
+data$nmds1 <- scores(nmds.varimax)[,1]
+data$nmds2 <- scores(nmds.varimax)[,2]
+head(data)
+
+write.csv(select(data,HouseholdID,nmds1,nmds2),
+          "C:/Users/dgill6/Dropbox/BHS/DG_nmds_scores.csv",row.names=F)
+
+
+plot()
+write.csv()
+```

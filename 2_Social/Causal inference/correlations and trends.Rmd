@@ -6,6 +6,10 @@ output: html_document
 ---
 Create custom functions, set stringsasFactors as false
 ```{r eval=F}
+# load packages
+pacman::p_load(plyr,ggplot2,reshape2,reldist,grid,gridExtra,varhandle,xlsx,Rmisc,
+               RODBC,Matching,optmatch,tidyr,RItools,Hmisc,MBESS,rbounds,Kendall,corrplot,cowplot,dplyr)
+
 # Options
 options(scipen=999,stringsAsFactors = FALSE)
 
@@ -178,27 +182,14 @@ prim.occ.data <- HHData %>%
   mutate(lvlhds=recode(PrimaryLivelihoodClean,'1'='farming','2'='forest_harvesting','3'='fishing',
                        '4'='aquaculture','5'='mining','6'='tourism','7'='wage_labor','996'="other")) %>%   my_summarize(FSIndex,MPAName,lvlhds,MonitoringYear)
 
-p.priocc <-  ggplot(prim.occ.data, aes(x=MonitoringYear, y=FSIndex, group=MPAName,label=n)) + 
-              geom_errorbar(aes(ymin=FSIndex- se, ymax=FSIndex+ se), width=0, position = pd ) +
-              geom_line(position =pd) +
-              geom_point(size=2, position =pd)+ theme_bw() +
-              geom_text(size = 3, position = position_stack(vjust = 0.5)) +
-              ylab("FSIndex") +
-              xlab("MonitoringYear") +
-              annotate("rect", xmin = 0, xmax = 4, ymin = 0, ymax = 1.5,alpha = .1,fill='red') +
-              annotate("rect", xmin = 0, xmax = 4, ymin = 1.5, ymax = 4,alpha = .1,fill='yellow') +
-              annotate("rect", xmin = 0, xmax = 4, ymin = 4, ymax = 6,alpha = .1,fill='green') +
-              facet_grid(lvlhds ~ MPAName) 
-p.priocc
-
-my_pointplot_ci(prim.occ.data,'MonitoringYear','FSIndex','MPAName') +
+p.priocc <- my_pointplot_ci(prim.occ.data,'MonitoringYear','FSIndex','MPAName') +
   ylab("FSIndex") +
   xlab("MonitoringYear") +
   annotate("rect", xmin = 0, xmax = 4, ymin = 0, ymax = 1.5,alpha = .1,fill='red') +
   annotate("rect", xmin = 0, xmax = 4, ymin = 1.5, ymax = 4,alpha = .1,fill='yellow') +
   annotate("rect", xmin = 0, xmax = 4, ymin = 4, ymax = 6,alpha = .1,fill='green') +
   facet_grid(lvlhds ~ MPAName) 
-
+p.priocc
 
 ggsave(paste0(outputdir,"food security by occupation.png"),width = 15,height = 9)
 ```
@@ -215,12 +206,8 @@ prim.inc <- HHData %>%
  my_summarize(FSIndex,MPAName,fish.inc,MonitoringYear)
 
 
-p.primincD <-  ggplot(prim.inc, aes(x=MonitoringYear, y=FSIndex, group=MPAName,label=n,)) + 
-              geom_errorbar(aes(ymin=FSIndex- se, ymax=FSIndex+ se), width=0, position = pd ) +
-              geom_line(position =pd) +
-              geom_point(size=2, position =pd)+ theme_bw() +
-              geom_text(size = 3, position = position_stack(vjust = 0.5)) +
-               ylab("FSIndex") +
+p.primincD <- my_pointplot_se(prim.inc,'MonitoringYear','FSIndex','MPAName') +
+              ylab("FSIndex") +
               xlab("MonitoringYear") +
               annotate("rect", xmin = 0, xmax = 4, ymin = 0, ymax = 1.5,alpha = .1,fill='red') +
               annotate("rect", xmin = 0, xmax = 4, ymin = 1.5, ymax = 4,alpha = .1,fill='yellow') +
@@ -234,7 +221,7 @@ prim.inc1 <- HHData %>%
  left_join(MPANames,by='MPAID') %>% 
  filter(!is.na(PercentIncFishClean) & PercentIncFishClean!=0) %>% 
  mutate(fish.inc1=ifelse(PercentIncFishClean>3,'majority','minority')) %>% 
-summarySE(measurevar="FSIndex", groupvars=c('MPAName','fish.inc1',"MonitoringYear"),na.rm = T) 
+ my_summarize(FSIndex,MPAName,fish.inc1,MonitoringYear)
 colnames(myColors) <- c("majority","minority")
 colScale <- scale_colour_manual(name = "Fish inc.",values =rev(myColors), breaks=c("majority","minority"))
 
