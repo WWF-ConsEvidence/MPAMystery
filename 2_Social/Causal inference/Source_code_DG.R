@@ -20,7 +20,7 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-pacman::p_load(plyr,ggplot2,reshape2,reldist,grid,gridExtra,varhandle,xlsx,Rmisc,
+pacman::p_load(plyr,ggplot2,reshape2,reldist,grid,gridExtra,varhandle,Rmisc,
                RODBC,Matching,optmatch,tidyr,RItools,Hmisc,MBESS,rbounds,Kendall,corrplot,cowplot,dplyr)
 
 
@@ -33,7 +33,7 @@ pacman::p_load(plyr,ggplot2,reshape2,reldist,grid,gridExtra,varhandle,xlsx,Rmisc
 # 
 
 # ---- 2.1 Required for all BHS analysis ----
-
+library(dplyr)
 source('2_Social/SourcedScripts/BHS_MPA_Mystery.R')
 # - Dependencies: SQLqueries_AccessODBC.R
 # - Inputs:

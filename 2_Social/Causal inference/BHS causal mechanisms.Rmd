@@ -120,19 +120,176 @@ summary(data)
 ### Get ATTs  
 (incomplete, but the idea is to join the assets ATTs and data from above)
 ```{r eval=F}
-hfs2yr <- read_excel(paste0(dropbox,'t2_fake_the_panel_A/fake_panel_A_outcomes_t2.xlsx'), sheet = 'hfs_outcome_t2') 
-names(hfs2yr)<- c('HouseholdID','hfs.MPA.outcome','hfs.crl.outcome','hfs.ATT')
-asset2yr <- read_excel(paste0(dropbox,'t2_fake_the_panel_A/fake_panel_A_outcomes_t2.xlsx'), sheet = 'asset_outcome_t2') 
-names(asset2yr)<- c('HouseholdID','ast.MPA.outcome','ast.crl.outcome','ast.ATT')
-# hfs4yr <- read_excel(paste0(dropbox,'t4_fake_the_panel_A/fake_panel_A_outcomes_t2.xlsx'), sheet = 'hfs_outcome_t4') 
-# asset4yr <- read_excel(paste0(dropbox,'t4_fake_the_panel_A/fake_panel_A_outcomes_t2.xlsx'), sheet = 'asset_outcome_t4') 
+hfs2yrA <- read_excel(paste0(dropbox,'t2_fake_the_panel_A/fake_panel_A_outcomes_t2.xlsx'),
+                     sheet = 'hfs_outcome_t2') %>% 
+          rename(HouseholdID=tr1tx,hfs.MPA.outcome=MPA.outcome,hfs.ctrl.outcome=Control.outcome,
+                 hfs.ATT=ATT) %>% 
+          left_join(select(HHData,HouseholdID,SettlementID,MPAID)) %>% 
+          left_join(select(Settlements,SettlementID,SettlementName)) %>%
+          left_join(MPANames) %>%
+          group_by(SettlementID,MPAID,SettlementName,MPAName)%>%
+          summarise(hfs.MPA.outcome=mean2(hfs.MPA.outcome),
+                    hfs.ctrl.outcome=mean2(hfs.ctrl.outcome), hfs.ATT=mean2(hfs.ATT))
+ 
+asset2yrA <- read_excel(paste0(dropbox,'t2_fake_the_panel_A/fake_panel_A_outcomes_t2.xlsx'),
+                     sheet = 'asset_outcome_t2') %>% 
+          rename(HouseholdID=tr1tx,ast.MPA.outcome=MPA.outcome,ast.ctrl.outcome=Control.outcome,
+                 ast.ATT=ATT) %>% 
+          left_join(select(HHData,HouseholdID,SettlementID,MPAID)) %>% 
+          left_join(select(Settlements,SettlementID,SettlementName)) %>%
+          left_join(MPANames) %>%
+          group_by(SettlementID,MPAID,SettlementName,MPAName)%>%
+          summarise(ast.MPA.outcome=mean2(ast.MPA.outcome),
+                    ast.ctrl.outcome=mean2(ast.ctrl.outcome), ast.ATT=mean2(ast.ATT))
+
+tenure2yrA <- read_excel(paste0(dropbox,'t2_fake_the_panel_A/fake_panel_A_outcomes_t2.xlsx'),
+                     sheet = 'tenure_outcome_t2') %>% 
+          rename(HouseholdID=tr1tx,tenure.MPA.outcome=MPA.outcome,tenure.ctrl.outcome=Control.outcome,
+                 tenure.ATT=ATT) %>% 
+          left_join(select(HHData,HouseholdID,SettlementID,MPAID)) %>% 
+          left_join(select(Settlements,SettlementID,SettlementName)) %>%
+          left_join(MPANames) %>%
+          group_by(SettlementID,MPAID,SettlementName,MPAName)%>%
+          summarise(tenure.MPA.outcome=mean2(tenure.MPA.outcome),
+                    tenure.ctrl.outcome=mean2(tenure.ctrl.outcome), tenure.ATT=mean2(tenure.ATT))
+
+enrol2yrA <- read_excel(paste0(dropbox,'t2_fake_the_panel_A/fake_panel_A_outcomes_t2.xlsx'),
+                     sheet = 'enrol_outcome.t2') %>% 
+          rename(HouseholdID=tr1tx,enrol.MPA.outcome=MPA.outcome,enrol.ctrl.outcome=Control.outcome,
+                 enrol.ATT=ATT) %>% 
+          left_join(select(HHData,HouseholdID,SettlementID,MPAID)) %>% 
+          left_join(select(Settlements,SettlementID,SettlementName)) %>%
+          left_join(MPANames) %>%
+          group_by(SettlementID,MPAID,SettlementName,MPAName)%>%
+          summarise(enrol.MPA.outcome=mean2(enrol.MPA.outcome),
+                    enrol.ctrl.outcome=mean2(enrol.ctrl.outcome), enrol.ATT=mean2(enrol.ATT))
+
+attach2yrA <- read_excel(paste0(dropbox,'t2_fake_the_panel_A/fake_panel_A_outcomes_t2.xlsx'),
+                     sheet = 'attach_outcome_t2') %>% 
+          rename(HouseholdID=tr1tx,attach.MPA.outcome=MPA.outcome,attach.ctrl.outcome=Control.outcome,
+                 attach.ATT=ATT) %>% 
+          left_join(select(HHData,HouseholdID,SettlementID,MPAID)) %>% 
+          left_join(select(Settlements,SettlementID,SettlementName)) %>%
+          left_join(MPANames) %>%
+          group_by(SettlementID,MPAID,SettlementName,MPAName)%>%
+          summarise(attach.MPA.outcome=mean2(attach.MPA.outcome),
+                    attach.ctrl.outcome=mean2(attach.ctrl.outcome), attach.ATT=mean2(attach.ATT))
 
 
-data1 <- hfs2yr %>% 
-  left_join(asset2yr,by='HouseholdID') %>% 
-  left_join(data,by='HouseholdID') %>% 
+hwb2yr_fakeA <- left_join(hfs2yrA,asset2yrA) %>% 
+  left_join(tenure2yrA) %>% 
+  left_join(enrol2yrA) %>% 
+  left_join(attach2yrA)
 
+hwb2yr_fakeA.MPA <- ungroup(hwb2yr_fakeA) %>% 
+  select(MPAID,MPAName,hfs.ATT,ast.ATT,tenure.ATT,enrol.ATT,attach.ATT) %>% 
+  gather(key=indicator,value=ATT,hfs.ATT:attach.ATT) %>% 
+  mutate(indicator=gsub(".ATT","",indicator))
+head(hwb2yr_fakeA.MPA)
 
+fake_A <- my_summarize(hwb2yr_fakeA.MPA,ATT,indicator,MPAName)
+fake_A.plot <- my_barplot_se(fake_A,'MPAName','ATT') +
+    aes(label="") +
+    geom_hline(aes(yintercept=0)) +
+    facet_grid(.~indicator) +
+   coord_flip()
 
-head(hfs2yr)
+# fake_B
+
+hfs2yrB <- read_excel(paste0(dropbox,'t2_fake_the_panel_B/fake_panel_B_outcomes_t2.xlsx'),
+                     sheet = 'hfs_outcome_t2') %>% 
+          rename(HouseholdID=tr1tx,hfs.MPA.outcome=MPA.outcome,hfs.ctrl.outcome=Control.outcome,
+                 hfs.ATT=ATT) %>% 
+          left_join(select(HHData,HouseholdID,SettlementID,MPAID)) %>% 
+          left_join(select(Settlements,SettlementID,SettlementName)) %>%
+          left_join(MPANames) %>%
+          group_by(SettlementID,MPAID,SettlementName,MPAName)%>%
+          summarise(hfs.MPA.outcome=mean2(hfs.MPA.outcome),
+                    hfs.ctrl.outcome=mean2(hfs.ctrl.outcome), hfs.ATT=mean2(hfs.ATT))
+ 
+asset2yrB <- read_excel(paste0(dropbox,'t2_fake_the_panel_B/fake_panel_B_outcomes_t2.xlsx'),
+                     sheet = 'asset_outcome_t2') %>% 
+          rename(HouseholdID=tr1tx,ast.MPA.outcome=MPA.outcome,ast.crl.outcome=Control.outcome,
+                 ast.ATT=ATT) %>% 
+          left_join(select(HHData,HouseholdID,SettlementID,MPAID)) %>% 
+          left_join(select(Settlements,SettlementID,SettlementName)) %>%
+          left_join(MPANames) %>%
+          group_by(SettlementID,MPAID,SettlementName,MPAName)%>%
+          summarise(ast.MPA.outcome=mean2(ast.MPA.outcome),
+                    ast.crl.outcome=mean2(ast.crl.outcome), ast.ATT=mean2(ast.ATT))
+
+tenure2yrB <- read_excel(paste0(dropbox,'t2_fake_the_panel_B/fake_panel_B_outcomes_t2.xlsx'),
+                     sheet = 'tenure_outcome_t2') %>% 
+          rename(HouseholdID=tr1tx,tenure.MPA.outcome=MPA.outcome,tenure.ctrl.outcome=Control.outcome,
+                 tenure.ATT=ATT) %>% 
+          left_join(select(HHData,HouseholdID,SettlementID,MPAID)) %>% 
+          left_join(select(Settlements,SettlementID,SettlementName)) %>%
+          left_join(MPANames) %>%
+          group_by(SettlementID,MPAID,SettlementName,MPAName)%>%
+          summarise(tenure.MPA.outcome=mean2(tenure.MPA.outcome),
+                    tenure.ctrl.outcome=mean2(tenure.ctrl.outcome), tenure.ATT=mean2(tenure.ATT))
+
+enrol2yrB <- read_excel(paste0(dropbox,'t2_fake_the_panel_B/fake_panel_B_outcomes_t2.xlsx'),
+                     sheet = 'enrol_outcome.t2') %>% 
+          rename(HouseholdID=tr1tx,enrol.MPA.outcome=MPA.outcome,enrol.ctrl.outcome=Control.outcome,
+                 enrol.ATT=ATT) %>% 
+          left_join(select(HHData,HouseholdID,SettlementID,MPAID)) %>% 
+          left_join(select(Settlements,SettlementID,SettlementName)) %>%
+          left_join(MPANames) %>%
+          group_by(SettlementID,MPAID,SettlementName,MPAName)%>%
+          summarise(enrol.MPA.outcome=mean2(enrol.MPA.outcome),
+                    enrol.ctrl.outcome=mean2(enrol.ctrl.outcome), enrol.ATT=mean2(enrol.ATT))
+
+attach2yrB <- read_excel(paste0(dropbox,'t2_fake_the_panel_B/fake_panel_B_outcomes_t2.xlsx'),
+                     sheet = 'attach_outcome_t2') %>% 
+          rename(HouseholdID=tr1tx,attach.MPA.outcome=MPA.outcome,attach.ctrl.outcome=Control.outcome,
+                 attach.ATT=ATT) %>% 
+          left_join(select(HHData,HouseholdID,SettlementID,MPAID)) %>% 
+          left_join(select(Settlements,SettlementID,SettlementName)) %>%
+          left_join(MPANames) %>%
+          group_by(SettlementID,MPAID,SettlementName,MPAName)%>%
+          summarise(attach.MPA.outcome=mean2(attach.MPA.outcome),
+                    attach.ctrl.outcome=mean2(attach.ctrl.outcome), attach.ATT=mean2(attach.ATT))
+
+# join all indicators
+hwb2yr_fakeB <- left_join(hfs2yrB,asset2yrB) %>% 
+  left_join(tenure2yrB) %>% 
+  left_join(enrol2yrB) %>% 
+  left_join(attach2yrB)
+
+# wrangle to long format
+hwb2yr_fakeB.MPA <- ungroup(hwb2yr_fakeB) %>% 
+  select(MPAID,MPAName,hfs.ATT,ast.ATT,tenure.ATT,enrol.ATT,attach.ATT) %>% 
+  gather(key=indicator,value=ATT,hfs.ATT:attach.ATT) %>% 
+  mutate(indicator=gsub(".ATT","",indicator))
+head(hwb2yr_fakeB.MPA)
+
+# summarize and plot
+fake_B <- my_summarize(hwb2yr_fakeB.MPA,ATT,indicator,MPAName)
+fake_B.plot <- my_barplot_se(fake_B,'MPAName','ATT') +
+    aes(label="") +
+    geom_hline(aes(yintercept=0)) +
+    facet_grid(.~indicator) +
+    coord_flip()
+
+# Combine the two
+fake_all <- rbind(fake_A,fake_B) 
+fake_all$type <- c(rep('fake A',30),rep('fake B',30))
+p.fake_all <- ggplot(fake_all,aes(MPAName,ATT,col=type)) + 
+  geom_errorbar(aes(ymin=se_lower, ymax=se_upper), width=0, position = pd ) +
+  geom_point(size=2, position =pd)+ theme_bw() +
+    geom_line() +
+    aes(label="",col=type) +
+    geom_hline(aes(yintercept=0)) +
+    facet_grid(.~indicator) +
+    coord_flip()  
+p.fake_all
+ggsave(paste0(outputdir,"fakeAvsB.png"),width = 15,height = 4)
+
+p.fake_all+ylim(-1, 1)
+ggsave(paste0(outputdir,"fakeAvsBtrimmed.png"),width = 15,height = 4)
+
+write.csv(hwb2yr_fakeA,paste0(outputdir,"fakeA_socialoutcomes.csv"),row.names = F)
+write.csv(hwb2yr_fakeB,paste0(outputdir,"fakeB_socialoutcomes.csv"),row.names = F)
+
 ```

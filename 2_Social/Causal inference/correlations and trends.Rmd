@@ -36,6 +36,8 @@ my_summarize <- function (.data,x,...) {
               se_lower=m-se,se_upper=m+se,ci_lower=m-ci,ci_upper=m+ci)  %>% 
     rename(!!mean_name:=m)
 }
+
+
 # my_barplot(data,'x','y') # Bar plot with standard error bars
 my_barplot_se <- function(.data,x,y){
 ggplot(.data,aes_string(x=x,y=y,label='n')) + 
@@ -124,7 +126,7 @@ foodsec <- HHData %>%
  filter(!is.na(FSIndex)) %>% 
  my_summarize(FSIndex,MonitoringYear,MPAName)
 
-p.foodsec <- t.plot(foodsec,'MonitoringYear','FSIndex') +
+p.foodsec <- my_barplot_se(foodsec,'MonitoringYear','FSIndex') +
   facet_grid(.~MPAName) 
 p.foodsec
 
@@ -169,7 +171,11 @@ ggsave(paste0(outputdir,"food_sec_and_tenure.png"),width = 14,height = 7)
 
 plot_grid(p.fincome,p.fishprot, labels=c("a", "b"), ncol = 1, nrow = 2)
 ggsave(paste0(outputdir,"fish_income_protein.png"),width = 14,height = 7)
-    
+   
+
+plot_grid(p.foodsec, labels=c("a"), ncol = 1, nrow = 2)
+ggsave(paste0(outputdir,"food_security.png"),width = 13,height = 7)
+ 
 ```
 
 ### Food security trend  relationships
