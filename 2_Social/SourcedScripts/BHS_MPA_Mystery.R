@@ -793,6 +793,31 @@ FishProtein.ByMPA <-
                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100)  
   
 
+FishProtein.BHSmeans <- 
+  HHDemos.context %>%
+  group_by(MonitoringYear) %>%
+  summarise(Percent.EatFish.RareOrNever=(length(FreqEatFishClean[FreqEatFishClean==1 &
+                                                                   !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.FewTimesPer6Mo=(length(FreqEatFishClean[FreqEatFishClean==2 &
+                                                                      !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.FewTimesPerMo=(length(FreqEatFishClean[FreqEatFishClean==3 &
+                                                                     !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.FewTimesPerWk=(length(FreqEatFishClean[FreqEatFishClean==4 &
+                                                                     !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            Percent.EatFish.MoreFewTimesWk=(length(FreqEatFishClean[FreqEatFishClean==5 &
+                                                                      !is.na(FreqEatFishClean)])/length(FreqEatFishClean[!is.na(FreqEatFishClean)]))*100,
+            ProteinFish.None=(length(PercentProteinFishClean[PercentProteinFishClean==1 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.Some=(length(PercentProteinFishClean[PercentProteinFishClean==2 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.Half=(length(PercentProteinFishClean[PercentProteinFishClean==3 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.Most=(length(PercentProteinFishClean[PercentProteinFishClean==4 &
+                                                               !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100,
+            ProteinFish.All=(length(PercentProteinFishClean[PercentProteinFishClean==5 &
+                                                              !is.na(PercentProteinFishClean)])/length(PercentProteinFishClean[!is.na(PercentProteinFishClean)]))*100)  
+
+
 # - Number years resident by settlement, to look for signs of rapid immigration 
 # - Changes in social conflict by settlement
 # - Marine tenure components by settlement
@@ -890,6 +915,12 @@ Days.unwell.control <-
   summarise(UnwellMean=mean(DaysUnwell,na.rm=T),
             UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)))
 
+# ---Days unwell, seascape-wide
+Days.unwell.BHS <- 
+  Days.unwell.treatment %>%
+  group_by(MonitoringYear) %>%
+  summarise(UnwellMean=mean(DaysUnwell,na.rm=T),
+            UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)))
 
 # Compare MPAs/Settlements to BHS means and proportions
 Techreport.BHSmeans <- 
@@ -1250,6 +1281,289 @@ AgeGenderDemos.ByMPA <-
                                                         !is.na(IndividualGenderClean)]))*100)
 
 AgeGenderDemos.ByMPA <- AgeGenderDemos.ByMPA[!is.na(AgeGenderDemos.ByMPA$MPAID),]
+
+# Seascape level age/gender demographics
+AgeGenderDemos.BHS <- 
+  AgeGenderDemos %>%
+  group_by(MonitoringYear) %>%
+  summarise(Male.0.4=(length(IndividualAgeClean[IndividualAgeClean<=4 &
+                                                  !is.na(IndividualAgeClean) &
+                                                  IndividualGenderClean==1&
+                                                  !is.na(IndividualGenderClean)])/
+                        length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                    !is.na(IndividualGenderClean)]))*-100,
+            Female.0.4=(length(IndividualAgeClean[IndividualAgeClean<=4 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==0&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*100,
+            Male.5.9=(length(IndividualAgeClean[IndividualAgeClean>4 & 
+                                                  IndividualAgeClean<=9 &
+                                                  !is.na(IndividualAgeClean) &
+                                                  IndividualGenderClean==1&
+                                                  !is.na(IndividualGenderClean)])/
+                        length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                    !is.na(IndividualGenderClean)]))*-100,
+            Female.5.9=(length(IndividualAgeClean[IndividualAgeClean>4 & 
+                                                    IndividualAgeClean<=9 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==0&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*100,
+            Male.10.14=(length(IndividualAgeClean[IndividualAgeClean>9 &
+                                                    IndividualAgeClean<=14 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.10.14=(length(IndividualAgeClean[IndividualAgeClean>9 &
+                                                      IndividualAgeClean<=14 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.15.19=(length(IndividualAgeClean[IndividualAgeClean>14 &
+                                                    IndividualAgeClean<=19 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.15.19=(length(IndividualAgeClean[IndividualAgeClean>14 &
+                                                      IndividualAgeClean<=19 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.20.24=(length(IndividualAgeClean[IndividualAgeClean>19 &
+                                                    IndividualAgeClean<=24 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.20.24=(length(IndividualAgeClean[IndividualAgeClean>19 &
+                                                      IndividualAgeClean<=24 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.25.29=(length(IndividualAgeClean[IndividualAgeClean>24 &
+                                                    IndividualAgeClean<=29 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.25.29=(length(IndividualAgeClean[IndividualAgeClean>24 &
+                                                      IndividualAgeClean<=29 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.30.34=(length(IndividualAgeClean[IndividualAgeClean>29 &
+                                                    IndividualAgeClean<=34 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.30.34=(length(IndividualAgeClean[IndividualAgeClean>29 &
+                                                      IndividualAgeClean<=34 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.35.39=(length(IndividualAgeClean[IndividualAgeClean>34 &
+                                                    IndividualAgeClean<=39 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.35.39=(length(IndividualAgeClean[IndividualAgeClean>34 &
+                                                      IndividualAgeClean<=39 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.40.44=(length(IndividualAgeClean[IndividualAgeClean>39 &
+                                                    IndividualAgeClean<=44 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)]))*-100,
+            Female.40.44=(length(IndividualAgeClean[IndividualAgeClean>39 &
+                                                      IndividualAgeClean<=44 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.45.49=(length(IndividualAgeClean[IndividualAgeClean>44 &
+                                                    IndividualAgeClean<=49 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.45.49=(length(IndividualAgeClean[IndividualAgeClean>44 &
+                                                      IndividualAgeClean<=49 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.50.54=(length(IndividualAgeClean[IndividualAgeClean>49 &
+                                                    IndividualAgeClean<=54 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.50.54=(length(IndividualAgeClean[IndividualAgeClean>49 &
+                                                      IndividualAgeClean<=54 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.55.59=(length(IndividualAgeClean[IndividualAgeClean>54 &
+                                                    IndividualAgeClean<=59 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.55.59=(length(IndividualAgeClean[IndividualAgeClean>54 &
+                                                      IndividualAgeClean<=59 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.60.64=(length(IndividualAgeClean[IndividualAgeClean>59 &
+                                                    IndividualAgeClean<=64 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.60.64=(length(IndividualAgeClean[IndividualAgeClean>59 &
+                                                      IndividualAgeClean<=64 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.65.69=(length(IndividualAgeClean[IndividualAgeClean>64 &
+                                                    IndividualAgeClean<=69 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.65.69=(length(IndividualAgeClean[IndividualAgeClean>64 &
+                                                      IndividualAgeClean<=69 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.70.74=(length(IndividualAgeClean[IndividualAgeClean>69 &
+                                                    IndividualAgeClean<=74 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.70.74=(length(IndividualAgeClean[IndividualAgeClean>69 &
+                                                      IndividualAgeClean<=74 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.75.79=(length(IndividualAgeClean[IndividualAgeClean>74 &
+                                                    IndividualAgeClean<=79 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.75.79=(length(IndividualAgeClean[IndividualAgeClean>74 &
+                                                      IndividualAgeClean<=79 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.80.84=(length(IndividualAgeClean[IndividualAgeClean>79 &
+                                                    IndividualAgeClean<=84 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.80.84=(length(IndividualAgeClean[IndividualAgeClean>79 &
+                                                      IndividualAgeClean<=84 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.85.89=(length(IndividualAgeClean[IndividualAgeClean>84 &
+                                                    IndividualAgeClean<=89 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.85.89=(length(IndividualAgeClean[IndividualAgeClean>84 &
+                                                      IndividualAgeClean<=89 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.90.94=(length(IndividualAgeClean[IndividualAgeClean>89 &
+                                                    IndividualAgeClean<=94 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.90.94=(length(IndividualAgeClean[IndividualAgeClean>89 &
+                                                      IndividualAgeClean<=94 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0&
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100,
+            Male.95.99=(length(IndividualAgeClean[IndividualAgeClean>94 &
+                                                    IndividualAgeClean<=99 &
+                                                    !is.na(IndividualAgeClean) &
+                                                    IndividualGenderClean==1&
+                                                    !is.na(IndividualGenderClean)])/
+                          length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                      !is.na(IndividualGenderClean)]))*-100,
+            Female.95.99=(length(IndividualAgeClean[IndividualAgeClean>94 &
+                                                      IndividualAgeClean<=99 &
+                                                      !is.na(IndividualAgeClean) &
+                                                      IndividualGenderClean==0 &
+                                                      !is.na(IndividualGenderClean)])/
+                            length(IndividualAgeClean[!is.na(IndividualAgeClean)&
+                                                        !is.na(IndividualGenderClean)]))*100)
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

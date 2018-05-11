@@ -1,0 +1,139 @@
+---
+title: "R Guide for MPA Mystery Project"
+author: "Kelly Claborn"
+date: "March 13, 2018"
+output: html_document
+---
+
+## Workflow / Organization
+### GitHub Workflows 
+
+- Centralized
+- Feature Branch
+- Gitflow
+- Forking
+
+Branching at lowest folder level (e.g., social.matching branch)
+Pull requests 
+  - Tagging specific collaborators -- be very intentional about who is meant to review code
+    - earlier in the pipeline of sourced code, might require more eyes
+
+### File Structure
+
+Data wrangling
+  - Social
+    - QAQC 
+    - Sourcing flat data / establish ODBC, etc.
+    - Calculating indicators
+      - BHS_MPA_Mystery.R
+      - SBS_MPA_Mystery.R
+  - Ecological
+    - Sourcing flat data / establish ODBC, etc.
+    - Calculating indicators
+  - Cross-cutting
+    - Merge soc/eco
+  
+Functions
+  - Plotting functions
+    - Global plot themes, guides
+  - Aggregating / wrangling
+  - Analysis
+  
+  Every function is its own script (or set of functions that always work together)
+  
+Analysis
+  - Social
+    - Experimental analyses
+    - Status and trends
+    - Matching (end of matching scripts would be output of matching model (pairs) being properly checked and verified -- treatment effects                live in post-matching analysis)
+    - Post-matching analysis
+  - Ecological
+  - Cross-cutting
+  
+Products
+  - Social 
+    - status and trends reports
+    - impact summaries
+  - Ecological
+  - Cross-cutting
+
+### File Naming Conventions
+
+Underscores between components of file names
+
+### What to include at the top of every script/Rmd
+
+Code title
+Author
+Date created
+Date modified
+Inputs / dependencies
+Outputs
+  - Any object that isn't removed by end of script (mostly thinking of data frames)
+Main sections
+
+### When to create a new script vs. continuing in old one
+
+Think of scripts as one-concept.  One Markdown chunk. 
+
+## Style Guide
+### Object naming conventions
+
+For all objects, use periods between components of the name.
+
+- For data frames and other named objects: 
+Include types of variables included in object, treatment/methodology, geography (if applicable -- i.e. MPA name), grouping variable (e.g., ".bySett"), time, object type (.df, .mat, etc.)
+
+- For variable names: 
+Include standardized reference to variable (e.g., "hfs"), any manipulation that has been done on the variable (e.g., "att"), and any time component as needed (e.g., "t2")
+
+- For functions:
+
+NEVER name something the same thing as somewhere else. 
+
+### Creating sections
+
+
+
+Model after the example section below:
+
+```{r}
+
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 1: Import Data ----
+# 
+#       1.1 Subset continuous variable datasets from BHS_MPA_Mystery.R
+#       1.2 Define list of settlement names in MPA
+#       1.3 Subset categorical variable frequency tables from BHS_MPA_Mystery.R
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+
+# ---- 1.1 Subset continuous variable datasets from BHS_MPA_Mystery.R ----
+
+# One line between sub-section title and beginning of code
+# Two lines at end of sub-section code, before next sub-section title
+
+
+# ---- 1.2 Define list of settlement names in MPA ----
+
+```
+
+Four hyphens on either side of the main section title (and each subsequent sub-section title) will ensure that the section is added to the quick-access bar at the bottom of the script pane.
+
+### Spacing
+
+- Between characters
+- Line spacing
+
+### Commenting
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
