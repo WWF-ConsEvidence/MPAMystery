@@ -81,7 +81,7 @@ PA <- HHData[,c(1,47:53)]
 MT <- HHData[,c(1,59:64)]
 
 HHLivelihood <- HHData[,c(1:3,79:90)]
-HHDemos <- HHData[,c(1:3,91:94,96)]
+HHDemos <- HHData[,c(1:3,91:94,99)]
 HeadOfHH <- IndDemos[IndDemos$RelationHHH==0 &
                        !is.na(IndDemos$RelationHHH),1:4]
 
@@ -279,7 +279,6 @@ HHDemos.context.1$HHsize <- sapply(HHDemos.context.1$HouseholdID,
                                    c(length(IndDemos$HouseholdID[which(IndDemos$HouseholdID==i)]))
                                  })
 HHDemos.context <- HHDemos.context.1[HHDemos.context.1$Treatment==1,]
-
 
 MPA.currentyear <- group_by(HHDemos.context.1,MPAID)
 MPA.currentyear <- summarise(MPA.currentyear,

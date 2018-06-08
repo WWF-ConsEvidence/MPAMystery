@@ -136,7 +136,7 @@ PA <- HHData[,c(1,47:53)]
 MT <- HHData[,c(1,59:64)]
 
 HHLivelihood <- HHData[,c(1:3,79:90)]
-HHDemos <- HHData[,c(1:3,91:94,96)]
+HHDemos <- HHData[,c(1:3,91:94,99)]
 HeadOfHH <- IndDemos[IndDemos$RelationHHH==0 &
                        !is.na(IndDemos$RelationHHH),1:4]
 
