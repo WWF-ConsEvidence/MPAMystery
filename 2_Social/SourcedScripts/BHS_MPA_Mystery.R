@@ -44,22 +44,22 @@
 
 # !!! Select ONE option to import data - ONLY CHOOSE ONE !!!
 
-# OPTION 1: Use ODBC connection to access database and import tables
-MPAMysteryDB <- odbcConnect("Unified.Social.MPAMystery")
-
-Wellbeing <- sqlFetch(MPAMysteryDB,'HH_tbl_WELLBEING')
-
-source('2_Social/SourcedScripts/SQLqueries_AccessODBC.R')
+# # OPTION 1: Use ODBC connection to access database and import tables
+# MPAMysteryDB <- odbcConnect("Unified.Social.MPAMystery")
+# 
+# Wellbeing <- sqlFetch(MPAMysteryDB,'HH_tbl_WELLBEING')
+# 
+# source('2_Social/SourcedScripts/SQLqueries_AccessODBC.R')
 
 
 # # OPTION 2: Set working directory and import flat data files (.csv files)
-# HHData <- read.csv('2_Social/FlatDataFiles/BHS/BHS_HHData.csv',header=T,sep=',')
-# 
-# IndDemos <- read.csv('2_Social/FlatDataFiles/BHS/BHS_HHDemos.csv',header=T,sep=',')
-# IndDemos <- left_join(IndDemos,HHData[,c("HouseholdID","SettlementID")],by="HouseholdID")
-# 
-# Settlements <- read.csv('2_Social/FlatDataFiles/BHS/BHS_HH_tbl_SETTLEMENT.csv',header=T,sep=',')
-# Settlements <- Settlements[,c(1,3:5)]
+HHData <- read.csv('2_Social/FlatDataFiles/BHS/BHS_HHData.csv',header=T,sep=',')
+
+IndDemos <- read.csv('2_Social/FlatDataFiles/BHS/BHS_HHDemos.csv',header=T,sep=',')
+IndDemos <- left_join(IndDemos,HHData[,c("HouseholdID","SettlementID")],by="HouseholdID")
+
+Settlements <- read.csv('2_Social/FlatDataFiles/BHS/BHS_HH_tbl_SETTLEMENT.csv',header=T,sep=',')
+Settlements <- Settlements[,c(1,3:5)]
 
 
 # Whichever option you chose above, you will still need to upload Ethnicity data from a flat file
@@ -324,7 +324,7 @@ HHDemos.context.1 <- left_join(HHDemos.context.1,
                              HeadOfHH,
                              by="HouseholdID")
 HHDemos.context.1 <- left_join(HHDemos.context.1,
-                             BigFive[,c(1,4:6,14)],
+                             BigFive[,c(1,4:7)],
                              by="HouseholdID")
 HHDemos.context.1 <- left_join(HHDemos.context.1,
                              HHLivelihood[,c(1,4:10,12:13,15)],
@@ -337,7 +337,7 @@ HHDemos.context.1 <- left_join(HHDemos.context.1,
                              by="HouseholdID")
 colnames(HHDemos.context.1) <- c(colnames(HHDemos.context.1)[c(1:7)],
                                "HeadofHH.gender","HeadofHH.educ","HeadofHH.age",
-                               colnames(BigFive)[c(4:6,14)],
+                               colnames(BigFive)[c(4:7)],
                                colnames(HHLivelihood)[c(4:10,12:13,15)],
                                colnames(HHEthnicity)[3],
                                "Child.FS.category")

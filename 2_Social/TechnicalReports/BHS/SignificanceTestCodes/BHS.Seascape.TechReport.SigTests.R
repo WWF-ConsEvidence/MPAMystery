@@ -82,6 +82,34 @@ BHS.Trend.Data <-
             Days.unwell[Days.unwell$Treatment==1,1:2],
             by="HouseholdID") 
 
+# --- BASELINE DATA
+# - "BHS Household Data" dataset
+BHS.Baseline.TechReport.SeascapeHouseholdData <- 
+  left_join(BHS.Seascape.TechReport.SigTest.Data[BHS.Seascape.TechReport.SigTest.Data$Treatment==1 &
+                                                   BHS.Seascape.TechReport.SigTest.Data$MonitoringYear== "Baseline",], 
+            Days.unwell.treatment[Days.unwell.treatment$MonitoringYear=="Baseline",
+                                  c("HouseholdID","DaysUnwell")],
+            by="HouseholdID")
+
+BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName <- 
+  factor(BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName)
+
+# - "MPA Means" dataset
+BHS.Baseline.TechReport.MPAMeans <- 
+  left_join(BigFive.MPAGroup[BigFive.MPAGroup$MonitoringYear=="Baseline",-c(1:2)],
+            Techreport.ByMPA[Techreport.ByMPA$MonitoringYear=="Baseline",
+                             c("MPAID","TimeMarketMean")],  
+            by=c("MPAID")) %>%
+  left_join(Days.unwell.ByMPA[Days.unwell.ByMPA$MonitoringYear=="Baseline",c("MPAID","UnwellMean")],
+            by="MPAID") %>%
+  left_join(data.frame(MPAID=c(1:6),MPAName=c("Teluk Mayalibit","Teluk Cenderawasih","Kaimana",
+                                              "Kofiau dan Pulau Boo","Selat Dampier","Misool Selatan Timur")),
+            by="MPAID")
+
+colnames(BHS.Baseline.TechReport.MPAMeans) <- c(colnames(BHS.Baseline.TechReport.MPAMeans)[1:3],
+                                       "FSIndex","FSErr","MAIndex","MAErr","PAIndex","PAErr",
+                                       "MTIndex","MTErr","SERate","SEErr","TimeMarketClean","DaysUnwell","MPAName")
+
 
 # ---- 1.2 Define list of MPA names in Seascape ----
 
@@ -242,6 +270,92 @@ median.MPA.BHS <-
                                       as.character(even.number.MPA.function.BHS[j])),
                                levels=levels(MPA.names.BHS))})
 
+# ---- 2.1 Create list of median MPA for each continuous variable AT BASELINE (whether the variable is parametric or non-parametric) ----
+
+even.number.MPA.function.BHS.baseline <- 
+  mapply(a=BHS.Baseline.TechReport.MPAMeans[,c("FSIndex","MAIndex","PAIndex","MTIndex","SERate","DaysUnwell")],
+         b=BHS.Baseline.TechReport.SeascapeHouseholdData[,c("FSIndex","MAIndex","PAIndex","MTIndex","SERate","DaysUnwell")],
+         function(a,b){
+           med <- median(a,na.rm=T)
+           equal <- c(a[which(a==med)])
+           upper <- c(a[which(a>med)]) 
+           upper <- min(upper,na.rm=T)
+           lower <- c(a[which(a<med)]) 
+           lower <- max(lower,na.rm=T)
+           upper.sett <- BHS.Baseline.TechReport.MPAMeans$MPAName[a==upper]
+           upper.sett <- ifelse(length(upper.sett)>1 & length(upper.sett)<3,
+                                ifelse((sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[1]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[1] & !is.na(b)])))<
+                                         (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[2]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[2] & !is.na(b)]))),
+                                       as.character(upper.sett[1]),as.character(upper.sett[2])),
+                                ifelse(length(upper.sett)>1 & length(upper.sett)<4,
+                                       ifelse((sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[1]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[1] & !is.na(b)])))<
+                                                (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[2]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[2] & !is.na(b)]))) &
+                                                (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[1]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[1] & !is.na(b)])))<
+                                                (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[3]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[3] & !is.na(b)]))),
+                                              as.character(upper.sett[1]),
+                                              ifelse((sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[2]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[2] & !is.na(b)])))<
+                                                       (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[1]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[1] & !is.na(b)]))) &
+                                                       (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[2]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[2] & !is.na(b)])))<
+                                                       (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[3]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett[3] & !is.na(b)]))),
+                                                     as.character(upper.sett[2]),
+                                                     as.character(upper.sett[3]))),
+                                       as.character(upper.sett)))
+           lower.sett <- BHS.Baseline.TechReport.MPAMeans$MPAName[a==lower]
+           lower.sett <- ifelse(length(lower.sett)>1 & length(lower.sett)<3,
+                                ifelse((sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[1]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[1] & !is.na(b)])))<
+                                         (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[2]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[2] & !is.na(b)]))),
+                                       as.character(lower.sett[1]),as.character(lower.sett[2])),
+                                ifelse(length(lower.sett)>1 & length(lower.sett)<4,
+                                       ifelse((sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[1]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[1] & !is.na(b)])))<
+                                                (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[2]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[2] & !is.na(b)]))) &
+                                                (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[1]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[1] & !is.na(b)])))<
+                                                (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[3]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[3] & !is.na(b)]))),
+                                              as.character(lower.sett[1]),
+                                              ifelse((sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[2]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[2] & !is.na(b)])))<
+                                                       (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[1]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[1] & !is.na(b)]))) &
+                                                       (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[2]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[2] & !is.na(b)])))<
+                                                       (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[3]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett[3] & !is.na(b)]))),
+                                                     as.character(lower.sett[2]),
+                                                     as.character(lower.sett[3]))),
+                                       as.character(lower.sett)))
+           sett.equal.med <- BHS.Baseline.TechReport.MPAMeans$MPAName[a==equal]
+           sett.equal.med <- ifelse(length(sett.equal.med)>1 & length(sett.equal.med)<3,
+                                    ifelse((sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[1]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[1] & !is.na(b)])))<
+                                             (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[2]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[2] & !is.na(b)]))),
+                                           as.character(sett.equal.med[1]),as.character(sett.equal.med[2])),
+                                    ifelse(length(sett.equal.med)>2 & length(sett.equal.med)<4,
+                                           ifelse((sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[1]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[1] & !is.na(b)])))<
+                                                    (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[2]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[2] & !is.na(b)]))) &
+                                                    (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[1]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[1] & !is.na(b)])))<
+                                                    (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[3]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[3] & !is.na(b)]))),
+                                                  as.character(sett.equal.med[1]),
+                                                  ifelse((sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[2]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[2] & !is.na(b)])))<
+                                                           (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[1]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[1] & !is.na(b)]))) &
+                                                           (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[2]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[2] & !is.na(b)])))<
+                                                           (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[3]],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==sett.equal.med[3] & !is.na(b)]))),
+                                                         as.character(sett.equal.med[2]),
+                                                         as.character(sett.equal.med[3]))),
+                                           ifelse(is.na(sett.equal.med),
+                                                  NA,
+                                                  as.character(sett.equal.med))))
+           median.sett <- ifelse(!is.na(sett.equal.med),
+                                 as.character(sett.equal.med),
+                                 ifelse((sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==upper.sett & !is.na(b)])))<
+                                          (sd(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett],na.rm=T)/sqrt(length(b[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==lower.sett & !is.na(b)]))),
+                                        as.character(upper.sett),
+                                        as.character(lower.sett)))
+         })
+
+median.MPA.BHS.baseline <- 
+  mapply(i=BHS.Baseline.TechReport.MPAMeans[,c("FSIndex","MAIndex","PAIndex","MTIndex","SERate","DaysUnwell")],
+         j=names(even.number.MPA.function.BHS.baseline),
+         function(i,j){
+           med <- median(i,na.rm=T)
+           med.setts <- factor(ifelse(length(MPA.names.BHS)%%2!=0,
+                                      as.character(BHS.Baseline.TechReport.MPAMeans$MPAName[which(i==med)]),
+                                      as.character(even.number.MPA.function.BHS.baseline[j])),
+                               levels=levels(MPA.names.BHS))})
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -392,7 +506,7 @@ qqline(BHS.TechReport.SeascapeHouseholdData$DaysUnwell,col="green")
 #       however, if the distribution appears to be normal, then PARAMETRIC tests are more powerful and the better choice.
 
 
-# ---- 4.1 Create function that will output significance values for non-parametric variables, BY SETTLEMENT ----
+# ---- 4.1 Create function that will output significance values for non-parametric variables, BY MPA ----
 #          (for status plots)
 
 non.parametric.test.MPA.BHS <- 
@@ -450,6 +564,63 @@ sigvals.BHS <-
                    sigvals.BHS[rev(order(sigvals.BHS$MPAName)),])
 
 sigvals.BHS[,2:8] <- unlist(sigvals.BHS[,2:8])
+
+
+# ---- 4.1b FOR BASELINE, create function that will output significance values for non-parametric variables, BY MPA ----
+#          
+
+non.parametric.test.MPA.BHS.baseline <- 
+  data.frame(mapply(a=c("FSIndex","MAIndex","PAIndex","MTIndex","SERate","DaysUnwell"),
+                    function(a){
+                      results <- 
+                        list(cbind.data.frame(MPAName=c(as.character(MPA.names.BHS[which(MPA.names.BHS!=median.MPA.BHS.baseline[a])]),
+                                                        as.character(median.MPA.BHS.baseline[a])),
+                                              rbind.data.frame(t(data.frame(mapply(i=MPA.names.BHS[which(MPA.names.BHS!=median.MPA.BHS.baseline[a])],
+                                                                                   function(i){
+                                                                                     var <- 
+                                                                                       BHS.Baseline.TechReport.SeascapeHouseholdData[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==i |
+                                                                                                                              BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==median.MPA.BHS.baseline[a],a]
+                                                                                     test <- 
+                                                                                       wilcox.test(var~MPAName,
+                                                                                                   data=BHS.Baseline.TechReport.SeascapeHouseholdData[BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==i |
+                                                                                                                                               BHS.Baseline.TechReport.SeascapeHouseholdData$MPAName==median.MPA.BHS.baseline[a],],
+                                                                                                   exact=F)
+                                                                                   }))["p.value",]),
+                                                               "median")))
+                    }))
+
+
+# - FOR BASELINE, alphabetize each column of MPA names.  Now all MPA names are in same order.
+sigvals.BHS.baseline <- 
+  cbind.data.frame(non.parametric.test.MPA.BHS.baseline[order(non.parametric.test.MPA.BHS.baseline$"FSIndex.MPAName"),
+                                               c("FSIndex.MPAName","FSIndex.p.value")],
+                   non.parametric.test.MPA.BHS.baseline[order(non.parametric.test.MPA.BHS.baseline$"MAIndex.MPAName"),
+                                               c("MAIndex.MPAName","MAIndex.p.value")],
+                   non.parametric.test.MPA.BHS.baseline[order(non.parametric.test.MPA.BHS.baseline$"PAIndex.MPAName"),
+                                               c("PAIndex.MPAName","PAIndex.p.value")],
+                   non.parametric.test.MPA.BHS.baseline[order(non.parametric.test.MPA.BHS.baseline$"MTIndex.MPAName"),
+                                               c("MTIndex.MPAName","MTIndex.p.value")],
+                   non.parametric.test.MPA.BHS.baseline[order(non.parametric.test.MPA.BHS.baseline$"SERate.MPAName"),
+                                               c("SERate.MPAName","SERate.p.value")],
+                   non.parametric.test.MPA.BHS.baseline[order(non.parametric.test.MPA.BHS.baseline$"DaysUnwell.MPAName"),
+                                               c("DaysUnwell.MPAName","DaysUnwell.p.value")])
+
+# - FOR BASELINE, remove all MPA name columns except for one. 
+sigvals.BHS.baseline <- 
+  sigvals.BHS.baseline[,c(1,2,4,6,8,10,12)]
+
+colnames(sigvals.BHS.baseline) <- c("MPAName","FS.pval","MA.pval","PA.pval","MT.pval","SE.pval","Unwell.pval")
+
+null.row.sigvals.BHS.baseline <- 
+  matrix(rep(NA,length(sigvals.BHS.baseline)),ncol=length(sigvals.BHS.baseline),
+         dimnames=list(NULL,colnames(sigvals.BHS.baseline)))
+
+sigvals.BHS.baseline <-
+  rbind.data.frame(data.frame(MPAName="Bird's Head Seascape",as.data.frame(null.row.sigvals.BHS.baseline)[,2:7]),
+                   null.row.sigvals.BHS.baseline,
+                   sigvals.BHS.baseline[rev(order(sigvals.BHS.baseline$MPAName)),])
+
+sigvals.BHS.baseline[,2:7] <- unlist(sigvals.BHS.baseline[,2:7])
 
 
 # ---- 4.3 Create function that will output TREND significance values for non-parametric variables, BY SEASCAPE ----

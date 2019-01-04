@@ -108,6 +108,7 @@ BHS.level.ContData.status <-
                    Techreport.BHSmeans[Techreport.BHSmeans$MonitoringYear=="4 Year Post",c("TimeMarketMean","TimeMarketErr")],
                    Days.unwell.BHS[Days.unwell.BHS$MonitoringYear=="4 Year Post",
                                              c("UnwellMean","UnwellErr")])
+
 BHS.level.ContData.annex <- 
   cbind.data.frame(MonitoringYear=c("Baseline","2 Year Post","4 Year Post"),
                    MPAID=0,
@@ -116,8 +117,20 @@ BHS.level.ContData.annex <-
                    Techreport.BHSmeans[,c("TimeMarketMean","TimeMarketErr")],
                    Days.unwell.BHS[,c("UnwellMean","UnwellErr")])
 
+BHS.level.ContData.baseline <-
+  cbind.data.frame(MonitoringYear="Baseline",
+                   MPAID=0,
+                   MPAName="Bird's Head Seascape",
+                   BigFive.BHSGroup[BigFive.BHSGroup$MonitoringYear=="Baseline",2:11],
+                   Days.unwell.BHS[Days.unwell.BHS$MonitoringYear=="Baseline",
+                                   c("UnwellMean","UnwellErr")])
+
 null.row.ContData <- 
   cbind.data.frame(matrix(rep(NA,17),ncol=17,dimnames=list(NULL,colnames(BHS.level.ContData.status))))
+
+
+null.row.ContData.baseline <- 
+  cbind.data.frame(matrix(rep(NA,15),ncol=15,dimnames=list(NULL,colnames(BHS.level.ContData.baseline))))
 
 
 # 
@@ -203,6 +216,45 @@ BHS.ContData.Techreport.status.PLOTFORMAT$MPAName <-
 # - add row for plot fill colour formatting
 BHS.ContData.Techreport.status.PLOTFORMAT$MPALevel <- 
   ifelse(BHS.ContData.Techreport.status.PLOTFORMAT$MPAName=="","Dummy","NotDummy")
+
+
+# ---- 2.2b FOR BASELINE, status dataset for BHS, continuous data (with p values) ----
+
+BHS.ContData.Techreport.baseline <- 
+  data.frame(MPAID=c(1:6),MPAName=c("Teluk Mayalibit","Teluk Cenderawasih","Kaimana",
+                                    "Kofiau dan Pulau Boo","Selat Dampier","Misool Selatan Timur")) %>%
+  left_join(BigFive.MPAGroup[BigFive.MPAGroup$MonitoringYear=="Baseline",c(3,6:15)],
+            by="MPAID") %>%
+  left_join(Days.unwell.ByMPA[Days.unwell.ByMPA$MonitoringYear=="Baseline",c(1,3,4)],
+            by="MPAID")
+
+BHS.ContData.Techreport.baseline <- 
+  BHS.ContData.Techreport.baseline[rev(order(BHS.ContData.Techreport.baseline$MPAName)),]
+
+BHS.ContData.Techreport.baseline.withBHSlevel <- 
+  rbind.data.frame(BHS.level.ContData.baseline[2:15],
+                   null.row.ContData.baseline[2:15],
+                   BHS.ContData.Techreport.baseline)
+
+# - plot-formatted dataset
+BHS.ContData.Techreport.baseline.PLOTFORMAT <- 
+  left_join(BHS.ContData.Techreport.baseline.withBHSlevel,
+            sigvals.BHS.baseline,by="MPAName")
+
+# - make MPAName an ordered factor for plotting
+BHS.ContData.Techreport.baseline.PLOTFORMAT$MPAName <-
+  ifelse(is.na(BHS.ContData.Techreport.baseline.PLOTFORMAT$MPAName)," ",
+         as.character(BHS.ContData.Techreport.baseline.PLOTFORMAT$MPAName))
+
+BHS.ContData.Techreport.baseline.PLOTFORMAT$MPAName <-
+  factor(BHS.ContData.Techreport.baseline.PLOTFORMAT$MPAName,
+         levels=unique(BHS.ContData.Techreport.baseline.PLOTFORMAT$MPAName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+BHS.ContData.Techreport.baseline.PLOTFORMAT$MPALevel <- 
+  ifelse(BHS.ContData.Techreport.baseline.PLOTFORMAT$MPAName=="","Dummy","NotDummy")
+
 
 
 # ---- 2.3 Trend dataset for BHS, Seascape-level proportional data ----
