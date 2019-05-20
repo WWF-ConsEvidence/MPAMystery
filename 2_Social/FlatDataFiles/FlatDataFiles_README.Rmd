@@ -1,8 +1,0 @@
-# FlatDataFiles_README
-
-<br>
-
-__Data to be added to FlatDataFiles must be acquired from WWF.__
-
-Please contact Louise Glew (louise.glew@wwf.org) or Kelly Claborn (kelly.claborn@wwf.org) for permissions.
-

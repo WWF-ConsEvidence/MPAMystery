@@ -335,13 +335,13 @@ residency.byMPA <-
   left_join(HHData,HeadOfHH,by="HouseholdID") %>%
   mutate(MPAID=as.factor(MPAID)) %>%
   group_by(MPAID, MonitoringYear) %>%
-  summarise(YrResident=mean(YrResidentClean,na.rm=T),
-            YrResident.sd=sd(YrResidentClean,na.rm=T),
-            Percent.majoritylife=(length(HouseholdID[YrResidentClean/IndividualAgeClean>=0.5 & 
-                                                      !is.na(YrResidentClean) & 
-                                                      !is.na(IndividualAgeClean)])/length(HouseholdID[!is.na(YrResidentClean) &
-                                                                                                        !is.na(IndividualAgeClean)]))*100,
-            Percent.movedlast2yr=(length(HouseholdID[YrResidentClean<=2 & !is.na(YrResidentClean)])/length(HouseholdID[!is.na(YrResidentClean)]))*100)
+  summarise(YrResident=mean(YrResident,na.rm=T),
+            YrResident.sd=sd(YrResident,na.rm=T),
+            Percent.majoritylife=(length(HouseholdID[YrResident/IndividualAge>=0.5 & 
+                                                      !is.na(YrResident) & 
+                                                      !is.na(IndividualAge)])/length(HouseholdID[!is.na(YrResident) &
+                                                                                                        !is.na(IndividualAge)]))*100,
+            Percent.movedlast2yr=(length(HouseholdID[YrResident<=2 & !is.na(YrResident)])/length(HouseholdID[!is.na(YrResident)]))*100)
 
 ggplot(residency.byMPA,aes(x=MPAID,y=YrResident)) +
   geom_bar(aes(group=MonitoringYear,fill=MonitoringYear),
@@ -388,35 +388,35 @@ ggplot(residency.byMPA,aes(x=MPAID,y=Percent.movedlast2yr/100)) +
 # ---- 4.1 Create data frame subsetting to only those who are lifelong residents ----
 
 lifelong.residents <-
-  left_join(HHData[,c("HouseholdID","MPAID","SettlementID","MonitoringYear","YrResidentClean")],
+  left_join(HHData[,c("HouseholdID","MPAID","SettlementID","MonitoringYear","YrResident")],
             HeadOfHH,by="HouseholdID") %>%
-  subset(.,YrResidentClean==IndividualAgeClean)
+  subset(.,YrResident==IndividualAge)
 
 adat.holders <-
-  left_join(lifelong.residents,HHData[,c("HouseholdID","RightsManageClean",
-                                         "RightsExcludeClean","RightsTransferClean")],
+  left_join(lifelong.residents,HHData[,c("HouseholdID","RightsManage",
+                                         "RightsExclude","RightsTransfer")],
             by="HouseholdID") %>%
-  subset(.,RightsManageClean==1 &
-           RightsExcludeClean==1 &
-           RightsTransferClean==1) %>%
+  subset(.,RightsManage==1 &
+           RightsExclude==1 &
+           RightsTransfer==1) %>%
   group_by(SettlementID, MPAID) %>%
   summarise(Num.Adat=length(HouseholdID))
 
 # ---- 4.2 Customary rights data set ----
 
 customary.rights.groups <-
-  left_join(HHData[,c("HouseholdID","MPAID","SettlementID","MonitoringYear","YrResidentClean")],
+  left_join(HHData[,c("HouseholdID","MPAID","SettlementID","MonitoringYear","YrResident")],
           HeadOfHH,by="HouseholdID") %>%
-  left_join(HHData[,c("HouseholdID","RightsManageClean","RightsExcludeClean","RightsTransferClean")]) %>%
+  left_join(HHData[,c("HouseholdID","RightsManage","RightsExclude","RightsTransfer")]) %>%
   left_join(asset) %>%
-  mutate(group=ifelse(YrResidentClean==IndividualAgeClean & 
-                       RightsManageClean==1 &
-                       RightsExcludeClean==1 &
-                       RightsTransferClean==1,"adat",
-                      ifelse(YrResidentClean==IndividualAgeClean & 
-                               (RightsManageClean!=1 | 
-                                  RightsExcludeClean!=1 |
-                                  RightsTransferClean!=1),"long-term, non-adat",
+  mutate(group=ifelse(YrResident==IndividualAge & 
+                       RightsManage==1 &
+                       RightsExclude==1 &
+                       RightsTransfer==1,"adat",
+                      ifelse(YrResident==IndividualAge & 
+                               (RightsManage!=1 | 
+                                  RightsExclude!=1 |
+                                  RightsTransfer!=1),"long-term, non-adat",
                              "other")))
 
 
@@ -430,11 +430,11 @@ customary.rights.groups <-
 
 BHS.demographics.byMPA.byGender <-
   left_join(HeadOfHH,BigFive,by="HouseholdID") %>%
-  left_join(HHLivelihood[,c("HouseholdID","PrimaryLivelihoodClean")],by="HouseholdID") %>%
+  left_join(HHLivelihood[,c("HouseholdID","PrimaryLivelihood")],by="HouseholdID") %>%
   left_join(HHData[,c("HouseholdID","MarineGroup")],by="HouseholdID") %>%
   mutate(MPAID=as.factor(MPAID),
-         IndividualGenderClean=as.factor(IndividualGenderClean)) %>%
-  group_by(MPAID, MonitoringYear, IndividualGenderClean) %>%
+         IndividualGender=as.factor(IndividualGender)) %>%
+  group_by(MPAID, MonitoringYear, IndividualGender) %>%
   summarise(Num.Individuals=length(HouseholdID),
             FSMean=round(mean(FSIndex,na.rm=T),2),
             FSErr=round(sd(FSIndex,na.rm=T)/sqrt(length(FSIndex)),2),
@@ -446,18 +446,18 @@ BHS.demographics.byMPA.byGender <-
             MTErr=round(sd(MTIndex,na.rm=T)/sqrt(length(MTIndex)),2),
             SEMean=round(mean(SERate,na.rm=T),2),
             SEErr=round(sd(SERate,na.rm=T)/sqrt(length(SERate)),2),
-            Percent.PrimaryOcc.Fish=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
-                                                                     !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-            Percent.PrimaryOcc.Farm=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==1 &
-                                                                     !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-            Percent.PrimaryOcc.WageLabor=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==7 &
-                                                                          !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-            Percent.PrimaryOcc.HarvestForest=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==2 &
-                                                                              !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-            Percent.PrimaryOcc.Tourism=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==6 &
-                                                                        !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
-            Percent.PrimaryOcc.Other=(length(PrimaryLivelihoodClean[(PrimaryLivelihoodClean==996 | PrimaryLivelihoodClean==4 | 
-                                                                       PrimaryLivelihoodClean==5) & !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            Percent.PrimaryOcc.Fish=(length(PrimaryLivelihood[PrimaryLivelihood==3 &
+                                                                     !is.na(PrimaryLivelihood)])/length(PrimaryLivelihood[!is.na(PrimaryLivelihood)]))*100,
+            Percent.PrimaryOcc.Farm=(length(PrimaryLivelihood[PrimaryLivelihood==1 &
+                                                                     !is.na(PrimaryLivelihood)])/length(PrimaryLivelihood[!is.na(PrimaryLivelihood)]))*100,
+            Percent.PrimaryOcc.WageLabor=(length(PrimaryLivelihood[PrimaryLivelihood==7 &
+                                                                          !is.na(PrimaryLivelihood)])/length(PrimaryLivelihood[!is.na(PrimaryLivelihood)]))*100,
+            Percent.PrimaryOcc.HarvestForest=(length(PrimaryLivelihood[PrimaryLivelihood==2 &
+                                                                              !is.na(PrimaryLivelihood)])/length(PrimaryLivelihood[!is.na(PrimaryLivelihood)]))*100,
+            Percent.PrimaryOcc.Tourism=(length(PrimaryLivelihood[PrimaryLivelihood==6 &
+                                                                        !is.na(PrimaryLivelihood)])/length(PrimaryLivelihood[!is.na(PrimaryLivelihood)]))*100,
+            Percent.PrimaryOcc.Other=(length(PrimaryLivelihood[(PrimaryLivelihood==996 | PrimaryLivelihood==4 | 
+                                                                       PrimaryLivelihood==5) & !is.na(PrimaryLivelihood)])/length(PrimaryLivelihood[!is.na(PrimaryLivelihood)]))*100,
             Percent.MarineGroup=(length(MarineGroup[MarineGroup==1 &
                                                       !is.na(MarineGroup)])/length(MarineGroup[!is.na(MarineGroup)]))*100)
 
@@ -466,14 +466,14 @@ MA.baselineplot.bygender <-
   ggplot(data=BHS.demographics.byMPA.byGender[BHS.demographics.byMPA.byGender$MonitoringYear=="Baseline",],
          aes(x=MPAID)) +
   geom_bar(aes(y=MAMean,
-               fill=IndividualGenderClean,
-               group=IndividualGenderClean),
+               fill=IndividualGender,
+               group=IndividualGender),
            stat="identity",
            position="dodge",
            width=0.75) +
   geom_errorbar(aes(ymin=MAMean-MAErr,
                     ymax=MAMean+MAErr,
-                    colour=IndividualGenderClean),
+                    colour=IndividualGender),
                 position=position_dodge(0.75),
                 width=0.25,
                 size=0.5,
@@ -493,14 +493,14 @@ MA.4yrplot.bygender <-
   ggplot(data=BHS.demographics.byMPA.byGender[BHS.demographics.byMPA.byGender$MonitoringYear=="4 Year Post",],
          aes(x=MPAID)) +
   geom_bar(aes(y=MAMean,
-               fill=IndividualGenderClean,
-               group=IndividualGenderClean),
+               fill=IndividualGender,
+               group=IndividualGender),
            stat="identity",
            position="dodge",
            width=0.75) +
   geom_errorbar(aes(ymin=MAMean-MAErr,
                     ymax=MAMean+MAErr,
-                    colour=IndividualGenderClean),
+                    colour=IndividualGender),
                 position=position_dodge(0.75),
                 width=0.25,
                 size=0.5,
@@ -522,14 +522,14 @@ MT.baselineplot.bygender <-
   ggplot(data=BHS.demographics.byMPA.byGender[BHS.demographics.byMPA.byGender$MonitoringYear=="Baseline",],
          aes(x=MPAID)) +
   geom_bar(aes(y=MTMean,
-               fill=IndividualGenderClean,
-               group=IndividualGenderClean),
+               fill=IndividualGender,
+               group=IndividualGender),
            stat="identity",
            position="dodge",
            width=0.75) +
   geom_errorbar(aes(ymin=MTMean-MTErr,
                     ymax=MTMean+MTErr,
-                    colour=IndividualGenderClean),
+                    colour=IndividualGender),
                 position=position_dodge(0.75),
                 width=0.25,
                 size=0.5,
@@ -549,14 +549,14 @@ MT.4yrplot.bygender <-
   ggplot(data=BHS.demographics.byMPA.byGender[BHS.demographics.byMPA.byGender$MonitoringYear=="4 Year Post",],
          aes(x=MPAID)) +
   geom_bar(aes(y=MTMean,
-               fill=IndividualGenderClean,
-               group=IndividualGenderClean),
+               fill=IndividualGender,
+               group=IndividualGender),
            stat="identity",
            position="dodge",
            width=0.75) +
   geom_errorbar(aes(ymin=MTMean-MTErr,
                     ymax=MTMean+MTErr,
-                    colour=IndividualGenderClean),
+                    colour=IndividualGender),
                 position=position_dodge(0.75),
                 width=0.25,
                 size=0.5,
@@ -578,8 +578,8 @@ PrimaryOccFish.baselineplot.bygender <-
   ggplot(data=BHS.demographics.byMPA.byGender[BHS.demographics.byMPA.byGender$MonitoringYear=="Baseline",],
          aes(x=MPAID)) +
   geom_bar(aes(y=Percent.PrimaryOcc.Fish,
-               fill=IndividualGenderClean,
-               group=IndividualGenderClean),
+               fill=IndividualGender,
+               group=IndividualGender),
            stat="identity",
            position="dodge",
            width=0.75) +
@@ -598,8 +598,8 @@ PrimaryOccFish.4yrplot.bygender <-
   ggplot(data=BHS.demographics.byMPA.byGender[BHS.demographics.byMPA.byGender$MonitoringYear=="4 Year Post",],
          aes(x=MPAID)) +
   geom_bar(aes(y=Percent.PrimaryOcc.Fish,
-               fill=IndividualGenderClean,
-               group=IndividualGenderClean),
+               fill=IndividualGender,
+               group=IndividualGender),
            stat="identity",
            position="dodge",
            width=0.75) +
