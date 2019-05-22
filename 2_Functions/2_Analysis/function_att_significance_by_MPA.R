@@ -19,6 +19,7 @@ att.significance.by.group <- function(outcomes, HHData, weights = NULL, grouping
   
   
 # Dealing with optional weight matrix and conf level (defining a default if they were not defined in function call)
+  pacman::p_load(Matching,MBESS,plyr,dplyr)
   
   weight.matrix <- 
     data.frame(w=ifelse(is.null(weights) == T,
@@ -40,29 +41,57 @@ att.significance.by.group <- function(outcomes, HHData, weights = NULL, grouping
            0.05,
            p.value)
 
-# Developing initial data frame 
+# Developing initial data frames 
+
+  est.data <- 
+    outcomes %>%
+    dplyr::rename(HouseholdID = tr1tx) %>%
+    left_join(HHData, by = "HouseholdID") %>%
+    transmute(X=seq(1:length(HouseholdID)),
+              MPA.outcome=MPA.outcome,
+              Control.outcome=Control.outcome,
+              MPAID=MPAID) %>%
+    reshape2::melt(.,id.vars=c("X","MPAID"),variable.name="Tr",value.name="Y") %>%
+    mutate(Tr=ifelse(Tr=="MPA.outcome",1,0))
+  
+  match.out <- data.frame(MPAID=NA, 
+                          est=NA,
+                          se=NA,
+                          nobs=NA)
+  
+  for(i in unique(est.data[,"MPAID"])) {
+    est.data.subset <- filter(est.data, MPAID==i)
+    match.store <- Match(X=est.data.subset$X,
+                         Tr=est.data.subset$Tr,
+                         Y=est.data.subset$Y,
+                         exact=TRUE)
+    match.out[i,"MPAID"] <- i
+    match.out[i,"est"] <- match.store$est
+    match.out[i,"se"] <- match.store$se
+    match.out[i,"nobs"] <- match.store$nobs
+  }
+  
+  
   x <- 
     outcomes %>%
     dplyr::rename(HouseholdID = tr1tx) %>%
     left_join(HHData, by = "HouseholdID") %>%
+    left_join(match.out, by = "MPAID") %>%
     cbind.data.frame(weight.matrix) %>%
     dplyr::group_by(get(group))
   
-  x$v1 <- x$MPA.outcome - x$Control.outcome
-  
 
-# Calculating est, AI se, impact type, etc. 
+# Calculating smd, ci, impact type, p.val & consolidating with est & se
+  
   initial.results <- 
     summarise(x,
               mpa.mean = mean(MPA.outcome),
               mpa.sd = sd(MPA.outcome),
               control.mean = mean(Control.outcome),
               control.sd = sd(Control.outcome),
-              est = sum((MPA.outcome - Control.outcome)*w)/sum(w),
-              varest = sum(((v1 - est)^2) * w)/(sum(w) * sum(w)),
-              se.standard = sqrt(varest),
-              t.stat = est/se.standard,
-              p.val = (1 - pnorm(abs(est/se.standard))) * 2,
+              est = mean(est),   #ATT calculated through Match function
+              se = mean(se),   #Abadie Imbens standard error calculated through Match function
+              p.val = (1 - pnorm(abs(est/se))) * 2,
               n.1 = length(MPA.outcome),
               n.2 = length(Control.outcome),
               lower.ci = ci.smd(n.1 = n.1,
@@ -178,7 +207,3 @@ att.significance.by.group <- function(outcomes, HHData, weights = NULL, grouping
 }
 
 
-
-
-
- 

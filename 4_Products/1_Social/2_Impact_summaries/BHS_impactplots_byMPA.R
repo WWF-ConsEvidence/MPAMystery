@@ -9,24 +9,7 @@
 
 ### ADJUST WORKING DIRECTORY TO SOURCE LOCAL GITHUB REPO
 
-source('Source_code.R')
-
-pacman::p_load(readxl)
-
-# upload all 2 year outcome data from .xlsx  (each variable is a different tab from same .xlsx file)
-hfs.t2.outcomes <- readxl::read_xlsx('2_Social/FlatDataFiles/BHS/t2_impacts/BigFive_panel_outcomes_t2.xlsx',sheet='hfs_outcome_t2')
-asset.t2.outcomes <- readxl::read_xlsx('2_Social/FlatDataFiles/BHS/t2_impacts/BigFive_panel_outcomes_t2.xlsx',sheet='asset_outcome_t2')
-tenure.t2.outcomes <- readxl::read_xlsx('2_Social/FlatDataFiles/BHS/t2_impacts/BigFive_panel_outcomes_t2.xlsx',sheet='tenure_outcome_t2')
-enrol.t2.outcomes <- readxl::read_xlsx('2_Social/FlatDataFiles/BHS/t2_impacts/BigFive_panel_outcomes_t2.xlsx',sheet='enrol_outcome.t2')
-attach.t2.outcomes <- readxl::read_xlsx('2_Social/FlatDataFiles/BHS/t2_impacts/BigFive_panel_outcomes_t2.xlsx',sheet='attach_outcome_t2')
-
-# upload all 4 year outcome data from .xlsx  (each variable is a different tab from same .xlsx file)
-hfs.t4.outcomes <- readxl::read_xlsx('2_Social/FlatDataFiles/BHS/t4_impacts/BigFive_panel_outcomes_t4.xlsx',sheet='hfs_outcome_t4')
-asset.t4.outcomes <- readxl::read_xlsx('2_Social/FlatDataFiles/BHS/t4_impacts/BigFive_panel_outcomes_t4.xlsx',sheet='asset_outcome_t4')
-tenure.t4.outcomes <- readxl::read_xlsx('2_Social/FlatDataFiles/BHS/t4_impacts/BigFive_panel_outcomes_t4.xlsx',sheet='tenure_outcome_t4')
-enrol.t4.outcomes <- readxl::read_xlsx('2_Social/FlatDataFiles/BHS/t4_impacts/BigFive_panel_outcomes_t4.xlsx',sheet='enrol_outcome.t4')
-attach.t4.outcomes <- readxl::read_xlsx('2_Social/FlatDataFiles/BHS/t4_impacts/BigFive_panel_outcomes_t4.xlsx',sheet='attach_outcome_t4')
-
+source('3_Analysis/1_Social/4_Post-matching/Calculate_ATTs_BHS.R')
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -38,8 +21,8 @@ attach.t4.outcomes <- readxl::read_xlsx('2_Social/FlatDataFiles/BHS/t4_impacts/B
 
 
 # output household food security att & AI error, by year
-hfs.t2.att.byMPA <- att.significance(outcomes = hfs.t2.outcomes, HHData = HHData, grouping_var = "MPAID")
-hfs.t4.att.byMPA <- att.significance(outcomes = hfs.t4.outcomes, HHData = HHData, grouping_var = "MPAID")
+hfs.t2.att.byMPA <- att.significance.by.group(outcomes = hfs.outcome.t2, HHData = HHData, grouping_var = "MPAID")
+hfs.t4.att.byMPA <- att.significance.by.group(outcomes = hfs.outcome.t4, HHData = HHData, grouping_var = "MPAID")
 
 hfs.att.byMPA <- 
   data.frame(year = c(rep("t2", 6), rep("t4", 6)), 
@@ -48,8 +31,8 @@ hfs.att.byMPA <-
 
 
 # output household material assets att & AI error, by year
-asset.t2.att.byMPA <- att.significance(outcomes = asset.t2.outcomes, HHData = HHData, grouping_var = "MPAID")
-asset.t4.att.byMPA <- att.significance(outcomes = asset.t4.outcomes, HHData = HHData, grouping_var = "MPAID")
+asset.t2.att.byMPA <- att.significance.by.group(outcomes = asset.outcome.t2, HHData = HHData, grouping_var = "MPAID")
+asset.t4.att.byMPA <- att.significance.by.group(outcomes = asset.outcome.t4, HHData = HHData, grouping_var = "MPAID")
 
 asset.att.byMPA <- 
   data.frame(year = c(rep("t2", 6), rep("t4", 6)), 
@@ -58,8 +41,8 @@ asset.att.byMPA <-
 
 
 # output marine tenure att & AI error, by year
-tenure.t2.att.byMPA <- att.significance(outcomes = tenure.t2.outcomes, HHData = HHData, grouping_var = "MPAID")
-tenure.t4.att.byMPA <- att.significance(outcomes = tenure.t4.outcomes, HHData = HHData, grouping_var = "MPAID")
+tenure.t2.att.byMPA <- att.significance.by.group(outcomes = tenure.outcome.t2, HHData = HHData, grouping_var = "MPAID")
+tenure.t4.att.byMPA <- att.significance.by.group(outcomes = tenure.outcome.t4, HHData = HHData, grouping_var = "MPAID")
 
 tenure.att.byMPA <- 
   data.frame(year = c(rep("t2", 6), rep("t4", 6)), 
@@ -68,8 +51,8 @@ tenure.att.byMPA <-
 
 
 # output enrollment att & AI error, by year
-enrol.t2.att.byMPA <- att.significance(outcomes = enrol.t2.outcomes, HHData = HHData, grouping_var = "MPAID")
-enrol.t4.att.byMPA <- att.significance(outcomes = enrol.t4.outcomes, HHData = HHData, grouping_var = "MPAID")
+enrol.t2.att.byMPA <- att.significance.by.group(outcomes = enrol.outcome.t2, HHData = HHData, grouping_var = "MPAID")
+enrol.t4.att.byMPA <- att.significance.by.group(outcomes = enrol.outcome.t4, HHData = HHData, grouping_var = "MPAID")
 
 enrol.att.byMPA <- 
   data.frame(year = c(rep("t2", 6), rep("t4", 6)), 
@@ -78,8 +61,8 @@ enrol.att.byMPA <-
 
 
 # output place attachment att & AI error, by year
-attach.t2.att.byMPA <- att.significance(outcomes = attach.t2.outcomes, HHData = HHData, grouping_var = "MPAID")
-attach.t4.att.byMPA <- att.significance(outcomes = attach.t4.outcomes, HHData = HHData, grouping_var = "MPAID")
+attach.t2.att.byMPA <- att.significance.by.group(outcomes = attach.outcome.t2, HHData = HHData, grouping_var = "MPAID")
+attach.t4.att.byMPA <- att.significance.by.group(outcomes = attach.outcome.t4, HHData = HHData, grouping_var = "MPAID")
 
 attach.att.byMPA <- 
   data.frame(year = c(rep("t2", 6), rep("t4", 6)), 
@@ -89,18 +72,17 @@ attach.att.byMPA <-
 
 
 # length of matched HH per MPA
-master.t2 <- read.csv('2_Social/FlatDataFiles/BHS/l_master_t2.csv',sep=",",header=T)
-master.t4 <- read.csv('2_Social/FlatDataFiles/BHS/l_master_t4.csv',sep=",",header=T)
 
+# (master.t2.A from Calculate_ATTs_BHS.R)
 num.obs.t2.perMPA <-
-  master.t2 %>%
+  master.t2.A %>%
   dplyr::rename(HouseholdID=HouseholdID.tr1.t2) %>%
   left_join(HHData,by="HouseholdID") %>%
   group_by(MPAID) %>%
   summarise(num.HH = length(HouseholdID[!is.na(HouseholdID)]))
 
 num.obs.t4.perMPA <-
-  master.t4 %>%
+  master.t4.A %>%
   dplyr::rename(HouseholdID=HouseholdID.tr1.t4) %>%
   left_join(HHData,by="HouseholdID") %>%
   group_by(MPAID) %>%

@@ -53,18 +53,17 @@
 
 
 # # OPTION 2: Set working directory and import flat data files (.csv files)
-HHData <- read.csv('2_Social/FlatDataFiles/BHS/BOTH_HHData.csv',header=T,sep=',')
-HHData <- HHData %>% filter(.,MPAID<7)
+HHData <- read.csv('x_Flat_data_files/1_Social/Input/BHS/BHS_HHData.csv',header=T,sep=',')
 
-IndDemos <- read.csv('2_Social/FlatDataFiles/BHS/BHS_HHDemos.csv',header=T,sep=',')
+IndDemos <- read.csv('x_Flat_data_files/1_Social/Input/BHS/BHS_HHDemos.csv',header=T,sep=',')
 IndDemos <- left_join(IndDemos,HHData[,c("HouseholdID","SettlementID")],by="HouseholdID")
 
-Settlements <- read.csv('2_Social/FlatDataFiles/BHS/BHS_HH_tbl_SETTLEMENT.csv',header=T,sep=',')
+Settlements <- read.csv('x_Flat_data_files/1_Social/Input/BHS/BHS_HH_tbl_SETTLEMENT.csv',header=T,sep=',')
 Settlements <- Settlements[,c(1,3:5)]
 
 
 # Whichever option you chose above, you will still need to upload Ethnicity data from a flat file
-HHEthnicity <- read.delim("2_Social/FlatDataFiles/BHS/eth_output_kc_2017_1217.txt",sep=",")
+HHEthnicity <- read.delim("x_Flat_data_files/1_Social/Input/BHS/eth_output_kc_2017_1217.txt",sep=",")
 
 HHEthnicity$eth.iso <- ifelse(HHEthnicity$eth.iso=="raj","rja",
                               ifelse(HHEthnicity$eth.iso=="mal","mlk",

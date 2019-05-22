@@ -6,11 +6,11 @@ pacman::p_load(dplyr, dbplyr, RPostgreSQL)
 
 # if connected wwinternal.org etheret use:
 pg = dbDriver("PostgreSQL")
-con = dbConnect(pg, user="Matheus", password="wwfPand@@M",
+con = dbConnect(pg, user="", password="",
                 host="WWFUS-ArcgisDev", port=5432, dbname="mpasocial")
 
 # if NOT connected wwinternal.org etheret use:
-# con = dbConnect(pg, user="Matheus", password="wwfPand@@M",
+# con = dbConnect(pg, user="", password="",
 #                 host="pandamaps.wwfus.org", port=5432, dbname="mpasocial")
 
 

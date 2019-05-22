@@ -1,8 +1,8 @@
 # 
 # code:  Aggregated BHS-level Technical Report Significance Tests
 # 
-# github: WWF-ConsEvidence/MPAMystery/2_Social/TechnicalReports/BHS/SignificanceTestCodes
-# --- Duplicate all code from "2_Social" onward, to maintain file structure for sourced code
+# github: WWF-ConsEvidence/MPAMystery/3_Analysis/1_Social/2_Status_trends/
+# --- Duplicate all code from MPAMystery repo folder to maintain sourcing functionality throughout scripts
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: April 2018
@@ -10,7 +10,7 @@
 # 
 # 
 # ---- inputs ----
-#  Dependencies: BHS_MPA_Mystery.R 
+#  
 # 
 # ---- code sections ----
 #  1) Import Data
@@ -28,14 +28,11 @@
 # 
 
 
-# ---- 1.1 Subset continuous variable datasets from BHS_MPA_Mystery.R ----
+# ---- 1.1 Subset continuous variable datasets from Calcualte_BigFive.R ----
 
 BHS.Seascape.TechReport.SigTest.Data <- 
-  left_join(BigFive[,c(1,2,5:11,14)],
-            HHLivelihood[,c(1,15)],
-            by="HouseholdID")
-
-BHS.Seascape.TechReport.SigTest.Data$MPAName <- ifelse(BHS.Seascape.TechReport.SigTest.Data$MPAID==1,
+  HHData %>%
+  mutate(MPAName=ifelse(BHS.Seascape.TechReport.SigTest.Data$MPAID==1,
                                                        "Teluk Mayalibit",
                                                        ifelse(BHS.Seascape.TechReport.SigTest.Data$MPAID==2,
                                                               "Teluk Cenderawasih",
@@ -47,7 +44,7 @@ BHS.Seascape.TechReport.SigTest.Data$MPAName <- ifelse(BHS.Seascape.TechReport.S
                                                                                    "Selat Dampier",
                                                                                    ifelse(BHS.Seascape.TechReport.SigTest.Data$MPAID==6,
                                                                                           "Misool Selatan Timur",
-                                                                                          NA))))))
+                                                                                          NA)))))))
 
 # - "BHS Household Data" dataset
 BHS.TechReport.SeascapeHouseholdData <- 

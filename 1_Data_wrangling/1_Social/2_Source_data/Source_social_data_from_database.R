@@ -192,7 +192,7 @@ IndDemos <-
                    DaysUnwell = ifelse(IndividualDaysUnwell>989,NA,IndividualDaysUnwell),
                    IndividualUnwell = ifelse(IndividualUnwell>989, NA, IndividualUnwell),
                    IndividualLostDays = ifelse(IndividualLostDays>989, NA, IndividualLostDays)) %>%
-  left_join(HHData[,c("HouseholdID","MPAID")], ., by="HouseholdID")
+  left_join(HHData[,c("HouseholdID","MPAID","SettlementID")], ., by="HouseholdID")
 
 
 # ---- 2.3 Call, clean, & post-code HH_tbl_ORGANIZATION to create Organization for analysis ----
@@ -213,6 +213,34 @@ Settlements <-
                                   ifelse(MPAID %in% c(15,16,17,18,19,20), 2,
                                          NA))) %>%
   dplyr::select("SettlementID", "MPAID", "SettlementName", "Treatment")
+
+
+# ---- 2.5 Add monitoring year column to HHData for analysis ----
+
+HHData$MonitoringYear <- factor(mapply(a=HHData$MPAID,
+                                       b=HHData$InterviewYear,
+                                       function(a,b){
+                                         define <- 
+                                           HHData %>% 
+                                           group_by(MPAID) %>% 
+                                           summarise(Baseline=min(InterviewYear),
+                                                     TwoYear=Baseline+2,
+                                                     ThreeYear=Baseline+3,
+                                                     FourYear=Baseline+4,
+                                                     FiveYear=Baseline+5,
+                                                     SixYear=Baseline+6) %>%
+                                           na.omit(.)
+                                         
+                                         mon.year <- ifelse(b==define$Baseline[define$MPAID==a],"Baseline",
+                                                            ifelse(b==define$TwoYear[define$MPAID==a],"2 Year Post",
+                                                                   ifelse(b==define$ThreeYear[define$MPAID==a],"3 Year Post",
+                                                                          ifelse(b==define$FourYear[define$MPAID==a],"4 Year Post",
+                                                                                 ifelse(b==define$FiveYear[define$MPAID==a],"5 Year Post",
+                                                                                        ifelse(b==define$SixYear[define$MPAID==a],"6 Year Post",NA))))))
+                                         mon.year
+                                       }),
+                                levels=c("Baseline", "2 Year Post", "3 Year Post", "4 Year Post", "5 Year Post", "6 Year Post"),
+                                ordered=T)
 
 
 # 

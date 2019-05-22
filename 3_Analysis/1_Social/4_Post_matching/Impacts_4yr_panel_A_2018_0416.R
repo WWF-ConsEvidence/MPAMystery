@@ -41,14 +41,15 @@ pacman::p_load(twang, dplyr,tm,NLP, readxl,cobalt, CBPS, Matching, optmatch, tid
 source(source('~/Social_impacts_2017_1230/function_process_covariates.R'))
 # ---
 # 1.3 Import raw data
-HH.data <- read_excel("Dropbox/DATA_ANALYSIS/Extract_Master_2017_117/HH_tbl_WELLBEING.xlsx") #redirect to final file destination
-DE.data <- read_excel("Dropbox/DATA_ANALYSIS/Extract_Master_2017_117/HH_tbl_DEMOGRAPHIC.xlsx") #redirect to final file destination
-SE.data<- read_excel("Dropbox/DATA_ANALYSIS/Extract_Master_2017_117/HH_tbl_SETTLEMENT.xlsx")
+HH.data <- read_excel("x_Flat_data_files/1_Social/Inputs/HH_tbl_WELLBEING.xlsx") %>% filter(MPAID<7) #redirect to final file destination
+DE.data <- read_excel("x_Flat_data_files/1_Social/Inputs/HH_tbl_DEMOGRAPHIC.xlsx") %>% 
+  left_join(.,HH.data[,c("HouseholdID","MPAID")], by="HouseholdID") %>% filter(MPAID<7) #redirect to final file destination
+SE.data<- read_excel("x_Flat_data_files/1_Social/Inputs/HH_tbl_SETTLEMENT.xlsx") %>% filter(MPAID<7)
 
 # ---
 # 1.4 Import lookup tables
-ethnic.lkp<- read_excel("Dropbox/DATA_ANALYSIS/Extract_Master_2017_117/master_ethnic_lookup_2017_117.xlsx")
-education_lkp <- read_excel("LKP/education_lkp.xlsx")
+ethnic.lkp<- read.delim("x_Flat_data_files/1_Social/Inputs/BHS/eth_output_kc_2017_1217.txt")
+education_lkp <- read.delim("x_Flat_data_files/1_Social/Inputs/BHS/education_lkp.txt")
 
 
 # ----SECTION 2: Pre-process matching covariates ----
