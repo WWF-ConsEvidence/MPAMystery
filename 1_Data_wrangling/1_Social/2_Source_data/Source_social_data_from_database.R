@@ -292,6 +292,10 @@ Settlements$Treatment <- ifelse(Settlements$SettlementID==83 | Settlements$Settl
 
 
 
+# ---- 3.4 Join Settlements and HHData tables ----
+
+HHData <- 
+  left_join(HHData,Settlements,by=c("SettlementID","MPAID"))
 
 
 # 
@@ -302,22 +306,21 @@ Settlements$Treatment <- ifelse(Settlements$SettlementID==83 | Settlements$Settl
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 
+
 # ---- 4.1 Filter by seascape ----
 
 # adjust filter() function with either "Seascape %in% 1" for Bird's Head, or "Seascape %in% 2" for Sunda Banda
 
 # HHData <-
-#   left_join(HHData,Settlements,by=c("SettlementID","MPAID")) %>%
+#   HHData %>%
 #   dplyr::filter(Seascape %in% 1)
 # 
 # IndDemos <-
-#   left_join(IndDemos,HHData[,c("HouseholdID","SettlementID")],by="HouseholdID") %>%
-#   left_join(.,Settlements,by=c("SettlementID","MPAID")) %>%
+#   left_join(IndDemos,HHData[,c("HouseholdID","Seascape")],by=c("HouseholdID"))
 #   dplyr::filter(Seascape %in% 1)
 # 
 # Organization <-
-#   left_join(Organization,HHData[,c("HouseholdID","SettlementID")],by="HouseholdID") %>%
-#   left_join(.,Settlements,by=c("SettlementID","MPAID")) %>%
+#   left_join(Organization,HHData[,c("HouseholdID","Seascape")],by="HouseholdID") %>%
 #   dplyr::filter(Seascape %in% 1)
 
 
@@ -326,17 +329,13 @@ Settlements$Treatment <- ifelse(Settlements$SettlementID==83 | Settlements$Settl
 # adjust filter() function with "MPAID %in%" whatever list of MPAs you'd like to filter by
 
 # HHData <-
-#   left_join(HHData,Settlements,by=c("SettlementID","MPAID")) %>%
+#   HHData %>%
 #   dplyr::filter(MPAID %in% c(1,2,3))
 # 
 # IndDemos <-
-#   left_join(IndDemos,HHData[,c("HouseholdID","SettlementID")],by=c("HouseholdID")) %>%
-#   left_join(.,Settlements,by=c("SettlementID","MPAID")) %>%
+#   left_join(IndDemos,HHData[,c("HouseholdID","Seascape")],by=c("HouseholdID")) %>%
 #   dplyr::filter(MPAID %in% c(1,2,3))
 # 
 # Organization <-
-#   left_join(Organization,HHData[,c("HouseholdID","SettlementID")],by="HouseholdID") %>%
-#   left_join(.,Settlements,by=c("SettlementID","MPAID")) %>%
+#   left_join(Organization,HHData[,c("HouseholdID","Seascape")],by="HouseholdID") %>%
 #   dplyr::filter(MPAID %in% c(1,2,3))
-
-

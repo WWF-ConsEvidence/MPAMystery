@@ -15,127 +15,11 @@
 
 
 # ---- 1.2 Source scripts / dataframes ----
-# BigFive
-# Middle 15
+
+source('3_Analysis/1_Social/4_Post_matching/Calculate_ATTs_BHS.R')
 
 
-
-# ---- 1.3 Import raw data ----
-
-#-- Master pairs lists, t2 and t4
-master.t2.A <- read.xlsx('2_Social/FlatDataFiles/BHS/t2_impacts/master_t2_panelA.xlsx', sheetName = 'Sheet 1')
-master.t4.A <- read.xlsx('2_Social/FlatDataFiles/BHS/t4_impacts/master_t4_panelA.xlsx', sheetName = 'Sheet 1')
-
-
-# ---- 1.4 Calculate outcome / ATT dataframes ----
-
-#-- BigFive, t2
-hfs.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = BigFive, var = FSIndex)
-asset.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = BigFive, var = MAIndex)
-tenure.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = BigFive, var = MTIndex)
-attach.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = BigFive, var = PAIndex)
-enrol.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = BigFive, var = SERate)
-
-#-- BigFive, t4
-hfs.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = BigFive, var = FSIndex)
-asset.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = BigFive, var = MAIndex)
-tenure.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = BigFive, var = MTIndex)
-attach.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = BigFive, var = PAIndex)
-enrol.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = BigFive, var = SERate)
-
-#-- Middle15, t2
-chfs.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = CFSIndex.inv)
-access.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = Acc.Harv)
-manage.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = Man.Excl.Trans)
-OD.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = ODIndex)
-MP.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = MarineGroup)                                     #
-OP.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = OtherGroup)
-econ.decline.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = EconDecline)
-econ.stable.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = EconStable)
-econ.increase.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = EconIncrease)
-con.decrease.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = ConDecrease)
-con.stable.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = ConStable)
-con.increase.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = ConIncrease)
-morbidity.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = DaysUnwell)
-f.enrol.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = FemaleSERate)
-m.enrol.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = MaleSERate)
-attain.4.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = Attain.4)
-attain.5.outcome.t2 <- outcome_ATT_method1_allpairs(pairs = master.t2.A, outcomes = Middle15, var = Attain.5)
-
-#-- Middle15, t4
-chfs.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = CFSIndex.inv)
-access.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = Acc.Harv)
-manage.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = Man.Excl.Trans)
-OD.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = ODIndex)
-MP.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = MarineGroup)                                     #
-OP.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = OtherGroup)
-econ.decline.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = EconDecline)
-econ.stable.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = EconStable)
-econ.increase.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = EconIncrease)
-con.decrease.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = ConDecrease)
-con.stable.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = ConStable)
-con.increase.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = ConIncrease)
-morbidity.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = DaysUnwell)
-f.enrol.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = FemaleSERate)
-m.enrol.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = MaleSERate)
-attain.4.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = Attain.4)
-attain.5.outcome.t4 <- outcome_ATT_method1_allpairs(pairs = master.t4.A, outcomes = Middle15, var = Attain.5)
-
-
-
-
-# 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# 
-# ---- Define BHS-level impacts for BigFive, and read to .png ----
-# 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# 
-
-# output household food security att & AI error, by year
-hfs.att.t2.BHS <- att.significance(outcomes = hfs.outcome.t2, HHData = HHData)
-hfs.att.t4.BHS <- att.significance(outcomes = hfs.outcome.t4, HHData = HHData)
-
-hfs.att.BHS <- 
-  data.frame(year = c("t2","t4"), 
-             rbind.data.frame(hfs.att.t2.BHS,hfs.att.t4.BHS))
-
-
-# output household material assets att & AI error, by year
-asset.att.t2.BHS <- att.significance(outcomes = asset.outcome.t2, HHData = HHData)
-asset.att.t4.BHS <- att.significance(outcomes = asset.outcome.t4, HHData = HHData)
-
-asset.att.BHS <- 
-  data.frame(year = c("t2","t4"), 
-             rbind.data.frame(asset.att.t2.BHS,asset.att.t4.BHS))
-
-
-# output marine tenure att & AI error, by year
-tenure.att.t2.BHS <- att.significance(outcomes = tenure.outcome.t2, HHData = HHData)
-tenure.att.t4.BHS <- att.significance(outcomes = tenure.outcome.t4, HHData = HHData)
-
-tenure.att.BHS <- 
-  data.frame(year = c("t2","t4"), 
-             rbind.data.frame(tenure.att.t2.BHS,tenure.att.t4.BHS))
-
-
-# output enrollment att & AI error, by year
-enrol.att.t2.BHS <- att.significance(outcomes = enrol.outcome.t2, HHData = HHData)
-enrol.att.t4.BHS <- att.significance(outcomes = enrol.outcome.t4, HHData = HHData)
-
-enrol.att.BHS <- 
-  data.frame(year = c("t2","t4"), 
-             rbind.data.frame(enrol.att.t2.BHS,enrol.att.t4.BHS))
-
-
-# output place attachment att & AI error, by year
-attach.att.t2.BHS <- att.significance(outcomes = attach.outcome.t2, HHData = HHData)
-attach.att.t4.BHS <- att.significance(outcomes = attach.outcome.t4, HHData = HHData)
-
-attach.att.BHS <- 
-  data.frame(year = c("t2","t4"), 
-             rbind.data.frame(attach.att.t2.BHS,attach.att.t4.BHS))
-
+# ---- 1.3 Define plotting-specific dataframe ----
 
 # define asterisk data for BHS-level impact plot
 asterisks.impactplots.seascape <- function(x) {
@@ -157,25 +41,35 @@ asterisks.impactplots.seascape <- function(x) {
 
 # put all BHS data together for plots, including asterisk data
 BigFive.impactplotdata.BHS <-
-  cbind.data.frame(variable=c(rep("hfs",length(hfs.att.BHS$year)),rep("asset",length(asset.att.BHS$year)),
-                              rep("tenure",length(tenure.att.BHS$year)),rep("enrol",length(enrol.att.BHS$year)),
-                              rep("attach",length(attach.att.BHS$year))),
-                   rbind.data.frame(left_join(hfs.att.BHS[,c("year","smd","lower.ci","upper.ci","est","se.standard")],
-                                              asterisks.impactplots.seascape(hfs.att.BHS), by = "year"),
-                                    left_join(asset.att.BHS[,c("year","smd","lower.ci","upper.ci","est","se.standard")],
-                                              asterisks.impactplots.seascape(asset.att.BHS), by = "year"),
-                                    left_join(tenure.att.BHS[,c("year","smd","lower.ci","upper.ci","est","se.standard")],
-                                              asterisks.impactplots.seascape(tenure.att.BHS), by = "year"),
-                                    left_join(enrol.att.BHS[,c("year","smd","lower.ci","upper.ci","est","se.standard")],
-                                              asterisks.impactplots.seascape(enrol.att.BHS), by = "year"),
-                                    left_join(attach.att.BHS[,c("year","smd","lower.ci","upper.ci","est","se.standard")],
-                                              asterisks.impactplots.seascape(attach.att.BHS), by = "year")))
+  cbind.data.frame(variable=c(rep("hfs",length(hfs.att.BHS.seascape$year)),rep("asset",length(asset.att.BHS.seascape$year)),
+                              rep("tenure",length(tenure.att.BHS.seascape$year)),rep("enrol",length(enrol.att.BHS.seascape$year)),
+                              rep("attach",length(attach.att.BHS.seascape$year))),
+                   rbind.data.frame(left_join(hfs.att.BHS.seascape[,c("year","smd","lower.ci","upper.ci","est","se")],
+                                              asterisks.impactplots.seascape(hfs.att.BHS.seascape), by = "year"),
+                                    left_join(asset.att.BHS.seascape[,c("year","smd","lower.ci","upper.ci","est","se")],
+                                              asterisks.impactplots.seascape(asset.att.BHS.seascape), by = "year"),
+                                    left_join(tenure.att.BHS.seascape[,c("year","smd","lower.ci","upper.ci","est","se")],
+                                              asterisks.impactplots.seascape(tenure.att.BHS.seascape), by = "year"),
+                                    left_join(enrol.att.BHS.seascape[,c("year","smd","lower.ci","upper.ci","est","se")],
+                                              asterisks.impactplots.seascape(enrol.att.BHS.seascape), by = "year"),
+                                    left_join(attach.att.BHS.seascape[,c("year","smd","lower.ci","upper.ci","est","se")],
+                                              asterisks.impactplots.seascape(attach.att.BHS.seascape), by = "year")))
 
 BigFive.impactplotdata.BHS <- BigFive.impactplotdata.BHS[c(9:10,5:6,7:8,1:2,3:4),]
 
 BigFive.impactplotdata.BHS$variable <- factor(BigFive.impactplotdata.BHS$variable,
                                               unique(BigFive.impactplotdata.BHS$variable),
                                               ordered=T)
+
+
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+# ---- Plot themes for seascape-level impact plot ----
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
 
 # define global plotting theme for plots
 plot.theme.impactplots <- theme(axis.ticks=element_blank(),
@@ -252,7 +146,7 @@ BigFive.impactplot.BHS <-
 
 
 # read to .png file
-png('2_Social/FlatDataFiles/BHS/BigFive.impactplots.BHS.png',
+png('x_Flat_data_files/1_Social/Outputs/BHS.impactplots.bySeascape.png',
     units="in",height=8,width=8,res=800)
 grid.newpage()
 grid.draw(BigFive.impactplot.BHS)

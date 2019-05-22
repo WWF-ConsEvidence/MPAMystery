@@ -11,83 +11,7 @@
 
 source('3_Analysis/1_Social/4_Post-matching/Calculate_ATTs_BHS.R')
 
-# 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# 
-# ---- Output ATTs and Abadie Imbens errors into dataframes for each variable ----
-# 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# 
-
-
-# output household food security att & AI error, by year
-hfs.t2.att.byMPA <- att.significance.by.group(outcomes = hfs.outcome.t2, HHData = HHData, grouping_var = "MPAID")
-hfs.t4.att.byMPA <- att.significance.by.group(outcomes = hfs.outcome.t4, HHData = HHData, grouping_var = "MPAID")
-
-hfs.att.byMPA <- 
-  data.frame(year = c(rep("t2", 6), rep("t4", 6)), 
-             rbind.data.frame(hfs.t2.att.byMPA,hfs.t4.att.byMPA)) %>%
-  dplyr::rename(mpa = get.group.)
-
-
-# output household material assets att & AI error, by year
-asset.t2.att.byMPA <- att.significance.by.group(outcomes = asset.outcome.t2, HHData = HHData, grouping_var = "MPAID")
-asset.t4.att.byMPA <- att.significance.by.group(outcomes = asset.outcome.t4, HHData = HHData, grouping_var = "MPAID")
-
-asset.att.byMPA <- 
-  data.frame(year = c(rep("t2", 6), rep("t4", 6)), 
-             rbind.data.frame(asset.t2.att.byMPA,asset.t4.att.byMPA)) %>%
-  dplyr::rename(mpa = get.group.)
-
-
-# output marine tenure att & AI error, by year
-tenure.t2.att.byMPA <- att.significance.by.group(outcomes = tenure.outcome.t2, HHData = HHData, grouping_var = "MPAID")
-tenure.t4.att.byMPA <- att.significance.by.group(outcomes = tenure.outcome.t4, HHData = HHData, grouping_var = "MPAID")
-
-tenure.att.byMPA <- 
-  data.frame(year = c(rep("t2", 6), rep("t4", 6)), 
-             rbind.data.frame(tenure.t2.att.byMPA,tenure.t4.att.byMPA)) %>%
-  dplyr::rename(mpa = get.group.)
-
-
-# output enrollment att & AI error, by year
-enrol.t2.att.byMPA <- att.significance.by.group(outcomes = enrol.outcome.t2, HHData = HHData, grouping_var = "MPAID")
-enrol.t4.att.byMPA <- att.significance.by.group(outcomes = enrol.outcome.t4, HHData = HHData, grouping_var = "MPAID")
-
-enrol.att.byMPA <- 
-  data.frame(year = c(rep("t2", 6), rep("t4", 6)), 
-             rbind.data.frame(enrol.t2.att.byMPA,enrol.t4.att.byMPA)) %>%
-  dplyr::rename(mpa = get.group.)
-
-
-# output place attachment att & AI error, by year
-attach.t2.att.byMPA <- att.significance.by.group(outcomes = attach.outcome.t2, HHData = HHData, grouping_var = "MPAID")
-attach.t4.att.byMPA <- att.significance.by.group(outcomes = attach.outcome.t4, HHData = HHData, grouping_var = "MPAID")
-
-attach.att.byMPA <- 
-  data.frame(year = c(rep("t2", 6), rep("t4", 6)), 
-             rbind.data.frame(attach.t2.att.byMPA,attach.t4.att.byMPA)) %>%
-  dplyr::rename(mpa = get.group.)
-
-
-
-# length of matched HH per MPA
-
-# (master.t2.A from Calculate_ATTs_BHS.R)
-num.obs.t2.perMPA <-
-  master.t2.A %>%
-  dplyr::rename(HouseholdID=HouseholdID.tr1.t2) %>%
-  left_join(HHData,by="HouseholdID") %>%
-  group_by(MPAID) %>%
-  summarise(num.HH = length(HouseholdID[!is.na(HouseholdID)]))
-
-num.obs.t4.perMPA <-
-  master.t4.A %>%
-  dplyr::rename(HouseholdID=HouseholdID.tr1.t4) %>%
-  left_join(HHData,by="HouseholdID") %>%
-  group_by(MPAID) %>%
-  summarise(num.HH = length(HouseholdID[!is.na(HouseholdID)]))
-
+pacman::p_load(ggplot2, grid, gridExtra, gtable, lemon)
 
 
 # 
@@ -131,11 +55,11 @@ impactplotdata.byMPA <-
   dplyr::rename(enrol = asterisk) %>%
   left_join(asterisks.impactplots.byMPA(attach.att.byMPA),by = c("year", "mpa")) %>%
   dplyr::rename(attach = asterisk) %>%
-  cbind.data.frame(hfs.est = hfs.att.byMPA$est, hfs.se = hfs.att.byMPA$se.standard,
-                   asset.est = asset.att.byMPA$est, asset.se = asset.att.byMPA$se.standard,
-                   tenure.est = tenure.att.byMPA$est, tenure.se = tenure.att.byMPA$se.standard,
-                   enrol.est = enrol.att.byMPA$est, enrol.se = enrol.att.byMPA$se.standard,
-                   attach.est = attach.att.byMPA$est, attach.se = attach.att.byMPA$se.standard)
+  cbind.data.frame(hfs.est = hfs.att.byMPA$est, hfs.se = hfs.att.byMPA$se,
+                   asset.est = asset.att.byMPA$est, asset.se = asset.att.byMPA$se,
+                   tenure.est = tenure.att.byMPA$est, tenure.se = tenure.att.byMPA$se,
+                   enrol.est = enrol.att.byMPA$est, enrol.se = enrol.att.byMPA$se,
+                   attach.est = attach.att.byMPA$est, attach.se = attach.att.byMPA$se)
   
 
 # define global plotting theme for plots
@@ -397,7 +321,7 @@ impactplots.byMPA <- arrangeGrob(hfs.impactplot.byMPA, asset.impactplot.byMPA, t
 
 
 # read to .png file
-png('2_Social/FlatDataFiles/BHS/impactplots.byMPA.png',
+png('x_Flat_data_files/1_Social/Outputs/BHS.impactplots.byMPA.png',
     units="in",height=6,width=9.5,res=400)
 grid.newpage()
 grid.draw(impactplots.byMPA)

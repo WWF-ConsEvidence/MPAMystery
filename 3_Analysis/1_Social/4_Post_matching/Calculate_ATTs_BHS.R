@@ -4,10 +4,16 @@
 # created: May 2018
 # modified: December 2018
 
+
 pacman::p_load(MBESS,Match,xlsx)
 
+
 # ---- 1.1 Source functions & data frames ----
+
 source('2_Functions/2_Analysis/Function_outcome_ATT_method1.R')
+source('2_Functions/2_Analysis/Function_att_significance_by_MPA.R')
+source('2_Functions/2_Analysis/Function_att_significance_by_seascape.R')
+
 
 # BigFive
 # Middle 15
@@ -153,10 +159,67 @@ num.obs.t4.perMPA <-
   summarise(num.HH = length(HouseholdID[!is.na(HouseholdID)]))
 
 
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+# ---- Output Seascape-level ATTs and Abadie Imbens errors into dataframes for each variable ----
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+
+# output household food security att & AI error, by year
+hfs.t2.att.BHS.seascape <- att.significance.by.seascape(outcomes = hfs.outcome.t2, HHData = HHData)
+hfs.t4.att.BHS.seascape <- att.significance.by.seascape(outcomes = hfs.outcome.t4, HHData = HHData)
+
+hfs.att.BHS.seascape <- 
+  data.frame(year = c("t2", "t4"), 
+             rbind.data.frame(hfs.t2.att.BHS.seascape,hfs.t4.att.BHS.seascape))
+
+
+# output household material assets att & AI error, by year
+asset.t2.att.BHS.seascape <- att.significance.by.seascape(outcomes = asset.outcome.t2, HHData = HHData)
+asset.t4.att.BHS.seascape <- att.significance.by.seascape(outcomes = asset.outcome.t4, HHData = HHData)
+
+asset.att.BHS.seascape <- 
+  data.frame(year = c("t2", "t4"), 
+             rbind.data.frame(asset.t2.att.BHS.seascape,asset.t4.att.BHS.seascape))
+
+
+# output marine tenure att & AI error, by year
+tenure.t2.att.BHS.seascape <- att.significance.by.seascape(outcomes = tenure.outcome.t2, HHData = HHData)
+tenure.t4.att.BHS.seascape <- att.significance.by.seascape(outcomes = tenure.outcome.t4, HHData = HHData)
+
+tenure.att.BHS.seascape <- 
+  data.frame(year = c("t2", "t4"), 
+             rbind.data.frame(tenure.t2.att.BHS.seascape,tenure.t4.att.BHS.seascape))
+
+
+# output enrollment att & AI error, by year
+enrol.t2.att.BHS.seascape <- att.significance.by.seascape(outcomes = enrol.outcome.t2, HHData = HHData)
+enrol.t4.att.BHS.seascape <- att.significance.by.seascape(outcomes = enrol.outcome.t4, HHData = HHData)
+
+enrol.att.BHS.seascape <- 
+  data.frame(year = c("t2", "t4"), 
+             rbind.data.frame(enrol.t2.att.BHS.seascape,enrol.t4.att.BHS.seascape))
+
+
+# output place attachment att & AI error, by year
+attach.t2.att.BHS.seascape <- att.significance.by.seascape(outcomes = attach.outcome.t2, HHData = HHData)
+attach.t4.att.BHS.seascape <- att.significance.by.seascape(outcomes = attach.outcome.t4, HHData = HHData)
+
+attach.att.BHS.seascape <- 
+  data.frame(year = c("t2", "t4"), 
+             rbind.data.frame(attach.t2.att.BHS.seascape,attach.t4.att.BHS.seascape))
+
+
 
 
 rm(asset.t2.att.byMPA,asset.t4.att.byMPA,attach.t2.att.byMPA,attach.t4.att.byMPA,enrol.t2.att.byMPA,
-   enrol.t4.att.byMPA,hfs.t2.att.byMPA,hfs.t4.att.byMPA,tenure.t2.att.byMPA,tenure.t4.att.byMPA)
+   enrol.t4.att.byMPA,hfs.t2.att.byMPA,hfs.t4.att.byMPA,tenure.t2.att.byMPA,tenure.t4.att.byMPA,
+   asset.t2.att.BHS.seascape,asset.t4.att.BHS.seascape,attach.t2.att.BHS.seascape,attach.t4.att.BHS.seascape,enrol.t2.att.BHS.seascape,
+   enrol.t4.att.BHS.seascape,hfs.t2.att.BHS.seascape,hfs.t4.att.BHS.seascape,tenure.t2.att.BHS.seascape,tenure.t4.att.BHS.seascape)
+
 
 
 

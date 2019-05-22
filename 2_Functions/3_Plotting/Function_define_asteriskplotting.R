@@ -169,6 +169,54 @@ define.seascape.statusplot.asterisk.pos <- function(x,asterisks) {
   result
 }
 
+# Define number of asterisks & reference settlement -- FOR SEASCAPE-LEVEL BASELINE plots
+define.seascape.baselineplot.asterisks <- function(x) {
+  result <- x
+  reference <- x
+  for(a in colnames(x[2:7])){
+    for(i in 1:length(x$MPAName)){
+      result[i,a] <- ifelse(as.numeric(x[i,a])<0.01,"***",
+                            ifelse(as.numeric(x[i,a])<0.05 & as.numeric(x[i,a])>=0.01,"**",
+                                   ifelse(as.numeric(x[i,a])<0.1 & as.numeric(x[i,a])>=0.05,"*","")))
+      reference[i,a] <- ifelse(as.character(x[i,a])=="median","R","")
+    }
+  }
+  colnames(result) <- c("MPAName","FS","MA","PA","MT","SE","Unwell")
+  colnames(reference) <- c("MPAName","FS.ref","MA.ref","PA.ref","MT.ref","SE.ref","Unwell.ref")
+  result <- left_join(result,reference,by="MPAName")
+  result
+}
+
+
+# Define (x,y) position of asterisks & reference settlement "R" -- FOR SEASCAPE-LEVEL BASELINE plots
+define.seascape.baselineplot.asterisk.pos <- function(x,asterisks) {
+  result <- asterisks[,1:7]
+  ref <- asterisks[,c(1,8:13)]
+  scale <- x[1,grep("Mean",colnames(x))]
+  for(i in colnames(scale)) {
+    scale[1,i] <- max(x[,i],na.rm=T)
+  }
+  result[,1:7] <- mapply(a=x[,grep("Mean",colnames(x))],
+                         b=x[,grep("Err",colnames(x))],
+                         c=asterisks[,1:7],
+                         d=c(1:7),
+                         function(a,b,c,d){
+                           ifelse(c=="***",a+b+(0.05*scale[,d]),
+                                  ifelse(c=="**",a+b+(0.04*scale[,d]),
+                                         ifelse(c=="*",a+b+(0.03*scale[,d]),1)))
+                         })
+  ref[,1:7] <- mapply(a=x[,grep("Mean",colnames(x))],
+                      b=x[,grep("Err",colnames(x))],
+                      c=asterisks[,8:13],
+                      d=c(1:7),
+                      function(a,b,c,d){
+                        ifelse(c=="R",a+b+(0.03*scale[,d]),1)
+                      })
+  result <- left_join(result,ref,by="MPAName")
+  result
+}
+
+
 # Define MPA Name labels, with asterisks -- FOR SEASCAPE-LEVEL annex plots
 define.annexplot.MPAname.labels <- function(x) {
   result <- x

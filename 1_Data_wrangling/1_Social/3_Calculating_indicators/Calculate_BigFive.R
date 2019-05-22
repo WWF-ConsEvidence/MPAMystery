@@ -56,14 +56,6 @@ HHEthnicity$eth.iso <- ifelse(HHEthnicity$eth.iso=="raj","rja",
                                             as.character(HHEthnicity$eth.iso))))
 
 
-# ---- 1.4 Subset variables from HHData for Big Five calculations & descriptive statistics ----
-
-HHLivelihood <- HHData[,c(1:3,79:90)]
-HHDemos <- HHData[,c(1:3,91:94,99)]
-HeadOfHH <- IndDemos[IndDemos$RelationHHH==0 &
-                       !is.na(IndDemos$RelationHHH),1:4]
-
-
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -120,7 +112,7 @@ HHData <-
 # ---- 2.2 Define "Big Five" data frame - averaged by settlement, for each monitoring year ----
 
 BigFive.SettleGroup <- 
-  left_join(HHData,Settlements[,c("SettlementID","SettlementName","Treatment")],by="SettlementID") %>%
+  HHData %>%
   group_by(SettlementID,SettlementName,MPAID,Treatment,MonitoringYear) %>%
   summarise(FSMean=round(mean(FSIndex,na.rm=T),2),
             FSErr=round(sd(FSIndex,na.rm=T)/sqrt(length(FSIndex)),2),
@@ -150,7 +142,7 @@ BigFive.SettleGroup <- rbind.data.frame(BigFive.SettleGroup,
 # ---- 2.4 Define "Big Five" data frame - averaged by control group (per MPA), for each monitoring year ----
 
 BigFive.ControlGroup <- 
-  left_join(HHData,Settlements[,c("SettlementID","SettlementName","Treatment")],by="SettlementID") %>%
+  HHData %>%
   filter(Treatment==0) %>%
   group_by(MPAID,MonitoringYear) %>%
   summarise(FSMean=round(mean(FSIndex,na.rm=T),2),
@@ -175,7 +167,7 @@ BigFive.ControlGroup <-
 # ---- 2.5 Define "Big Five" data frame - averaged by MPA, for each monitoring year ----
 
 BigFive.MPAGroup <- 
-  left_join(HHData,Settlements[,c("SettlementID","SettlementName","Treatment")],by="SettlementID") %>%
+  HHData %>%
   filter(Treatment==1) %>%
   group_by(MPAID,MonitoringYear) %>%
   summarise(FSMean=round(mean(FSIndex,na.rm=T),2),

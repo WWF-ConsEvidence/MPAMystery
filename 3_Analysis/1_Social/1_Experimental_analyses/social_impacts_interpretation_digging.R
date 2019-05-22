@@ -220,7 +220,7 @@ ggplot(t0.wealth.attachATT.byMPA,aes(x=ATT,y=MAMean)) +
 PercentHH.assets.bytype.byMPA <-
   HHData %>%
   transmute(HouseholdID=HouseholdID,
-            MPAID=as.factor(MPAID),
+            MPAID=as.numeric(MPAID),
             SettlementID=SettlementID,
             MonitoringYear=MonitoringYear,
             CarTruck=CarTruck/11,
@@ -307,7 +307,7 @@ PercentHH.assets.bytype <-
             MoreOneSatellite=length(HouseholdID[Satellite>1 & !is.na(Satellite)])/length(HouseholdID[!is.na(Satellite)])*100)
 
 change.assets.plots <-
-  ggplot(PercentHH.assets.bytype.byMPA,
+  ggplot(PercentHH.assets.bytype.byMPA[PercentHH.assets.bytype.byMPA$MPAID<7,],
          aes(x=MPAID,group=MonitoringYear,y=NoPhone/100)) +
   geom_bar(aes(fill=MonitoringYear),
            stat="identity",
