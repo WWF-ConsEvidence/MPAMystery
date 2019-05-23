@@ -38,7 +38,7 @@ pacman::p_load(twang, dplyr,tm,NLP, readxl,cobalt, CBPS, Matching, optmatch, tid
 
 # ---
 # 1.2 
-source(source('~/Social_impacts_2017_1230/function_process_covariates.R'))
+source('2_Functions/2_Analysis/Function_process_covariates.R')
 # ---
 # 1.3 Import raw data
 HH.data <- read_excel("x_Flat_data_files/1_Social/Inputs/HH_tbl_WELLBEING.xlsx") %>% filter(MPAID<7) #redirect to final file destination
