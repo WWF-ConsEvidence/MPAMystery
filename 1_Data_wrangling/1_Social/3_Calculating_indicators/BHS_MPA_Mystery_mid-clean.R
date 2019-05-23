@@ -138,7 +138,7 @@ MT <- HHData[,c(1,59:64)]
 HHLivelihood <- HHData[,c(1:3,79:90)]
 HHDemos <- HHData[,c(1:3,91:94,99)]
 HeadOfHH <- IndDemos[IndDemos$RelationHHH==0 &
-                       !is.na(IndDemos$RelationHHH),1:4]
+                       !is.na(IndDemos$RelationHHH),1:5]
 
 
 # 
@@ -477,6 +477,13 @@ Techreport.BySett <- Techreport.BySett[!is.na(Techreport.BySett$SettlementID),]
 Techreport.ByMPA <-
   HHData %>%
   filter(Treatment==1) %>%
+  group_by(MPAID,MonitoringYear) %>%
+  summarise(TimeMarketMean=mean(TimeMarket,na.rm=T),
+            TimeMarketErr=sd(TimeMarket,na.rm=T)/sqrt(length(TimeMarket)))
+
+Techreport.Control <-
+  HHData %>%
+  filter(Treatment==0) %>%
   group_by(MPAID,MonitoringYear) %>%
   summarise(TimeMarketMean=mean(TimeMarket,na.rm=T),
             TimeMarketErr=sd(TimeMarket,na.rm=T)/sqrt(length(TimeMarket)))
@@ -906,6 +913,12 @@ Days.unwell.ByMPA <-
   summarise(UnwellMean=mean(DaysUnwell,na.rm=T),
             UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)))
 
+Days.unwell.Control <-
+  Days.unwell[Days.unwell$Treatment==0,] %>%
+  group_by(MPAID,MonitoringYear) %>%
+  summarise(UnwellMean=mean(DaysUnwell,na.rm=T),
+            UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)))
+  
 # ---Days unwell, by settlement ("Days.unwell.BySett" is most current cross-section of data)
 Days.unwell.BySett <- 
   Days.unwell.treatment %>%
@@ -947,6 +960,24 @@ Techreport.BHSmeans <-
             UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell))) %>%
   na.omit()
 
+Techreport.BHSmeans.Control <- 
+  left_join(HHData[HHData$Treatment==0,],Days.unwell[Days.unwell$Treatment==0,c("HouseholdID","DaysUnwell")],by="HouseholdID") %>%
+  group_by(MonitoringYear) %>%
+  summarise(FSMean=round(mean(FSIndex,na.rm=T),2),
+            FSErr=round(sd(FSIndex,na.rm=T)/sqrt(length(FSIndex)),2),
+            MAMean=round(mean(MAIndex,na.rm=T),2),
+            MAErr=round(sd(MAIndex,na.rm=T)/sqrt(length(MAIndex)),2),
+            PAMean=round(mean(PAIndex,na.rm=T),2),
+            PAErr=round(sd(PAIndex,na.rm=T)/sqrt(length(PAIndex)),2),
+            MTMean=round(mean(MTIndex,na.rm=T),2),
+            MTErr=round(sd(MTIndex,na.rm=T)/sqrt(length(MTIndex)),2),
+            SEMean=round(mean(SERate,na.rm=T),2),
+            SEErr=round(sd(SERate,na.rm=T)/sqrt(length(SERate)),2),
+            TimeMarketMean=mean(TimeMarket,na.rm=T),
+            TimeMarketErr=sd(TimeMarket,na.rm=T)/sqrt(length(TimeMarket)),
+            UnwellMean=mean(DaysUnwell,na.rm=T),
+            UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell))) %>%
+  na.omit()
 
 # Individual Age and Gender breakdowns, by MPA
 AgeGenderDemos <- left_join(HHDemos.context[,c(1,3,4,7,11,14)],

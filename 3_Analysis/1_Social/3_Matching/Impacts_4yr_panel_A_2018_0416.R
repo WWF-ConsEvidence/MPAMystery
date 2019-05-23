@@ -34,29 +34,73 @@
 #===
 
 # 1.1 Call in libraries
-pacman::p_load(twang, dplyr,tm,NLP, readxl,cobalt, CBPS, Matching, optmatch, tidyr,RItools,Hmisc,MBESS,rbounds,reshape2, Matching,dplyr, openxlsx)
+pacman::p_load(twang, tm,NLP, readxl,cobalt, CBPS, Matching, optmatch, tidyr,RItools,Hmisc,MBESS,rbounds,reshape2, Matching, openxlsx,dplyr)
+pacman::p_load(rio)
 
 # ---
 # 1.2 
-source(source('~/Social_impacts_2017_1230/function_process_covariates.R'))
+source('2_Functions/2_Analysis/Function_process_covariates.R')
 # ---
 # 1.3 Import raw data
-HH.data <- read_excel("x_Flat_data_files/1_Social/Inputs/HH_tbl_WELLBEING.xlsx") %>% filter(MPAID<7) #redirect to final file destination
-DE.data <- read_excel("x_Flat_data_files/1_Social/Inputs/HH_tbl_DEMOGRAPHIC.xlsx") %>% 
+HH.data <- HHData %>% filter(MPAID<7) #redirect to final file destination
+DE.data <- import("x_Flat_data_files/1_Social/Inputs/HH_tbl_DEMOGRAPHIC.xlsx") %>% 
   left_join(.,HH.data[,c("HouseholdID","MPAID")], by="HouseholdID") %>% filter(MPAID<7) #redirect to final file destination
-SE.data<- read_excel("x_Flat_data_files/1_Social/Inputs/HH_tbl_SETTLEMENT.xlsx") %>% filter(MPAID<7)
+SE.data<- import("x_Flat_data_files/1_Social/Inputs/HH_tbl_SETTLEMENT.xlsx") %>% filter(MPAID<7)
 
 # ---
 # 1.4 Import lookup tables
-ethnic.lkp<- read.delim("x_Flat_data_files/1_Social/Inputs/BHS/eth_output_kc_2017_1217.txt")
-education_lkp <- read.delim("x_Flat_data_files/1_Social/Inputs/BHS/education_lkp.txt")
+ethnic.lkp<- import("x_Flat_data_files/1_Social/Inputs/master_ethnic_lookup_2017_117.xlsx")
+education.lkp <- import("x_Flat_data_files/1_Social/Inputs/education_lkp_BHS.xlsx")
 
 
 # ----SECTION 2: Pre-process matching covariates ----
 
 # ---
 # 2.1 Run data prep function
-match.covariate <- process_covariates(HH.data, DE.data,t0.t2.pairs, t0.t4.pairs)
+match.covariate <- process_covariates(HH.data, DE.data)
+
+cov.avg <- match.covariate %>% 
+  group_by(SettlementID,MonitoringYear) %>% 
+  summarize_at(vars(TimeMarket:IndividualAge),mean)
+
+match.covariate1 <- match.covariate %>% 
+  left_join(cov.avg, by=c("SettlementID","MonitoringYear")) %>% 
+  mutate(TimeMarket.x=ifelse(is.na(TimeMarket.x),TimeMarket.y,TimeMarket.x),
+         n.child.x=ifelse(is.na(n.child.x),n.child.y,n.child.x),
+          ed.level.x=ifelse(is.na(ed.level.x),ed.level.y,ed.level.x),
+           dom.eth.x=ifelse(is.na(dom.eth.x),dom.eth.y,dom.eth.x),
+            YearsResident.x=ifelse(is.na(YearsResident.x),YearsResident.y,YearsResident.x),
+            IndividualGender.x=ifelse(is.na(IndividualGender.x),IndividualGender.y,IndividualGender.x),
+            IndividualAge.x=ifelse(is.na(IndividualAge.x),IndividualAge.x,IndividualAge.x))
+
+# --- pscore calculations
+#baseline 
+cov.t0 <- filter(match.covariate1,MonitoringYear=="Baseline")
+p.score.t0 <- glm(Treatment~ TimeMarket + n.child + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge, 
+                   data=cov.t0, family= binomial())$fitted.values
+cov.t0.pscore <- cbind(cov.t0,p.score.t0)
+
+#t2
+cov.t2 <- filter(match.covariate1,MonitoringYear=="2 Year Post")
+p.score.t2 <- glm(Treatment~ TimeMarket + n.child + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge, 
+                  data=filter(match.covariate,MonitoringYear=="2 Year Post"), family= binomial())$fitted.values
+cov.t2.pscore <- cbind(cov.t2,p.score.t2)
+
+#t4
+cov.t4 <- filter(match.covariate1,MonitoringYear=="2 Year Post")
+p.score.t4 <- glm(Treatment~ TimeMarket + n.child + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge, 
+                  data=filter(match.covariate,MonitoringYear=="4 Year Post"), family= binomial())$fitted.values
+cov.t4.pscore <- cbind(cov.t4,p.score.t4)
+
+# get ranges
+p.score.range <- range(c(p.score.t0,p.score.t2,p.score.t4))
+p.score.sd <- sd((c(p.score.t0,p.score.t2,p.score.t4)))
+p.score.range.sd <- range (p.score.range + (0.5 * p.score.sd),p.score.range - (0.5 * p.score.sd))
+
+n.t0.tr.trim <- cov.t4.pscore %>% 
+  filter(p.score.t4>=min(p.score.range) & p.score.t4<=max(p.score.range))
+
+
 
 #--- 
 # 2.2 Subset to t0.t4.data
