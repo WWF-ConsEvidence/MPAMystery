@@ -3,12 +3,12 @@
 # modified: --
 
 process_covariates <- 
-  function(HH.data, DE.data) {
+  function(HH.data, DE.data,t0.t2.pairs, t0.t4.pairs) {
  
 #---- Import look up tables ----
     
-    ethnic.lkp<- import("x_Flat_data_files/1_Social/Inputs/master_ethnic_lookup_2017_117.xlsx")
-    education.lkp <- import("x_Flat_data_files/1_Social/Inputs/education_lkp_BHS.xlsx")
+    ethnic.lkp<- read.delim("x_Flat_data_files/1_Social/Inputs/BHS/eth_output_kc_2017_1217.txt")
+    education.lkp <- read.delim("x_Flat_data_files/1_Social/Inputs/BHS/education_lkp.txt")
     
 # ---Create functions
     # Function to remove all white space in string variables
@@ -28,14 +28,14 @@ process_covariates <-
     # Age
     age.bin<-c(0,20,30,40,50,60,70,990)
     
-    HH.age<-subset(DE.data, select=c("HouseholdID","RelationHHH","IndividualAge"), RelationHHH==0)
+    HH.age<-subset(DE.data, select=c("HouseholdID","DemographicCode","IndividualAge"), DemographicCode==1)
     HH.monitoring.year <-subset(HH.data, select=c("HouseholdID","MonitoringYear"))
     HH.age <-left_join(HH.age,(subset(HH.data, select=c("HouseholdID","MonitoringYear"))),by="HouseholdID")
     HH.age$IndividualAge[HH.age$IndividualAge >= 990] <- 990 #recode blind values
     
-    t0.age <- subset(HH.age, MonitoringYear=="Baseline")
-    t2.age <- subset(HH.age, MonitoringYear=="2 Year Post")
-    t4.age <- subset(HH.age, MonitoringYear=="4 Year Post")
+    t0.age <- subset(HH.age, MonitoringYear=="t0")
+    t2.age <- subset(HH.age, MonitoringYear=="t2")
+    t4.age <- subset(HH.age, MonitoringYear=="t4")
     
     t0.age$IndividualAge <- .bincode(t0.age$IndividualAge,age.bin,TRUE,TRUE)
     t2.age$IndividualAge <- .bincode((t2.age$IndividualAge-2),age.bin,TRUE,TRUE)
@@ -53,14 +53,12 @@ process_covariates <-
     # Residency
     resident.bin<-c(0,10,20,30,40,50,60,990)
 
-    HH.residency<-subset(HH.data,select=c("HouseholdID","YrResident", "MonitoringYear")) %>% transmute(HouseholdID=HouseholdID,
-                                                                                                       YearsResident=YrResident,
-                                                                                                       MonitoringYear=MonitoringYear)
+    HH.residency<-subset(HH.data,select=c("HouseholdID","YearsResident", "MonitoringYear"))
     HH.residency$YearsResident[HH.residency$YearsResident >= 990] <- 990
 
-    t0.residency <- subset(HH.residency, MonitoringYear=="Baseline")
-    t2.residency <- subset(HH.residency, MonitoringYear=="2 Year Post")
-    t4.residency <- subset(HH.residency, MonitoringYear=="4 Year Post")
+    t0.residency <- subset(HH.residency, MonitoringYear=="t0")
+    t2.residency <- subset(HH.residency, MonitoringYear=="t2")
+    t4.residency <- subset(HH.residency, MonitoringYear=="t4")
     
     t0.residency$YearsResident <- .bincode(t0.residency$YearsResident,resident.bin,TRUE,TRUE)
     t2.residency$YearsResident <- ifelse(t2.residency$YearsResident>2,(.bincode((t2.residency$YearsResident-2),resident.bin,TRUE,TRUE)),1)
@@ -96,7 +94,7 @@ process_covariates <-
     rm(max.eth,x)
 
     # Education level of household head
-    HH.ed <- subset(DE.data, select=c("HouseholdID","IndividualEducation"), RelationHHH==0)
+    HH.ed <- subset(DE.data, select=c("HouseholdID","IndividualEducation"), DemographicCode==1)
     HH.ed <- left_join(HH.ed, education.lkp, by=c("IndividualEducation"))
     HH.ed$IndividualEducation <-NULL
  
@@ -126,23 +124,27 @@ process_covariates <-
     rm(market.mean, impute.market)
     
     # Site and treatment
-    MPA <-left_join((subset (HH.data, select=c("HouseholdID", "MPAID","SettlementID","MonitoringYear"))),(subset(SE.data, select=c("SettlementID","Treatment"))),by="SettlementID")
+    MPA <-left_join((subset (HH.data, select=c("HouseholdID", "MPAID","SettlementID"))),(subset(SE.data, select=c("SettlementID","Treatment"))),by="SettlementID")
+    
+    # Longitudinal pairs
+    t0.t2.pairs <-melt(t0.t2.matched, id.vars="match.id",measure.vars=c("HouseholdID.t0","HouseholdID.t2"))
+    t0.t2.pairs<-subset(t0.t2.pairs,select=c("match.id","value"))
+    colnames(t0.t2.pairs) <-c("t0.t2.pair","HouseholdID")
+    
+    t0.t4.pairs <-melt(t0.t4.matched, id.vars="match.id",measure.vars=c("HouseholdID.t0","HouseholdID.t4"))
+    t0.t4.pairs<-subset(t0.t4.pairs,select=c("match.id","value"))
+    colnames(t0.t4.pairs) <-c("t0.t4.pair","HouseholdID")
+    
     
     #Compile match covariate
-    match.covariate <-
-      left_join(MPA,market.distance[,c("HouseholdID","TimeMarket")],by="HouseholdID") %>%
-      left_join(N.Child,by="HouseholdID") %>%
-      left_join(HH.ed,by="HouseholdID") %>%
-      left_join(HH.eth,by="HouseholdID") %>%
-      left_join(HH.residency,by="HouseholdID") %>%
-      left_join(gender.HHH,by="HouseholdID") %>%
-      left_join(HH.age,by="HouseholdID") %>%
-      .[!duplicated(.),]
-      
+    match.covariate <-list(MPA,market.distance,N.Child,HH.ed, HH.eth,HH.residency,gender.HHH, HH.age,t0.t2.pairs,t0.t4.pairs) %>%
+      Reduce(function(dtf1,dtf2) left_join(dtf1,dtf2,by="HouseholdID"), .)
+    
+match.covariate$t0.t2.pair[is.na(match.covariate$t0.t2.pair)]<-99999
+match.covariate$t0.t4.pair[is.na(match.covariate$t0.t4.pair)]<-99999
     
 rm(MPA,market.distance,N.Child,HH.ed, HH.eth,HH.residency,gender.HHH, HH.age)
 
 return (match.covariate)
   }
 #rm()
-

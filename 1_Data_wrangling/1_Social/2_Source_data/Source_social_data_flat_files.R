@@ -144,7 +144,8 @@ HHData <-
                    PoorCatchUnits = PoorCatchUnits, 
                    MoreProductiveDaysFishing = MoreProductiveDaysFishing, 
                    GoodCatch = GoodCatch, 
-                   GoodCatchUnits = GoodCatchUnits) %>%
+                   GoodCatchUnits = GoodCatchUnits,
+                   PaternalEthnicity = PaternalEthnicity) %>%
   
   dplyr::mutate(RemoveFS = as.factor(ifelse(rowSums(is.na(.[c("DidNotLast", "BalancedDiet", "FreqAdultSkip", 
                                                               "AdultSkip", "EatLess", "Hungry")]))>3,"Yes","No")),
@@ -165,7 +166,7 @@ HHData <-
                 LowCostFood, ChildBalancedMeal, ChildNotEnough, ChildPortion, ChildHungry, ChildSkip, FreqChildSkip, NoMealChild, RemovecFS,
                 PrimaryLivelihood, SecondaryLivelihood, TertiaryLivelihood, FreqFish, FreqSaleFish, PercentIncFish, MajFishTechnique, FreqEatFish, PercentProteinFish, 
                 EconStatusTrend, EconStatusReason, Religion, YrResident, TimeMarket, SocialConflict,
-                LessProductiveDaysFishing, PoorCatch, PoorCatchUnits, MoreProductiveDaysFishing, GoodCatch, GoodCatchUnits)
+                LessProductiveDaysFishing, PoorCatch, PoorCatchUnits, MoreProductiveDaysFishing, GoodCatch, GoodCatchUnits, PaternalEthnicity)
 
 
 # ---- 2.2 Clean & post-code DEMOGRAPHIC to create IndDemos for analysis ----

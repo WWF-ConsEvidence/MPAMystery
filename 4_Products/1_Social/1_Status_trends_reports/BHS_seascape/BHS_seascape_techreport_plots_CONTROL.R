@@ -1248,7 +1248,7 @@ BHS.fs.annexplot <-
                alpha=MonitoringYear),
            stat="identity",
            position="dodge",
-           fill=fillcols.trend,
+           fill=fillcols.trend.Control,
            width=0.75,
            size=0.15,
            colour="#505050") +
@@ -1309,7 +1309,7 @@ BHS.ma.annexplot <-
   geom_bar(aes(alpha=MonitoringYear),
            stat="identity",
            position="dodge",
-           fill=fillcols.trend,
+           fill=fillcols.trend.Control,
            width=0.75,
            size=0.15,
            colour="#505050") +
@@ -1348,7 +1348,7 @@ BHS.pa.annexplot <-
   geom_bar(aes(alpha=MonitoringYear),
            stat="identity",
            position="dodge",
-           fill=fillcols.trend,
+           fill=fillcols.trend.Control,
            width=0.75,
            size=0.15,
            colour="#505050") +
@@ -1385,7 +1385,7 @@ BHS.mt.annexplot <-
   geom_bar(aes(alpha=MonitoringYear),
            stat="identity",
            position="dodge",
-           fill=fillcols.trend,
+           fill=fillcols.trend.Control,
            width=0.75,
            size=0.15,
            colour="#505050") +
@@ -1422,7 +1422,7 @@ BHS.se.annexplot <-
   geom_bar(aes(alpha=MonitoringYear),
            stat="identity",
            position="dodge",
-           fill=fillcols.trend,
+           fill=fillcols.trend.Control,
            width=0.75,
            size=0.15,
            colour="#505050") +
@@ -1458,7 +1458,7 @@ BHS.time.annexplot <-
   geom_bar(aes(alpha=MonitoringYear),
            stat="identity",
            position="dodge",
-           fill=fillcols.trend,
+           fill=fillcols.trend.Control,
            width=0.75,
            size=0.15,
            colour="#505050") +
@@ -1497,7 +1497,7 @@ BHS.unwell.annexplot <-
   geom_bar(aes(alpha=MonitoringYear),
            stat="identity",
            position="dodge",
-           fill=fillcols.trend,
+           fill=fillcols.trend.Control,
            width=0.75,
            size=0.15,
            colour="#505050") +
