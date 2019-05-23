@@ -2,8 +2,7 @@ require(sf)
 require(leaflet)
 require(rio)
 require(tidyverse)
-require(dplyr)
-require(lwgeom)
+#require(lwgeom)
 require(geosphere)
 
 boundir <- ("R:/Gill/RMesa/Gill_Retreat/Spatial/2017_BHS_MPA_Boundary/")
@@ -49,7 +48,7 @@ ctrl.sites <- monitor %>%
   st_set_geometry(NULL)
 
 # Creating an empty dataframe with the variables of interest 
-dist.table <- data.frame(MPA = tr.sites$MPA_NAME,Settlement_ID=tr.sites$Settlement,Settlement = tr.sites$Settleme_1,
+dist.table <- data.frame(MPA = tr.sites$MPA_NAME,MPAID=tr.sites$MPAID,Settlement_ID=tr.sites$Settlement,Settlement = tr.sites$Settleme_1,
                          mean.dist = NA,min.dist = NA,max.dist = NA)
 
 # dist.km <- distGeo(tr.sites[1,c("X","Y")],ctrl.sites[c("X","Y")])/1000
@@ -61,4 +60,10 @@ for (i in 1:nrow(tr.sites)) {
   dist.table$min.dist[i] = min(dist.km)
   dist.table$max.dist[i] = max(dist.km)
 }
+
+dist.table <- dist.table %>% 
+  group_by(MPAID,MPA) %>% 
+  summarise(mean.dist=mean(mean.dist),
+            min.dist=min(min.dist),
+            max.dist=max(max.dist))
 
