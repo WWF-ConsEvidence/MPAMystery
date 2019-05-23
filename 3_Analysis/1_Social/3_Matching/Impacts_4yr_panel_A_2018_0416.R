@@ -39,7 +39,7 @@ pacman::p_load(rio)
 
 # ---
 # 1.2 
-source('2_Functions/2_Analysis/Function_process_covariates_mid-clean.R')
+source('2_Functions/2_Analysis/Function_process_covariates.R')
 # ---
 # 1.3 Import raw data
 HH.data <- HHData %>% filter(MPAID<7) #redirect to final file destination
