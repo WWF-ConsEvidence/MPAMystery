@@ -48,7 +48,7 @@ source('1_Data_wrangling/1_Social/2_Source_data/Source_social_data_flat_files.R'
 
 
 # Whichever option you chose above, you will still need to upload Ethnicity data from a flat file
-HHEthnicity <- read.delim("2_Social/FlatDataFiles/BHS/eth_output_kc_2017_1217.txt",sep=",")
+HHEthnicity <- read.delim("x_Flat_data_files/1_Social/Inputs/BHS/eth_output_kc_2017_1217.txt",sep=",")
 
 HHEthnicity$eth.iso <- ifelse(HHEthnicity$eth.iso=="raj","rja",
                               ifelse(HHEthnicity$eth.iso=="mal","mlk",
