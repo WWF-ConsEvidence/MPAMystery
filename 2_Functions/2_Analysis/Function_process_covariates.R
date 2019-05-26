@@ -18,7 +18,7 @@ process_covariates <-
     str_clean <- function(strings) {
       require(dplyr)
       require(tm)
-      strings %>% tolower() %>% removePunctuation(preserve_intra_word_dashes = FALSE) %>% stripWhitespace() %>% 
+      strings %>% tolower() %>% removePunctuation(preserve_intra_word_dashes = TRUE) %>% stripWhitespace() %>% 
         trim()
     }
     
@@ -48,8 +48,8 @@ process_covariates <-
 
     
     # Gender of Household Head
-    gender.HHH <- unique(subset(DE.data, select=c("HouseholdID","IndividualGender"), DemographicCode==1))
-    
+    gender.HHH <- unique(subset(DE.data, select=c("HouseholdID","IndividualGender"), RelationHHH==0))
+
     # Residency
     resident.bin<-c(0,10,20,30,40,50,60,990)
 
@@ -88,7 +88,7 @@ process_covariates <-
     HH.eth$dom.eth <- ifelse(HH.eth$eth.iso.x==HH.eth$eth.iso.y,1,0)
     HH.eth <-subset(HH.eth, select=c("HouseholdID","dom.eth"))
     x <-HH.eth %>%  #quick bodge to get rid of duplicates where ethnicities tied. 
-      group_by(HouseholdID)%>%
+      group_by(HouseholdID) %>%
       top_n(1,dom.eth)
     
     HH.eth <-unique(x)
@@ -142,6 +142,46 @@ process_covariates <-
     
 rm(MPA,market.distance,N.Child,HH.ed, HH.eth,HH.residency,gender.HHH, HH.age)
 
+
+
+
+    covariate.means <- 
+      match.covariate %>%
+      group_by(SettlementID,MPAID,MonitoringYear) %>%
+      summarise(mean.age=mean(IndividualAge,na.rm=T),
+                mean.year.res=mean(YearsResident,na.rm=T),
+                mean.time.market=mean(TimeMarket,na.rm=T)) %>%
+      mutate(mean.time.market=ifelse(MPAID==1 & MonitoringYear=="Baseline",
+                                     mean.time.market[MPAID==1 & MonitoringYear=="2 Year Post"],
+                                     ifelse(MPAID==2 & MonitoringYear=="Baseline",
+                                            mean.time.market[MPAID==2 & MonitoringYear=="2 Year Post"],
+                                            mean.time.market)))
+    
+    match.covariate <-
+      left_join(match.covariate,covariate.means,by=c("SettlementID","MPAID","MonitoringYear")) %>%
+      transmute(HouseholdID=HouseholdID,
+                MPAID=MPAID,
+                SettlementID=SettlementID,
+                MonitoringYear=MonitoringYear,
+                Treatment=Treatment,
+                TimeMarket=ifelse(is.na(TimeMarket),
+                                  mean.time.market,
+                                  as.numeric(TimeMarket)),
+                n.child=ifelse(is.na(n.child),
+                               0,as.numeric(n.child)),
+                ed.level=ifelse(is.na(ed.level),
+                                990,
+                                as.numeric(ed.level)),
+                dom.eth=dom.eth,
+                YearsResident=ifelse(is.na(YearsResident),
+                                     mean.year.res,
+                                     as.numeric(YearsResident)),
+                IndividualGender=IndividualGender,
+                IndividualAge=ifelse(is.na(IndividualAge),
+                                     mean.age,
+                                     as.numeric(IndividualAge)))
+    
+    
 return (match.covariate)
   }
 #rm()
