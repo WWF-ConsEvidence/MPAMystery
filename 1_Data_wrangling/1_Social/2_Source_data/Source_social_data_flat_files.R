@@ -38,6 +38,26 @@
 # 
 
 
+# Sourcing most recent files
+
+# Date in format YYYYMMDD (could be changed but we believe it makes most sense 
+# to avoid hyphens in file names and to have the date first so files get sorted chronologically)
+today.date <- gsub("-","",Sys.Date())
+
+# Files (with package rio)
+last.file <- function(dir.nam,nam){
+  import(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))}
+
+# Shapefiles (with package sf)
+st_last.file <- function(dir.nam,nam){
+  st_read(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))}
+
+# RData files
+last.Rdata <- function(dir.nam,nam){
+  load(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))
+}
+
+
 # ---- 1.1 Load libraries & data ----
 
 pacman::p_load(plyr,dplyr)
