@@ -40,12 +40,12 @@ pacman::p_load(rio)
 # ---
 # 1.2 
 source('2_Functions/2_Analysis/Function_process_covariates.R')
+
 # ---
 # 1.3 Import raw data
-HH.data <- HHData %>% filter(MPAID<7) #redirect to final file destination
-DE.data <- import("x_Flat_data_files/1_Social/Inputs/HH_tbl_DEMOGRAPHIC.xlsx") %>% 
-  left_join(.,HH.data[,c("HouseholdID","MPAID")], by="HouseholdID") %>% filter(MPAID<7) #redirect to final file destination
-SE.data<- import("x_Flat_data_files/1_Social/Inputs/HH_tbl_SETTLEMENT.xlsx") %>% filter(MPAID<7)
+HH.data <- HHData %>% filter(MPAID<7) 
+DE.data <- IndDemos %>% filter(MPAID<7)
+SE.data <- Settlements %>% filter(MPAID<7)
 
 # ---
 # 1.4 Import lookup tables
@@ -59,49 +59,120 @@ education.lkp <- import("x_Flat_data_files/1_Social/Inputs/education_lkp_BHS.xls
 # 2.1 Run data prep function
 match.covariate <- process_covariates(HH.data, DE.data)
 
-cov.avg <- match.covariate %>% 
-  group_by(SettlementID,MonitoringYear) %>% 
-  summarize_at(vars(TimeMarket:IndividualAge),mean)
-
-match.covariate1 <- match.covariate %>% 
-  left_join(cov.avg, by=c("SettlementID","MonitoringYear")) %>% 
-  mutate(TimeMarket.x=ifelse(is.na(TimeMarket.x),TimeMarket.y,TimeMarket.x),
-         n.child.x=ifelse(is.na(n.child.x),n.child.y,n.child.x),
-          ed.level.x=ifelse(is.na(ed.level.x),ed.level.y,ed.level.x),
-           dom.eth.x=ifelse(is.na(dom.eth.x),dom.eth.y,dom.eth.x),
-            YearsResident.x=ifelse(is.na(YearsResident.x),YearsResident.y,YearsResident.x),
-            IndividualGender.x=ifelse(is.na(IndividualGender.x),IndividualGender.y,IndividualGender.x),
-            IndividualAge.x=ifelse(is.na(IndividualAge.x),IndividualAge.x,IndividualAge.x))
-
 # --- pscore calculations
 #baseline 
-cov.t0 <- filter(match.covariate1,MonitoringYear=="Baseline")
+cov.t0 <- filter(match.covariate,MonitoringYear=="Baseline")
 p.score.t0 <- glm(Treatment~ TimeMarket + n.child + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge, 
                    data=cov.t0, family= binomial())$fitted.values
 cov.t0.pscore <- cbind(cov.t0,p.score.t0)
 
 #t2
-cov.t2 <- filter(match.covariate1,MonitoringYear=="2 Year Post")
+cov.t2 <- filter(match.covariate,MonitoringYear=="2 Year Post")
 p.score.t2 <- glm(Treatment~ TimeMarket + n.child + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge, 
-                  data=filter(match.covariate,MonitoringYear=="2 Year Post"), family= binomial())$fitted.values
+                  data=cov.t2, family= binomial())$fitted.values
 cov.t2.pscore <- cbind(cov.t2,p.score.t2)
 
 #t4
-cov.t4 <- filter(match.covariate1,MonitoringYear=="2 Year Post")
+cov.t4 <- filter(match.covariate,MonitoringYear=="4 Year Post")
 p.score.t4 <- glm(Treatment~ TimeMarket + n.child + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge, 
-                  data=filter(match.covariate,MonitoringYear=="4 Year Post"), family= binomial())$fitted.values
+                  data=cov.t4, family= binomial())$fitted.values
 cov.t4.pscore <- cbind(cov.t4,p.score.t4)
 
 # get ranges
-p.score.range <- range(c(p.score.t0,p.score.t2,p.score.t4))
+p.score.range <- 
+  data.frame(year=c("t0","t2","t4"),
+             minimums=c(range(p.score.t0)[1],
+                        range(p.score.t2)[1],
+                        range(p.score.t4)[1]),
+             maximums=c(range(p.score.t0)[2],
+                        range(p.score.t2)[2],
+                        range(p.score.t4)[2])) %>%
+  summarise(min=max(minimums),
+            max=min(maximums))
+
 p.score.sd <- sd((c(p.score.t0,p.score.t2,p.score.t4)))
 p.score.range.sd <- range (p.score.range + (0.5 * p.score.sd),p.score.range - (0.5 * p.score.sd))
 
-n.t0.tr.trim <- cov.t4.pscore %>% 
-  filter(p.score.t4>=min(p.score.range) & p.score.t4<=max(p.score.range))
+n.t0.tr.trim <- cov.t0.pscore %>% 
+  filter(p.score.t0>=p.score.range$min & p.score.t0<=p.score.range$max)
+
+n.t2.tr.trim <- cov.t2.pscore %>% 
+  filter(p.score.t2>=p.score.range$min & p.score.t2<=p.score.range$max)
+
+n.t4.tr.trim <- cov.t4.pscore %>% 
+  filter(p.score.t4>=p.score.range$min & p.score.t4<=p.score.range$max)
+
+nrow(cov.t0)
+nrow(n.t0.tr.trim)
+
+nrow(cov.t2)
+nrow(n.t2.tr.trim)
+
+nrow(cov.t4)
+nrow(n.t4.tr.trim)
 
 
+  length(cov.t4$HouseholdID[cov.t4$Treatment==0])/length(cov.t4$HouseholdID)
+  length(n.t4.tr.trim$HouseholdID[n.t4.tr.trim$Treatment==0])/length(n.t4.tr.trim$HouseholdID)
 
+  length(cov.t2$HouseholdID[cov.t2$Treatment==0])/length(cov.t2$HouseholdID)
+  length(n.t2.tr.trim$HouseholdID[n.t2.tr.trim$Treatment==0])/length(n.t2.tr.trim$HouseholdID)
+  
+  length(cov.t0$HouseholdID[cov.t0$Treatment==0])/length(cov.t0$HouseholdID)
+  length(n.t0.tr.trim$HouseholdID[n.t0.tr.trim$Treatment==0])/length(n.t0.tr.trim$HouseholdID)
+
+  match.covariate[match.covariate$MPAID==3 & match.covariate$Treatment==0,]
+  HHData[HHData$MPAID==3 & HHData$Treatment==0,]
+  
+  nrows.perMPA <- data.frame(MPAID=c(1:6),
+                             nrows.pretrim.t0=NA,
+                             nrows.posttrim.t0=NA,
+                             prop.control.pretrim.t0=NA,
+                             prop.control.posttrim.t0=NA,
+                             nrows.pretrim.t2=NA,
+                             nrows.posttrim.t2=NA,
+                             prop.control.pretrim.t2=NA,
+                             prop.control.posttrim.t2=NA,
+                             nrows.pretrim.t4=NA,
+                             nrows.posttrim.t4=NA,
+                             prop.control.pretrim.t4=NA,
+                             prop.control.posttrim.t4=NA)
+  
+  for(i in unique(nrows.perMPA$MPAID)) {
+    
+    t0.pretrim.data <- cov.t0[cov.t0$MPAID==i,]
+    t0.posttrim.data <- n.t0.tr.trim[n.t0.tr.trim$MPAID==i,]
+    
+    t0.pretrim.control <- cov.t0[cov.t0$MPAID==i & cov.t0$Treatment==0,]
+    t0.posttrim.control <- n.t0.tr.trim[n.t0.tr.trim$MPAID==i & n.t0.tr.trim$Treatment==0,]
+    
+    t2.pretrim.data <- cov.t2[cov.t2$MPAID==i,]
+    t2.posttrim.data <- n.t2.tr.trim[n.t2.tr.trim$MPAID==i,]
+    
+    t2.pretrim.control <- cov.t2[cov.t2$MPAID==i & cov.t2$Treatment==0,]
+    t2.posttrim.control <- n.t2.tr.trim[n.t2.tr.trim$MPAID==i & n.t2.tr.trim$Treatment==0,]
+    
+    t4.pretrim.data <- cov.t4[cov.t4$MPAID==i,]
+    t4.posttrim.data <- n.t4.tr.trim[n.t4.tr.trim$MPAID==i,]
+    
+    t4.pretrim.control <- cov.t4[cov.t4$MPAID==i & cov.t4$Treatment==0,]
+    t4.posttrim.control <- n.t4.tr.trim[n.t4.tr.trim$MPAID==i & n.t4.tr.trim$Treatment==0,]
+    
+    nrows.perMPA$nrows.pretrim.t0[i] <- nrow(t0.pretrim.data)
+    nrows.perMPA$nrows.posttrim.t0[i] <- nrow(t0.posttrim.data)
+    nrows.perMPA$prop.control.pretrim.t0[i] <- nrow(t0.pretrim.control)/nrow(t0.pretrim.data)
+    nrows.perMPA$prop.control.posttrim.t0[i] <- nrow(t0.posttrim.control)/nrow(t0.posttrim.data)
+    nrows.perMPA$nrows.pretrim.t2[i] <- nrow(t2.pretrim.data)
+    nrows.perMPA$nrows.posttrim.t2[i] <- nrow(t2.posttrim.data)
+    nrows.perMPA$prop.control.pretrim.t2[i] <- nrow(t2.pretrim.control)/nrow(t2.pretrim.data)
+    nrows.perMPA$prop.control.posttrim.t2[i] <- nrow(t2.posttrim.control)/nrow(t2.posttrim.data)
+    nrows.perMPA$nrows.pretrim.t4[i] <- nrow(t4.pretrim.data)
+    nrows.perMPA$nrows.posttrim.t4[i] <- nrow(t4.posttrim.data)
+    nrows.perMPA$prop.control.pretrim.t4[i] <- nrow(t4.pretrim.control)/nrow(t4.pretrim.data)
+    nrows.perMPA$prop.control.posttrim.t4[i] <- nrow(t4.posttrim.control)/nrow(t4.posttrim.data)
+  }
+  
+  
 #--- 
 # 2.2 Subset to t0.t4.data
 t0.t4.match.covariate <- subset(match.covariate, (match.covariate$MonitoringYear=="t0"|match.covariate$MonitoringYear=="t4") & Treatment==1)

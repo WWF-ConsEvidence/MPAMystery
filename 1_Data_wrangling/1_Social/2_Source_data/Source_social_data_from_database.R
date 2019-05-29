@@ -291,7 +291,7 @@ HHData <- HHData[HHData$HouseholdID!=1347,]
 # ---- 3.2 Re-code settlements in Kaimana MPA that changed designation after baseline year ----
 
 Settlements$Treatment <- ifelse(Settlements$SettlementID==83 | Settlements$SettlementID==91 | Settlements$SettlementID==92,
-                                "0",Settlements$Treatment)
+                                0,Settlements$Treatment)
 
 
 # ---- 3.3. Add dummy row of data for all settlements (in Bird's Head) that do not have baseline data ----

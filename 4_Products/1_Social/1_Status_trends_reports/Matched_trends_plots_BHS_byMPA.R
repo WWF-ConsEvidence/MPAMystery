@@ -34,7 +34,7 @@ hfs.matched.trends <-
   rbind.data.frame(cbind.data.frame(year=rep("t2",length(hfs.outcome.t2$tr1tx)),
                                     left_join(hfs.outcome.t2,HHData[,c("HouseholdID","MPAID")],by=c("tr1tx"="HouseholdID"))),
                    cbind.data.frame(year=rep("t4",length(hfs.outcome.t4$tr1tx)),
-                                    left_join(hfs.outcome.t4,HHData[,c("HouseholdID","MPAID")],by=c("tr1tx"="HouseholdID")))) %>%
+                                    left_join(hfs.outcome.t4,HHData[,c("HouseholdID","MPAID")],by=c("tr1tx"="HouseholdID"))))  %>%
   group_by(year,MPAID) %>%
   summarise(MPA.trend=mean(MPA.outcome,na.rm=T),
             Control.trend=mean(Control.outcome,na.rm=T))
@@ -44,7 +44,7 @@ asset.matched.trends <-
   rbind.data.frame(cbind.data.frame(year=rep("t2",length(asset.outcome.t2$tr1tx)),
                                     left_join(asset.outcome.t2,HHData[,c("HouseholdID","MPAID")],by=c("tr1tx"="HouseholdID"))),
                    cbind.data.frame(year=rep("t4",length(asset.outcome.t4$tr1tx)),
-                                    left_join(asset.outcome.t4,HHData[,c("HouseholdID","MPAID")],by=c("tr1tx"="HouseholdID")))) %>%
+                                    left_join(asset.outcome.t4,HHData[,c("HouseholdID","MPAID")],by=c("tr1tx"="HouseholdID"))))  %>%
   group_by(year,MPAID) %>%
   summarise(MPA.trend=mean(MPA.outcome,na.rm=T),
             Control.trend=mean(Control.outcome,na.rm=T))

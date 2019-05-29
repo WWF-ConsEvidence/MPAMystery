@@ -3,7 +3,7 @@
 # modified: --
 
 process_covariates <- 
-  function(HH.data, DE.data) {
+  function(HH.data, DE.data, HHData) {
  
 #---- Import look up tables ----
     
@@ -110,23 +110,23 @@ process_covariates <-
     market.distance<-subset(HH.data,select=c("HouseholdID","TimeMarket", "MonitoringYear","SettlementID"))
     market.distance$TimeMarket[market.distance$TimeMarket >=990] <- 990
 
-    market.mean <-market.distance %>% 
+    market.mean <-market.distance %>%
       group_by(SettlementID,MonitoringYear)%>%
       summarise (mean=mean(TimeMarket[TimeMarket!=990])) # subsequent rows handle blind codes, and missing data
-    
-    market.mean$mean[is.na(market.mean$mean)]<- ave(market.mean$mean, 
-                                     market.mean$SettlementID, 
-                                     FUN=function(x)mean(x,na.rm = T))[is.na(market.mean$mean)] 
-    
+
+    market.mean$mean[is.na(market.mean$mean)]<- ave(market.mean$mean,
+                                     market.mean$SettlementID,
+                                     FUN=function(x)mean(x,na.rm = T))[is.na(market.mean$mean)]
+
     impute.market <- filter(market.distance,TimeMarket==990)
     impute.market <-inner_join(subset(impute.market, select=c("HouseholdID","MonitoringYear", "SettlementID")),market.mean, by=c("MonitoringYear", "SettlementID"))
     colnames(impute.market) <-c("HouseholdID","MonitoringYear", "SettlementID", "TimeMarket")
     market.distance <-rbind((subset(market.distance, TimeMarket!=990)),impute.market)
-    
+
     rm(market.mean, impute.market)
     
     # Site and treatment
-    MPA <-left_join((subset (HH.data, select=c("HouseholdID", "MPAID","SettlementID","MonitoringYear"))),(subset(SE.data, select=c("SettlementID","Treatment"))),by="SettlementID")
+    MPA <- HH.data %>% dplyr::select(HouseholdID,MPAID,SettlementID,MonitoringYear,Treatment)
     
     #Compile match covariate
     match.covariate <-
@@ -139,7 +139,6 @@ process_covariates <-
       left_join(HH.age,by="HouseholdID") %>%
       .[!duplicated(.),]
       
-    
 rm(MPA,market.distance,N.Child,HH.ed, HH.eth,HH.residency,gender.HHH, HH.age)
 
 

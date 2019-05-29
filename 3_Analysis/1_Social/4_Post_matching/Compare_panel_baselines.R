@@ -10,10 +10,10 @@ source('Calculate_ATTs_BHS.R')
 # --Food security
 
 hfs.compare.baselines <-
-  rbind.data.frame(cbind.data.frame(year=rep("t2",length(hfs.outcome.t2$tr1t0)),
-                                    left_join(hfs.outcome.t2,HHData,by=c("tr1t0"="HouseholdID"))),
-                   cbind.data.frame(year=rep("t4",length(hfs.outcome.t4$tr1t0)),
-                                    left_join(hfs.outcome.t4,HHData,by=c("tr1t0"="HouseholdID")))) %>%
+  rbind.data.frame(cbind.data.frame(year=rep("t2",length(unique(hfs.outcome.t2$tr1t0))),
+                                    HHData%>%filter(HouseholdID %in% hfs.outcome.t2$tr1t0)),
+                   cbind.data.frame(year=rep("t4",length(unique(hfs.outcome.t4$tr1t0))),
+                                    HHData%>%filter(HouseholdID %in% hfs.outcome.t4$tr1t0))) %>%
   filter(!is.na(year))
 
 
@@ -40,11 +40,11 @@ for(i in unique(hfs.compare.baselines$MPAID)){
 }
 
 # output data frame with mean baselines by MPA
-hfs.compare.baselines <-
-  rbind.data.frame(cbind.data.frame(year=rep("t2",length(hfs.outcome.t2$tr1t0)),
-                                    left_join(hfs.outcome.t2,HHData,by=c("tr1t0"="HouseholdID"))),
-                   cbind.data.frame(year=rep("t4",length(hfs.outcome.t4$tr1t0)),
-                                    left_join(hfs.outcome.t4,HHData,by=c("tr1t0"="HouseholdID")))) %>%
+hfs.compare.baselines.MPA <-
+  rbind.data.frame(cbind.data.frame(year=rep("t2",length(unique(hfs.outcome.t2$tr1t0))),
+                                    HHData%>%filter(HouseholdID %in% hfs.outcome.t2$tr1t0)),
+                   cbind.data.frame(year=rep("t4",length(unique(hfs.outcome.t4$tr1t0))),
+                                    HHData%>%filter(HouseholdID %in% hfs.outcome.t4$tr1t0))) %>%
   group_by(year,MPAID) %>%
   summarise(hfs.baseline.mean=mean(FSIndex,na.rm=T)) %>%
   .[order(.$MPAID),]
@@ -61,10 +61,10 @@ number.repeats.hfs <- rbind.data.frame(cbind.data.frame(year=rep("t2",length(hfs
 # --Material assets
 
 asset.compare.baselines <-
-  rbind.data.frame(cbind.data.frame(year=rep("t2",length(asset.outcome.t2$tr1t0)),
-                                    left_join(asset.outcome.t2,HHData,by=c("tr1t0"="HouseholdID"))),
-                   cbind.data.frame(year=rep("t4",length(asset.outcome.t4$tr1t0)),
-                                    left_join(asset.outcome.t4,HHData,by=c("tr1t0"="HouseholdID")))) %>%
+  rbind.data.frame(cbind.data.frame(year=rep("t2",length(unique(asset.outcome.t2$tr1t0))),
+                                    HHData%>%filter(HouseholdID %in% asset.outcome.t2$tr1t0)),
+                   cbind.data.frame(year=rep("t4",length(unique(asset.outcome.t4$tr1t0))),
+                                    HHData%>%filter(HouseholdID %in% asset.outcome.t4$tr1t0)))%>%
   filter(!is.na(year))
 
 
@@ -92,10 +92,10 @@ for(i in unique(asset.compare.baselines$MPAID)){
 
 # output data frame with mean baselines by MPA
 asset.compare.baselines <-
-  rbind.data.frame(cbind.data.frame(year=rep("t2",length(asset.outcome.t2$tr1t0)),
-                                    left_join(asset.outcome.t2,HHData,by=c("tr1t0"="HouseholdID"))),
-                   cbind.data.frame(year=rep("t4",length(asset.outcome.t4$tr1t0)),
-                                    left_join(asset.outcome.t4,HHData,by=c("tr1t0"="HouseholdID")))) %>%
+  rbind.data.frame(cbind.data.frame(year=rep("t2",length(unique(asset.outcome.t2$tr1t0))),
+                                    HHData%>%filter(HouseholdID %in% asset.outcome.t2$tr1t0)),
+                   cbind.data.frame(year=rep("t4",length(unique(asset.outcome.t4$tr1t0))),
+                                    HHData%>%filter(HouseholdID %in% asset.outcome.t4$tr1t0))) %>%
   group_by(year,MPAID) %>%
   summarise(asset.baseline.mean=mean(MAIndex,na.rm=T)) %>%
   .[order(.$MPAID),]
@@ -111,10 +111,10 @@ number.repeats.asset <- rbind.data.frame(cbind.data.frame(year=rep("t2",length(a
 # --Marine tenure
 
 tenure.compare.baselines <-
-  rbind.data.frame(cbind.data.frame(year=rep("t2",length(tenure.outcome.t2$tr1t0)),
-                                    left_join(tenure.outcome.t2,HHData,by=c("tr1t0"="HouseholdID"))),
-                   cbind.data.frame(year=rep("t4",length(tenure.outcome.t4$tr1t0)),
-                                    left_join(tenure.outcome.t4,HHData,by=c("tr1t0"="HouseholdID")))) %>%
+  rbind.data.frame(cbind.data.frame(year=rep("t2",length(unique(tenure.outcome.t2$tr1t0))),
+                                    HHData%>%filter(HouseholdID %in% tenure.outcome.t2$tr1t0)),
+                   cbind.data.frame(year=rep("t4",length(unique(tenure.outcome.t4$tr1t0))),
+                                    HHData%>%filter(HouseholdID %in% tenure.outcome.t4$tr1t0))) %>%
   filter(!is.na(year))
 
 
@@ -142,10 +142,10 @@ for(i in unique(tenure.compare.baselines$MPAID)){
 
 # output data frame with mean baselines by MPA
 tenure.compare.baselines <-
-  rbind.data.frame(cbind.data.frame(year=rep("t2",length(tenure.outcome.t2$tr1t0)),
-                                    left_join(tenure.outcome.t2,HHData,by=c("tr1t0"="HouseholdID"))),
-                   cbind.data.frame(year=rep("t4",length(tenure.outcome.t4$tr1t0)),
-                                    left_join(tenure.outcome.t4,HHData,by=c("tr1t0"="HouseholdID")))) %>%
+  rbind.data.frame(cbind.data.frame(year=rep("t2",length(unique(tenure.outcome.t2$tr1t0))),
+                                    HHData%>%filter(HouseholdID %in% tenure.outcome.t2$tr1t0)),
+                   cbind.data.frame(year=rep("t4",length(unique(tenure.outcome.t4$tr1t0))),
+                                    HHData%>%filter(HouseholdID %in% tenure.outcome.t4$tr1t0))) %>%
   group_by(year,MPAID) %>%
   summarise(tenure.baseline.mean=mean(MTIndex,na.rm=T)) %>%
   .[order(.$MPAID),]

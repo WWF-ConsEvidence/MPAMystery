@@ -40,7 +40,7 @@
 
 # ---- 1.1 Load libraries & data ----
 
-pacman::p_load(plyr,dplyr)
+pacman::p_load(plyr,dplyr,rio)
 
 WELLBEING <- read.csv('x_Flat_data_files/1_Social/Inputs/HH_tbl_WELLBEING.csv')
 DEMOGRAPHIC <- read.csv('x_Flat_data_files/1_Social/Inputs/HH_tbl_DEMOGRAPHIC.csv')
@@ -194,8 +194,8 @@ IndDemos <-
 Organization <- 
   ORGANIZATION %>%
   dplyr::transmute(HouseholdID = HouseholdID,
-                   MarineMeetingClean = ifelse(!(MarineMeeting==0 | MarineMeeting==1),NA, MarineMeeting),
-                   MarineContributionClean = ifelse(MarineContribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, MarineContribution)) %>%
+                   MarineMeeting = ifelse(!(MarineMeeting==0 | MarineMeeting==1),NA, MarineMeeting),
+                   MarineContribution = ifelse(MarineContribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, MarineContribution)) %>%
   left_join(HHData[,c("HouseholdID","MPAID")], ., by="HouseholdID")
 
 
