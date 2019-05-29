@@ -37,15 +37,36 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-
 # ---- 1.1 Load libraries & data ----
 
 pacman::p_load(plyr,dplyr,rio)
 
-WELLBEING <- read.csv('x_Flat_data_files/1_Social/Inputs/HH_tbl_WELLBEING.csv')
-DEMOGRAPHIC <- read.csv('x_Flat_data_files/1_Social/Inputs/HH_tbl_DEMOGRAPHIC.csv')
-SETTLEMENT <- read.csv('x_Flat_data_files/1_Social/Inputs/HH_tbl_SETTLEMENT.csv')
-ORGANIZATION <- read.csv('x_Flat_data_files/1_Social/Inputs/HH_tbl_ORGANIZATION.csv')
+# Sourcing most recent files
+
+# Date in format YYYYMMDD (could be changed but we believe it makes most sense 
+# to avoid hyphens in file names and to have the date first so files get sorted chronologically)
+today.date <- gsub("-","",Sys.Date())
+
+# Files (with package rio)
+last.file <- function(dir.nam,nam){
+  import(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))}
+
+# # Shapefiles (with package sf)
+# st_last.file <- function(dir.nam,nam){
+#   st_read(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))}
+# 
+# # RData files
+# last.Rdata <- function(dir.nam,nam){
+#   load(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))
+# }
+
+
+# ---- 1.2 Import data ----
+
+WELLBEING <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_WELLBEING')
+DEMOGRAPHIC <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_DEMOGRAPHIC')
+SETTLEMENT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_SETTLEMENT')
+ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_ORGANIZATION')
 
 
 # 

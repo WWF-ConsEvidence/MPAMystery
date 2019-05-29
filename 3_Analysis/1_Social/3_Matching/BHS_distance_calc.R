@@ -12,7 +12,8 @@ settledir <- ("R:/Gill/RMesa/Gill_Retreat/Spatial/SBS_BHS_Social_Monitoring_Site
 mpa.bound <- st_read(paste0(boundir,"BHS MPA boundaries.shp"))
 mpa.bound <- st_zm(mpa.bound)
 
-monitor <- st_read(paste0(settledir,"20190108_socmon_location.shp"))
+monitor <- st_read(paste0(settledir,"20190108_socmon_location.shp")) 
+
 
 # plot(st_geometry(mpa.bound))
 # plot(st_geometry(monitor))
@@ -35,15 +36,15 @@ leaflet() %>%
 
 
 ## ---- Geodesic distance ----
-# Separating monitoring and control sites
+# Separating monitoring and control sites ( BHS only: MPAID<7)
 
 tr.sites <- monitor %>% 
-  filter(Treatment==1) %>% 
+  filter(Treatment==1  & MPAID<7) %>% 
   select(Settlement:MPA_NAME,Y,X) %>% 
   st_set_geometry(NULL)
 
 ctrl.sites <- monitor %>% 
-  filter(Treatment==0) %>% 
+  filter(Treatment==0  & MPAID<7) %>% 
   select(Settlement:MPA_NAME,Y,X)%>% 
   st_set_geometry(NULL)
 
@@ -61,9 +62,11 @@ for (i in 1:nrow(tr.sites)) {
   dist.table$max.dist[i] = max(dist.km)
 }
 
-dist.table <- dist.table %>% 
-  group_by(MPAID,MPA) %>% 
-  summarise(mean.dist=mean(mean.dist),
-            min.dist=min(min.dist),
-            max.dist=max(max.dist))
+# dist.table <- dist.table %>% 
+#   group_by(MPAID,MPA) %>% 
+#   summarise(mean.dist=mean(mean.dist),
+#             min.dist=min(min.dist),
+#             max.dist=max(max.dist))
+min(dist.table$min.dist);max(dist.table$min.dist);mean(dist.table$min.dist)
+
 

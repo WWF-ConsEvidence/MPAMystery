@@ -81,7 +81,7 @@ process_covariates <-
 
     max.eth <- HH.eth %>%
       group_by(MonitoringYear,SettlementID,eth.iso)%>%
-      summarise(freq.eth=n()) %>%
+      dplyr::summarise(freq.eth=n()) %>%
       top_n(1, freq.eth)
     
     HH.eth <-left_join(HH.eth,max.eth, by=c("SettlementID" = "SettlementID", "MonitoringYear"="MonitoringYear"))
