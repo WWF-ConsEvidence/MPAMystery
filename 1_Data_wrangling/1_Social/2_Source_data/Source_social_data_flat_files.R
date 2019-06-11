@@ -39,7 +39,7 @@
 
 # ---- 1.1 Load libraries & data ----
 
-pacman::p_load(plyr,dplyr,rio)
+pacman::p_load(rio,dplyr)
 
 # Sourcing most recent files
 
@@ -81,7 +81,7 @@ ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_data
 
 HHData <- 
   WELLBEING %>%
-  dplyr::transmute(HouseholdID = HouseholdID, 
+  transmute(HouseholdID = HouseholdID, 
                    MPAID = MPAID, 
                    SettlementID = SettlementID, 
                    InterviewYear = InterviewYear,
@@ -168,7 +168,7 @@ HHData <-
                    GoodCatchUnits = GoodCatchUnits,
                    PaternalEthnicity = PaternalEthnicity) %>%
   
-  dplyr::mutate(RemoveFS = as.factor(ifelse(rowSums(is.na(.[c("DidNotLast", "BalancedDiet", "FreqAdultSkip", 
+  mutate(RemoveFS = as.factor(ifelse(rowSums(is.na(.[c("DidNotLast", "BalancedDiet", "FreqAdultSkip", 
                                                               "AdultSkip", "EatLess", "Hungry")]))>3,"Yes","No")),
                 RemoveMA = as.factor(ifelse(rowSums(is.na(.[c("CarTruck", "Bicycle", "Motorcycle", "BoatNoMotor", 
                                                               "BoatOutboard", "BoatInboard", "PhoneCombined", 
@@ -180,7 +180,7 @@ HHData <-
                 RemovecFS = as.factor(ifelse(rowSums(is.na(.[c("ChildPortion", "LowCostFood", "ChildSkip", 
                                                                "FreqChildSkip", "NoMealChild")]))>2,"Yes","No"))) %>%
   
-  dplyr::select(HouseholdID, MPAID, SettlementID, InterviewYear, DidNotLast, BalancedDiet, AdultSkip, EatLess, FreqAdultSkip, Hungry, RemoveFS,
+  select(HouseholdID, MPAID, SettlementID, InterviewYear, DidNotLast, BalancedDiet, AdultSkip, EatLess, FreqAdultSkip, Hungry, RemoveFS,
                 CarTruck, Bicycle, Motorcycle,  BoatNoMotor, BoatOutboard, BoatInboard, PhoneCombined, TV, Entertain, Satellite, Generator, RemoveMA,
                 PlaceHappy,  PlaceFavourite, PlaceMiss, PlaceBest, PlaceFishHere, PlaceBeMyself, RemovePA,
                 RightsAccess, RightsHarvest, RightsManage, RightsExclude, RightsTransfer, RemoveMT,
@@ -194,7 +194,7 @@ HHData <-
 
 IndDemos <- 
   DEMOGRAPHIC %>%
-  dplyr::transmute(DemographicID = DemographicID,
+  transmute(DemographicID = DemographicID,
                 HouseholdID = HouseholdID,
                 RelationHHH = RelationHHH,
                 IndividualGender = ifelse(IndividualGender==2,0,ifelse(IndividualGender>989,NA,IndividualGender)),
@@ -214,7 +214,7 @@ IndDemos <-
 
 Organization <- 
   ORGANIZATION %>%
-  dplyr::transmute(HouseholdID = HouseholdID,
+  transmute(HouseholdID = HouseholdID,
                    MarineMeeting = ifelse(!(MarineMeeting==0 | MarineMeeting==1),NA, MarineMeeting),
                    MarineContribution = ifelse(MarineContribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, MarineContribution)) %>%
   left_join(HHData[,c("HouseholdID","MPAID")], ., by="HouseholdID")
@@ -224,10 +224,10 @@ Organization <-
 
 Settlements <- 
   SETTLEMENT %>%
-  dplyr::mutate(Seascape = ifelse(MPAID %in% c(1,2,3,4,5,6), 1, 
+  mutate(Seascape = ifelse(MPAID %in% c(1,2,3,4,5,6), 1, 
                                   ifelse(MPAID %in% c(15,16,17,18,19,20), 2,
                                          NA))) %>%
-  dplyr::select(.,c("SettlementID","SettlementName","MPAID","Treatment","Seascape"))
+  select(.,c("SettlementID","SettlementName","MPAID","Treatment","Seascape"))
 
 
 # ---- 2.5 Add monitoring year column to HHData for analysis ----
@@ -330,15 +330,15 @@ HHData <-
 
 # HHData <-
 #   HHData %>%
-#   dplyr::filter(Seascape %in% 1)
+#   filter(Seascape %in% 1)
 # 
 # IndDemos <-
 #   left_join(IndDemos,HHData[,c("HouseholdID","Seascape")],by=c("HouseholdID"))
-#   dplyr::filter(Seascape %in% 1)
+#   filter(Seascape %in% 1)
 # 
 # Organization <-
 #   left_join(Organization,HHData[,c("HouseholdID","Seascape")],by="HouseholdID") %>%
-#   dplyr::filter(Seascape %in% 1)
+#   filter(Seascape %in% 1)
 
 
 # ---- 4.2 Filter by MPA ----
@@ -347,15 +347,15 @@ HHData <-
 
 # HHData <-
 #   HHData %>%
-#   dplyr::filter(MPAID %in% c(1,2,3))
+#   filter(MPAID %in% c(1,2,3))
 # 
 # IndDemos <-
 #   left_join(IndDemos,HHData[,c("HouseholdID","Seascape")],by=c("HouseholdID")) %>%
-#   dplyr::filter(MPAID %in% c(1,2,3))
+#   filter(MPAID %in% c(1,2,3))
 # 
 # Organization <-
 #   left_join(Organization,HHData[,c("HouseholdID","Seascape")],by="HouseholdID") %>%
-#   dplyr::filter(MPAID %in% c(1,2,3))
+#   filter(MPAID %in% c(1,2,3))
 
 
 

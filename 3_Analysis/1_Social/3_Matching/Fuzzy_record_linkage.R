@@ -33,7 +33,7 @@
 
 # -----
 # 1.1 Call in libraries
-pacman::p_load(stringdist,dplyr,tm,statar,fuzzyjoin,readxl,WriteXLS,reshape2)
+pacman::p_load(stringdist,tm,statar,fuzzyjoin,readxl,WriteXLS,reshape2,dplyr)
 
 # -----
 

@@ -39,7 +39,7 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 
-pacman::p_load(plyr,dplyr,reshape2,ggplot2)
+pacman::p_load(reshape2,ggplot2,dplyr)
 
 # ---- 1.1 Import data ----
 
@@ -93,7 +93,7 @@ HHData$FSIndex <-
                                         "FreqAdultSkip", "Hungry")],
                               na.rm=TRUE),
                       NA)) %>%
-  plyr::revalue(., c("0"="0", "1"="2.04","2"="2.99","3"="3.77","4"="4.5","5"="5.38","6"="6.06"))
+  revalue(., c("0"="0", "1"="2.04","2"="2.99","3"="3.77","4"="4.5","5"="5.38","6"="6.06"))
 HHData$FSIndex <- 6.06-as.numeric(HHData$FSIndex) 
 
 HHData <- 

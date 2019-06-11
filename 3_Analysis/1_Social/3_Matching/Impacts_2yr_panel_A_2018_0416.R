@@ -34,7 +34,7 @@
 #===
 
 # 1.1 Call in libraries
-pacman::p_load(twang, dplyr,tm,NLP, readxl,cobalt, CBPS, Matching, optmatch, tidyr,RItools,Hmisc,MBESS,rbounds,reshape2, Matching,dplyr)
+pacman::p_load(twang,tm,NLP,readxl,cobalt,CBPS,Matching,optmatch,tidyr,RItools,Hmisc,MBESS,rbounds,reshape2,Matching,dplyr)
 
 # ---
 # 1.2 
