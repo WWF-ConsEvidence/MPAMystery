@@ -39,7 +39,7 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 
-pacman::p_load(reshape2,ggplot2,dplyr)
+pacman::p_load(plyr,dplyr,reshape2,ggplot2)
 
 # ---- 1.1 Import data ----
 
@@ -93,7 +93,8 @@ HHData$FSIndex <-
                                         "FreqAdultSkip", "Hungry")],
                               na.rm=TRUE),
                       NA)) %>%
-  revalue(., c("0"="0", "1"="2.04","2"="2.99","3"="3.77","4"="4.5","5"="5.38","6"="6.06"))
+  plyr::revalue(., c("0"="0", "1"="2.04","2"="2.99","3"="3.77","4"="4.5","5"="5.38","6"="6.06"))
+#This line will reverse the scale so that larger values indicate more Food Secure
 HHData$FSIndex <- 6.06-as.numeric(HHData$FSIndex) 
 
 HHData <- 
@@ -128,6 +129,7 @@ BigFive.SettleGroup <-
             SEErr=round(sd(SERate,na.rm=T)/sqrt(length(SERate)),2)) %>%
   na.omit()
 
+#Adding blank-data row to complete the BigFive.SettleGroup dataframe (for settlements that did not have Baseline)
 BigFive.SettleGroup <- rbind.data.frame(BigFive.SettleGroup,
                                         data.frame(SettlementID=c(72,104:112,113:115),
                                                    SettlementName=c(as.character(unique(BigFive.SettleGroup$SettlementName[BigFive.SettleGroup$SettlementID==72])),
@@ -136,7 +138,9 @@ BigFive.SettleGroup <- rbind.data.frame(BigFive.SettleGroup,
                                                                                                                              BigFive.SettleGroup$SettlementID>100])),
                                                                     as.character(unique(BigFive.SettleGroup$SettlementName[BigFive.SettleGroup$MPAID==3 &
                                                                                                                              BigFive.SettleGroup$SettlementID>110]))),
-                                                   MPAID=c(5,rep(2,9),rep(3,3)),Treatment=rep(1,13),MonitoringYear=rep("Baseline",13),
+                                                   MPAID=c(5,rep(2,9),rep(3,3)),
+                                                   Treatment=rep(1,13),
+                                                   MonitoringYear=rep("Baseline",13),
                                                    as.data.frame(matrix(rep(NA,10),ncol=10,nrow=13,
                                                                         dimnames=list(NULL,colnames(BigFive.SettleGroup[6:15]))))))
 

@@ -2,12 +2,9 @@
 # author: Louise Glew, louise.glew@gmail.com
 # modified: --
 
-
-source('1_Data_wrangling/1_Social/3_Calculating_indicators/Calculate_BigFive.R')
-HHData <- HHData %>%
-  mutate(yearsPost = ifelse(MonitoringYear=="Baseline",0,
-                            as.integer(substr(MonitoringYear, 1, 1))))
-
+process_covariates <- 
+  function(HH.data, DE.data, HHData) {
+ 
 #---- Import look up tables ----
     
     ethnic.lkp<- import("x_Flat_data_files/1_Social/Inputs/master_ethnic_lookup_2017_117.xlsx")
@@ -30,131 +27,122 @@ HHData <- HHData %>%
     
     # Age
     age.bin<-c(0,20,30,40,50,60,70,990)
+    
+    HH.age<-subset(DE.data, select=c("HouseholdID","RelationHHH","IndividualAge"), RelationHHH==0)
+    HH.monitoring.year <-subset(HH.data, select=c("HouseholdID","MonitoringYear"))
+    HH.age <-left_join(HH.age,(subset(HH.data, select=c("HouseholdID","MonitoringYear"))),by="HouseholdID")
+    HH.age$IndividualAge[HH.age$IndividualAge >= 990] <- 990 #recode blind values
+    
+    t0.age <- subset(HH.age, MonitoringYear=="Baseline")
+    t2.age <- subset(HH.age, MonitoringYear=="2 Year Post")
+    t4.age <- subset(HH.age, MonitoringYear=="4 Year Post")
+    
+    t0.age$IndividualAge <- .bincode(t0.age$IndividualAge,age.bin,TRUE,TRUE)
+    t2.age$IndividualAge <- .bincode((t2.age$IndividualAge-2),age.bin,TRUE,TRUE)
+    t4.age$IndividualAge <- .bincode((t4.age$IndividualAge-4),age.bin,TRUE,TRUE)
+    
+    HH.age <- rbind(t0.age, t2.age, t4.age)
+    HH.age <-unique(subset(HH.age, select=c("HouseholdID","IndividualAge")))
+    
+    rm(t0.age,t2.age,t4.age,HH.monitoring.year,age.bin)
 
-    HH.age <- IndDemos %>%
-      filter(RelationHHH==0) %>%
-      select(HouseholdID,IndividualAge) %>%
-      left_join(select(HHData,HouseholdID,yearsPost),by="HouseholdID") %>%
-      mutate(IndividualAge=.bincode(IndividualAge-yearsPost,age.bin,TRUE,TRUE)) %>% 
-      select(HouseholdID,IndividualAge)%>% 
-      distinct(HouseholdID,.keep_all = T)
     
-    # Gender of Household Head (temp fix using distinct)
-    gender.HHH <- IndDemos %>% 
-      filter(RelationHHH==0) %>% 
-      select("HouseholdID","IndividualGender") %>% 
-      distinct(HouseholdID,.keep_all = T)
-    
+    # Gender of Household Head
+    gender.HHH <- unique(subset(DE.data, select=c("HouseholdID","IndividualGender"), RelationHHH==0))
+
     # Residency
     resident.bin<-c(0,10,20,30,40,50,60,990)
 
-    HH.residency <- HHData %>%
-      select(HouseholdID,YrResident,MonitoringYear,yearsPost) %>%
-      mutate(YearsResident=ifelse(MonitoringYear=="Baseline",.bincode(YrResident,resident.bin,TRUE,TRUE),
-                              ifelse(YrResident>yearsPost,.bincode(YrResident-yearsPost,resident.bin,TRUE,TRUE),
-                                         1))) %>% 
-      select(HouseholdID,YearsResident) %>% 
-      na.omit()
+    HH.residency<-subset(HH.data,select=c("HouseholdID","YrResident", "MonitoringYear")) %>% transmute(HouseholdID=HouseholdID,
+                                                                                                       YearsResident=YrResident,
+                                                                                                       MonitoringYear=MonitoringYear)
+    HH.residency$YearsResident[HH.residency$YearsResident >= 990] <- 990
+
+    t0.residency <- subset(HH.residency, MonitoringYear=="Baseline")
+    t2.residency <- subset(HH.residency, MonitoringYear=="2 Year Post")
+    t4.residency <- subset(HH.residency, MonitoringYear=="4 Year Post")
+    
+    t0.residency$YearsResident <- .bincode(t0.residency$YearsResident,resident.bin,TRUE,TRUE)
+    t2.residency$YearsResident <- ifelse(t2.residency$YearsResident>2,(.bincode((t2.residency$YearsResident-2),resident.bin,TRUE,TRUE)),1)
+    t4.residency$YearsResident <- ifelse(t4.residency$YearsResident>4,(.bincode((t4.residency$YearsResident-4),resident.bin,TRUE,TRUE)),1)
+   
+    HH.residency <-rbind(t0.residency,t2.residency,t4.residency)
+    HH.residency <- na.omit(HH.residency)
+    HH.residency$MonitoringYear<-NULL
+
+    rm(resident.bin, t0.residency, t2.residency,t4.residency)
+    
     
     # Dominant ethnicity
-    # some duplicates in ethnicity table (NAs, perhaps white spaces), filtering out these here
-    ethnic.lkp1 <- ethnic.lkp %>% 
-      distinct(std.eth.str,eth.iso,.keep_all = T) %>%
-      filter(eth.iso!="NA")
-      # filter(!ethnic.id%in%c(2734,2813,5422,5425,5643)) # select out the specific five
     
-    HH.eth <- HHData %>% 
-      select(HouseholdID,PaternalEthnicity, MonitoringYear, SettlementID) %>% 
-      mutate(PaternalEthnicity=str_clean(PaternalEthnicity)) %>% 
-      left_join(ethnic.lkp1, by=c("PaternalEthnicity"="std.eth.str")) %>% 
-      mutate(SettlYear=paste0(MonitoringYear,"_",SettlementID))
-    
-    # this code gives you the top ethnicity for each settlement at each sampling period
+    HH.eth <- subset(HH.data, select=c("HouseholdID","PaternalEthnicity", "MonitoringYear", "SettlementID"))
+    HH.eth$PaternalEthnicity <-str_clean(HH.eth$PaternalEthnicity)
+    HH.eth<- left_join(HH.eth,ethnic.lkp, by=c("PaternalEthnicity"="std.eth.str"))
+
     max.eth <- HH.eth %>%
-      group_by(SettlYear,eth.iso)%>%
+      group_by(MonitoringYear,SettlementID,eth.iso)%>%
       dplyr::summarise(freq.eth=n()) %>%
-      top_n(1, freq.eth) 
-
-    HH.eth$dom.eth <- NA
-    for (i in unique(HH.eth$SettlYear)){
-      max.eth.dom<-  max.eth$eth.iso[max.eth$SettlYear==i]
-      HH.eth$dom.eth[HH.eth$SettlYear==i] <- ifelse(HH.eth$eth.iso[HH.eth$SettlYear==i]%in%max.eth.dom,1,0)
-    }
-    HH.eth <- select(HH.eth,HouseholdID,eth.iso,dom.eth)
+      top_n(1, freq.eth)
     
+    HH.eth <-left_join(HH.eth,max.eth, by=c("SettlementID" = "SettlementID", "MonitoringYear"="MonitoringYear"))
+    HH.eth$dom.eth <- ifelse(HH.eth$eth.iso.x==HH.eth$eth.iso.y,1,0)
+    HH.eth <-subset(HH.eth, select=c("HouseholdID","dom.eth"))
+    x <-HH.eth %>%  #quick bodge to get rid of duplicates where ethnicities tied. 
+      group_by(HouseholdID) %>%
+      top_n(1,dom.eth)
+    
+    HH.eth <-unique(x)
+    
+    rm(max.eth,x)
+
     # Education level of household head
-    # some duplicates in education table (NAs, perhaps white spaces), filtering out these here
-#    dupl <- education.lkp$IndividualEducation[duplicated(education.lkp$IndividualEducation)]           
-#    education.lkp[education.lkp$IndividualEducation%in%dupl,]
-    education.lkp1 <- education.lkp %>% 
-      distinct(IndividualEducation,ed.level,.keep_all = T) %>%
-      filter(ed.level!="NA")
-
-    HH.ed <- IndDemos %>% 
-      filter(RelationHHH==0) %>% 
-      select(HouseholdID,IndividualEducation) %>% 
-      left_join(education.lkp1, by=c("IndividualEducation")) %>%
-       select(-IndividualEducation) %>%
-      distinct(HouseholdID,.keep_all = T)
-
-       # dupl <- unique(IndDemos$HouseholdID[duplicated(IndDemos$HouseholdID) & IndDemos$RelationHHH==0])
-       # test <- HH.ed %>%
-       #   filter(HouseholdID%in%dupl ) %>%
-       #   arrange(HouseholdID)
-    
+    HH.ed <- subset(DE.data, select=c("HouseholdID","IndividualEducation"), RelationHHH==0)
+    HH.ed <- left_join(HH.ed, education.lkp, by=c("IndividualEducation"))
+    HH.ed$IndividualEducation <-NULL
+ 
     # Children in Household
-    IndDemos$Child<-ifelse(IndDemos$IndividualAge<19,1,0) #  create new variable, child/adult
-    N.Child<-IndDemos%>%
+    DE.data$Child<-ifelse(DE.data$IndividualAge<19,1,0) #  create new variable, child/adult
+    N.Child<-DE.data%>%
       group_by(HouseholdID) %>% 
       summarise(n.child=sum(Child))
     
     # Market distance
-    market.mean.sett.yr <-HHData %>%
+    market.distance<-subset(HH.data,select=c("HouseholdID","TimeMarket", "MonitoringYear","SettlementID"))
+    market.distance$TimeMarket[market.distance$TimeMarket >=990] <- 990
+
+    market.mean <-market.distance %>%
       group_by(SettlementID,MonitoringYear)%>%
-      summarise (TimeMean.sett.yr=mean(TimeMarket, trim = 0.9,na.rm = T)) # subsequent rows handle blind codes, and missing data
+      summarise (mean=mean(TimeMarket[TimeMarket!=990])) # subsequent rows handle blind codes, and missing data
+
+    market.mean$mean[is.na(market.mean$mean)]<- ave(market.mean$mean,
+                                     market.mean$SettlementID,
+                                     FUN=function(x)mean(x,na.rm = T))[is.na(market.mean$mean)]
+
+    impute.market <- filter(market.distance,TimeMarket==990)
+    impute.market <-inner_join(subset(impute.market, select=c("HouseholdID","MonitoringYear", "SettlementID")),market.mean, by=c("MonitoringYear", "SettlementID"))
+    colnames(impute.market) <-c("HouseholdID","MonitoringYear", "SettlementID", "TimeMarket")
+    market.distance <-rbind((subset(market.distance, TimeMarket!=990)),impute.market)
+
+    rm(market.mean, impute.market)
     
-    market.mean.sett <-HHData %>%
-      group_by(SettlementID)%>%
-      summarise (TimeMean.sett=mean(TimeMarket, trim = 0.9,na.rm = T)) # subsequent rows handle blind codes, and missing data
+    # Site and treatment
+    MPA <- HH.data %>% dplyr::select(HouseholdID,MPAID,SettlementID,MonitoringYear,Treatment)
     
-    market.distance <- HHData %>% 
-      select(HouseholdID,TimeMarket,MonitoringYear,SettlementID) %>% 
-      left_join(market.mean.sett.yr,by=c("SettlementID" = "SettlementID", "MonitoringYear"="MonitoringYear")) %>% 
-      left_join(market.mean.sett,by=c("SettlementID" = "SettlementID")) %>% 
-      mutate(TimeMarket=ifelse(is.na(TimeMarket),TimeMean.sett.yr,TimeMarket),
-             TimeMarket=ifelse(is.na(TimeMarket),TimeMean.sett,TimeMarket)) %>% 
-      select(HouseholdID,TimeMarket)
-    
-    head(market.distance)
-    # market.distance<-subset(HHData,select=c("HouseholdID","TimeMarket", "MonitoringYear","SettlementID"))
-    # market.distance$TimeMarket[market.distance$TimeMarket >=990] <- 990
-    # market.mean <-market.distance %>%
-    #   group_by(SettlementID,MonitoringYear)%>%
-    #   summarise (mean=mean(TimeMarket[TimeMarket!=990])) # subsequent rows handle blind codes, and missing data
-    # 
-    # market.mean$mean[is.na(market.mean$mean)]<- ave(market.mean$mean,
-    #                                  market.mean$SettlementID,
-    #                                  FUN=function(x)mean(x,na.rm = T))[is.na(market.mean$mean)]
-    # 
-    # impute.market <- filter(market.distance,TimeMarket==990)
-    # impute.market <-inner_join(subset(impute.market, select=c("HouseholdID","MonitoringYear", "SettlementID")),market.mean, by=c("MonitoringYear", "SettlementID"))
-    # colnames(impute.market) <-c("HouseholdID","MonitoringYear", "SettlementID", "TimeMarket")
-    # market.distance <-rbind((subset(market.distance, TimeMarket!=990)),impute.market)
-    # 
-    # rm(market.mean, impute.market)
-    
-    # Compile match covariate
-    match.covariate <-HHData %>% 
-      select(HouseholdID,MPAID,SettlementID,MonitoringYear,Treatment) %>% 
-      left_join(market.distance[,c("HouseholdID","TimeMarket")],by="HouseholdID") %>%
+    #Compile match covariate
+    match.covariate <-
+      left_join(MPA,market.distance[,c("HouseholdID","TimeMarket")],by="HouseholdID") %>%
       left_join(N.Child,by="HouseholdID") %>%
       left_join(HH.ed,by="HouseholdID") %>%
       left_join(HH.eth,by="HouseholdID") %>%
       left_join(HH.residency,by="HouseholdID") %>%
       left_join(gender.HHH,by="HouseholdID") %>%
-      left_join(HH.age,by="HouseholdID") 
+      left_join(HH.age,by="HouseholdID") %>%
+      .[!duplicated(.),]
       
-rm(market.distance,N.Child,HH.ed, HH.eth,HH.residency,gender.HHH, HH.age, market.mean.sett,market.mean.sett.yr,max.eth)
+rm(MPA,market.distance,N.Child,HH.ed, HH.eth,HH.residency,gender.HHH, HH.age)
+
+
+
 
     covariate.means <- 
       match.covariate %>%
@@ -193,3 +181,7 @@ rm(market.distance,N.Child,HH.ed, HH.eth,HH.residency,gender.HHH, HH.age, market
                                      as.numeric(IndividualAge)))
     
     
+return (match.covariate)
+  }
+#rm()
+
