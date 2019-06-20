@@ -3,7 +3,7 @@
 pacman::p_load(stargazer,lme4)
 
 
-##Code Difference-in-difference Analysis for social impacts of BHS/SBS MPAs
+##Code Difference-in-difference Analysis for social impacts of BHS/SBS MPAs 
 
 source('R:/Gill/DLe/MPAMystery/2_Functions/2_Analysis/Function_process_covariates.R')
 mpa.nam <- rio::import("x_Flat_data_files/1_Social/Inputs/HH_tbl_MPA.xlsx")
