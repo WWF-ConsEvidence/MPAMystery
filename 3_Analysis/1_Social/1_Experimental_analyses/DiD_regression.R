@@ -1,77 +1,240 @@
 
-source(paste0(code.dir,'1_Data_wrangling/1_Social/2_Source_data/Source_social_data_flat_files_from_dropbox.R'))
-mpa.nam <- rio::import("x_Flat_data_files/1_Social/Inputs/HH_tbl_MPA.xlsx")
 
-# --- DiD specification (some bugs in the glm)
+pacman::p_load(stargazer,lme4)
+
+
+##Code Difference-in-difference Analysis for social impacts of BHS/SBS MPAs
+
+source('R:/Gill/DLe/MPAMystery/2_Functions/2_Analysis/Function_process_covariates.R')
+mpa.nam <- rio::import("x_Flat_data_files/1_Social/Inputs/HH_tbl_MPA.xlsx")
+outputdir <- "4_Products/"
+
+
+# --- DiD specification 
 DiD.data <- match.covariate %>% 
   left_join(select(HHData,MAIndex:FSIndex,SERate,HouseholdID,InterviewYear), by="HouseholdID") %>% 
   left_join(mpa.nam,by="MPAID") %>% 
   select(HouseholdID:InterviewYear,MPAName) %>% 
-#  filter(complete.cases(FSIndex)) %>%
-  mutate(post.period=recode_factor(as.character(MonitoringYear), "Baseline" = "t0","2 Year Post" = "t2","4 Year Post" = "t4", .ordered = T),
-         post.period=C(post.period, treatment),
-         MPAID=as.factor(as.character(MPAID)),
-         MPAName=gsub(" MPA","",MPAName))
+  filter(MPAID<=6) %>% 
+  mutate(TreatFactor= as.factor(ifelse(Treatment==0,0,MPAID)),
+         yearsPostF=as.factor(yearsPost),
+         MPAID=as.factor(MPAID),
+         InterviewYear=as.factor(InterviewYear)) %>% 
+  filter(!is.na(IndividualGender))
+
 summary(DiD.data)
 
-#Example indicators
-DiD.glm.FS <- glm(FSIndex~ Treatment + post.period + post.period:Treatment + 
-                  MPAName + MPAName:post.period + InterviewYear +
-                  TimeMarket + n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge,
-                data=DiD.data)
+pscore <- glm(Treatment ~ TimeMarket + n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge,
+              data=DiD.data)$fitted.values
+
+DiD.data <- cbind(DiD.data,pscore)  
+
+###export to DiD.data and other raw source data frames to Stata
+#write.dta(DiD.data, "D:/Dropbox/Indonesia MPA/data/MPA_06192019.dta")
+#write.dta(HHData, "D:/Dropbox/Indonesia MPA/data/HHData.dta")
+#write.dta(IndDemos, "D:/Dropbox/Indonesia MPA/data/IndDemos.dta")
+#write.dta(education.lkp1, "D:/Dropbox/Indonesia MPA/data/Educ_lookup.dta")
+#write.dta(ethnic.lkp1, "D:/Dropbox/Indonesia MPA/data/Ethnic_lookup.dta")
+
+
+
+#---------------------------------Individual MPAs' ATE
+
+# Food security
+DiD.glm.FS <- glm(FSIndex~ TreatFactor + yearsPostF + TreatFactor:yearsPostF + pscore + 
+                    factor(SettlementID) + MPAID + InterviewYear + MPAID:InterviewYear,
+                  data=DiD.data)
 summary(DiD.glm.FS)
 
-DiD.glm.MT <- glm(MTIndex~ Treatment + post.period + post.period:Treatment + 
-                    MPAName + MPAName:post.period + InterviewYear +
-                    TimeMarket + n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge,
+# Material Assets
+DiD.glm.MA <- glm(MAIndex~ TreatFactor + yearsPostF + TreatFactor:yearsPostF + pscore + 
+                    factor(SettlementID) + MPAID + InterviewYear + MPAID:InterviewYear,
+                  data=DiD.data)
+summary(DiD.glm.MA)
+
+# School Education
+DiD.glm.SE <- glm(SERate~ TreatFactor + yearsPostF + TreatFactor:yearsPostF + pscore + 
+                    factor(SettlementID) + MPAID + InterviewYear + MPAID:InterviewYear,
+                  data=DiD.data)
+summary(DiD.glm.SE)
+
+# Marine Tenure
+DiD.glm.MT <- glm(MTIndex~ TreatFactor + yearsPostF + TreatFactor:yearsPostF + pscore + 
+                    factor(SettlementID) + MPAID + InterviewYear + MPAID:InterviewYear,
                   data=DiD.data)
 summary(DiD.glm.MT)
 
-#Example MPAs
-DiD.glm.FS.Dampier <- glm(FSIndex~ Treatment + post.period + post.period:Treatment + 
-                    SettlementID + SettlementID:post.period + InterviewYear +
-                    TimeMarket + n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge,
-                  data=filter(DiD.data,MPAName=="Selat Dampier"))
-summary(DiD.glm.FS.Dampier)
+# Place Attachment
+DiD.glm.PA <- glm(PAIndex~ TreatFactor + yearsPostF + TreatFactor:yearsPostF + pscore + 
+                    factor(SettlementID) + MPAID + InterviewYear + MPAID:InterviewYear,
+                  data=DiD.data)
+summary(DiD.glm.PA)
+stargazer(DiD.glm.FS,DiD.glm.MA,DiD.glm.SE,DiD.glm.MT,DiD.glm.PA, out = "R:/Gill/DLe/MPAMystery/4_Products/1_Social/DiD.glm-MPA.html")
 
-DiD.glm.FS.Kaimana <- glm(FSIndex~ Treatment + post.period + post.period:Treatment + 
-                            SettlementID + SettlementID:post.period + InterviewYear +
-                            TimeMarket + n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge,
-                          data=filter(DiD.data,MPAName=="Kofiau dan Pulau  Boo"))
-summary(DiD.glm.FS.Kaimana)
+# ----------------------Produce plots for 5 indexes
+####food security
+DiD.glm.FS.broom <- tidy(DiD.glm.FS) %>% 
+  filter(grepl('TreatFactor', term)) %>% 
+  mutate(term=gsub("TreatFactor","MPA ",term),
+         term=gsub("yearsPostF","yr",term))
+
+pd <- position_dodge(width=.3) # move them .05 to the left and right
+
+ggplot(DiD.glm.FS.broom,aes(x=term,y=estimate)) + 
+  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
+  geom_line( position = pd) +
+  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.2, position = pd ) +
+  labs(x="parameter",y="estimate",title="Food security")
 
 
-# --- PSM DID
-psm.data.t0 <- match.covariate %>% 
-  left_join(select(HHData,MAIndex:FSIndex,SERate,HouseholdID,InterviewYear), by="HouseholdID") %>% 
-  left_join(mpa.nam,by="MPAID") %>% 
-  select(HouseholdID:InterviewYear,MPAName) %>% 
-  tidyr::drop_na(TimeMarket,n.child, ed.level, dom.eth, YearsResident, IndividualGender,IndividualAge) %>%
-  mutate(post.period=recode_factor(as.character(MonitoringYear), "Baseline" = "t0","2 Year Post" = "t2","4 Year Post" = "t4", .ordered = T),
-         post.period=C(post.period, treatment),
-         MPAID=as.factor(as.character(MPAID)),
-         MPAName=gsub(" MPA","",MPAName)) %>% 
-  filter(MonitoringYear=="Baseline")
-summary(psm.data.t0)
-
-pscore.psm.t0 <- glm(Treatment ~ TimeMarket + n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge,
-                  data=psm.data.t0)$fitted.values
-psm.data <- cbind(psm.data,pscore.psm)
+ggsave(paste0(outputdir,"foodsecurity.jpg"),width = 12, height = 6)
 
 
 
-# --- Panel match (doesn't work)
-library(devtools)
-install_github("insongkim/PanelMatch", dependencies=TRUE)
-library(PanelMatch)
-names(match.covariate)
+####assets
+DiD.glm.MA.broom <- tidy(DiD.glm.MA) %>% 
+  filter(grepl('TreatFactor', term)) %>% 
+  mutate(term=gsub("TreatFactor","MPA ",term),
+         term=gsub("yearsPostF","yr",term))
 
-tscs <- match.covariate %>% 
-  mutate(time.id=as.integer(recode(MonitoringYear, "Baseline" = 1,"2 Year Post" = 2,"4 Year Post" = 3)))
+pd <- position_dodge(width=.3) # move them .05 to the left and right
 
-PM.results <- PanelMatch(lag = 2, time.id = "time.id", unit.id = "HouseholdID", 
-                         treatment = "Treatment", refinement.method = "ps.match", 
-                         data = tscs, match.missing = F, 
-                         covs.formula = ~ TimeMarket + n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge,
-                         size.match = 5, qoi = "att", ,outcome.var,lead = 0, forbid.treatment.reversal = TRUE)
+ggplot(DiD.glm.MA.broom,aes(x=term,y=estimate)) + 
+  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
+  geom_line( position = pd) +
+  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.2, position = pd ) +
+  labs(x="parameter",y="estimate",title="Material Assets")
 
+
+ggsave(paste0(outputdir,"assets.jpg"),width = 12, height = 6)
+
+
+
+
+
+####school education
+DiD.glm.SE.broom <- tidy(DiD.glm.SE) %>% 
+  filter(grepl('TreatFactor', term)) %>% 
+  mutate(term=gsub("TreatFactor","MPA ",term),
+         term=gsub("yearsPostF","yr",term))
+
+pd <- position_dodge(width=.3) # move them .05 to the left and right
+
+ggplot(DiD.glm.SE.broom,aes(x=term,y=estimate)) + 
+  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
+  geom_line( position = pd) +
+  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.2, position = pd ) +
+  labs(x="parameter",y="estimate",title="School Education")
+
+
+ggsave(paste0(outputdir,"schooleduc.jpg"),width = 12, height = 6)
+
+
+
+
+####Marine Tenure
+DiD.glm.MT.broom <- tidy(DiD.glm.MT) %>% 
+  filter(grepl('TreatFactor', term)) %>% 
+  mutate(term=gsub("TreatFactor","MPA ",term),
+         term=gsub("yearsPostF","yr",term))
+
+pd <- position_dodge(width=.3) # move them .05 to the left and right
+
+ggplot(DiD.glm.MT.broom,aes(x=term,y=estimate)) + 
+  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
+  geom_line( position = pd) +
+  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.2, position = pd ) +
+  labs(x="parameter",y="estimate",title="Marine Tenure")
+
+
+ggsave(paste0(outputdir,"marinetenure.jpg"),width = 12, height = 6)
+
+
+
+
+####Place Attachment
+DiD.glm.PA.broom <- tidy(DiD.glm.PA) %>% 
+  filter(grepl('TreatFactor', term)) %>% 
+  mutate(term=gsub("TreatFactor","MPA ",term),
+         term=gsub("yearsPostF","yr",term))
+
+pd <- position_dodge(width=.3) # move them .05 to the left and right
+
+ggplot(DiD.glm.PA.broom,aes(x=term,y=estimate)) + 
+  geom_bar(stat="identity", position =pd, fill='blue')+ theme_bw() +
+  geom_line( position = pd) +
+  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.2, position = pd ) +
+  labs(x="parameter",y="estimate",title="Place Attachment")
+
+
+ggsave(paste0(outputdir,"placeattachment.jpg"),width = 12, height = 6)
+
+
+
+#-----------------------------------------------------
+#---------------------------------------------------
+#---------------------------------Entire Seascape ATE
+# Food security
+DiD.glm.FS <- glm(FSIndex~ Treatment + yearsPostF + Treatment:yearsPostF + pscore + 
+                    factor(SettlementID) + MPAID + InterviewYear + MPAID:InterviewYear,
+                  data=DiD.data)
+summary(DiD.glm.FS)
+
+# Material Assets
+DiD.glm.MA <- glm(MAIndex~ Treatment + yearsPostF + Treatment:yearsPostF + pscore + 
+                    factor(SettlementID) + MPAID + InterviewYear + MPAID:InterviewYear,
+                  data=DiD.data)
+summary(DiD.glm.MA)
+
+# School Education
+DiD.glm.SE <- glm(SERate~ Treatment + yearsPostF + Treatment:yearsPostF + pscore + 
+                    factor(SettlementID) + MPAID + InterviewYear + MPAID:InterviewYear,
+                  data=DiD.data)
+summary(DiD.glm.SE)
+
+# Marine Tenure
+DiD.glm.MT <- glm(MTIndex~ Treatment + yearsPostF + Treatment:yearsPostF + pscore + 
+                    factor(SettlementID) + MPAID + InterviewYear + MPAID:InterviewYear,
+                  data=DiD.data)
+summary(DiD.glm.MT)
+
+# Place Attachment
+DiD.glm.PA <- glm(PAIndex~ Treatment + yearsPostF + Treatment:yearsPostF + pscore + 
+                    factor(SettlementID) + MPAID + InterviewYear + MPAID:InterviewYear,
+                  data=DiD.data)
+summary(DiD.glm.PA)
+stargazer(DiD.glm.FS,DiD.glm.MA,DiD.glm.SE,DiD.glm.MT,DiD.glm.PA, out = "R:/Gill/DLe/MPAMystery/4_Products/1_Social/DiD.glm-Seascape.html")
+
+#------- Linear mixed effects models
+# glm model
+DiD.glm.FS <- glm(FSIndex~ TreatFactor + yearsPostF + TreatFactor:yearsPostF + pscore + 
+                    factor(SettlementID) + MPAID + InterviewYear + MPAID:InterviewYear,
+                  data=DiD.data)
+summary(DiD.glm.FS)
+
+# linear mixed effects model (random factor for settlement)
+lmefit.sett.FS <- lmer(FSIndex~ TreatFactor + yearsPostF + TreatFactor:yearsPostF + pscore + 
+                  MPAID + InterviewYear + MPAID:InterviewYear + (1|SettlementID), 
+                           data=DiD.data, REML=F) # random intercept
+summary(lmefit.sett.FS)
+
+
+# Fit linear mixed effects model with settlement nested in interview year
+lmefit.sett.FS2 <- lmer(FSIndex~ TreatFactor + yearsPostF + TreatFactor:yearsPostF + pscore + 
+                  MPAID + MPAID:InterviewYear + (1|InterviewYear/SettlementID), 
+                data=DiD.data, REML=F) # random intercept
+summary(lmefit.sett.FS2)
+
+# Compete LMEFIT1 against LMEFIT3 with likelihood ratio test 
+anova(DiD.glm.FS, lmefit.sett.FS)
+
+# Compare best model to simple linear model (seems like family makes no difference!)
+nlmefit <- lme(FSIndex~ TreatFactor + yearsPostF + TreatFactor:yearsPostF + pscore + 
+                 MPAID + InterviewYear + MPAID:InterviewYear,
+               random=~1|SettlementID,
+               na.action=na.omit,data=DiD.data,method="REML") # same as lmefit1
+glsfit <- gls(FSIndex~ TreatFactor + yearsPostF + TreatFactor:yearsPostF + pscore + 
+                MPAID + InterviewYear + MPAID:InterviewYear,
+              na.action=na.omit,data=DiD.data, method = "REML")
+anova(glsfit, nlmefit)
+summary(nlmefit)
