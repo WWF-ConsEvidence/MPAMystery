@@ -10,9 +10,10 @@
 # 
 # 
 # ---- inputs ----
-#  1) Source Alor.TechReport.Datasets.2019.R 
+#  1) Dependencies: Function_define_asteriskplotting.R
+#  2) Source Alor.TechReport.Datasets.2019.R 
 #     - Dependencies: Alor.TechReport.SigTests.2019.R
-#                     Alor.Report.Calculations.R
+#                     SBS.TechReport.Calculations.R
 # 
 # ---- code sections ----
 #  1) DEFINE MPA-SPECIFIC PLOTTING DATA FRAMES
@@ -29,7 +30,7 @@
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
-source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Alor.Report.Calculations.R")
+source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/SBS_TechReport_Calculations.R")
 
 source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Alor.TechReport.SigTest.2019.R")
 
@@ -40,9 +41,9 @@ source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Alor.TechReport.Datasets
 
 Alor.statusplot.asterisks <- 
   define.statusplot.asterisks(Alor.ContData.Techreport.status.PLOTFORMAT[,c("SettlementName","FS.pval",
-                                                                               "MA.pval","PA.pval",
-                                                                               "SE.pval",
-                                                                               "Unwell.pval")])
+                                                                            "MA.pval","PA.pval",
+                                                                            "SE.pval",
+                                                                            "Unwell.pval")])
 Alor.statusplot.sigpos <- 
   define.statusplot.asterisk.pos(Alor.ContData.Techreport.status.PLOTFORMAT,
                                  Alor.statusplot.asterisks)  
@@ -64,20 +65,20 @@ Alor.proptrendplot.ylabs <-
 
 
 Alor.trendplot.labs <- list(FS=labs(y=as.character(Alor.conttrendplot.ylabs["FSMean"]),x="Monitoring Year"),
-                           MA=labs(y=as.character(Alor.conttrendplot.ylabs["MAMean"]),x="Monitoring Year"),
-                           PA=labs(y=as.character(Alor.conttrendplot.ylabs["PAMean"]),x="Monitoring Year"),
-                           SE=labs(y=as.character(Alor.conttrendplot.ylabs["SEMean"]),x="Monitoring Year"),
-                           Unwell=labs(y=as.character(Alor.conttrendplot.ylabs["UnwellMean"]),
-                                       x="Monitoring Year"),
-                           Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
-                           Religion=labs(y="Religion (% households)",x="Monitoring Year"),
-                           PrimaryOcc=labs(y=as.character(Alor.proptrendplot.ylabs["PrimaryOcc"]),x="Monitoring Year"),
-                           FreqFish=labs(y=as.character(Alor.proptrendplot.ylabs["FreqFish"]),x="Monitoring Year"),
-                           FreqSellFish=labs(y=as.character(Alor.proptrendplot.ylabs["SellFish"]),x="Monitoring Year"),
-                           IncFish=labs(y=as.character(Alor.proptrendplot.ylabs["IncFish"]),x="Monitoring Year"),
-                           FishTech=labs(y=as.character(Alor.proptrendplot.ylabs["FishTech"]),x="Monitoring Year"),
-                           ChildFS=labs(y=as.character(Alor.proptrendplot.ylabs["childFS"]),x="Monitoring Year"),
-                           Protein=labs(y=as.character(Alor.proptrendplot.ylabs["Protein"]),x="Monitoring Year"))
+                            MA=labs(y=as.character(Alor.conttrendplot.ylabs["MAMean"]),x="Monitoring Year"),
+                            PA=labs(y=as.character(Alor.conttrendplot.ylabs["PAMean"]),x="Monitoring Year"),
+                            SE=labs(y=as.character(Alor.conttrendplot.ylabs["SEMean"]),x="Monitoring Year"),
+                            Unwell=labs(y=as.character(Alor.conttrendplot.ylabs["UnwellMean"]),
+                                        x="Monitoring Year"),
+                            Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
+                            Religion=labs(y="Religion (% households)",x="Monitoring Year"),
+                            PrimaryOcc=labs(y=as.character(Alor.proptrendplot.ylabs["PrimaryOcc"]),x="Monitoring Year"),
+                            FreqFish=labs(y=as.character(Alor.proptrendplot.ylabs["FreqFish"]),x="Monitoring Year"),
+                            FreqSellFish=labs(y=as.character(Alor.proptrendplot.ylabs["SellFish"]),x="Monitoring Year"),
+                            IncFish=labs(y=as.character(Alor.proptrendplot.ylabs["IncFish"]),x="Monitoring Year"),
+                            FishTech=labs(y=as.character(Alor.proptrendplot.ylabs["FishTech"]),x="Monitoring Year"),
+                            ChildFS=labs(y=as.character(Alor.proptrendplot.ylabs["childFS"]),x="Monitoring Year"),
+                            Protein=labs(y=as.character(Alor.proptrendplot.ylabs["Protein"]),x="Monitoring Year"))
 
 Alor.annexplot.settnames <- 
   define.annexplot.settname.labels(annex.sigvals.Alor)
@@ -218,13 +219,13 @@ Alor.fs.statusplot <-
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
-
+  
   geom_text(aes(x=length(SettlementName),y=(0.5*(6.06-4.02))+4.02,label="Food secure"),
-             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   geom_text(aes(x=length(SettlementName),y=(0.5*(4.02-1.56))+1.56,label="Food insecure\nwithout hunger"),
-             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   geom_text(aes(x=length(SettlementName),y=0.5*1.56,label="Food insecure\nwith hunger"),
-             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,6.06)) +
   scale_fill_manual(values=fillcols.status) +
@@ -273,8 +274,8 @@ Alor.ma.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
             nudge_y=0.7,
             size=rel(4),
             colour=errcols.status["NotDummy"]) +
- geom_text(data=Alor.statusplot.sigpos,
-           aes(x=SettlementName,y=MA.ref),
+  geom_text(data=Alor.statusplot.sigpos,
+            aes(x=SettlementName,y=MA.ref),
             label=Alor.statusplot.asterisks$MA.ref,
             size=rel(3),
             nudge_x=0.02,
@@ -412,7 +413,7 @@ Alor.se.statusplot
 
 # - TIME TO MARKET
 Alor.time.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
-                             aes(x=SettlementName)) +
+                               aes(x=SettlementName)) +
   geom_bar(aes(y=TimeMarketMean,
                fill=SettLevel),
            stat="identity",
@@ -445,7 +446,7 @@ Alor.time.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
             colour=errcols.status["NotDummy"]) +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,max(Alor.ContData.Techreport.status.PLOTFORMAT$TimeMarketMean,na.rm=T)+
-                                      max(Alor.ContData.Techreport.status.PLOTFORMAT$TimeMarketErr,na.rm=T)+
+                                max(Alor.ContData.Techreport.status.PLOTFORMAT$TimeMarketErr,na.rm=T)+
                                 0.03*max(Alor.ContData.Techreport.status.PLOTFORMAT$TimeMarketMean,na.rm=T))) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
@@ -454,7 +455,7 @@ Alor.time.statusplot
 
 # - DAYS UNWELL
 Alor.unwell.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
-                             aes(x=SettlementName)) +
+                                 aes(x=SettlementName)) +
   geom_bar(aes(y=UnwellMean,
                fill=SettLevel),
            stat="identity",
@@ -964,7 +965,7 @@ Alor.conflict.statusplot <-
 Alor.NumThreat.statusplot <- 
   melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Threat.Minimum.Five","Threat.Four", "Threat.Three",
-"Threat.Two","Threat.One","Threat.None")) %>%
+                                               "Threat.Two","Threat.One","Threat.None")) %>%
   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -1003,7 +1004,7 @@ Alor.ThreatType.statusplot <-
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["ThreatType"]],
                     labels=c("Other", "Other marine resource uses", "Natural processes", "Habitat loss", 
-                              "Climate change", "Illegal fishing", "Destructive fishing", "Pollution")) +
+                             "Climate change", "Illegal fishing", "Destructive fishing", "Pollution")) +
   coord_flip() + plot.theme + Statusplot.labs["ThreatTypes"] + plot.guides.techreport
 
 
@@ -1087,20 +1088,20 @@ Alor.fs.trendplot <-
                      limits=c(0,6.06)) +
   scale_x_discrete(labels=Alor.annexplot.monitoryear.labs) +
   coord_flip() + Alor.trendplot.labs["FS"] + theme(axis.ticks=element_blank(),
-                                                  panel.background=element_rect(fill="white",
-                                                                                colour="#909090"),
-                                                  panel.border=element_rect(fill=NA,
-                                                                            size=0.25,
-                                                                            colour="#C0C0C0"),
-                                                  panel.grid.major.x=element_blank(),
-                                                  panel.grid.major.y=element_blank(),
-                                                  axis.title=element_text(size=10,
+                                                   panel.background=element_rect(fill="white",
+                                                                                 colour="#909090"),
+                                                   panel.border=element_rect(fill=NA,
+                                                                             size=0.25,
+                                                                             colour="#C0C0C0"),
+                                                   panel.grid.major.x=element_blank(),
+                                                   panel.grid.major.y=element_blank(),
+                                                   axis.title=element_text(size=10,
+                                                                           angle=0,
+                                                                           face="bold",
+                                                                           colour="#303030"),
+                                                   axis.text=element_text(size=8,
                                                                           angle=0,
-                                                                          face="bold",
-                                                                          colour="#303030"),
-                                                  axis.text=element_text(size=8,
-                                                                         angle=0,
-                                                                         colour="#303030"))
+                                                                          colour="#303030"))
 Alor.fs.trendplot
 
 # - MATERIAL ASSETS
@@ -2021,7 +2022,5 @@ png(paste(FigureFileName,"Num.Ethnic.png",sep="/"),
     units="in",height=4,width=6,res=400)
 plot(Alor.ethnic.statusplot)
 dev.off()
-
-
 
 

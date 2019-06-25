@@ -31,7 +31,7 @@
 
 # ---- 1.1 Source or run statistical test results  ----
 
-source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Alor.Report.Calculations.R")
+source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/SBS_TechReport.Calculations.R")
 
 source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Alor.TechReport.SigTest.2019.R")
 

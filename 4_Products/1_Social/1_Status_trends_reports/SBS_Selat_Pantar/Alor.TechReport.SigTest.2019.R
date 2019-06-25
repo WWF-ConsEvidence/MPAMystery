@@ -10,7 +10,7 @@
 # modified for Alor: Amari Bauer, June 2019
 # 
 # ---- inputs ----
-#  Dependencies:Report.Calculations.R
+#  Dependencies: SBS_TechReport.Calculations.R
 #
 # 
 # ---- code sections ----
