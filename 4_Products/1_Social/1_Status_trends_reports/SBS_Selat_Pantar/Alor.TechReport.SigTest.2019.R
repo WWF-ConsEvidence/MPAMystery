@@ -27,7 +27,7 @@
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
-source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Alor.Report.Calculations.R")
+source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/SBS_TechReport_Calculations.R")
 
 # ---- 1.1 Subset continuous variable datasets from SBS.TechReport.Calculations.R ----
 
@@ -57,19 +57,34 @@ Alor.TechReport.MPAHouseholdData <- Alor.TechReport.MPAHouseholdData %>% filter(
 Alor.TechReport.MPAHouseholdData$SettlementName <- 
   factor(Alor.TechReport.MPAHouseholdData$SettlementName)
 
-# - "MPA versus Control" dataset
+# - "MPA versus Control" datasets
 Alor.TechReport.MPAvControl <- 
   left_join(MPA.TechReport.SigTest.Data[MPA.TechReport.SigTest.Data$MPAID==15,],
             Days.unwell[Days.unwell$MPAID==15,
                         c("HouseholdID","DaysUnwell")])
 
+Techreport.ByMPA.control.annex <- Techreport.ByMPA.control.annex %>% 
+  filter(MPAID==15)
+BigFive.ControlGroup.annex <-BigFive.ControlGroup.annex %>% filter(MPAID==15)
+
+Techreport.ByMPA.control.annex <- left_join(Techreport.ByMPA.control.annex,BigFive.ControlGroup.annex[2:12])
+
+
+Days.unwell.Alor.control.annex <- Days.unwell.Alor.control.annex %>%
+  group_by(MPAID,MonitoringYear) %>%
+  filter(MPAID==15) %>%
+  summarise(UnwellMean=mean(DaysUnwell,na.rm=T),
+            UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)))
+
+Techreport.ByMPA.control.annex <- left_join(Techreport.ByMPA.control.annex,Days.unwell.Alor.control.annex[2:4])
+
 # - "Settlement Means" dataset
 Alor.TechReport.Status.SettlementMeans<-
   left_join(BigFive.bySett[BigFive.bySett$Treatment==1 &
                              BigFive.bySett$MonitoringYear=="3 Year Post" &
-                                  BigFive.bySett$MPAID==15,],
+                             BigFive.bySett$MPAID==15,],
             Techreport.Status.BySett[Techreport.Status.BySett$MPAID==15 & Techreport.Status.BySett$MonitoringYear=="3 Year Post",
-                              c("SettlementID","SettlementName","TimeMarketMean")])
+                                     c("SettlementID","SettlementName","TimeMarketMean")])
 
 Alor.TechReport.Status.SettlementMeans <- Alor.TechReport.Status.SettlementMeans %>% filter(SettlementID != 116) 
 
@@ -88,15 +103,15 @@ Alor.TechReport.Status.SettlementMeans <-
 
 
 colnames(Alor.TechReport.Status.SettlementMeans) <- c(colnames(Alor.TechReport.Status.SettlementMeans)[1:5],
-                                               "FSIndex","FSErr","MAIndex","MAErr","PAIndex","PAErr", "MTMean","MTErr",
-                                              "SERate","SEErr","TimeMarket","DaysUnwell")
+                                                      "FSIndex","FSErr","MAIndex","MAErr","PAIndex","PAErr", "MTMean","MTErr",
+                                                      "SERate","SEErr","TimeMarket","DaysUnwell")
 
 # - "Trend" dataset
 Alor.Trend.Data <- 
   left_join(MPA.TechReport.SigTest.Trend.Data[
-                                                MPA.TechReport.SigTest.Trend.Data$MPAID==15,],
-            Days.unwell[Days.unwell$MPAID==15,1:2],
-            by="HouseholdID","Treatment") 
+    MPA.TechReport.SigTest.Trend.Data$MPAID==15,],
+    Days.unwell[Days.unwell$MPAID==15,1:2],
+    by="HouseholdID","Treatment") 
 
 Alor.FreqTables <- 
   HHDemos.context[HHDemos.context$MPAID==15,] %>%
@@ -153,7 +168,7 @@ Alor.FreqTables$Variable <- ifelse(grepl("PrimaryOcc",Alor.FreqTables$Category)=
                                                         ifelse(grepl("FreqFish",Alor.FreqTables$Category)==T,"FreqFish",
                                                                ifelse(grepl("child",Alor.FreqTables$Category)==T,"child",
                                                                       ifelse(grepl("Protein",Alor.FreqTables$Category)==T,"Protein",NA)))))))
-                                   
+
 
 # ---- 1.2 Define list of settlement names in MPA ----
 
@@ -235,8 +250,8 @@ even.number.setts.function.Alor <-
                                            ifelse(is.na(sett.equal.med),
                                                   NA,
                                                   as.character(sett.equal.med))))
-    
-        
+           
+           
            median.sett <- ifelse(!is.na(sett.equal.med),
                                  as.character(sett.equal.med),
                                  ifelse((sd(b[Alor.TechReport.MPAHouseholdData$SettlementName==upper.sett],na.rm=T)/sqrt(length(b[Alor.TechReport.MPAHouseholdData$SettlementName==upper.sett & !is.na(b)])))<
@@ -417,8 +432,8 @@ non.parametric.test.settlements.Alor <-
                       results <- 
                         list(cbind.data.frame(SettlementName=c(as.character(sett.names.Alor[which(sett.names.Alor!=median.setts.Alor[a])]),
                                                                as.character(median.setts.Alor[a])),
-                                    
-                                          rbind.data.frame(t(data.frame(mapply(i=sett.names.Alor[which(sett.names.Alor!=median.setts.Alor[a])],
+                                              
+                                              rbind.data.frame(t(data.frame(mapply(i=sett.names.Alor[which(sett.names.Alor!=median.setts.Alor[a])],
                                                                                    function(i){
                                                                                      var <- 
                                                                                        Alor.TechReport.MPAHouseholdData[Alor.TechReport.MPAHouseholdData$SettlementName==i |
@@ -431,7 +446,7 @@ non.parametric.test.settlements.Alor <-
                                                                                                    exact=F)
                                                                                    }))["p.value",]),
                                                                "median"))
-                    )}))
+                        )}))
 
 
 # - Alphabetize each column of settlement names.  Now all settlement names are in same order.
@@ -450,8 +465,8 @@ sigvals.Sett.Alor <-
 # - Remove all settlement name columns except for one. 
 sigvals.Sett.Alor <- 
   dplyr:: select(sigvals.Sett.Alor,"FSIndex.SettlementName", "FSIndex.p.value", "MAIndex.p.value", 
-  "PAIndex.p.value", "SERate.p.value", 
-  "DaysUnwell.p.value")
+                 "PAIndex.p.value", "SERate.p.value", 
+                 "DaysUnwell.p.value")
 
 
 colnames(sigvals.Sett.Alor) <- c("SettlementName","FS.pval","MA.pval","PA.pval","SE.pval","Unwell.pval")
@@ -488,8 +503,8 @@ sigvals.Sett.Alor <- sigvals.Sett.Alor %>%
   arrange(rev(order(sigvals.Sett.Alor$SettlementName)))
 
 sigvals.Alor <- rbind.data.frame(sigvals.MPA.Alor,
-                   null.row.sigvals.Alor,
-                   sigvals.Sett.Alor)
+                                 null.row.sigvals.Alor,
+                                 sigvals.Sett.Alor)
 
 
 sigvals.Alor[,c("FS.pval", "MA.pval", "PA.pval",  "SE.pval", 
