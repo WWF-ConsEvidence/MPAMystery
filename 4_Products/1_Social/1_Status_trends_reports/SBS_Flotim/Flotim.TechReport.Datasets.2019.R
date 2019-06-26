@@ -30,7 +30,7 @@
 
 # ---- 1.1 Source or run statistical test results  ----
 
-source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/SBS.TechReport.Calculations.R")
+source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/SBS_TechReport_Calculations.R")
 
 source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Flotim.TechReport.SigTest.2019.R")
 
