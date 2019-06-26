@@ -51,8 +51,8 @@ Flotim.statusplot.sigpos <-
 
 # ---- 1.3 Define Flotim-specific plot labels, with significance asterisks ----
 
-Flotim.annexplot.monitoryear.labs <- rev(define.year.monitoryear.column(Flotim.AnnexContData.Techreport.PLOTFORMAT))
-Flotim.trendplot.monitoryear.labs <- (define.year.monitoryear.column(Flotim.AnnexContData.Techreport.PLOTFORMAT))
+Flotim.annexplot.monitoryear.labs <- (define.year.monitoryear.column(Flotim.AnnexContData.Techreport.PLOTFORMAT))
+Flotim.trendplot.monitoryear.labs <- rev(define.year.monitoryear.column(Flotim.AnnexContData.Techreport.PLOTFORMAT))
 
 Flotim.conttrendplot.ylabs <- 
   define.conttrendplot.ylabels.withasterisks(Flotim.TrendContData.Techreport.PLOTFORMAT
