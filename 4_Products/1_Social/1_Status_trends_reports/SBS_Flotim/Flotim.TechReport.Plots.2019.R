@@ -77,12 +77,13 @@ Flotim.trendplot.labs <- list(FS=labs(y=as.character(Flotim.conttrendplot.ylabs[
                            Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
                            Religion=labs(y="Religion (% households)",x="Monitoring Year"),
                            PrimaryOcc=labs(y=as.character(Flotim.proptrendplot.ylabs["Primary occupation (% households)"]),x="Monitoring Year"),
-                           FreqFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Frequency of fishing in past 6 months"]),x="Monitoring Year"),
-                           FreqSellFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Frequency of selling fish in past 6 months"]),x="Monitoring Year"),
-                           IncFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Portion of income from fishing in past 6 months"]),x="Monitoring Year"),
+                           FreqFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Frequency of fishing (% households)"]),x="Monitoring Year"),
+                           FreqSellFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Frequency of selling at least some catch (% households)"]),x="Monitoring Year"),
+                           IncFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Income from fishing in past 6 months (% households)"]),x="Monitoring Year"),
                            FishTech=labs(y=as.character(Flotim.proptrendplot.ylabs["Fishing technique most often used in past 6 months (% households)"]),x="Monitoring Year"),
-                           ChildFS=labs(y=as.character(Flotim.proptrendplot.ylabs["Evidence of child food security"]),x="Monitoring Year"),
-                           Protein=labs(y=as.character(Flotim.proptrendplot.ylabs["Portion of dietary protein from fish in past 6 months"]),x="Monitoring Year"))
+                           ChildFS=labs(y=as.character(Flotim.proptrendplot.ylabs["Child hunger (% households)"]),x="Monitoring Year"),
+                           Protein=labs(y=as.character(Flotim.proptrendplot.ylabs["Dietary protein from fish in past 6 months (% households)"]),x="Monitoring Year"))
+
 
 annex.sigvals.Flotim$SettlementName <- gsub("Flotim","Flores Timur",annex.sigvals.Flotim$SettlementName)
 
