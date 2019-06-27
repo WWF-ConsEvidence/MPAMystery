@@ -33,6 +33,12 @@
 # ---- 1.0 Load libraries and data ----
 pacman::p_load(plyr,tidyverse,reldist,Kendall,reshape2,gridExtra)
 
+library(tidyverse)
+library(Kendall)
+library(reldist)
+library(reshape2)
+library(gridExtra)
+
 HHData<-read.csv("SBS_Repeated_HHdata.csv")
 IndDemos<-read.csv("SBS_Repeated_IndDemos.csv")
 Organization<-read.csv("SBS_Repeated_Organization.csv")

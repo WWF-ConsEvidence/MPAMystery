@@ -134,7 +134,7 @@ Flotim.level.ContData.status <-
                                     Days.unwell.Flotim.ByMPA[,c("UnwellMean","UnwellErr")]))
 
 Flotim.level.ContData.annex <- 
-  cbind.data.frame(MonitoringYear=c("Baseline","3 Year Post"),
+  cbind.data.frame(MonitoringYear=c("3 Year Post","Baseline"),
                    SettlementID=0,SettlementName="MPA",
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==16,3:12],
                    Techreport.Trend.ByMPA[Techreport.Trend.ByMPA$MPAID==16,c("TimeMarketMean","TimeMarketErr")],

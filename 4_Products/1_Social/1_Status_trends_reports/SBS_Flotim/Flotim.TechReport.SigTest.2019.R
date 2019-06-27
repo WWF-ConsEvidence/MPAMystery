@@ -614,4 +614,5 @@ propdata.trend.test.Flotim <-
                                                                NA)
                          propdata.trend.test.Flotim[a] <- ifelse(is.na(propdata.trend.test.Flotim[a]),100,propdata.trend.test.Flotim[a])
                        }))
-colnames(propdata.trend.test.Flotim) <- c("PrimaryOcc","FreqFish","SellFish","IncFish","FishTech","childFS","Protein")
+colnames(propdata.trend.test.Flotim) <- c("Primary occupation (% households)","Frequency of fishing in past 6 months","Frequency of selling fish in past 6 months",
+                                          "Portion of income from fishing in past 6 months","Fishing technique most often used in past 6 months (% households)","Evidence of child food security","Portion of dietary protein from fish in past 6 months")

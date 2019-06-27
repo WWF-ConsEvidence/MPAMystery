@@ -51,8 +51,8 @@ Flotim.statusplot.sigpos <-
 
 # ---- 1.3 Define Flotim-specific plot labels, with significance asterisks ----
 
-Flotim.annexplot.monitoryear.labs <- (define.year.monitoryear.column(Flotim.AnnexContData.Techreport.PLOTFORMAT))
-Flotim.trendplot.monitoryear.labs <- rev(define.year.monitoryear.column(Flotim.AnnexContData.Techreport.PLOTFORMAT))
+Flotim.annexplot.monitoryear.labs <- rev(define.year.monitoryear.column(Flotim.AnnexContData.Techreport.PLOTFORMAT))
+Flotim.trendplot.monitoryear.labs <- (define.year.monitoryear.column(Flotim.AnnexContData.Techreport.PLOTFORMAT))
 
 Flotim.conttrendplot.ylabs <- 
   define.conttrendplot.ylabels.withasterisks(Flotim.TrendContData.Techreport.PLOTFORMAT
@@ -61,6 +61,7 @@ Flotim.conttrendplot.ylabs <-
                                                  "SEMean","TimeMarketMean","UnwellMean")])
 
 proportional.variables.plotlabs <-colnames(propdata.trend.test.Flotim)
+
 Flotim.proptrendplot.ylabs <- 
   define.proptrendplot.ylabels.withasterisks(propdata.trend.test.Flotim)
 
@@ -75,13 +76,13 @@ Flotim.trendplot.labs <- list(FS=labs(y=as.character(Flotim.conttrendplot.ylabs[
                            Unwell=labs(y=as.character(Flotim.conttrendplot.ylabs["UnwellMean"]),x="Monitoring Year"),
                            Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
                            Religion=labs(y="Religion (% households)",x="Monitoring Year"),
-                           PrimaryOcc=labs(y=as.character(Flotim.proptrendplot.ylabs["PrimaryOcc"]),x="Monitoring Year"),
-                           FreqFish=labs(y=as.character(Flotim.proptrendplot.ylabs["FreqFish"]),x="Monitoring Year"),
-                           FreqSellFish=labs(y=as.character(Flotim.proptrendplot.ylabs["SellFish"]),x="Monitoring Year"),
-                           IncFish=labs(y=as.character(Flotim.proptrendplot.ylabs["IncFish"]),x="Monitoring Year"),
-                           FishTech=labs(y=as.character(Flotim.proptrendplot.ylabs["FishTech"]),x="Monitoring Year"),
-                           ChildFS=labs(y=as.character(Flotim.proptrendplot.ylabs["childFS"]),x="Monitoring Year"),
-                           Protein=labs(y=as.character(Flotim.proptrendplot.ylabs["Protein"]),x="Monitoring Year"))
+                           PrimaryOcc=labs(y=as.character(Flotim.proptrendplot.ylabs["Primary occupation (% households)"]),x="Monitoring Year"),
+                           FreqFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Frequency of fishing in past 6 months"]),x="Monitoring Year"),
+                           FreqSellFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Frequency of selling fish in past 6 months"]),x="Monitoring Year"),
+                           IncFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Portion of income from fishing in past 6 months"]),x="Monitoring Year"),
+                           FishTech=labs(y=as.character(Flotim.proptrendplot.ylabs["Fishing technique most often used in past 6 months (% households)"]),x="Monitoring Year"),
+                           ChildFS=labs(y=as.character(Flotim.proptrendplot.ylabs["Evidence of child food security"]),x="Monitoring Year"),
+                           Protein=labs(y=as.character(Flotim.proptrendplot.ylabs["Portion of dietary protein from fish in past 6 months"]),x="Monitoring Year"))
 
 annex.sigvals.Flotim$SettlementName <- gsub("Flotim","Flores Timur",annex.sigvals.Flotim$SettlementName)
 
@@ -1199,7 +1200,7 @@ Flotim.se.trendplot <-
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format(),
                      limits=c(0,1)) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   coord_flip() + Flotim.trendplot.labs["SE"] + plot.theme
 Flotim.se.trendplot
 
@@ -1265,7 +1266,7 @@ Flotim.gender.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Gender"]],
                     labels=c("Female","Male")) +
@@ -1286,7 +1287,7 @@ Flotim.religion.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Religion"]],
                     labels=c("Other","Muslim","Christian")) +
@@ -1319,7 +1320,7 @@ Flotim.primaryocc.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["PrimaryOcc"]],
                     labels=c("Other","Other Wage Labor","Tourism",
@@ -1341,7 +1342,7 @@ Flotim.freqfish.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FreqFish"]],
                     labels=c("More than a few times per week","A few times per week",
@@ -1364,7 +1365,7 @@ Flotim.freqsellfish.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FreqSellFish"]],
                     labels=c("More than a few times per week","A few times per week",
@@ -1387,7 +1388,7 @@ Flotim.incfish.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["IncFish"]],
                     labels=c("All","Most","About half","Some","None")) +
@@ -1408,7 +1409,7 @@ Flotim.fishtech.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FishTech"]],
                     labels=c("Mobile line","Stationary line",
@@ -1430,7 +1431,7 @@ Flotim.childfs.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["ChildFS"]],
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
@@ -1451,7 +1452,7 @@ Flotim.proteinfish.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Protein"]],
                     labels=c("All","Most","About half","Some","None")) +
