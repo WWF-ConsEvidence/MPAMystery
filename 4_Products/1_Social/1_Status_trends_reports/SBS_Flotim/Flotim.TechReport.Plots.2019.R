@@ -1094,7 +1094,7 @@ Flotim.fs.trendplot <-
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,6.06)) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   coord_flip() + Flotim.trendplot.labs["FS"] + theme(axis.ticks=element_blank(),
                                                   panel.background=element_rect(fill="white",
                                                                                 colour="#909090"),
@@ -1132,7 +1132,7 @@ Flotim.ma.trendplot <-
                      limits=c(0,max(Flotim.TrendContData.Techreport.PLOTFORMAT$MAMean,na.rm=T)+
                                 max(Flotim.TrendContData.Techreport.PLOTFORMAT$MAErr,na.rm=T)+
                                 0.03*max(Flotim.TrendContData.Techreport.PLOTFORMAT$MAMean,na.rm=T))) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   coord_flip() + Flotim.trendplot.labs["MA"] + plot.theme
 Flotim.ma.trendplot
 
@@ -1154,7 +1154,7 @@ Flotim.pa.trendplot <-
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,5)) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   coord_flip() + Flotim.trendplot.labs["PA"] + plot.theme
 Flotim.pa.trendplot
 
@@ -1176,7 +1176,7 @@ Flotim.mt.trendplot <-
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,5)) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   coord_flip() + Flotim.trendplot.labs["MT"] + plot.theme
 Flotim.mt.trendplot
 
@@ -1223,7 +1223,7 @@ Flotim.time.trendplot <-
                      limits=c(0,max(Flotim.TrendContData.Techreport.PLOTFORMAT$TimeMarketMean,na.rm=T)+
                                 max(Flotim.TrendContData.Techreport.PLOTFORMAT$TimeMarketErr,na.rm=T)+
                                 0.03*max(Flotim.TrendContData.Techreport.PLOTFORMAT$TimeMarketMean,na.rm=T))) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   coord_flip() + Flotim.trendplot.labs["Market"] + plot.theme
 Flotim.time.trendplot
 
@@ -1247,7 +1247,7 @@ Flotim.unwell.trendplot <-
                      limits=c(0,max(Flotim.TrendContData.Techreport.PLOTFORMAT$UnwellMean,na.rm=T)+
                                 max(Flotim.TrendContData.Techreport.PLOTFORMAT$UnwellErr,na.rm=T)+
                                 0.03*max(Flotim.TrendContData.Techreport.PLOTFORMAT$UnwellMean,na.rm=T))) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   coord_flip() + Flotim.trendplot.labs["Unwell"] + plot.theme
 Flotim.unwell.trendplot
 

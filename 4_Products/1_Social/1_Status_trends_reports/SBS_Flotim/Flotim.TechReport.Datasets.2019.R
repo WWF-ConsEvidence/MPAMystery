@@ -341,7 +341,7 @@ Flotim.AnnexContData.Techreport <-
 
 Flotim.AnnexContData.Techreport$MonitoringYear <- 
   factor(Flotim.AnnexContData.Techreport$MonitoringYear,
-         levels=c("Baseline","3 Year Post"),ordered=T)
+         levels=c("3 Year Post","Baseline"),ordered=T)
 
 Flotim.AnnexContData.Techreport <- 
   Flotim.AnnexContData.Techreport[rev(order(Flotim.AnnexContData.Techreport$SettlementName,
@@ -359,7 +359,7 @@ Flotim.AnnexContData.Techreport.PLOTFORMAT <-
 # - make MonitoringYear an ordered factor for plotting
 Flotim.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear <-
   factor(Flotim.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear,
-         levels=c("Baseline","3 Year Post"),
+         levels=c("3 Year Post","Baseline"),
          ordered=T)
 
 # - make SettlementName an ordered factor for plotting
