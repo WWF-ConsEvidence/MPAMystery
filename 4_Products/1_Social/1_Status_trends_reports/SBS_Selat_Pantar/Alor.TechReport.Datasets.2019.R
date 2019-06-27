@@ -137,7 +137,7 @@ Alor.level.ContData.status <-
                                     Days.unwell.Alor.ByMPA[,c("UnwellMean","UnwellErr")]))
 
 Alor.level.ContData.annex <- 
-  cbind.data.frame(MonitoringYear=c("Baseline","3 Year Post"),
+  cbind.data.frame(MonitoringYear=c("3 Year Post","Baseline"),
                    SettlementID=0,SettlementName="MPA",
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==15,3:8],
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==15,11:12],
@@ -224,16 +224,16 @@ Alor.PropData.Techreport.status.PLOTFORMAT <-
 # - make SettlementName an ordered factor for plotting
 Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
   ifelse(is.na(Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName),"",
-         as.character(Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName)
+         as.character(Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName))
          
-         Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName <- gsub("Alor","Alor MPA",Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName)
+Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName <- gsub("Alor","Alor MPA",Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName)
          
          
-         Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
-           factor(Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName,
-                  levels=unique(Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName),
-                  ordered=T)
-         
+Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
+ factor(Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName,
+        levels=unique(Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName),
+        ordered=T)
+
 # - add row for plot fill colour formatting
 Alor.PropData.Techreport.status.PLOTFORMAT$Dummy <- 
  ifelse(Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")

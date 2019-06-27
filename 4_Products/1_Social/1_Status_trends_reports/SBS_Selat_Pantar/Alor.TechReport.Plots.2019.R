@@ -50,7 +50,7 @@ Alor.statusplot.sigpos <-
 
 # ---- 1.3 Define Alor-specific plot labels, with significance asterisks ----
 
-Alor.trendplot.monitoryear.labs <- rev(define.year.monitoryear.column(Alor.AnnexContData.Techreport.PLOTFORMAT))
+Alor.trendplot.monitoryear.labs <- (define.year.monitoryear.column(Alor.AnnexContData.Techreport.PLOTFORMAT))
 Alor.annexplot.monitoryear.labs <- rev(define.year.monitoryear.column(Alor.AnnexContData.Techreport.PLOTFORMAT))
 
 Alor.conttrendplot.ylabs <- 
@@ -72,13 +72,14 @@ Alor.trendplot.labs <- list(FS=labs(y=as.character(Alor.conttrendplot.ylabs["FSM
                                         x="Monitoring Year"),
                             Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
                             Religion=labs(y="Religion (% households)",x="Monitoring Year"),
-                            PrimaryOcc=labs(y=as.character(Alor.proptrendplot.ylabs["PrimaryOcc"]),x="Monitoring Year"),
-                            FreqFish=labs(y=as.character(Alor.proptrendplot.ylabs["FreqFish"]),x="Monitoring Year"),
-                            FreqSellFish=labs(y=as.character(Alor.proptrendplot.ylabs["SellFish"]),x="Monitoring Year"),
-                            IncFish=labs(y=as.character(Alor.proptrendplot.ylabs["IncFish"]),x="Monitoring Year"),
-                            FishTech=labs(y=as.character(Alor.proptrendplot.ylabs["FishTech"]),x="Monitoring Year"),
-                            ChildFS=labs(y=as.character(Alor.proptrendplot.ylabs["childFS"]),x="Monitoring Year"),
-                            Protein=labs(y=as.character(Alor.proptrendplot.ylabs["Protein"]),x="Monitoring Year"))
+                            PrimaryOcc=labs(y=as.character(Alor.proptrendplot.ylabs["Primary occupation (% households)"]),x="Monitoring Year"),
+                            FreqFish=labs(y=as.character(Alor.proptrendplot.ylabs["Frequency of fishing (% households)"]),x="Monitoring Year"),
+                            FreqSellFish=labs(y=as.character(Alor.proptrendplot.ylabs["Frequency of selling at least some catch (% households)"]),x="Monitoring Year"),
+                            IncFish=labs(y=as.character(Alor.proptrendplot.ylabs["Income from fishing in past 6 months (% households)"]),x="Monitoring Year"),
+                            FishTech=labs(y=as.character(Alor.proptrendplot.ylabs["Fishing technique most often used in past 6 months (% households)"]),x="Monitoring Year"),
+                            ChildFS=labs(y=as.character(Alor.proptrendplot.ylabs["Child hunger (% households)"]),x="Monitoring Year"),
+                            Protein=labs(y=as.character(Alor.proptrendplot.ylabs["Dietary protein from fish in past 6 months (% households)"]),x="Monitoring Year"))
+
 
 Alor.annexplot.settnames <- 
   define.annexplot.settname.labels(annex.sigvals.Alor)
@@ -289,7 +290,6 @@ Alor.ma.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["MA"] + plot.theme
 Alor.ma.statusplot
-
 # - PLACE ATTACHMENT
 Alor.pa.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
                              aes(x=SettlementName)) +
@@ -412,6 +412,7 @@ Alor.se.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
 Alor.se.statusplot
 
 # - TIME TO MARKET
+#currently not in
 Alor.time.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
                                aes(x=SettlementName)) +
   geom_bar(aes(y=TimeMarketMean,
@@ -1217,6 +1218,7 @@ Alor.time.trendplot <-
                                 0.03*max(Alor.TrendContData.Techreport.PLOTFORMAT$TimeMarketMean,na.rm=T))) +
   scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
   coord_flip() + Alor.trendplot.labs["Time"] + plot.theme
+Alor.time.trendplot
 
 # - DAYS UNWELL
 Alor.unwell.trendplot <- 

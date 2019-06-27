@@ -614,4 +614,6 @@ propdata.trend.test.Alor <-
                                                                NA)
                          propdata.trend.test.Alor[a] <- ifelse(is.na(propdata.trend.test.Alor[a]),100,propdata.trend.test.Alor[a])
                        }))
-colnames(propdata.trend.test.Alor) <- c("PrimaryOcc","FreqFish","SellFish","IncFish","FishTech","childFS","Protein")
+colnames(propdata.trend.test.Alor) <- c("Primary occupation (% households)","Frequency of fishing (% households)",
+                                        "Frequency of selling at least some catch (% households)","Income from fishing in past 6 months (% households)",
+                                        "Fishing technique most often used in past 6 months (% households)","Child hunger (% households)","Dietary protein from fish in past 6 months (% households)")
