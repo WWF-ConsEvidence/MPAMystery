@@ -179,8 +179,8 @@ sett.names.Flotim <- factor(Flotim.TechReport.Status.SettlementMeans$SettlementN
 # ---- 2.1 Create list of median settlement for each continuous variable (whether the variable is parametric or non-parametric) ----
 
 even.number.setts.function.Flotim <- 
-  mapply(a=Flotim.TechReport.Status.SettlementMeans[,c("FSIndex","MAIndex","MTIndex","SERate","TimeMarket","DaysUnwell")],
-         b=Flotim.TechReport.MPAHouseholdData[,c("FSIndex","MAIndex","MTIndex","SERate","TimeMarket","DaysUnwell")],
+  mapply(a=Flotim.TechReport.Status.SettlementMeans[,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
+         b=Flotim.TechReport.MPAHouseholdData[,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
          function(a,b){
            med <- median(a,na.rm=T)
            equal <- c(a[which(a==med)])
@@ -255,7 +255,7 @@ even.number.setts.function.Flotim <-
          })
 
 median.setts.Flotim <- 
-  mapply(i=Flotim.TechReport.Status.SettlementMeans[,c("FSIndex","MAIndex","MTIndex","SERate","TimeMarket","DaysUnwell")],
+  mapply(i=Flotim.TechReport.Status.SettlementMeans[,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
          j=names(even.number.setts.function.Flotim),
          function(i,j){
            med <- median(i,na.rm=T)
@@ -420,7 +420,7 @@ qqline(Flotim.TechReport.MPAHouseholdData$DaysUnwell,col="green")
 # ---- 4.1 Create function that will output significance values for non-parametric variables, BY SETTLEMENT ----
 #          (for status plots)
 non.parametric.test.settlements.Flotim <- 
-  data.frame(mapply(a=c("FSIndex","MAIndex","MTIndex","SERate","TimeMarket","DaysUnwell"),
+  data.frame(mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
                     function(a){
                       results <- 
                         list(cbind.data.frame(SettlementName=c(as.character(sett.names.Flotim[which(sett.names.Flotim!=median.setts.Flotim[a])]),
@@ -450,6 +450,8 @@ sigvals.Sett.Flotim <-
                                                         c("MAIndex.SettlementName","MAIndex.p.value")],
                    non.parametric.test.settlements.Flotim[order(non.parametric.test.settlements.Flotim$"MTIndex.SettlementName"),
                                                           c("MTIndex.SettlementName","MTIndex.p.value")],
+                   non.parametric.test.settlements.Flotim[order(non.parametric.test.settlements.Flotim$"PAIndex.SettlementName"),
+                                                          c("PAIndex.SettlementName","PAIndex.p.value")],
                    non.parametric.test.settlements.Flotim[order(non.parametric.test.settlements.Flotim$"SERate.SettlementName"),
                                                         c("SERate.SettlementName","SERate.p.value")],
                    non.parametric.test.settlements.Flotim[order(non.parametric.test.settlements.Flotim$"TimeMarket.SettlementName"),
@@ -460,18 +462,18 @@ sigvals.Sett.Flotim <-
 # - Remove all settlement name columns except for one. 
 sigvals.Sett.Flotim <- 
   dplyr:: select(sigvals.Sett.Flotim,"FSIndex.SettlementName", "FSIndex.p.value", "MAIndex.p.value",  
-  "MTIndex.p.value", "SERate.p.value", "TimeMarket.p.value",
+  "PAIndex.p.value","MTIndex.p.value", "SERate.p.value", "TimeMarket.p.value",
   "DaysUnwell.p.value")
 
 
-colnames(sigvals.Sett.Flotim) <- c("SettlementName","FS.pval","MA.pval","MT.pval","SE.pval","TimeMarket.pval","Unwell.pval")
+colnames(sigvals.Sett.Flotim) <- c("SettlementName","FS.pval","MA.pval","PA.pval","MT.pval","SE.pval","TimeMarket.pval","Unwell.pval")
 
 
 # ---- 4.2 Create function that will output significance values for non-parametric variables, MPA VS. Control ----
 #          (for status plots, comparing MPA households to control households)
 
 non.parametric.test.MPAvControl.Flotim <-
-  data.frame(mapply(a=c("FSIndex","MAIndex","MTIndex","SERate","TimeMarket","DaysUnwell"),
+  data.frame(mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
                     function(a){
                       var <- Flotim.TechReport.MPAvControl[,a]
                       wilcox.test(var~Treatment,
@@ -502,37 +504,37 @@ sigvals.Flotim <- rbind.data.frame(sigvals.MPA.Flotim,
                    sigvals.Sett.Flotim)
 
 
-sigvals.Flotim[,c("FS.pval", "MA.pval", "MT.pval" ,  "SE.pval", "TimeMarket.pval",
-                "Unwell.pval")] <- unlist(sigvals.Flotim[,c("FS.pval", "MA.pval", "MT.pval", "SE.pval","TimeMarket.pval",
+sigvals.Flotim[,c("FS.pval", "MA.pval", "MT.pval" , "PA.pval", "SE.pval", "TimeMarket.pval",
+                "Unwell.pval")] <- unlist(sigvals.Flotim[,c("FS.pval", "MA.pval", "MT.pval", "PA.pval","SE.pval","TimeMarket.pval",
                                                           "Unwell.pval")])
 
 # ---- 4.3 Define function for trend data significance ---- 
 
 trend.non.parametric.test.byMPA.Flotim <- 
-  data.frame(mapply(i=Flotim.Trend.Data[,c("FSIndex","MAIndex","MTIndex","SERate","TimeMarket","DaysUnwell")],
+  data.frame(mapply(i=Flotim.Trend.Data[,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
                     function(i){
                       MannKendall(c(i[Flotim.Trend.Data$InterviewYear==unique(Flotim.Trend.Data$InterviewYear)[1]],
                                     i[Flotim.Trend.Data$InterviewYear==unique(Flotim.Trend.Data$InterviewYear)[2]]))
                     }))
 
 trend.non.parametric.test.byControl.Flotim <- 
-  data.frame(mapply(i=Flotim.Trend.Data[Flotim.Trend.Data$Treatment==0,c("FSIndex","MAIndex","MTIndex","SERate","TimeMarket","DaysUnwell")],
+  data.frame(mapply(i=Flotim.Trend.Data[Flotim.Trend.Data$Treatment==0,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
                     function(i){
                       MannKendall(c(i[Flotim.Trend.Data$InterviewYear==unique(Flotim.Trend.Data$InterviewYear)[1]],
                                     i[Flotim.Trend.Data$InterviewYear==unique(Flotim.Trend.Data$InterviewYear)[2]]))
                     }))
 
 
-colnames(trend.non.parametric.test.byMPA.Flotim) <- colnames(sigvals.Flotim[2:7])
-colnames(trend.non.parametric.test.byControl.Flotim) <- colnames(sigvals.Flotim[2:7])
+colnames(trend.non.parametric.test.byMPA.Flotim) <- colnames(sigvals.Flotim[2:8])
+colnames(trend.non.parametric.test.byControl.Flotim) <- colnames(sigvals.Flotim[2:8])
 
 
 trend.sigvals.Flotim <- 
   cbind.data.frame(MonitoringYear="p.value",trend.non.parametric.test.byMPA.Flotim["sl",1],NA,trend.non.parametric.test.byMPA.Flotim["sl",2],
                    NA,trend.non.parametric.test.byMPA.Flotim["sl",3],NA,trend.non.parametric.test.byMPA.Flotim["sl",4],NA,trend.non.parametric.test.byMPA.Flotim["sl",5],
-                   NA,trend.non.parametric.test.byMPA.Flotim["sl",6],NA)
+                   NA,trend.non.parametric.test.byMPA.Flotim["sl",6],NA,trend.non.parametric.test.byMPA.Flotim["sl",7],NA)
 
-colnames(trend.sigvals.Flotim) <- c("MonitoringYear","FSMean","FSErr","MAMean","MAErr","MTMean","MTErr","SEMean","SEErr",
+colnames(trend.sigvals.Flotim) <- c("MonitoringYear","FSMean","FSErr","MAMean","MAErr","PAMean","PAErr","MTMean","MTErr","SEMean","SEErr",
                                   "MarketMean","MarketErr","UnwellMean","UnwellErr")
 
 trend.sigvals.Flotim <- unlist(trend.sigvals.Flotim)
@@ -543,7 +545,7 @@ trend.sigvals.Flotim <- unlist(trend.sigvals.Flotim)
 
 trend.non.parametric.test.bySett.Flotim <- 
   cbind.data.frame(SettlementName=as.character(sett.names.Flotim),
-                   mapply(a=c("FSIndex","MAIndex","MTIndex","SERate","TimeMarket","DaysUnwell"),
+                   mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
                           function(a){
                             t(data.frame(mapply(i=as.character(sett.names.Flotim),
                                                 function(i){
@@ -555,7 +557,7 @@ trend.non.parametric.test.bySett.Flotim <-
 
 
 
-colnames(trend.non.parametric.test.bySett.Flotim) <- colnames(sigvals.Flotim[1:7])
+colnames(trend.non.parametric.test.bySett.Flotim) <- colnames(sigvals.Flotim[1:8])
 
 
 # - Define data frame with p-values for annex plots
@@ -563,12 +565,12 @@ colnames(trend.non.parametric.test.bySett.Flotim) <- colnames(sigvals.Flotim[1:7
 #   variable, using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
 #   there [is/is not] a significant difference in this variable across the settlement)
 annex.sigvals.Flotim <- 
-  rbind.data.frame(cbind.data.frame(SettlementName="Flores Timur\n MPA",trend.non.parametric.test.byMPA.Flotim["sl",]),
+  rbind.data.frame(cbind.data.frame(SettlementName="Flores Timur\nMPA",trend.non.parametric.test.byMPA.Flotim["sl",]),
                    cbind.data.frame(SettlementName=c("Control\n Settlements"),trend.non.parametric.test.byControl.Flotim["sl",]),
                    null.row.sigvals.Flotim,
                    trend.non.parametric.test.bySett.Flotim[rev(order(trend.non.parametric.test.bySett.Flotim$SettlementName)),])
 
-annex.sigvals.Flotim[2:7] <- unlist(annex.sigvals.Flotim[2:7])
+annex.sigvals.Flotim[2:8] <- unlist(annex.sigvals.Flotim[2:8])
 
 
 # 

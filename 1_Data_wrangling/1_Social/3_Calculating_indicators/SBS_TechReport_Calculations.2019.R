@@ -53,6 +53,7 @@ IndDemos <- IndDemos %>%
 
 Organization <- Organization %>%
   filter(MPAID < 17 & MPAID >14)
+
 # Fix improper capitalization
 HHData$SettlementName<-gsub("Alila TImur","Alila Timur",HHData$SettlementName)
 
@@ -1471,6 +1472,5 @@ plot.mt.labs.i <- labs(y="Change in Household Marine Tenure\nsince Baseline",tit
 plot.se.labs.i <- labs(y="Change in Enrollment Rate\nsince Baseline",title="IMPACT")
 
 impact.x.labs <- c("MPA\nHouseholds","Control\nHouseholds")
-
 
 

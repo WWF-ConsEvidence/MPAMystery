@@ -23,7 +23,7 @@
 #  6) WRITE TO .PNG
 # 
 # 
-
+#
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 # ---- SECTION 1: DEFINE MPA-SPECIFIC PLOTTING DATA FRAMES ----
@@ -41,7 +41,7 @@ source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Flotim.TechReport.Datase
 
 Flotim.statusplot.asterisks <- 
   define.statusplot.asterisks(Flotim.ContData.Techreport.status.PLOTFORMAT[,c("SettlementName","FS.pval",
-                                                                               "MA.pval","MT.pval",
+                                                                               "MA.pval","MT.pval","PA.pval",
                                                                                "SE.pval", "TimeMarket.pval",
                                                                                "Unwell.pval")])
 Flotim.statusplot.sigpos <- 
@@ -83,9 +83,6 @@ Flotim.trendplot.labs <- list(FS=labs(y=as.character(Flotim.conttrendplot.ylabs[
                            FishTech=labs(y=as.character(Flotim.proptrendplot.ylabs["Fishing technique most often used in past 6 months (% households)"]),x="Monitoring Year"),
                            ChildFS=labs(y=as.character(Flotim.proptrendplot.ylabs["Child hunger (% households)"]),x="Monitoring Year"),
                            Protein=labs(y=as.character(Flotim.proptrendplot.ylabs["Dietary protein from fish in past 6 months (% households)"]),x="Monitoring Year"))
-
-
-annex.sigvals.Flotim$SettlementName <- gsub("Flotim","Flores Timur",annex.sigvals.Flotim$SettlementName)
 
 Flotim.annexplot.settnames <- 
   define.annexplot.settname.labels(annex.sigvals.Flotim)
@@ -188,9 +185,9 @@ Flotim.age.gender.plot <-
 Flotim.fs.statusplot <- 
   rbind.data.frame(Flotim.ContData.Techreport.status.PLOTFORMAT,
                    cbind.data.frame(SettlementID=NA,SettlementName="  ",
-                                    matrix(rep(NA,20),ncol=20,
+                                    matrix(rep(NA,21),ncol=21,
                                            dimnames=list(NULL,
-                                                         colnames(Flotim.ContData.Techreport.status.PLOTFORMAT)[3:22])),
+                                                         colnames(Flotim.ContData.Techreport.status.PLOTFORMAT)[3:23])),
                                     SettLevel="Dummy")) %>%
   ggplot(aes(x=SettlementName)) +
   geom_hline(aes(yintercept=1.56),size=0.25,colour="#505050") +
@@ -2034,4 +2031,5 @@ png(paste(FigureFileName,"Num.Ethnic.png",sep="/"),
     units="in",height=4,width=6,res=400)
 plot(Flotim.ethnic.statusplot)
 dev.off()
+
 

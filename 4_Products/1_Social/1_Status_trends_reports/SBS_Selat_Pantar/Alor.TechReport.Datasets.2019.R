@@ -44,7 +44,7 @@ Days.unwell.Alor.BySett <-
 
 
 Days.unwell.Alor.ByMPA <- 
-  Days.unwell.ByMPA[Days.unwell.ByMPA$MPAID==15 & Days.unwell.ByMPA$MonitoringYear=="3 Year Post" &
+  Days.unwell.ByMPA[Days.unwell.ByMPA$MPAID==15  &
                       !is.na(Days.unwell.ByMPA$MPAID),c("MonitoringYear", "UnwellMean", "UnwellErr")]
 
 
@@ -134,7 +134,7 @@ Alor.level.ContData.status <-
                    cbind.data.frame(MonitoringYear="3 Year Post",SettlementID=0,SettlementName="Alor MPA",
                                     BigFive.MPAGroup[BigFive.MPAGroup$MPAID==15 & BigFive.MPAGroup$MonitoringYear=="3 Year Post",c("FSMean", "FSErr", "MAMean", "MAErr", "PAMean", "PAErr", "SEMean", "SEErr")],
                                     Techreport.Trend.ByMPA[Techreport.Trend.ByMPA$MPAID==15 & Techreport.Trend.ByMPA$MonitoringYear=="3 Year Post",c("TimeMarketMean","TimeMarketErr")],
-                                    Days.unwell.Alor.ByMPA[,c("UnwellMean","UnwellErr")]))
+                                    Days.unwell.Alor.ByMPA[Days.unwell.Alor.ByMPA$MonitoringYear=="3 Year Post",c("UnwellMean","UnwellErr")]))
 
 Alor.level.ContData.annex <- 
   cbind.data.frame(MonitoringYear=c("3 Year Post","Baseline"),
