@@ -161,6 +161,7 @@ Flotim.agegender.legend.plot <-
                              "Male.3Year"=alpha("#253494",0.95)),
                     labels=c("Female","Male")) +
   coord_flip() + plot.guides.techreport + theme(legend.justification="right")
+Flotim.agegender.legend.plot
 
 Flotim.agegender.legend <- g_legend(Flotim.agegender.legend.plot)
 
@@ -170,7 +171,9 @@ Flotim.age.gender.plot <-
                arrangeGrob(
                  Flotim.age.gender.3Year,
                  Flotim.age.gender.Baseline,ncol=1),nrow=2,heights=c(0.35,10))
-# 
+Flotim.age.gender.plot
+
+
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 # ---- SECTION 3: STATUS PLOTS ----
@@ -295,7 +298,6 @@ Flotim.ma.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT
 Flotim.ma.statusplot
 
 # - PLACE ATTACHMENT
-#Not currently in dataset
 Flotim.pa.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT,
                              aes(x=SettlementName)) +
   geom_bar(aes(y=PAMean,
@@ -1773,11 +1775,10 @@ Flotim.unwell.annexplot
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
-
-dir.create(paste("C:/Users/bauer-intern/Dropbox/MPAMystery/Products",
+dir.create(paste("C:/Users/HP/Dropbox/Products7-3",
                  format(Sys.Date(),format="%Y_%m_%d"),sep="_"))
 
-FigureFileName <- paste("C:/Users/bauer-intern/Dropbox/MPAMystery/Products",
+FigureFileName <- paste("C:/Users/HP/Dropbox/Products7-3",
                         format(Sys.Date(),format="%Y_%m_%d"),sep="_")
 
 png(paste(FigureFileName,"FS.trend.png",sep="/"),
@@ -1788,6 +1789,11 @@ dev.off()
 png(paste(FigureFileName,"FS.annex.png",sep="/"),
     units="in",height=7.5,width=7.5,res=400)
 plot(Flotim.fs.annexplot)
+dev.off()
+
+png(paste(FigureFileName,"FS.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.fs.statusplot)
 dev.off()
 
 
@@ -2014,7 +2020,6 @@ png(paste(FigureFileName,"FishProtein.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
 plot(Flotim.proteinfish.trendplot)
 dev.off()
-
 
 # ---- 6.17 Age/Gender ----
 

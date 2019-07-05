@@ -31,6 +31,8 @@
 
 # ---- 1.1 Source or run statistical test results  ----
 
+source("C:/Users/HP/Dropbox/NotThisOne/Source_social_data_flat_files.R")
+
 source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/SBS_TechReport.Calculations.R")
 
 source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Alor.TechReport.SigTest.2019.R")
@@ -137,7 +139,7 @@ Alor.level.ContData.status <-
                                     Days.unwell.Alor.ByMPA[Days.unwell.Alor.ByMPA$MonitoringYear=="3 Year Post",c("UnwellMean","UnwellErr")]))
 
 Alor.level.ContData.annex <- 
-  cbind.data.frame(MonitoringYear=c("3 Year Post","Baseline"),
+  cbind.data.frame(MonitoringYear=c("Baseline","3 Year Post"),
                    SettlementID=0,SettlementName="MPA",
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==15,3:8],
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==15,11:12],
@@ -145,8 +147,7 @@ Alor.level.ContData.annex <-
                    Days.unwell.Alor.ByMPA[,c("UnwellMean","UnwellErr")])
 
 Alor.level.ContData.control.annex <- 
-  cbind.data.frame(SettlementName="Control\nSettlements", SettlementID=0,
-                   Techreport.ByMPA.control.annex[Techreport.ByMPA.control.annex$MPAID==15,3],
+  cbind.data.frame(SettlementName="Control\nSettlements", SettlementID=0, MonitoringYear=c("Baseline","3 Year Post"),
                    Techreport.ByMPA.control.annex[Techreport.ByMPA.control.annex$MPAID==15,50:57],
                    Techreport.ByMPA.control.annex[Techreport.ByMPA.control.annex$MPAID==15,60:63])
 
@@ -685,3 +686,4 @@ define.annexplot.MPAname.labels <- function(x) {
  colnames(result) <- c("MPAName","FS","MA","PA","MT","SE","Time","Unwell")
  result
 }
+

@@ -27,6 +27,8 @@
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
+source("C:/Users/HP/Dropbox/NotThisOne/Source_social_data_flat_files.R")
+
 source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/SBS_TechReport_Calculations.R")
 
 # ---- 1.1 Subset continuous variable datasets from SBS.TechReport.Calculations.R ----
@@ -617,3 +619,4 @@ propdata.trend.test.Alor <-
 colnames(propdata.trend.test.Alor) <- c("Primary occupation (% households)","Frequency of fishing (% households)",
                                         "Frequency of selling at least some catch (% households)","Income from fishing in past 6 months (% households)",
                                         "Fishing technique most often used in past 6 months (% households)","Child hunger (% households)","Dietary protein from fish in past 6 months (% households)")
+

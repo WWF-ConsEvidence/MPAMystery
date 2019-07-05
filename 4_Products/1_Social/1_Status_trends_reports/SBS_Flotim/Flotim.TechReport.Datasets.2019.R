@@ -79,7 +79,7 @@ Flotim.AgeGender <-
 
 Flotim.level.PropData.status <- 
   rbind.data.frame(data.frame(MonitoringYear="3 Year Post",
-                              SettlementName="Control\nSettlements",
+                              SettlementName="Control Settlements",
                               Techreport.ByMPA.control[Techreport.ByMPA.control$MPAID==16 & Techreport.ByMPA.control$MonitoringYear=="3 Year Post",c("HHH.female", "HHH.male", "Percent.Rel.Christian", "Percent.Rel.Muslim", 
                                                                                             "Percent.Rel.Other", "Percent.PrimaryOcc.Fish", "Percent.PrimaryOcc.Farm", 
                                                                                             "Percent.PrimaryOcc.WageLabor", "Percent.PrimaryOcc.HarvestForest", 
@@ -124,7 +124,7 @@ null.row.PropData <-
 
 
 Flotim.level.ContData.status <- 
-  rbind.data.frame(cbind.data.frame(MonitoringYear="3 Year Post",SettlementID=0,SettlementName="Control\nSettlements",
+  rbind.data.frame(cbind.data.frame(MonitoringYear="3 Year Post",SettlementID=0,SettlementName="Control Settlements",
                                     BigFive.ControlGroup[BigFive.ControlGroup$MPAID==16,c("FSMean", "FSErr", "MAMean", "MAErr", "MTMean","MTErr", "PAMean", "PAErr", "SEMean", "SEErr")],
                                     Techreport.ByMPA.control[Techreport.ByMPA.control$MPAID==16,c("TimeMarketMean","TimeMarketErr")],
                                     Days.unwell.Flotim.control[,c("UnwellMean","UnwellErr")]),
@@ -216,7 +216,8 @@ Flotim.PropData.Techreport.status.PLOTFORMAT <-
                                        "ProteinFish.Most", "ProteinFish.All","Percent.FoodInsecure.NoHunger","Percent.FoodInsecure.YesHunger","Percent.FoodSecure")],
                    Flotim.PropData.Techreport.status)
 
-Flotim.PropData.Techreport.status.PLOTFORMAT$SettlementName <- gsub("Flotim","MPA\nSettlements",Flotim.PropData.Techreport.status.PLOTFORMAT$SettlementName)
+Flotim.PropData.Techreport.status.PLOTFORMAT$SettlementName <- gsub("Flores Timur\nMPA","Flores Timur MPA",Flotim.PropData.Techreport.status.PLOTFORMAT$SettlementName)
+Flotim.PropData.Techreport.status.PLOTFORMAT$SettlementName <- gsub("Control\nSettlements","Control Settlements",Flotim.PropData.Techreport.status.PLOTFORMAT$SettlementName)
 
 # - make SettlementName an ordered factor for plotting
 Flotim.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
@@ -275,7 +276,7 @@ Flotim.ContData.Techreport.status.PLOTFORMAT <-
   left_join(Flotim.ContData.Techreport.status.withMPA,
             sigvals.Flotim,by="SettlementName")
 
-Flotim.ContData.Techreport.status.PLOTFORMAT$SettlementName <- gsub("FlotimMPA","Flores Timur\nMPA",Flotim.ContData.Techreport.status.PLOTFORMAT$SettlementName)
+Flotim.ContData.Techreport.status.PLOTFORMAT$SettlementName <- gsub("FlotimMPA","Flores Timur MPA",Flotim.ContData.Techreport.status.PLOTFORMAT$SettlementName)
 
 # - make SettlementName an ordered factor for plotting
 Flotim.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
@@ -296,7 +297,6 @@ Flotim.ContData.Techreport.status.PLOTFORMAT$SettLevel <-
 
 Flotim.TrendPropData.Techreport.PLOTFORMAT <- 
   Techreport.Trend.ByMPA[Techreport.Trend.ByMPA$MPAID==16,c(2,1,3:48,71:75)]
-        
 
 
 # ---- 2.4 Trend dataset for Flotim, MPA-level continuous data (with p values) ----

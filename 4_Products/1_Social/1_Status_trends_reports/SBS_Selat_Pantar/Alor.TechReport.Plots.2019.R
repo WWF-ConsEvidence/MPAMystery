@@ -30,6 +30,8 @@
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
+source("C:/Users/HP/Dropbox/NotThisOne/Source_social_data_flat_files.R")
+
 source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/SBS_TechReport_Calculations.R")
 
 source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Alor.TechReport.SigTest.2019.R")
@@ -50,7 +52,7 @@ Alor.statusplot.sigpos <-
 
 # ---- 1.3 Define Alor-specific plot labels, with significance asterisks ----
 
-Alor.trendplot.monitoryear.labs <- (define.year.monitoryear.column(Alor.AnnexContData.Techreport.PLOTFORMAT))
+Alor.trendplot.monitoryear.labs <- rev(define.year.monitoryear.column(Alor.AnnexContData.Techreport.PLOTFORMAT))
 Alor.annexplot.monitoryear.labs <- (define.year.monitoryear.column(Alor.AnnexContData.Techreport.PLOTFORMAT))
 
 Alor.conttrendplot.ylabs <- 
@@ -72,14 +74,13 @@ Alor.trendplot.labs <- list(FS=labs(y=as.character(Alor.conttrendplot.ylabs["FSM
                                         x="Monitoring Year"),
                             Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
                             Religion=labs(y="Religion (% households)",x="Monitoring Year"),
-                            PrimaryOcc=labs(y=as.character(Alor.proptrendplot.ylabs["PrimaryOcc"]),x="Monitoring Year"),
-                            FreqFish=labs(y=as.character(Alor.proptrendplot.ylabs["FreqFish"]),x="Monitoring Year"),
-                            FreqSellFish=labs(y=as.character(Alor.proptrendplot.ylabs["SellFish"]),x="Monitoring Year"),
-                            IncFish=labs(y=as.character(Alor.proptrendplot.ylabs["IncFish"]),x="Monitoring Year"),
-                            FishTech=labs(y=as.character(Alor.proptrendplot.ylabs["FishTech"]),x="Monitoring Year"),
-                            ChildFS=labs(y=as.character(Alor.proptrendplot.ylabs["childFS"]),x="Monitoring Year"),
-                            Protein=labs(y=as.character(Alor.proptrendplot.ylabs["Protein"]),x="Monitoring Year"))
-
+                            PrimaryOcc=labs(y=as.character(Alor.proptrendplot.ylabs["Primary occupation (% households)"]),x="Monitoring Year"),
+                            FreqFish=labs(y=as.character(Alor.proptrendplot.ylabs["Frequency of fishing (% households)"]),x="Monitoring Year"),
+                            FreqSellFish=labs(y=as.character(Alor.proptrendplot.ylabs["Frequency of selling at least some catch (% households)"]),x="Monitoring Year"),
+                            IncFish=labs(y=as.character(Alor.proptrendplot.ylabs["Income from fishing in past 6 months (% households)"]),x="Monitoring Year"),
+                            FishTech=labs(y=as.character(Alor.proptrendplot.ylabs["Fishing technique most often used in past 6 months (% households)"]),x="Monitoring Year"),
+                            ChildFS=labs(y=as.character(Alor.proptrendplot.ylabs["Child hunger (% households)"]),x="Monitoring Year"),
+                            Protein=labs(y=as.character(Alor.proptrendplot.ylabs["Dietary protein from fish in past 6 months (% households)"]),x="Monitoring Year"))
 Alor.annexplot.settnames <- 
   define.annexplot.settname.labels(annex.sigvals.Alor)
 
@@ -1086,7 +1087,7 @@ Alor.fs.trendplot <-
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,6.06)) +
-  scale_x_discrete(labels=Alor.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
   coord_flip() + Alor.trendplot.labs["FS"] + theme(axis.ticks=element_blank(),
                                                    panel.background=element_rect(fill="white",
                                                                                  colour="#909090"),
@@ -1124,7 +1125,7 @@ Alor.ma.trendplot <-
                      limits=c(0,max(Alor.TrendContData.Techreport.PLOTFORMAT$MAMean,na.rm=T)+
                                 max(Alor.TrendContData.Techreport.PLOTFORMAT$MAErr,na.rm=T)+
                                 0.03*max(Alor.TrendContData.Techreport.PLOTFORMAT$MAMean,na.rm=T))) +
-  scale_x_discrete(labels=Alor.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
   coord_flip() + Alor.trendplot.labs["MA"] + plot.theme
 Alor.ma.trendplot
 
@@ -1146,7 +1147,7 @@ Alor.pa.trendplot <-
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,5)) +
-  scale_x_discrete(labels=Alor.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
   coord_flip() + Alor.trendplot.labs["PA"] + plot.theme
 Alor.pa.trendplot
 
@@ -1168,7 +1169,7 @@ Alor.mt.trendplot <-
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,5)) +
-  scale_x_discrete(labels=Alor.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
   coord_flip() + Alor.trendplot.labs["MT"] + plot.theme
 Alor.mt.trendplot
 
@@ -1191,7 +1192,7 @@ Alor.se.trendplot <-
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format(),
                      limits=c(0,1)) +
-  scale_x_discrete(labels=Alor.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
   coord_flip() + Alor.trendplot.labs["SE"] + plot.theme
 Alor.se.trendplot
 
@@ -1500,7 +1501,7 @@ Alor.fs.annexplot <-
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.3,0.6,1),
-                     labels=(Alor.annexplot.monitoryear.labs),
+                     labels=(Alor.trendplot.monitoryear.labs),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
@@ -1555,7 +1556,7 @@ Alor.ma.annexplot <-
              colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.3,0.6,1),
-                     labels=Alor.annexplot.monitoryear.labs,
+                     labels=Alor.trendplot.monitoryear.labs,
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
@@ -1599,7 +1600,7 @@ Alor.pa.annexplot <-
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
-  scale_x_discrete(labels=Alor.annexplot.settnames[,"PA"]) +
+  scale_x_discrete(labels=Alor.trendplot.settnames[,"PA"]) +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,5)) +
   coord_flip() + Statusplot.labs["PA"] + plot.guides.techreport + plot.theme
@@ -1632,7 +1633,7 @@ Alor.mt.annexplot <-
              colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.3,0.6,1),
-                     labels=Alor.annexplot.monitoryear.labs,
+                     labels=Alor.trendplot.monitoryear.labs,
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
@@ -1669,7 +1670,7 @@ Alor.se.annexplot <-
              colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.3,0.6,1),
-                     labels=Alor.annexplot.monitoryear.labs,
+                     labels=Alor.trendplot.monitoryear.labs,
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
@@ -1705,7 +1706,7 @@ Alor.time.annexplot <-
              colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.3,0.6,1),
-                     labels=Alor.annexplot.monitoryear.labs,
+                     labels=Alor.trendplot.monitoryear.labs,
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
@@ -1744,7 +1745,7 @@ Alor.unwell.annexplot <-
              colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.3,0.6,1),
-                     labels=Alor.annexplot.monitoryear.labs,
+                     labels=Alor.trendplot.monitoryear.labs,
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
