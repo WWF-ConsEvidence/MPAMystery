@@ -332,7 +332,7 @@ writeData(wb,"KII_habRULES",rbind.data.frame(Alor_KII_habrules,Flotim_KII_habrul
 writeData(wb,"KII_RIGHTS",rbind.data.frame(Alor_KII_Rights,Flotim_KII_Rights))
 writeData(wb,"KII_ORG",rbind.data.frame(Alor_KII_Org,Flotim_KII_Org))
 
-saveWorkbook(wb,'C:/Users/HP/Dropbox/this one/MyWork/READYTOMERGEE.xlsx')
+saveWorkbook(wb,'C:/Users/HP/Dropbox/this one/MyWork/READYTOMERGE.xlsx')
 
 
 
