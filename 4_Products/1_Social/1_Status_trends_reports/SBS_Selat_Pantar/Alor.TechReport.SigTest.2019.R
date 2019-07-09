@@ -566,7 +566,7 @@ colnames(trend.non.parametric.test.bySett.Alor) <- colnames(sigvals.Alor)
 #   there [is/is not] a significant difference in this variable across the settlement)
 annex.sigvals.Alor <- 
   rbind.data.frame(cbind.data.frame(SettlementName=c("Alor MPA"),trend.non.parametric.test.byMPA.Alor["sl",]),
-                   cbind.data.frame(SettlementName=c("Control\n Settlements"),trend.non.parametric.test.byControl.Alor["sl",]),
+                   cbind.data.frame(SettlementName=c("Control Settlements"),trend.non.parametric.test.byControl.Alor["sl",]),
                    null.row.sigvals.Alor,
                    trend.non.parametric.test.bySett.Alor[rev(order(trend.non.parametric.test.bySett.Alor$SettlementName)),])
 

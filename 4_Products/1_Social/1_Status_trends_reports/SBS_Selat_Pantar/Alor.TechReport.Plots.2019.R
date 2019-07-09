@@ -52,8 +52,8 @@ Alor.statusplot.sigpos <-
 
 # ---- 1.3 Define Alor-specific plot labels, with significance asterisks ----
 
-Alor.trendplot.monitoryear.labs <- rev(define.year.monitoryear.column(Alor.AnnexContData.Techreport.PLOTFORMAT))
-Alor.annexplot.monitoryear.labs <- (define.year.monitoryear.column(Alor.AnnexContData.Techreport.PLOTFORMAT))
+Alor.trendplot.monitoryear.labs <- (define.year.monitoryear.column(Alor.AnnexContData.Techreport.PLOTFORMAT))
+Alor.annexplot.monitoryear.labs <- rev(define.year.monitoryear.column(Alor.AnnexContData.Techreport.PLOTFORMAT))
 
 Alor.conttrendplot.ylabs <- 
   define.conttrendplot.ylabels.withasterisks(Alor.TrendContData.Techreport.PLOTFORMAT
@@ -115,7 +115,8 @@ Alor.age.gender.3Year <-
                     labels=c("Female","Male"),
                     values=c("Female.3Year"=alpha("#7FCDBB",0.95),
                              "Male.3Year"=alpha("#253494",0.95)))+ 
-  coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="2017 Population distribution (% of individuals by gender)")
+  coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="2017 Population distribution (% of individuals by gender)")+
+  theme(legend.position="none")
 Alor.age.gender.3Year
 
 # ---- 2.2 Baseline ----
@@ -136,7 +137,8 @@ Alor.age.gender.Baseline <-
                     labels=c("Female","Male"),
                     values=c("Female.Baseline"=alpha("#7FCDBB",0.95),
                              "Male.Baseline"=alpha("#253494",0.95)))+ 
-  coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="2014 Population distribution (% of individuals by gender)")
+  coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="2014 Population distribution (% of individuals by gender)")+
+  theme(legend.position="none")
 Alor.age.gender.Baseline
 
 Alor.agegender.legend.plot <-
@@ -1249,7 +1251,7 @@ Alor.unwell.trendplot
 Alor.gender.trendplot <- 
   melt(Alor.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="MonitoringYear",measure.vars=c("HHH.female","HHH.male")) %>%
-  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
            width=0.65,
@@ -1268,7 +1270,7 @@ Alor.gender.trendplot
 Alor.religion.trendplot <- 
   melt(Alor.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="MonitoringYear",measure.vars=c("Percent.Rel.Other","Percent.Rel.Muslim","Percent.Rel.Christian")) %>%
-  ggplot(aes(x=MonitoringYear,
+  ggplot(aes(x=rev(MonitoringYear),
              y=value)) +
   geom_bar(aes(fill=variable),
            stat="identity",
@@ -1303,7 +1305,7 @@ Alor.primaryocc.trendplot <-
        id.vars="MonitoringYear",measure.vars=c("Percent.PrimaryOcc.Other","Percent.PrimaryOcc.WageLabor",
                                                "Percent.PrimaryOcc.Tourism","Percent.PrimaryOcc.Fish",
                                                "Percent.PrimaryOcc.HarvestForest","Percent.PrimaryOcc.Farm")) %>%
-  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
            width=0.65,
@@ -1325,7 +1327,7 @@ Alor.freqfish.trendplot <-
        id.vars="MonitoringYear",measure.vars=c("Prop.Fish.MoreFewTimesWk","Prop.Fish.FewTimesPerWk",
                                                "Prop.Fish.FewTimesPerMo","Prop.Fish.FewTimesPer6Mo",
                                                "Prop.Fish.AlmostNever")) %>%
-  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
            width=0.65,
@@ -1348,7 +1350,7 @@ Alor.freqsellfish.trendplot <-
        id.vars="MonitoringYear",measure.vars=c("Prop.SellFish.MoreFewTimesWk","Prop.SellFish.FewTimesPerWk",
                                                "Prop.SellFish.FewTimesPerMo","Prop.SellFish.FewTimesPer6Mo",
                                                "Prop.SellFish.AlmostNever")) %>%
-  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
            width=0.65,
@@ -1371,7 +1373,7 @@ Alor.incfish.trendplot <-
        id.vars="MonitoringYear",measure.vars=c("Prop.IncFish.All","Prop.IncFish.Most",
                                                "Prop.IncFish.Half","Prop.IncFish.Some",
                                                "Prop.IncFish.None")) %>%
-  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
            width=0.65,
@@ -1392,7 +1394,7 @@ Alor.fishtech.trendplot <-
        id.vars="MonitoringYear",measure.vars=c("Prop.FishTech.MobileLine","Prop.FishTech.StatLine",
                                                "Prop.FishTech.MobileNet","Prop.FishTech.StatNet",
                                                "Prop.FishTech.ByHand")) %>%
-  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
            width=0.65,
@@ -1412,7 +1414,7 @@ Alor.fishtech.trendplot
 Alor.childfs.trendplot <- 
   melt(Alor.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="MonitoringYear",measure.vars=c("Child.FS.yes","Child.FS.no")) %>%
-  ggplot(aes(x=MonitoringYear,
+  ggplot(aes(x=rev(MonitoringYear),
              y=value)) +
   geom_bar(aes(fill=variable),
            stat="identity",
@@ -1435,7 +1437,7 @@ Alor.proteinfish.trendplot <-
        id.vars="MonitoringYear",measure.vars=c("ProteinFish.All","ProteinFish.Most",
                                                "ProteinFish.Half","ProteinFish.Some",
                                                "ProteinFish.None")) %>%
-  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
            width=0.65,
@@ -1596,11 +1598,11 @@ Alor.pa.annexplot <-
              colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.3,0.6,1),
-                     labels=Alor.annexplot.monitoryear.labs,
+                     labels=Alor.trendplot.monitoryear.labs,
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
-  scale_x_discrete(labels=Alor.trendplot.settnames[,"PA"]) +
+  scale_x_discrete(labels=Alor.annexplot.settnames[,"PA"]) +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,5)) +
   coord_flip() + Statusplot.labs["PA"] + plot.guides.techreport + plot.theme
@@ -1766,10 +1768,10 @@ Alor.unwell.annexplot
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-dir.create(paste("C:/Users/bauer-intern/Dropbox/MPAMystery/Products",
+dir.create(paste("C:/Users/HP/Dropbox/AlorProducts",
                  format(Sys.Date(),format="%Y_%m_%d"),sep="_"))
 
-FigureFileName <- paste("C:/Users/bauer-intern/Dropbox/MPAMystery/Products",
+FigureFileName <- paste("C:/Users/HP/Dropbox/AlorProducts",
                         format(Sys.Date(),format="%Y_%m_%d"),sep="_")
 
 png(paste(FigureFileName,"FS.trend.png",sep="/"),
@@ -1780,6 +1782,11 @@ dev.off()
 png(paste(FigureFileName,"FS.annex.png",sep="/"),
     units="in",height=7.5,width=7.5,res=400)
 plot(Alor.fs.annexplot)
+dev.off()
+
+png(paste(FigureFileName,"FS.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Alor.fs.statusplot)
 dev.off()
 
 
@@ -2015,7 +2022,6 @@ png(paste(FigureFileName,"Age.gender.png",sep="/"),
 grid.newpage()
 grid.draw(Alor.age.gender.plot)
 dev.off()
-
 
 # ---- 6.18 Number ethnic groups ----
 

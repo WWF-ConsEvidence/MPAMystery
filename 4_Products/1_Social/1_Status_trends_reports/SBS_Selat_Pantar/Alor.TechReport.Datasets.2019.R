@@ -82,7 +82,7 @@ Alor.AgeGender <-
 
 Alor.level.PropData.status <- 
   rbind.data.frame(data.frame(MonitoringYear="3 Year Post",
-                              SettlementName="Control\nSettlements",
+                              SettlementName="Control Settlements",
                               Techreport.ByMPA.control[Techreport.ByMPA.control$MPAID==15 &
                                                          Techreport.ByMPA.control$MonitoringYear=="3 Year Post",c("HHH.female", "HHH.male", "Percent.Rel.Christian", "Percent.Rel.Muslim", 
                                                                                                                   "Percent.Rel.Other", "Percent.PrimaryOcc.Fish", "Percent.PrimaryOcc.Farm", 
@@ -129,7 +129,7 @@ null.row.PropData <-
 
 
 Alor.level.ContData.status <- 
-  rbind.data.frame(cbind.data.frame(MonitoringYear="3 Year Post",SettlementID=0,SettlementName="Control\nSettlements",
+  rbind.data.frame(cbind.data.frame(MonitoringYear="3 Year Post",SettlementID=0,SettlementName="Control Settlements",
                                     BigFive.ControlGroup[BigFive.ControlGroup$MPAID==15,c("FSMean", "FSErr", "MAMean", "MAErr", "PAMean", "PAErr", "SEMean", "SEErr")],
                                     Techreport.ByMPA.control[Techreport.ByMPA.control$MPAID==15,c("TimeMarketMean","TimeMarketErr")],
                                     Days.unwell.Alor.control[,c("UnwellMean","UnwellErr")]),
@@ -139,7 +139,7 @@ Alor.level.ContData.status <-
                                     Days.unwell.Alor.ByMPA[Days.unwell.Alor.ByMPA$MonitoringYear=="3 Year Post",c("UnwellMean","UnwellErr")]))
 
 Alor.level.ContData.annex <- 
-  cbind.data.frame(MonitoringYear=c("Baseline","3 Year Post"),
+  cbind.data.frame(MonitoringYear=c("3 Year Post","Baseline"),
                    SettlementID=0,SettlementName="MPA",
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==15,3:8],
                    BigFive.MPAGroup[BigFive.MPAGroup$MPAID==15,11:12],
@@ -147,7 +147,7 @@ Alor.level.ContData.annex <-
                    Days.unwell.Alor.ByMPA[,c("UnwellMean","UnwellErr")])
 
 Alor.level.ContData.control.annex <- 
-  cbind.data.frame(SettlementName="Control\nSettlements", SettlementID=0, MonitoringYear=c("Baseline","3 Year Post"),
+  cbind.data.frame(SettlementName="Control Settlements", SettlementID=0, MonitoringYear=c("3 Year Post","Baseline"),
                    Techreport.ByMPA.control.annex[Techreport.ByMPA.control.annex$MPAID==15,50:57],
                    Techreport.ByMPA.control.annex[Techreport.ByMPA.control.annex$MPAID==15,60:63])
 
@@ -343,7 +343,7 @@ Alor.AnnexContData.Techreport <-
 
 Alor.AnnexContData.Techreport$MonitoringYear <- 
  factor(Alor.AnnexContData.Techreport$MonitoringYear,
-        levels=c("Baseline","3 Year Post"),ordered=T)
+        levels=c("3 Year Post","Baseline"),ordered=T)
 
 Alor.AnnexContData.Techreport <- 
  Alor.AnnexContData.Techreport[rev(order(Alor.AnnexContData.Techreport$SettlementName,

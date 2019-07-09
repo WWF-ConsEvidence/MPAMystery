@@ -118,7 +118,8 @@ Flotim.age.gender.3Year <-
                     labels=c("Female","Male"),
                     values=c("Female.3Year"=alpha("#7FCDBB",0.95),
                              "Male.3Year"=alpha("#253494",0.95)))+ 
-  coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="2017 Population distribution (% of individuals by gender)")
+  coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="2017 Population distribution (% of individuals by gender)")+
+  theme(legend.position="none")
 Flotim.age.gender.3Year
 
 # ---- 2.2 Baseline ----
@@ -139,7 +140,9 @@ Flotim.age.gender.Baseline <-
                     labels=c("Female","Male"),
                     values=c("Female.Baseline"=alpha("#7FCDBB",0.95),
                              "Male.Baseline"=alpha("#253494",0.95)))+ 
-  coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="2014 Population distribution (% of individuals by gender)")
+  coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="2014 Population distribution (% of individuals by gender)")+
+  theme(legend.position="none")
+
 Flotim.age.gender.Baseline
 
 Flotim.agegender.legend.plot <-
