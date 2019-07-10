@@ -6,6 +6,7 @@ library(dplyr)
 library(plyr)
 library(openxlsx)
 library(chron)
+library(lubridate)
 
 Alor_FGD_Habitats <- read.csv("FGD_Habitats.csv")
 Alor_FGD_MPA <- read.csv("FGD_MPA.csv")
@@ -206,7 +207,7 @@ Flotim_FGD_MPA <- Flotim_FGD_MPA %>%
   plyr::rename(c("TraditionalGov"="TraditionalGovernance","FGroundTime..minute."="FGroundTime",
                  "FGroundDist..kilometer."="FGroundDist","FGroundSize..kilometer.square."="FGroundSize")) %>%
   .[order(.$FGDID,.$FGDCode),] %>%
-  mutate(DAY=Date,Date=paste0(Num,"/",DAY,"/",YEAR),
+  mutate(DAY=Date,Date=paste0(Num,"/",DAY,"/",YEAR), MONTH=Num,
     Npenalty=NA, VerbalSanction=NA, PhysicalSanction=NA,MonetarySanction=NA,
          FGDID=seq(max(Alor_FGD_MPA$FGDID)+1,max(Alor_FGD_MPA$FGDID)+length(FGDID),by=1)) %>%
   select(FGDID,CountryCode,SiteCode,SettlementCode,FGDCode,FacilitatorCode,NotetakerCode,
@@ -271,10 +272,15 @@ Flotim_FGD_Users <- Flotim_FGD_Users %>%
          MonitorSoc,MonitorCompliance,EnforceFreq,ContributionRank,BenefitRank) %>%
   filter(USERID < 1665)
 
+Month.to.number <- data.frame(Num=c(10,11,11,11,12,1),
+                              "INTERVIEW.MONTH"=c("Oktober","November","Nopember","nopember","Desember","Januari"))
+
+Flotim_KII_MPA <- left_join(Flotim_KII_MPA,Month.to.number,by="INTERVIEW.MONTH")
+
 Flotim_KII_MPA <- Flotim_KII_MPA %>%
   plyr::rename(c("KII_Field_Code"="KIICode","INTERVIEW.MONTH"="INTERVIEW MONTH","INTERVIEW.YEAR"="INTERVIEW YEAR")) %>%
   .[order(.$KII_ID),] %>%
-  mutate(`INTERVIEW DATE`=NA, 
+  mutate(`INTERVIEW DATE`=day(mdy(InterviewDate)), `INTERVIEW MONTH`=Num, 
          KII_ID=seq(max(Alor_KII_MPA$KII_ID)+1,max(Alor_KII_MPA$KII_ID)+length(KII_ID),by=1)) %>%
   select(KII_ID,CountryCode,SiteCode,SettlementCode,KIICode,RefFGDCode,InformantName,KeyInformantRole,
          InterviewerCode,NotetakerCode,InterviewDate,`INTERVIEW DATE`,`INTERVIEW MONTH`,`INTERVIEW YEAR`,
