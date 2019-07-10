@@ -48,10 +48,17 @@ Max_ID_per_table_master <- data.frame(FGD_MPA=230,
 
 # ---- 2.1 ALOR: plyr::rename and add new IDs----
 
+Month.to.number <- data.frame(Num=c(10,11,11,11,12,1),
+                  "MONTH"=c("Oktober","November","Nopember","nopember","Desember","Januari"))
+
+Alor_FGD_MPA <- left_join(Alor_FGD_MPA,Month.to.number,by="MONTH")
+
 Alor_FGD_MPA <- Alor_FGD_MPA %>%
   plyr::rename(c("TraditionalGov"="TraditionalGovernance")) %>%
   .[order(.$FGDID),] %>%
   mutate(Npenalty=NA, VerbalSanction=NA, PhysicalSanction=NA,MonetarySanction=NA,
+         DAY=Date, MONTH=Num,
+         Date=paste0(Num,"/",Date,"/",YEAR),
          FGDID=seq(Max_ID_per_table_master$FGD_MPA+1,Max_ID_per_table_master$FGD_MPA+length(FGDID),by=1)) %>%
   select(FGDID,CountryCode,SiteCode,SettlementCode,FGDCode,FacilitatorCode,NotetakerCode,
          Date,DAY,MONTH,YEAR,StartTime,EndTime,MaleParticipants,FemaleParticipants,
@@ -112,10 +119,17 @@ Alor_FGD_Users <- Alor_FGD_Users %>%
          IntBnd,ParticipateEstablish,ParticipateBoundaries,ParticipateAdmin,ParticipateRules,MonitorEco,
          MonitorSoc,MonitorCompliance,EnforceFreq,ContributionRank,BenefitRank)
 
+Month.to.number <- data.frame(Num=c(10,11,11,11,12,1),
+                              'INTERVIEW.MONTH'=c("Oktober","November","Nopember","nopember","Desember","Januari"))
+
+Alor_KII_MPA <- left_join(Alor_KII_MPA,Month.to.number,by='INTERVIEW.MONTH')
+
 Alor_KII_MPA <- Alor_KII_MPA %>%
   plyr::rename(c("KII_Field_Code"="KIICode","INTERVIEW.MONTH"="INTERVIEW MONTH","INTERVIEW.YEAR"="INTERVIEW YEAR")) %>%
   .[order(.$KII_ID),] %>%
-  mutate(`INTERVIEW DATE`=NA,
+  mutate('INTERVIEW DATE'= InterviewDate,
+        InterviewDate= paste0(Num,"/",InterviewDate,"/",`INTERVIEW YEAR`),
+        'INTERVIEW MONTH'=Num,
          KII_ID=seq(Max_ID_per_table_master$KII_MPA+1,Max_ID_per_table_master$KII_MPA+length(KII_ID),by=1)) %>%
   select(KII_ID,CountryCode,SiteCode,SettlementCode,KIICode,RefFGDCode,InformantName,KeyInformantRole,
          InterviewerCode,NotetakerCode,InterviewDate,`INTERVIEW DATE`,`INTERVIEW MONTH`,`INTERVIEW YEAR`,
@@ -182,11 +196,18 @@ Alor_KII_Zones <- Alor_KII_Zones %>%
 
 # ---- 2.2 FLOTIM: plyr::rename and add new IDs----
 
+Month.to.number <- data.frame(Num=c(10,11,11,11,12,1),
+                              "MONTH"=c("Oktober","November","Nopember","nopember","Desember","Januari"))
+
+Flotim_FGD_MPA <- left_join(Flotim_FGD_MPA,Month.to.number,by="MONTH")
+
+
 Flotim_FGD_MPA <- Flotim_FGD_MPA %>%
   plyr::rename(c("TraditionalGov"="TraditionalGovernance","FGroundTime..minute."="FGroundTime",
                  "FGroundDist..kilometer."="FGroundDist","FGroundSize..kilometer.square."="FGroundSize")) %>%
   .[order(.$FGDID,.$FGDCode),] %>%
-  mutate(Npenalty=NA, VerbalSanction=NA, PhysicalSanction=NA,MonetarySanction=NA,
+  mutate(DAY=Date,Date=paste0(Num,"/",DAY,"/",YEAR),
+    Npenalty=NA, VerbalSanction=NA, PhysicalSanction=NA,MonetarySanction=NA,
          FGDID=seq(max(Alor_FGD_MPA$FGDID)+1,max(Alor_FGD_MPA$FGDID)+length(FGDID),by=1)) %>%
   select(FGDID,CountryCode,SiteCode,SettlementCode,FGDCode,FacilitatorCode,NotetakerCode,
          Date,DAY,MONTH,YEAR,StartTime,EndTime,MaleParticipants,FemaleParticipants,
