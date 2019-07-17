@@ -39,7 +39,7 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 
-pacman::p_load(plyr,dplyr,reshape2,ggplot2)
+pacman::p_load(plyr,tidyverse)
 
 # ---- 1.1 Import data ----
 
