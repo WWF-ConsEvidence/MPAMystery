@@ -1,13 +1,13 @@
-
-
-pacman::p_load(stargazer,lme4)
-
+#.libPaths()
+#.libPaths("C:/Users/Duong Le/Documents/R/R-3.6.0/library")
+library(lfe)
+library(Matrix)
+library(stargazer)
 
 ##Code Difference-in-difference Analysis for social impacts of BHS/SBS MPAs 
 
 source('R:/Gill/DLe/MPAMystery/2_Functions/2_Analysis/Function_process_covariates.R')
 mpa.nam <- rio::import("x_Flat_data_files/1_Social/Inputs/HH_tbl_MPA.xlsx")
-outputdir <- "4_Products/"
 
 
 # --- DiD specification 
@@ -22,7 +22,7 @@ DiD.data <- match.covariate %>%
          InterviewYear=as.factor(InterviewYear)) %>% 
   filter(!is.na(IndividualGender))
 
-summary(DiD.data)
+#summary(DiD.data)
 
 pscore <- glm(Treatment ~ TimeMarket + n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge,
               data=DiD.data)$fitted.values
@@ -35,6 +35,24 @@ DiD.data <- cbind(DiD.data,pscore)
 #write.dta(IndDemos, "D:/Dropbox/Indonesia MPA/data/IndDemos.dta")
 #write.dta(education.lkp1, "D:/Dropbox/Indonesia MPA/data/Educ_lookup.dta")
 #write.dta(ethnic.lkp1, "D:/Dropbox/Indonesia MPA/data/Ethnic_lookup.dta")
+
+
+
+###############
+###############using lfe (felm) for high dimensional FE DiD (similar to reghdfe)
+
+###1. 
+DiD.felm.FS <- felm(FSIndex ~ Treatment + yearsPostF + Treatment:yearsPostF + TimeMarket + n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge
+                                | InterviewYear + MPAID:InterviewYear| 0 | SettlementID, 
+                    data=DiD.data,exactDOF = TRUE)
+
+summary(DiD.felm.FS)
+stargazer(DiD.felm.FS, out = "R:/Gill/DLe/MPAMystery/4_Products/1_Social/DiD.felm.FSaaaaaaa.html")
+
+
+
+
+
 
 
 
@@ -70,6 +88,10 @@ DiD.glm.PA <- glm(PAIndex~ TreatFactor + yearsPostF + TreatFactor:yearsPostF + p
                   data=DiD.data)
 summary(DiD.glm.PA)
 stargazer(DiD.glm.FS,DiD.glm.MA,DiD.glm.SE,DiD.glm.MT,DiD.glm.PA, out = "R:/Gill/DLe/MPAMystery/4_Products/1_Social/DiD.glm-MPA.html")
+
+
+
+
 
 # ----------------------Produce plots for 5 indexes
 ####food security
@@ -238,3 +260,5 @@ glsfit <- gls(FSIndex~ TreatFactor + yearsPostF + TreatFactor:yearsPostF + pscor
               na.action=na.omit,data=DiD.data, method = "REML")
 anova(glsfit, nlmefit)
 summary(nlmefit)
+
+
