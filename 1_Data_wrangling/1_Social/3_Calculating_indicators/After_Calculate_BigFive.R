@@ -9,6 +9,8 @@
 source("C:/Users/HP/Dropbox/NotThisOne/Source_social_data_flat_files.R")
 source("C:/Users/HP/Dropbox/NotThisOne/Calculate_BigFive.R")
 
+library(reldist)
+
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -32,12 +34,14 @@ HHData$cat.cFS <- ifelse(HHData$cFS>=6.9,"Evidence",
                       ifelse(HHData$cFS<6.9,"No or insufficient evidence",NA))
 
 #Assignig the MPAID's to their respective MPA name, then joining that with the HHData table
-MPANames <- data.frame(MPAID=c(15:19),
-                       MPAName=c("Alor","Flotim","Kei","Koon","Yamdena"))
+MPANames <- data.frame(MPAID=c(1:6,15:19),
+                       MPAName=c("Mayalibit","TNTC","Kaimana","Kofiau","Dampier","Misool","Alor","Flotim","Kei","Koon","Yamdena"))
 
 HHData <- left_join(HHData,
                       MPANames,
                       by="MPAID")
+
+AllData <- HHData
 
 #Subsetting table to just include the household heads, removing NA's in the relation to household head column
 HHData <- right_join(HHData,IndDemos[IndDemos$RelationHHH==0 &
@@ -58,7 +62,7 @@ HHData$HHsize <- sapply(HHData$HouseholdID,
 #Creating the variable Unwell, that is the average days unwell, on a household basis
 HHData<- left_join(HHData,(IndDemos %>%
   group_by(HouseholdID) %>% 
-  mutate(Unwell=sum(DaysUnwell,na.rm=T)/length(HouseholdID))))
+  mutate(DaysUnwell=sum(DaysUnwell,na.rm=T)/length(HouseholdID))))
 
 # ---- 1.2 Settlement-level analysis, for status and annex plots ----
 
@@ -68,8 +72,7 @@ HHData<- left_join(HHData,(IndDemos %>%
 
 Techreport.Status.BySett <- 
   HHData %>%
-  filter(Treatment==1) %>%
-  group_by(SettlementID,MonitoringYear) %>%
+  group_by(SettlementID,MonitoringYear,Treatment) %>%
   summarise(MPAID=unique(MPAID),
             SettlementName=unique(SettlementName),
             YrResident=mean(YrResident,na.rm=T),
@@ -141,8 +144,8 @@ Techreport.Status.BySett <-
             ProteinFish.All=(length(PercentProteinFish[PercentProteinFish==5 &
                                                          !is.na(PercentProteinFish)])/length(PercentProteinFish[!is.na(PercentProteinFish)]))*100,
             SERate=mean(SERate,na.rm=T),
-            UnwellMean=mean(Unwell,na.rm=T),
-            UnwellErr=sd(Unwell,na.rm=T)/sqrt(length(Unwell)),
+            UnwellMean=mean(DaysUnwell,na.rm=T),
+            UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)),
             TimeMarketMean=mean(TimeMarket,na.rm=T),
             TimeMarketErr=sd(TimeMarket,na.rm=T)/sqrt(length(TimeMarket)),
             Percent.Increased.SocConflict=(length(SocialConflict[(SocialConflict==1 | SocialConflict==2) &
@@ -173,8 +176,7 @@ Techreport.Status.BySett <- Techreport.Status.BySett[!is.na(Techreport.Status.By
 
 Techreport.Trend.ByMPA <- 
   HHData %>%
-  filter(Treatment==1) %>%
-  group_by(MPAID,MonitoringYear) %>%
+  group_by(MPAID,MonitoringYear,Treatment) %>%
   summarise(YrResident=mean(YrResident,na.rm=T),
         HHH.female=(length(IndividualGender[IndividualGender==0 &
                                                   !is.na(IndividualGender)])/length(IndividualGender[!is.na(IndividualGender)]))*100,
@@ -244,8 +246,8 @@ Techreport.Trend.ByMPA <-
             ProteinFish.All=(length(PercentProteinFish[PercentProteinFish==5 &
                                                          !is.na(PercentProteinFish)])/length(PercentProteinFish[!is.na(PercentProteinFish)]))*100, 
             SERate=mean(SERate,na.rm=T),
-            UnwellMean=mean(Unwell,na.rm=T),
-            UnwellErr=sd(Unwell,na.rm=T)/sqrt(length(Unwell)),
+            UnwellMean=mean(DaysUnwell,na.rm=T),
+            UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)),
             TimeMarketMean=mean(TimeMarket,na.rm=T),
             TimeMarketErr=sd(TimeMarket,na.rm=T)/sqrt(length(TimeMarket)),
             Percent.Increased.SocConflict=(length(SocialConflict[(SocialConflict==1 | SocialConflict==2) &
@@ -263,8 +265,7 @@ Techreport.Trend.ByMPA <-
             MAIndex=mean(MAIndex,na.rm=T),
             Percent.FoodSecure=(length(HouseholdID[FSIndex>=4.02 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
             Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex>=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
-            Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100
-)
+            Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100)
 
 Techreport.Trend.ByMPA <- Techreport.Trend.ByMPA[!is.na(Techreport.Trend.ByMPA$MPAID),]
 
@@ -273,11 +274,11 @@ Techreport.Trend.ByMPA <- Techreport.Trend.ByMPA[!is.na(Techreport.Trend.ByMPA$M
 #Techreport.ByMPA.control is a dataframe that calculates the percent of respondents in the control 
 #settlements for each MPA, for each monitoring year, that gave each response for the proportional data and 
 #also calculates the mean and error terms for a few variables
-
 Techreport.ByMPA.control <- HHData %>%
   filter(Treatment==0) %>%
   group_by(MPAID,MonitoringYear) %>%
-                        summarise(YrResident=mean(YrResident,na.rm=T),
+                        summarise(
+                          YrResident=mean(YrResident,na.rm=T),
                                   HHH.female=(length(IndividualGender[IndividualGender==0 &
                                                                             !is.na(IndividualGender)])/length(IndividualGender[!is.na(IndividualGender)]))*100,
                                       HHH.male=(length(IndividualGender[IndividualGender==1 &
@@ -346,8 +347,8 @@ Techreport.ByMPA.control <- HHData %>%
                                       ProteinFish.All=(length(PercentProteinFish[PercentProteinFish==5 &
                                                                                    !is.na(PercentProteinFish)])/length(PercentProteinFish[!is.na(PercentProteinFish)]))*100,
                                       SERate=mean(SERate,na.rm=T),
-                                  UnwellMean=mean(Unwell,na.rm=T),
-                                  UnwellErr=sd(Unwell,na.rm=T)/sqrt(length(Unwell)),
+                                  UnwellMean=mean(DaysUnwell,na.rm=T),
+                                  UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)),
                                       TimeMarketMean=mean(TimeMarket,na.rm=T),
                                       TimeMarketErr=sd(TimeMarket,na.rm=T)/sqrt(length(TimeMarket)),
                                   Percent.Increased.SocConflict=(length(SocialConflict[(SocialConflict==1 | SocialConflict==2) &
@@ -365,7 +366,7 @@ Techreport.ByMPA.control <- HHData %>%
                                   MAIndex=mean(MAIndex,na.rm=T),
                                   Percent.FoodSecure=(length(HouseholdID[FSIndex>=4.02 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
                                   Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex>=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
-                                  Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100))
+                                  Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100)
 
 Techreport.ByMPA.control <- Techreport.ByMPA.control[!is.na(Techreport.ByMPA.control$MPAID),]
 
@@ -391,28 +392,33 @@ Techreport.ByMPA.control <-left_join(Techreport.ByMPA.control,BigFive.ControlGro
 
 # ----  2.1 Calculating Age and Gender breakdown by MPA, settlement, and treatment ----
 
+AgeGenderDemos <- left_join(AllData[,c("HouseholdID", "MPAID", "SettlementID", "MonitoringYear", "MPAName", "SettlementName","Treatment")],
+                            IndDemos[,c("HouseholdID", "IndividualGender", "IndividualAge")])
+
+
 AgeGender.AvgAge.byMPA <-
-  HHData %>%
+  AgeGenderDemos %>%
   filter(Treatment==1)%>%
   group_by(MPAID,MonitoringYear) %>%
   summarise(AvgAge=mean(IndividualAge,na.rm=T))
 
 AgeGender.AvgAge.bySett <-
-  HHData %>%
+  AgeGenderDemos %>%
   filter(Treatment==1) %>%
   group_by(SettlementName,MPAID,MonitoringYear) %>%
   summarise(AvgAge=mean(IndividualAge,na.rm=T))
 
 AgeGender.AvgAge.control <-
-  HHData %>%
+  AgeGenderDemos %>%
   filter(Treatment==0) %>%
   group_by(MPAID,MonitoringYear) %>%
   summarise(AvgAge=mean(IndividualAge,na.rm=T))
 
+
+
 #Determining the percent of individuals of each gender that fall within each of our age categories
 AgeGenderDemos.ByMPA <- 
-  HHData %>%
-  filter(Treatment==1) %>%
+  AgeGenderDemos[AgeGenderDemos$Treatment==1,] %>%
   group_by(MPAID,MonitoringYear) %>%
   summarise(Male.0.4=(length(IndividualAge[IndividualAge<=4 &
                                              !is.na(IndividualAge) &
@@ -847,7 +853,45 @@ multianswer.fillcols.status <- list(Gender=c("HHH.male"=alpha("#253494",0.95),
                                                      "AdultEducPrim"=alpha("#BEBADA",0.95),
                                                      "AdultEducMid"=alpha("#2C7FB8",0.95),
                                                      "AdultEducSec"=alpha("#253494",0.95),
-                                                     "AdultEducHigher"=alpha("#FDB462", 0.95)))
+                                                     "AdultEducHigher"=alpha("#FDB462", 0.95)),
+                                    Gender=c("HHH.male"=alpha("#253494",0.95),
+                                             "HHH.female"=alpha("#7FCDBB",0.95)),
+                                    Religion=c("Percent.Rel.Christian"=alpha("#253494",0.95),
+                                               "Percent.Rel.Muslim"=alpha("#7FCDBB",0.95),
+                                               "Percent.Rel.Other"=alpha("#FDC086",0.95)),
+                                    PrimaryOcc=c("Percent.PrimaryOcc.Farm"=alpha("#7FC97F",0.95),
+                                                 "Percent.PrimaryOcc.HarvestForest"=alpha("#BEAED4",0.95),
+                                                 "Percent.PrimaryOcc.Fish"=alpha("#FDC086",0.95),
+                                                 "Percent.PrimaryOcc.Tourism"=alpha("#E1E198",0.95),
+                                                 "Percent.PrimaryOcc.WageLabor"=alpha("#386CB0",0.95),
+                                                 "Percent.PrimaryOcc.Other"=alpha("#C23737",0.95)),
+                                    FreqFish=c("Prop.Fish.AlmostNever"=alpha("#E1E198",0.95),
+                                               "Prop.Fish.FewTimesPer6Mo"=alpha("#7FCDBB",0.95),
+                                               "Prop.Fish.FewTimesPerMo"=alpha("#2CA9B8",0.95),
+                                               "Prop.Fish.FewTimesPerWk"=alpha("#2C7FB8",0.95),
+                                               "Prop.Fish.MoreFewTimesWk"=alpha("#253494",0.95)),
+                                    FreqSellFish=c("Prop.SellFish.AlmostNever"=alpha("#E1E198",0.95),
+                                                   "Prop.SellFish.FewTimesPer6Mo"=alpha("#7FCDBB",0.95),
+                                                   "Prop.SellFish.FewTimesPerMo"=alpha("#2CA9B8",0.95),
+                                                   "Prop.SellFish.FewTimesPerWk"=alpha("#2C7FB8",0.95),
+                                                   "Prop.SellFish.MoreFewTimesWk"=alpha("#253494",0.95)),
+                                    IncFish=c("Prop.IncFish.None"=alpha("#E1E198",0.95),
+                                              "Prop.IncFish.Some"=alpha("#7FCDBB",0.95),
+                                              "Prop.IncFish.Half"=alpha("#2CA9B8",0.95),
+                                              "Prop.IncFish.Most"=alpha("#2C7FB8",0.95),
+                                              "Prop.IncFish.All"=alpha("#253494",0.95)),
+                                    FishTech=c("Prop.FishTech.ByHand"=alpha("#7FC97F",0.95),
+                                               "Prop.FishTech.StatNet"=alpha("#BEAED4",0.95),
+                                               "Prop.FishTech.MobileNet"=alpha("#FDC086",0.95),
+                                               "Prop.FishTech.StatLine"=alpha("#E1E198",0.95),
+                                               "Prop.FishTech.MobileLine"=alpha("#386CB0",0.95)),
+                                    ChildFS=c("Child.FS.no"=alpha("#253494",0.95),
+                                              "Child.FS.yes"=alpha("#7FCDBB",0.95)),
+                                    Protein=c("ProteinFish.None"=alpha("#E1E198",0.95),
+                                              "ProteinFish.Some"=alpha("#7FCDBB",0.95),
+                                              "ProteinFish.Half"=alpha("#2CA9B8",0.95),
+                                              "ProteinFish.Most"=alpha("#2C7FB8",0.95),
+                                              "ProteinFish.All"=alpha("#253494",0.95)))
 
 
 
@@ -1070,7 +1114,6 @@ dist.plot.theme <- theme(axis.ticks=element_blank(),
                                                 angle=0,
                                                 colour="#303030"))
 
-
 # ---- 3.6 MPA Technical Report plot labels ----
 
 Statusplot.labs <- list(FS=labs(y="Mean household food security",x="Settlement"),
@@ -1111,7 +1154,7 @@ Statusplot.labs <- list(FS=labs(y="Mean household food security",x="Settlement")
 
 
 continuous.variables.plotlabs <- c("Mean household food security","Mean household assets",
-                                   "Mean place attachment",
+                                   "Mean place attachment","Mean household marine tenure",
                                    "School enrollment (% children ages 5-18 years old)",
                                    "Mean time suffering from illness or injury in past 4 weeks (days)")
 
