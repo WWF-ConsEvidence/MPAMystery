@@ -10,10 +10,10 @@
 # 
 # 
 # ---- inputs ----
-#  1) Source Flotim.TR.SigTest.R 
-#     - Dependencies: Calculate_BigFive.R
-#                AFTER_CALCULATE_BIGFIVE.R
-# 
+#  1) Source: Flotim.TR.SigTest.R
+#     - Dependencies: 
+#                     After_Calculate_BigFive.R
+#                     Calculate_BigFive.R
 # ---- code sections ----
 #  1) Data Sourcing, Configuration, and Subsetting
 #  2) Define Datasets for Status, Trend, and Annex Plots for Export

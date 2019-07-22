@@ -7,8 +7,8 @@
 # modified for Flotim: Amari Bauer, June 2019
 # 
 # ---- inputs ----
-#  Dependencies: Calculate_BigFive.R
-#                AFTER_CALCULATE_BIGFIVE.R
+#  Dependencies: After_Calculate_BigFive.R
+#                     Calculate_BigFive.R
 # 
 # ---- code sections ----
 #  1) Import Data
