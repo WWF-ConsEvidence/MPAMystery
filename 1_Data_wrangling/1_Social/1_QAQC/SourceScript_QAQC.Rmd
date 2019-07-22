@@ -9,7 +9,7 @@ Script that goes through the relevant variables in the Wellbeing and Demographic
 ### ---- SECTION 1 Load libraries and import data 
 ```{r warning=FALSE, echo=FALSE}
 pacman::p_load(dplyr,rio)
-setwd("C:/Users/david/Dropbox/data/analysis/IndSocImpacts/MPAMystery")
+setwd("R:/Gill/DLe/MPAMystery")
 # Files (with package rio)
 last.file <- function(dir.nam,nam){
   import(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))}
