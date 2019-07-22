@@ -74,7 +74,7 @@ Flotim.trendplot.monitoryear.labs <- (define.year.monitoryear.column(Flotim.Anne
 Flotim.conttrendplot.ylabs <- 
   define.conttrendplot.ylabels.withasterisks(Flotim.TrendContData.Techreport.PLOTFORMAT
                                              [is.na(Flotim.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
-                                               c("FSMean","MAMean","MTMean","PAMean",
+                                               c("FSMean","MAMean","PAMean","MTMean",
                                                  "SEMean","TimeMarketMean","UnwellMean")])
 
 proportional.variables.plotlabs <-colnames(propdata.trend.test.Flotim)
@@ -460,14 +460,13 @@ Flotim.time.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORM
                 y=Market),
             label=Flotim.statusplot.asterisks$Market,
             nudge_x=-0.07,
-            nudge_y=0.2,
+            nudge_y=0.07,
             size=rel(4),
             colour=errcols.status["NotDummy"]) +
   geom_text(data=Flotim.statusplot.sigpos,
             aes(x=SettlementName,y=Market.ref),
             label=Flotim.statusplot.asterisks$Market.ref,
             size=rel(3),
-            nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
   scale_y_continuous(expand=c(0,0),
@@ -2074,7 +2073,7 @@ plot(Flotim.proteinfish.trendplot)
 dev.off()
 
 # ---- 6.17 Age/Gender ----
-
+library(grid)
 png(paste(FigureFileName,"Age.gender.png",sep="/"),
     units="in",height=10,width=4,res=400)
 grid.newpage()
