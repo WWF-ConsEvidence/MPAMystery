@@ -1155,7 +1155,7 @@ Statusplot.labs <- list(FS=labs(y="Mean household food security",x="Settlement")
 
 continuous.variables.plotlabs <- c("Mean household food security","Mean household assets",
                                    "Mean place attachment","Mean household marine tenure",
-                                   "School enrollment (% children ages 5-18 years old)",
+                                   "School enrollment (% children ages 5-18 years old)", "Distance to market (hours)",
                                    "Mean time suffering from illness or injury in past 4 weeks (days)")
 
 
