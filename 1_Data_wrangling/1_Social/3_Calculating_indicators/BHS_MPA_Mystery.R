@@ -51,6 +51,8 @@
 # 
 # source('2_Social/SourcedScripts/SQLqueries_AccessODBC.R')
 
+# Packages
+library(tidyverse)
 
 # # OPTION 2: Set working directory and import flat data files (.csv files)
 HHData <- read.csv('x_Flat_data_files/1_Social/Input/BHS/BHS_HHData.csv',header=T,sep=',')
@@ -170,7 +172,7 @@ FS$FSIndex <- as.character(ifelse(FS$RemoveFS=="No",
                      rowSums(FS[,6:11],
                              na.rm=TRUE),
                      NA))
-FS$FSIndex <- revalue(FS$FSIndex, c("0"="0", "1"="2.04","2"="2.99","3"="3.77","4"="4.5","5"="5.38","6"="6.06"))
+FS$FSIndex <- plyr::revalue(FS$FSIndex, c("0"="0", "1"="2.04","2"="2.99","3"="3.77","4"="4.5","5"="5.38","6"="6.06"))
 FS$FSIndex <- 6.06-as.numeric(FS$FSIndex)
 
 MA.PA.MT.FS <- left_join(MA,PA,by="HouseholdID")
@@ -838,7 +840,7 @@ Synth.techreport.bySett <-
             MTAccess=mean(RightsAccessClean,na.rm=T),
             MTManage=mean(RightsManageClean,na.rm=T),
             MTHarvest=mean(RightsHarvestClean,na.rm=T),
-            MatAssets.gini=gini(MAIndex),
+            MatAssets.gini=reldist::gini(MAIndex),
             MAIndex=mean(MAIndex,na.rm=T),
             Percent.FoodSecure=(length(HouseholdID[FSIndex>=4.02 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
             Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex>=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
@@ -865,7 +867,7 @@ Synth.techreport.byMPA <-
             MTAccess=mean(RightsAccessClean,na.rm=T),
             MTManage=mean(RightsManageClean,na.rm=T),
             MTHarvest=mean(RightsHarvestClean,na.rm=T),
-            MatAssets.gini=gini(MAIndex),
+            MatAssets.gini=reldist::gini(MAIndex),
             MAIndex=mean(MAIndex,na.rm=T),
             Percent.FoodSecure=(length(HouseholdID[FSIndex>=4.02 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
             Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex>=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
@@ -1946,3 +1948,82 @@ impact.x.labs <- c("Two Year\nPost-Baseline","Four Year\nPost-Baseline")
     # units="in",height=10,width=10,res=500)
 # plot(kof.MPAimpact.summ.se.i)
 # dev.off()
+
+
+#---- Calculating missing variables per MPAID and/or MonitoringYear ----
+
+# Calculating mean YrResident per MonitoringYear
+Synth.techreport.byMonYr.variables <-
+  left_join(HHDemos.context,HHData[,c("HouseholdID","SocialConflict")]) %>%
+  left_join(MT) %>%
+  left_join(BigFive[,c("HouseholdID","MAIndex","FSIndex")]) %>%
+  left_join(HHDemos[,c("HouseholdID","HHBirthClean","HHDeathClean")]) %>%
+  group_by(MonitoringYear) %>%
+  summarise(YrResident=mean(YrResidentClean,na.rm=T))
+
+# Calculating mean YrResident per MPAID and MonitoringYear
+Synth.techreport.byMPAMonYr.variables <-
+  left_join(HHDemos.context,HHData[,c("HouseholdID","SocialConflict")]) %>%
+  left_join(MT) %>%
+  left_join(BigFive[,c("HouseholdID","MAIndex","FSIndex")]) %>%
+  left_join(HHDemos[,c("HouseholdID","HHBirthClean","HHDeathClean")]) %>%
+  group_by(MPAID, MonitoringYear) %>%
+  summarise(YrResident=mean(YrResidentClean,na.rm=T))
+
+# Calculating mean YrResident per MPAID
+Synth.techreport.byMPA.variables <-
+  left_join(HHDemos.context,HHData[,c("HouseholdID","SocialConflict")]) %>%
+  left_join(MT) %>%
+  left_join(BigFive[,c("HouseholdID","MAIndex","FSIndex")]) %>%
+  left_join(HHDemos[,c("HouseholdID","HHBirthClean","HHDeathClean")]) %>%
+  group_by(MPAID) %>%
+  summarise(YrResident=mean(YrResidentClean,na.rm=T))
+
+residency <- plyr::rbind.fill(Synth.techreport.byMonYr.variables, Synth.techreport.byMPAMonYr.variables, Synth.techreport.byMPA.variables)
+residency <- residency[, c("MPAID", "MonitoringYear", "YrResident")]
+
+write.csv(residency, "R:/Gill/LWarmuth/Residency.csv", row.names = F)
+
+# Calculate Big Five Indicators, Percent Primary Occupation Fishers, Time Market Access by MonitoringYear
+Techreport.BHSmeans.MonYr.variables <- 
+  left_join(HHDemos.context,BigFive[BigFive$Treatment==1,c("HouseholdID","FSIndex","MAIndex","MTIndex","PAIndex","SERate")],by="HouseholdID") %>%
+  group_by(MonitoringYear) %>%
+  summarise(FSMean=mean(FSIndex,na.rm=T),
+            MAMean=mean(MAIndex,na.rm=T),
+            MTMean=mean(MTIndex,na.rm=T),
+            PAMean=mean(PAIndex,na.rm=T),
+            SEMean=mean(SERate,na.rm=T),
+            Percent.PrimaryOcc.Fish=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
+                                                                     !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            TimeMarketMean=mean(TimeMarketClean,na.rm=T))
+
+# Calculate Big Five Indicators, Percent Primary Occupation Fishers, Time Market Access by MPAID and MonitoringYear
+Techreport.BHSmeans.MPAIDMonYr.variables <- 
+  left_join(HHDemos.context,BigFive[BigFive$Treatment==1,c("HouseholdID","FSIndex","MAIndex","MTIndex","PAIndex","SERate")],by="HouseholdID") %>%
+  group_by(MPAID,MonitoringYear) %>%
+  summarise(FSMean=mean(FSIndex,na.rm=T),
+            MAMean=mean(MAIndex,na.rm=T),
+            MTMean=mean(MTIndex,na.rm=T),
+            PAMean=mean(PAIndex,na.rm=T),
+            SEMean=mean(SERate,na.rm=T),
+            Percent.PrimaryOcc.Fish=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
+                                                                     !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            TimeMarketMean=mean(TimeMarketClean,na.rm=T))
+
+# Calculate variables per MPAID
+Techreport.BHSmeans.MPAID.variables <- 
+  left_join(HHDemos.context,BigFive[BigFive$Treatment==1,c("HouseholdID","FSIndex","MAIndex","MTIndex","PAIndex","SERate")],by="HouseholdID") %>%
+  group_by(MPAID) %>%
+  summarise(FSMean=mean(FSIndex,na.rm=T),
+            MAMean=mean(MAIndex,na.rm=T),
+            MTMean=mean(MTIndex,na.rm=T),
+            PAMean=mean(PAIndex,na.rm=T),
+            SEMean=mean(SERate,na.rm=T),
+            Percent.PrimaryOcc.Fish=(length(PrimaryLivelihoodClean[PrimaryLivelihoodClean==3 &
+                                                                     !is.na(PrimaryLivelihoodClean)])/length(PrimaryLivelihoodClean[!is.na(PrimaryLivelihoodClean)]))*100,
+            TimeMarketMean=mean(TimeMarketClean,na.rm=T))
+
+variables <- plyr::rbind.fill(Techreport.BHSmeans.MonYr.variables, Techreport.BHSmeans.MPAIDMonYr.variables, Techreport.BHSmeans.MPAID.variables)
+variables <- variables[, c("MPAID", "MonitoringYear", "FSMean", "MAMean", "MTMean", "PAMean", "SEMean", "Percent.PrimaryOcc.Fish", "TimeMarketMean")]
+
+write.csv(variables, "R:/Gill/LWarmuth/Variables.csv", row.names = F)
