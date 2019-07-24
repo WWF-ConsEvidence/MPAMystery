@@ -4,12 +4,18 @@ author: "David Gill"
 date: "6/12/2019"
 output: html_document
 ---
+
+```{r setup, include=FALSE}
+getwd()
+knitr::opts_knit$set(root.dir = getwd())
+```
+
 Script that goes through the relevant variables in the Wellbeing and Demographic tables to ensure that all variables are recoded correctly in the Source_social_data_flat_files.R script. 
 
 ### ---- SECTION 1 Load libraries and import data 
 ```{r warning=FALSE, echo=FALSE}
 pacman::p_load(dplyr,rio)
-setwd("R:/Gill/DLe/MPAMystery")
+
 # Files (with package rio)
 last.file <- function(dir.nam,nam){
   import(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))}
@@ -28,16 +34,16 @@ Prints out summaries, unique values, and headers for the wellbeing and demograph
 #### 2.1 Wellbeing table
 ```{r echo=FALSE}
 
-for (i in 1:ncol(select(WELLBEING,InterviewYear:BestIncomeUnits))){
+for (i in 1:ncol(WELLBEING)){
   
   print(paste0(names(WELLBEING)[i]," (",class(WELLBEING[,i]),")"))
   
-  if(length(unique(WELLBEING[,i]))>20 & class(WELLBEING[,i])!="character"){
+  if(length(unique(WELLBEING[,i]))>25 & class(WELLBEING[,i])!="character"){
     print(summary(WELLBEING[,i]))
   }
   
   else{
-    if (length(unique(WELLBEING[,i]))<20){
+    if (length(unique(WELLBEING[,i]))<25){
       print(table(WELLBEING[,i]))}
     else{
       print(head(WELLBEING[,i]))}
@@ -48,20 +54,27 @@ for (i in 1:ncol(select(WELLBEING,InterviewYear:BestIncomeUnits))){
 #### 2.2 Demographic table
 ```{r echo=FALSE}
 
-for (i in 1:ncol(select(DEMOGRAPHIC,IndividualName:IndividualLostDays))){
+for (i in 1:ncol(DEMOGRAPHIC)){
   
   print(paste0(names(DEMOGRAPHIC)[i]," (",class(DEMOGRAPHIC[,i]),")"))
   
-  if(length(unique(DEMOGRAPHIC[,i]))>20 & class(DEMOGRAPHIC[,i])!="character"){
+  if(length(unique(DEMOGRAPHIC[,i]))>25 & class(DEMOGRAPHIC[,i])!="character"){
     print(summary(DEMOGRAPHIC[,i]))
   }
   
   else{
-    if (length(unique(DEMOGRAPHIC[,i]))<20){
+    if (length(unique(DEMOGRAPHIC[,i]))<25){
       print(table(DEMOGRAPHIC[,i]))}
     else{
       print(head(DEMOGRAPHIC[,i]))}
   }
 }
+
+```
+
+#### 3. Display incorrect values
+```{r echo=FALSE}
+blind.codes <- c(994,997,998,999)
+
 
 ```
