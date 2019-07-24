@@ -132,7 +132,7 @@ SE.plot <- ggplot(filter(model.out1,Response=="SERate"),aes(x=term,y=estimate)) 
 #library(cowplot)
 #Combine "regular BigFive"
 plot_grid(FS.plot,MT.plot,PA.plot,SE.plot,MA.plot,ncol=3)
-ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/","DiD_BigFive_seascape.jpg"),width = 12, height = 6)
+ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/main_DD/","DiD_BigFive_seascape.jpg"),width = 12, height = 6)
 
 
 
@@ -180,7 +180,7 @@ SE.plot <- ggplot(filter(model.out1,Response=="SERate_z"),aes(x=term,y=estimate)
 
 #Combine "standardize BigFive"
 plot_grid(FS.plot,MT.plot,PA.plot,SE.plot,MA.plot,ncol=3)
-ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/","DiD_BigFive_z_seascape.jpg"),width = 12, height = 6)
+ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/main_DD/","DiD_BigFive_z_seascape.jpg"),width = 12, height = 6)
 
 
 
@@ -269,7 +269,7 @@ FS.plot <- ggplot(filter(model.out.mpalevel1,Response=="FSIndex"),aes(x=MPAName,
   labs(x="",y="DiD estimate", title="Food Security")  +
   scale_colour_manual(values = c("skyblue3", "blue"))
 #+ facet_grid(.~Response)
-ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/","DiD_FS_MPAlevel.jpg"),width = 12, height = 6)
+ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/main_DD/","DiD_FS_MPAlevel.jpg"),width = 12, height = 6)
 
 MT.plot <- ggplot(filter(model.out.mpalevel1,Response=="MTIndex"),aes(x=MPAName,y=estimate, color=term),group=1) + 
   geom_point(stat="identity", position =pd, fill='blue', size=3)+ theme_bw() +
@@ -279,7 +279,7 @@ MT.plot <- ggplot(filter(model.out.mpalevel1,Response=="MTIndex"),aes(x=MPAName,
   geom_vline(xintercept = 1.5, linetype = "dotdash") +
   labs(x="",y="DiD estimate", title="Marine Tenure")  +
   scale_colour_manual(values = c("skyblue3", "blue")) 
-ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/","DiD_MT_MPAlevel.jpg"),width = 12, height = 6)
+ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/main_DD/","DiD_MT_MPAlevel.jpg"),width = 12, height = 6)
 
 
 PA.plot <- ggplot(filter(model.out.mpalevel1,Response=="PAIndex"),aes(x=MPAName,y=estimate, color=term),group=1) + 
@@ -290,7 +290,7 @@ PA.plot <- ggplot(filter(model.out.mpalevel1,Response=="PAIndex"),aes(x=MPAName,
   geom_vline(xintercept = 1.5, linetype = "dotdash") +
   labs(x="",y="DiD estimate", title="Place Attachment")  +
   scale_colour_manual(values = c("skyblue3", "blue"))
-ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/","DiD_PA_MPAlevel.jpg"),width = 12, height = 6)
+ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/main_DD/","DiD_PA_MPAlevel.jpg"),width = 12, height = 6)
 
 
 MA.plot <- ggplot(filter(model.out.mpalevel1,Response=="MAIndex"),aes(x=MPAName,y=estimate, color=term),group=1) + 
@@ -301,7 +301,7 @@ MA.plot <- ggplot(filter(model.out.mpalevel1,Response=="MAIndex"),aes(x=MPAName,
   geom_vline(xintercept = 1.5, linetype = "dotdash") +
   labs(x="",y="DiD estimate", title="Material Assets")  +
   scale_colour_manual(values = c("skyblue3", "blue"))
-ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/","DiD_MA_MPAlevel.jpg"),width = 12, height = 6)
+ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/main_DD/","DiD_MA_MPAlevel.jpg"),width = 12, height = 6)
 
 
 SE.plot <- ggplot(filter(model.out.mpalevel1,Response=="SERate"),aes(x=MPAName,y=estimate, color=term),group=1) + 
@@ -312,7 +312,7 @@ SE.plot <- ggplot(filter(model.out.mpalevel1,Response=="SERate"),aes(x=MPAName,y
   geom_vline(xintercept = 1.5, linetype = "dotdash") +
   labs(x="",y="DiD estimate", title="School Enrollment")  +
   scale_colour_manual(values = c("skyblue3", "blue"))
-ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/","DiD_SE_MPAlevel.jpg"),width = 12, height = 6)
+ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/main_DD/","DiD_SE_MPAlevel.jpg"),width = 12, height = 6)
 
 
 
@@ -331,7 +331,7 @@ FS.plot_z <- ggplot(filter(model.out.mpalevel1,Response=="FSIndex_z"),aes(x=MPAN
   scale_colour_manual(values = c("skyblue3", "blue"))
 FS.plot
 
-ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/","DiD_z_FS_MPAlevel.jpg"),width = 12, height = 6)
+ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/main_DD/","DiD_z_FS_MPAlevel.jpg"),width = 12, height = 6)
 
 MT.plot_z <- ggplot(filter(model.out.mpalevel1,Response=="MTIndex_z"),aes(x=MPAName,y=estimate, color=term),group=1) + 
   geom_point(stat="identity", position =pd, fill='blue', size=3)+ theme_bw() +
@@ -341,7 +341,7 @@ MT.plot_z <- ggplot(filter(model.out.mpalevel1,Response=="MTIndex_z"),aes(x=MPAN
   geom_vline(xintercept = 1.5, linetype = "dotdash") +
   labs(x="",y="DiD estimate", title="Marine Tenure")  +
   scale_colour_manual(values = c("skyblue3", "blue")) 
-ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/","DiD_z_MT_MPAlevel.jpg"),width = 12, height = 6)
+ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/main_DD/","DiD_z_MT_MPAlevel.jpg"),width = 12, height = 6)
 
 
 PA.plot_z <- ggplot(filter(model.out.mpalevel1,Response=="PAIndex_z"),aes(x=MPAName,y=estimate, color=term),group=1) + 
@@ -352,7 +352,7 @@ PA.plot_z <- ggplot(filter(model.out.mpalevel1,Response=="PAIndex_z"),aes(x=MPAN
   geom_vline(xintercept = 1.5, linetype = "dotdash") +
   labs(x="",y="DiD estimate", title="Place Attachment")  +
   scale_colour_manual(values = c("skyblue3", "blue"))
-ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/","DiD_z_PA_MPAlevel.jpg"),width = 12, height = 6)
+ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/main_DD/","DiD_z_PA_MPAlevel.jpg"),width = 12, height = 6)
 
 
 MA.plot_z <- ggplot(filter(model.out.mpalevel1,Response=="MAIndex_z"),aes(x=MPAName,y=estimate, color=term),group=1) + 
@@ -363,7 +363,7 @@ MA.plot_z <- ggplot(filter(model.out.mpalevel1,Response=="MAIndex_z"),aes(x=MPAN
   geom_vline(xintercept = 1.5, linetype = "dotdash") +
   labs(x="",y="DiD estimate", title="Material Assets")  +
   scale_colour_manual(values = c("skyblue3", "blue"))
-ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/","DiD_z_MA_MPAlevel.jpg"),width = 12, height = 6)
+ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/main_DD/","DiD_z_MA_MPAlevel.jpg"),width = 12, height = 6)
 
 
 SE.plot_z <- ggplot(filter(model.out.mpalevel1,Response=="SERate_z"),aes(x=MPAName,y=estimate, color=term),group=1) + 
@@ -374,7 +374,7 @@ SE.plot_z <- ggplot(filter(model.out.mpalevel1,Response=="SERate_z"),aes(x=MPANa
   geom_vline(xintercept = 1.5, linetype = "dotdash") +
   labs(x="",y="DiD estimate", title="School Enrollment")  +
   scale_colour_manual(values = c("skyblue3", "blue"))
-ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/","DiD_z_SE_MPAlevel.jpg"),width = 12, height = 6)
+ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/main_DD/","DiD_z_SE_MPAlevel.jpg"),width = 12, height = 6)
 
 
 
@@ -443,7 +443,7 @@ SE.plot <- ggplot(filter(model.out.mpalevel1,Response=="SERate"),aes(x=MPAName,y
 ########################Combine BigFive MPAlevel graph
 #library(cowplot)
 plot_grid(FS.plot,MT.plot,PA.plot,SE.plot,MA.plot,ncol=3)
-ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/","DiD_BigFive_MPAlevel.jpg"),width = 12, height = 6)
+ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/main_DD/","DiD_BigFive_MPAlevel.jpg"),width = 12, height = 6)
 
 
 
@@ -510,7 +510,7 @@ SE.plot_z <- ggplot(filter(model.out.mpalevel1,Response=="SERate_z"),aes(x=MPANa
 ########################Combine BigFive MPAlevel graph
 #library(cowplot)
 plot_grid(FS.plot_z,MT.plot_z,PA.plot_z,SE.plot_z,MA.plot_z,ncol=3)
-ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/","DiD_z_BigFive_MPAlevel.jpg"),width = 12, height = 6)
+ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/SBS/main_DD/","DiD_z_BigFive_MPAlevel.jpg"),width = 12, height = 6)
 
 
 

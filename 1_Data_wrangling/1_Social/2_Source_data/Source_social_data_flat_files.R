@@ -70,15 +70,13 @@ SETTLEMENT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_databa
 ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_ORGANIZATION')
 
 
-# 
+ 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 # ---- SECTION 2: CLEAN & POST-CODE DATA ----
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#
-
-# ---- 2.1 Clean & post-code WELLBEING to create HHData for analysis ----
+# -- 2.1 Clean & post-code WELLBEING to create HHData for analysis ----
 
 HHData <-   WELLBEING %>%
   dplyr::transmute(HouseholdID = HouseholdID, 
