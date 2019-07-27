@@ -68,15 +68,6 @@ WELLBEING <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_databas
 DEMOGRAPHIC <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_DEMOGRAPHIC')
 SETTLEMENT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_SETTLEMENT')
 ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_ORGANIZATION')
-library(tidyverse)
-library(readxl)
-
-WELLBEING<- read_excel("HH_tbl_WELLBEING_20190603.xlsx")  
-DEMOGRAPHIC<- read_excel("HH_tbl_DEMOGRAPHIC_20190603.xlsx")
-SETTLEMENT<-read_excel("HH_tbl_SETTLEMENT_2019_0523.xlsx")
-ORGANIZATION<- read_excel("HH_tbl_ORGANIZATION_20190603.xlsx")
-
-
 
  
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
