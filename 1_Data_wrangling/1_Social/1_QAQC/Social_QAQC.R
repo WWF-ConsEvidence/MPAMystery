@@ -24,14 +24,14 @@
 
 # ---- 1.1 load libraries ----
 
-pacman::p_load(dplyr, foreach, reshape2, stringdist)
+pacman::p_load(dplyr, foreach, reshape2, stringdist, rio)
 
 # ---- 1.2 import data ----
 
-DEMOGRAPHIC <- read.csv('C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2018_KOON/2_PRE_QAQC_RECOMBINE/1_HWB/KOON_2018_Pre-QAQC_DEMOGRAPHIC.csv',
-                        na.strings="#N/A")
-WELLBEING <-  read.csv('C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2018_KOON/2_PRE_QAQC_RECOMBINE/1_HWB/KOON_2018_Pre-QAQC_WELLBEING.csv',
-                       na.strings="#N/A")
+DEMOGRAPHIC <- import('C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2017_SULAWESI_TENGGARA/3_QAQC/1_HWB/SULTRA_2017_mid-QAQC_KC.xlsx',
+                        which="HH_tbl_DEMOGRAPHIC")
+WELLBEING <-  import('C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2017_SULAWESI_TENGGARA/3_QAQC/1_HWB/SULTRA_2017_mid-QAQC_KC.xlsx',
+                     which="HH_tbl_WELLBEING")
 
 # GTHREAT <- read.csv('2_Social/FlatDataFiles/SBS/SelatPantar_2017_QAQC/HH_tbl_GTHREAT_SelatPantar_2017_Pre-QAQC.csv')
 # GSTEPS <- read.csv('2_Social/FlatDataFiles/SBS/SelatPantar_2017_QAQC/HH_tbl_GSTEPS_SelatPantar_2017_Pre-QAQC.csv')
@@ -88,61 +88,101 @@ WELLBEING_appended <-
 
 # ---- duplicate rows ----
 duplicated_rows <- 
-  WELLBEING_appended %>% 
+  WELLBEING %>% 
   left_join(.,DEMOGRAPHIC %>%
               dplyr::group_by(HouseholdID) %>%
               dplyr::summarise(NumInd=length(DemographicID),
+                               IndividualName.1=IndividualName[1],
+                               RelationHHH.1=RelationHHH[1],
                                IndividualAge.1=IndividualAge[1],
                                IndividualEducation.1=IndividualEducation[1]), by="HouseholdID") %>%
   dplyr::group_by(Respondent,SecondaryRespondent) %>% 
   dplyr::summarise(NumHH=length(HouseholdID)) %>% 
   dplyr::filter(.,NumHH>1) %>%
-  dplyr::mutate(HouseholdID.1=WELLBEING$HouseholdID[which(WELLBEING$Respondent==Respondent & 
-                                                     WELLBEING$SecondaryRespondent==SecondaryRespondent)][1],
-         HouseholdID.2=WELLBEING$HouseholdID[which(WELLBEING$Respondent==Respondent & 
-                                                     WELLBEING$SecondaryRespondent==SecondaryRespondent)][2],
-         HouseholdID.3=ifelse(NumHH>2,WELLBEING$HouseholdID[which(WELLBEING$Respondent==Respondent &
-                                                                    WELLBEING$SecondaryRespondent==SecondaryRespondent)][3],
-                              NA),
-         Household.1.2=ifelse(nrow(data.frame(A=as.character(WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")]==
-                                                               WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.2),-which(names(WELLBEING) %in% "HouseholdID")])) %>%
-                                     filter(A==FALSE))>0,
-                              paste(colnames(WELLBEING[which((WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")]==
-                                                                WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.2),-which(names(WELLBEING) %in% "HouseholdID")])==FALSE)]),
-                                    collapse=", "),
-                              "YES"),
-         Household.1.3=ifelse(is.na(HouseholdID.3), 
-                              NA,
-                              ifelse(nrow(data.frame(A=as.character(WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")]==
-                                                                      WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")])) %>%
-                                            filter(A==FALSE))>0,
-                                     paste(colnames(WELLBEING[which((WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")]==
-                                                                       WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")])==FALSE)]),
-                                           collapse=", "),
-                                     "YES")),
-         Household.2.3=ifelse(is.na(HouseholdID.3), 
-                              NA,
-                              ifelse(nrow(data.frame(A=as.character(WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.2),-which(names(WELLBEING) %in% "HouseholdID")]==
-                                                                      WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")])) %>%
-                                            filter(A==FALSE))>0,
-                                     paste(colnames(WELLBEING[which((WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.2),-which(names(WELLBEING) %in% "HouseholdID")]==
-                                                                       WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")])==FALSE)]),
-                                           collapse=", "),
-                                     "YES"))) %>%
+  dplyr::mutate(HouseholdID.1=WELLBEING$HouseholdID[which(WELLBEING$Respondent==Respondent)][1],
+                HouseholdID.2=WELLBEING$HouseholdID[which(WELLBEING$Respondent==Respondent)][2],
+                HouseholdID.3=ifelse(NumHH>2,
+                                     WELLBEING$HouseholdID[which(WELLBEING$Respondent==Respondent)][3],
+                                     NA),
+                Diff.bt.Household.1.2=ifelse(HouseholdID.1==HouseholdID.2,
+                                             ifelse(nrow(data.frame(A=as.character(WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")][1,]==
+                                                                                     WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.2),-which(names(WELLBEING) %in% "HouseholdID")][2,])) %>%
+                                                           filter(A==FALSE))>0,
+                                                    paste(colnames(WELLBEING[which((WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")][1,]==
+                                                                                      WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.2),-which(names(WELLBEING) %in% "HouseholdID")][2,])==FALSE)]),
+                                                          collapse=", "),
+                                                    "NONE"),
+                                             ifelse(nrow(data.frame(A=as.character(WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")]==
+                                                                                     WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.2),-which(names(WELLBEING) %in% "HouseholdID")])) %>%
+                                                           filter(A==FALSE))>0,
+                                                    paste(colnames(WELLBEING[which((WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")]==
+                                                                                      WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.2),-which(names(WELLBEING) %in% "HouseholdID")])==FALSE)]),
+                                                          collapse=", "),
+                                                    "NONE")),
+                Diff.bt.Household.1.3=ifelse(is.na(HouseholdID.3), 
+                                             NA,
+                                             ifelse(HouseholdID.1==HouseholdID.2 & HouseholdID.1==HouseholdID.3,
+                                                    ifelse(nrow(data.frame(A=as.character(WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")][1,]==
+                                                                                            WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")][3,])) %>%
+                                                                  filter(A==FALSE))>0,
+                                                           paste(colnames(WELLBEING[which((WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")][1,]==
+                                                                                             WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")][3,])==FALSE)]),
+                                                                 collapse=", "),
+                                                           "NONE"),
+                                                    ifelse(HouseholdID.1==HouseholdID.3 & HouseholdID.1!=HouseholdID.2,
+                                                           ifelse(nrow(data.frame(A=as.character(WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")][1,]==
+                                                                                                   WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")][2,])) %>%
+                                                                         filter(A==FALSE))>0,
+                                                                  paste(colnames(WELLBEING[which((WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")][1,]==
+                                                                                                    WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")][2,])==FALSE)]),
+                                                                        collapse=", "),
+                                                                  "NONE"),
+                                                           ifelse(nrow(data.frame(A=as.character(WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")]==
+                                                                                                   WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")])) %>%
+                                                                         filter(A==FALSE))>0,
+                                                                  paste(colnames(WELLBEING[which((WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")]==
+                                                                                                    WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")])==FALSE)]),
+                                                                        collapse=", "),
+                                                                  "NONE")))),
+                Diff.bt.Household.2.3=ifelse(is.na(HouseholdID.3), 
+                                             NA,
+                                             ifelse(HouseholdID.2==HouseholdID.3 & HouseholdID.2==HouseholdID.1,
+                                                    ifelse(nrow(data.frame(A=as.character(WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")][2,]==
+                                                                                            WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")][3,])) %>%
+                                                                  filter(A==FALSE))>0,
+                                                           paste(colnames(WELLBEING[which((WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")][2,]==
+                                                                                             WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")][3,])==FALSE)]),
+                                                                 collapse=", "),
+                                                           "NONE"),
+                                                    ifelse(HouseholdID.2==HouseholdID.3 & HouseholdID.2!=HouseholdID.1,
+                                                           ifelse(nrow(data.frame(A=as.character(WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")][1,]==
+                                                                                                   WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")][2,])) %>%
+                                                                         filter(A==FALSE))>0,
+                                                                  paste(colnames(WELLBEING[which((WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")][1,]==
+                                                                                                    WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")][2,])==FALSE)]),
+                                                                        collapse=", "),
+                                                                  "NONE"),
+                                                           ifelse(nrow(data.frame(A=as.character(WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")]==
+                                                                                                   WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")])) %>%
+                                                                         filter(A==FALSE))>0,
+                                                                  paste(colnames(WELLBEING[which((WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.1),-which(names(WELLBEING) %in% "HouseholdID")]==
+                                                                                                    WELLBEING[which(WELLBEING$HouseholdID==HouseholdID.3),-which(names(WELLBEING) %in% "HouseholdID")])==FALSE)]),
+                                                                        collapse=", "),
+                                                                  "NONE"))))) %>%
   data.frame(HouseholdID=c(.$HouseholdID.2,.$HouseholdID.3),
-             RemoveDuplicate=c(ifelse(.$Household.1.2=="YES","YES","CHECK"),
+             RemoveDuplicate=c(ifelse(.$Diff.bt.Household.1.2=="NONE","YES","MANUAL CHECK"),
                                ifelse(is.na(.$HouseholdID.3)==T,
                                       NA,
-                                      ifelse(.$Household.1.3=="YES" | .$Household.2.3=="YES",
-                                                      "YES",
-                                                      "CHECK"))),
-             CheckAgainst=c(ifelse(.$Household.1.2!="YES",.$HouseholdID.1,NA),
-                            ifelse(.$Household.1.3!="YES" & .$Household.2.3!="YES" & .$Household.1.2!="YES",paste(.$HouseholdID.1,.$HouseholdID.2,sep=","),
-                                   ifelse(.$Household.1.3!="YES" & .$Household.2.3!="YES" &.$Household.1.2=="YES",
+                                      ifelse(.$Diff.bt.Household.1.3=="NONE" | .$Diff.bt.Household.2.3=="NONE",
+                                             "YES",
+                                             "MANUAL CHECK"))),
+             CheckAgainst=c(ifelse(.$Diff.bt.Household.1.2!="NONE",.$HouseholdID.1,NA),
+                            ifelse(.$Diff.bt.Household.1.3!="NONE" & .$Diff.bt.Household.2.3!="NONE" & .$Diff.bt.Household.1.2!="NONE",paste(.$HouseholdID.1,.$HouseholdID.2,sep=","),
+                                   ifelse(.$Diff.bt.Household.1.3!="NONE" & .$Diff.bt.Household.2.3!="NONE" &.$Diff.bt.Household.1.2=="NONE",
                                           .$HouseholdID.1,
-                                          ifelse(.$Household.1.3!="YES" & .$Household.2.3=="YES",
+                                          ifelse(.$Diff.bt.Household.1.3!="NONE" & .$Diff.bt.Household.2.3=="NONE",
                                                  .$HouseholdID.1,
-                                                 ifelse(.$Household.1.3=="YES" & .$Household.2.3!="YES",
+                                                 ifelse(.$Diff.bt.Household.1.3=="NONE" & .$Diff.bt.Household.2.3!="NONE",
                                                         .$HouseholdID.2,
                                                         NA))))))
 
@@ -352,11 +392,43 @@ DEMOGRAPHIC_appended <-
 #   -- 
 # - Logical coherence
 #   -- One HHH per HH
+  
 #   -- If no children, cFS questions should be skipped
 #   -- Years resident should be no greater than individual age
 # - Calculate combined assets columns
 # - Calculate NumLocalThreat
 
+  logic_errors <-
+    DEMOGRAPHIC %>%
+    group_by(HouseholdID) %>%
+    summarise(NumHeadHH=length(DemographicID[RelationHHH==0])) %>%
+    filter(NumHeadHH!=1)
+  
+num.HH.per.sett <-
+  WELLBEING %>%
+  group_by(SettlementID) %>%
+  summarise(NumHH=length(HouseholdID))
+
+  
+  logic_errors <-
+    DEMOGRAPHIC %>%
+    group_by(HouseholdID) %>%
+    summarise(OldestHHMember=max(IndividualAge, na.rm=T),
+              NumberOldHHMember=length(DemographicID[IndividualAge==OldestHHMember]),
+              DemographicID.OldestHHMember=DemographicID[IndividualAge==OldestHHMember][1],
+              IndividualAge=IndividualAge[DemographicID==DemographicID.OldestHHMember],
+              NumHeadHH=length(DemographicID[RelationHHH==0])) %>%
+    left_join(WELLBEING, ., by="HouseholdID") %>%
+    transmute(HouseholdID=HouseholdID,
+              OldestHHMember=IndividualAge,
+              YearsResident=YearsResident,
+              YearResident.v.Age=ifelse(YearsResident>IndividualAge,"Logic error","NONE"),
+              NumHeadHH=NumHeadHH,
+              NumHeadHH.over1=ifelse(NumHeadHH>1,"Logic error","NONE"),
+              NumHeadHH.zero=ifelse(NumHeadHH==0,"Logic error","NONE")) %>%
+    filter(YearResident.v.Age=="Logic error" | NumHeadHH.over1=="Logic error" | NumHeadHH.zero=="Logic error")  
+  
+  
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #

@@ -93,7 +93,7 @@ HHData$FSIndex <-
                                         "FreqAdultSkip", "Hungry")],
                               na.rm=TRUE),
                       NA)) %>%
-  revalue(., c("0"="0", "1"="2.04","2"="2.99","3"="3.77","4"="4.5","5"="5.38","6"="6.06"))
+  recode(., "0"="0", "1"="2.04","2"="2.99","3"="3.77","4"="4.5","5"="5.38","6"="6.06")
 HHData$FSIndex <- 6.06-as.numeric(HHData$FSIndex) 
 
 HHData <- 
@@ -190,4 +190,4 @@ BigFive.MPAGroup <-
                    BigFive.MPAGroup[,"MPAID"],
                    "Treatment"=rep.int(1,nrow(unique(BigFive.SettleGroup[c("MPAID","MonitoringYear")]))),
                    BigFive.MPAGroup[,2:12])
-  
+
