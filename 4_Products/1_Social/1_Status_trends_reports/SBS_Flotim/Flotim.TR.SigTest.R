@@ -7,8 +7,8 @@
 # modified for Flotim: Amari Bauer, June 2019
 # 
 # ---- inputs ----
-#  Dependencies: Calculate_BigFive.R
-#                AFTER_CALCULATE_BIGFIVE.R
+#  Dependencies: After_Calculate_BigFive.R
+#                     Calculate_BigFive.R
 # 
 # ---- code sections ----
 #  1) Import Data
@@ -26,9 +26,9 @@
 # 
 source("C:/Users/HP/Dropbox/NotThisOne/Source_social_data_flat_files.R")
 source("C:/Users/HP/Dropbox/NotThisOne/Calculate_BigFive.R")
-source("C:/Users/HP/Dropbox/NotThisOne/AFTER_CALCULATE_BIGFIVE.R")
+source("C:/Users/HP/Dropbox/NotThisOne/After_Calculate_BigFive.R")
 
-
+library(Kendall)
 # ---- 1.1 Subset continuous variable datasets from SBS.TechReport.Calculations.R ----
 
 
@@ -38,11 +38,10 @@ MPA.TechReport.SigTest.Data <- HHData %>%
          "SERate","TimeMarket","DaysUnwell")
 
 # - "Trend" dataset
-Flotim.Trend.Data <- 
-  MPA.TechReport.SigTest.Data %>%
+
+Flotim.Trend.Data <- MPA.TechReport.SigTest.Data %>%
   filter(MPAID==16)
 
-#Flotim.Trend.Data$InterviewYear <- as.numeric(as.character(Flotim.Trend.Data$InterviewYear))
 
 MPA.TechReport.SigTest.Data <- MPA.TechReport.SigTest.Data %>%
   filter(MonitoringYear=="3 Year Post")
@@ -66,8 +65,11 @@ Flotim.TechReport.MPAvControl <-
 Flotim.TechReport.Status.SettlementMeans<- Techreport.Status.BySett %>% 
     filter(MonitoringYear=="3 Year Post" & MPAID==16 & Treatment==1)
 
-Flotim.TechReport.Status.SettlementMeans$SettlementName <- 
-  factor(Flotim.TechReport.Status.SettlementMeans$SettlementName)
+
+#Removing the settlement with an NA in order for function to run
+Flotim.TechReport.Status.SettlementMeans <- 
+  Flotim.TechReport.Status.SettlementMeans[!is.na(Flotim.TechReport.Status.SettlementMeans$SettlementName),]
+
 
 colnames(Flotim.TechReport.Status.SettlementMeans) <- c(colnames(Flotim.TechReport.Status.SettlementMeans)[1:51],"DaysUnwell","UnwellErr",
                                                               "TimeMarket","TimeMarketErr",colnames(Flotim.TechReport.Status.SettlementMeans)[56:69],
@@ -390,6 +392,7 @@ qqline(Flotim.TechReport.MPAHouseholdData$Unwell,col="green")
 # ---- 4.1 Create function that will output significance values for non-parametric variables, BY SETTLEMENT ----
 #          (for status plots)
 
+
 non.parametric.test.settlements.Flotim <- 
   data.frame(mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
                     function(a){
@@ -452,7 +455,7 @@ non.parametric.test.MPAvControl.Flotim <-
                                   exact=F)}))["p.value",]
 
 sigvals.MPA.Flotim <- 
-  cbind.data.frame("Flores Timur\n MPA",non.parametric.test.MPAvControl.Flotim)
+  cbind.data.frame("Flores Timur MPA",non.parametric.test.MPAvControl.Flotim)
 
 colnames(sigvals.MPA.Flotim) <- colnames(sigvals.Sett.Flotim)
 
@@ -506,24 +509,25 @@ colnames(trend.sigvals.Flotim) <- c("MonitoringYear","FSMean","FSErr","MAMean","
 
 trend.sigvals.Flotim <- unlist(trend.sigvals.Flotim)
 
-
 # ---- 4.4 Create function that will output TREND significance values for non-parametric variables, BY SETTLEMENT ----
 #          (for annex plots)
+Flotim.Trend.Data <- as.data.frame(Flotim.Trend.Data)
+
 trend.non.parametric.test.bySett.Flotim <- 
   cbind.data.frame(SettlementName=as.character(sett.names.Flotim),
-                   mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
+                   mapply(a=c("FSIndex","MAIndex","PAIndex","MTIndex","SERate","TimeMarket","DaysUnwell"),
                           function(a){
                             t(data.frame(mapply(i=as.character(sett.names.Flotim),
                                                 function(i){
-                                                  MannKendall(c(Flotim.Trend.Data[Flotim.Trend.Data$SettlementName==i & Flotim.Trend.Data$Treatment==1 &
+                                                  MannKendall(c(Flotim.Trend.Data[Flotim.Trend.Data$SettlementName==i &
                                                                                     Flotim.Trend.Data$InterviewYear==unique(Flotim.Trend.Data$InterviewYear)[1],a],
-                                                                Flotim.Trend.Data[Flotim.Trend.Data$SettlementName==i & Flotim.Trend.Data$Treatment==1 &
+                                                                Flotim.Trend.Data[Flotim.Trend.Data$SettlementName==i &
                                                                                     Flotim.Trend.Data$InterviewYear==unique(Flotim.Trend.Data$InterviewYear)[2],a]))
                                                 }))["sl",])}))
 
 
-colnames(trend.non.parametric.test.bySett.Flotim) <- colnames(sigvals.Flotim[1:8])
 
+colnames(trend.non.parametric.test.bySett.Flotim) <- colnames(sigvals.Flotim[1:8])
 
 # - Define data frame with p-values for annex plots
 #   (households within each settlement from each year of sampling are compared across time for the given 

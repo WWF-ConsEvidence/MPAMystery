@@ -10,9 +10,10 @@
 # 
 # 
 # ---- inputs ----
-#  1) Source Flotim.TechReport.Datasets.2019.R 
-#     - Dependencies: Flotim.TechReport.SigTests.2019.R
-#                     SBS_TechReport_Calculations.R
+#  1) Source Flotim.TR.Datasets.R 
+#     - Dependencies: Flotim.TR.SigTest.R
+#                     After_Calculate_BigFive.R
+#                     Calculate_BigFive.R
 # 
 # ---- code sections ----
 #  1) DEFINE MPA-SPECIFIC PLOTTING DATA FRAMES
@@ -37,13 +38,29 @@ source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Flotim.TechReport.SigTes
 source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Flotim.TechReport.Datasets.2019.R")
 
 
+#DETERMINING HOW MANY PEOPLE ACTUALLY RESPONDED TO THE FISH QUESTIONS
+HHData %>%
+  filter(MPAID==16) %>%
+  filter(Treatment==1) %>%
+  group_by(SettlementName,InterviewYear) %>%
+  summarise(total=length(HouseholdID),
+            actualfishfreq=length(FreqFish[!is.na(FreqFish)]),
+            actualfreqsale=length(FreqSaleFish[!is.na(FreqSaleFish)]),
+            actualpercentinc=length(PercentIncFish[!is.na(PercentIncFish)]),
+            actualmajfishtech=length(MajFishTechnique[!is.na(MajFishTechnique)]),
+            actualproteinfish=length(PercentProteinFish[!is.na(PercentProteinFish)]),
+            actualeatfish=length(FreqEatFish[!is.na(FreqEatFish)])) %>% View()
+
+
 # ---- 1.2 Define significance labels and (x,y) coordinates for plots ----
+
+library(gridExtra)
 
 Flotim.statusplot.asterisks <- 
   define.statusplot.asterisks(Flotim.ContData.Techreport.status.PLOTFORMAT[,c("SettlementName","FS.pval",
-                                                                               "MA.pval","MT.pval","PA.pval",
-                                                                               "SE.pval", "TimeMarket.pval",
-                                                                               "Unwell.pval")])
+                                                                              "MA.pval","MT.pval","PA.pval",
+                                                                              "SE.pval", "TimeMarket.pval",
+                                                                              "Unwell.pval")])
 Flotim.statusplot.sigpos <- 
   define.statusplot.asterisk.pos(Flotim.ContData.Techreport.status.PLOTFORMAT,
                                  Flotim.statusplot.asterisks)  
@@ -57,7 +74,7 @@ Flotim.trendplot.monitoryear.labs <- (define.year.monitoryear.column(Flotim.Anne
 Flotim.conttrendplot.ylabs <- 
   define.conttrendplot.ylabels.withasterisks(Flotim.TrendContData.Techreport.PLOTFORMAT
                                              [is.na(Flotim.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
-                                               c("FSMean","MAMean","MTMean", "PAMean",
+                                               c("FSMean","MAMean","PAMean","MTMean",
                                                  "SEMean","TimeMarketMean","UnwellMean")])
 
 proportional.variables.plotlabs <-colnames(propdata.trend.test.Flotim)
@@ -67,22 +84,22 @@ Flotim.proptrendplot.ylabs <-
 
 
 Flotim.trendplot.labs <- list(FS=labs(y=as.character(Flotim.conttrendplot.ylabs["FSMean"]),x="Monitoring Year"),
-                           MA=labs(y=as.character(Flotim.conttrendplot.ylabs["MAMean"]),x="Monitoring Year"),
-                           MT=labs(y=as.character(Flotim.conttrendplot.ylabs["MTMean"]),x="Monitoring Year"),
-                           PA=labs(y=as.character(Flotim.conttrendplot.ylabs["PAMean"]),x="Monitoring Year"),
-                           SE=labs(y=as.character(Flotim.conttrendplot.ylabs["SEMean"]),x="Monitoring Year"),
-                           Market=labs(y=as.character(Flotim.conttrendplot.ylabs["TimeMarketMean"]),
-                                       x="Monitoring Year"),
-                           Unwell=labs(y=as.character(Flotim.conttrendplot.ylabs["UnwellMean"]),x="Monitoring Year"),
-                           Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
-                           Religion=labs(y="Religion (% households)",x="Monitoring Year"),
-                           PrimaryOcc=labs(y=as.character(Flotim.proptrendplot.ylabs["Primary occupation (% households)"]),x="Monitoring Year"),
-                           FreqFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Frequency of fishing (% households)"]),x="Monitoring Year"),
-                           FreqSellFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Frequency of selling at least some catch (% households)"]),x="Monitoring Year"),
-                           IncFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Income from fishing in past 6 months (% households)"]),x="Monitoring Year"),
-                           FishTech=labs(y=as.character(Flotim.proptrendplot.ylabs["Fishing technique most often used in past 6 months (% households)"]),x="Monitoring Year"),
-                           ChildFS=labs(y=as.character(Flotim.proptrendplot.ylabs["Child hunger (% households)"]),x="Monitoring Year"),
-                           Protein=labs(y=as.character(Flotim.proptrendplot.ylabs["Dietary protein from fish in past 6 months (% households)"]),x="Monitoring Year"))
+                              MA=labs(y=as.character(Flotim.conttrendplot.ylabs["MAMean"]),x="Monitoring Year"),
+                              MT=labs(y=as.character(Flotim.conttrendplot.ylabs["MTMean"]),x="Monitoring Year"),
+                              PA=labs(y=as.character(Flotim.conttrendplot.ylabs["PAMean"]),x="Monitoring Year"),
+                              SE=labs(y=as.character(Flotim.conttrendplot.ylabs["SEMean"]),x="Monitoring Year"),
+                              Market=labs(y=as.character(Flotim.conttrendplot.ylabs["TimeMarketMean"]),
+                                          x="Monitoring Year"),
+                              Unwell=labs(y=as.character(Flotim.conttrendplot.ylabs["UnwellMean"]),x="Monitoring Year"),
+                              Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
+                              Religion=labs(y="Religion (% households)",x="Monitoring Year"),
+                              PrimaryOcc=labs(y=as.character(Flotim.proptrendplot.ylabs["Primary occupation (% households)"]),x="Monitoring Year"),
+                              FreqFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Frequency of fishing (% households)"]),x="Monitoring Year"),
+                              FreqSellFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Frequency of selling at least some catch (% households)"]),x="Monitoring Year"),
+                              IncFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Income from fishing in past 6 months (% households)"]),x="Monitoring Year"),
+                              FishTech=labs(y=as.character(Flotim.proptrendplot.ylabs["Fishing technique most often used in past 6 months (% households)"]),x="Monitoring Year"),
+                              ChildFS=labs(y=as.character(Flotim.proptrendplot.ylabs["Child hunger (% households)"]),x="Monitoring Year"),
+                              Protein=labs(y=as.character(Flotim.proptrendplot.ylabs["Dietary protein from fish in past 6 months (% households)"]),x="Monitoring Year"))
 
 Flotim.annexplot.settnames <- 
   define.annexplot.settname.labels(annex.sigvals.Flotim)
@@ -100,7 +117,6 @@ Flotim.annexplot.settnames[3,] <- rep("",length(Flotim.annexplot.settnames[3,]))
 
 
 # ---- 2.1 3 Year ----
-
 Flotim.age.gender.3Year <- 
   melt(Flotim.AgeGender,id.vars="AgeCat",measure.vars=c("Female.3Year","Male.3Year")) %>%
   ggplot() +
@@ -168,13 +184,11 @@ Flotim.agegender.legend.plot
 
 Flotim.agegender.legend <- g_legend(Flotim.agegender.legend.plot)
 
-
 Flotim.age.gender.plot <- 
   grid.arrange(Flotim.agegender.legend,
                arrangeGrob(
                  Flotim.age.gender.3Year,
                  Flotim.age.gender.Baseline,ncol=1),nrow=2,heights=c(0.35,10))
-Flotim.age.gender.plot
 
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -191,9 +205,9 @@ Flotim.age.gender.plot
 Flotim.fs.statusplot <- 
   rbind.data.frame(Flotim.ContData.Techreport.status.PLOTFORMAT,
                    cbind.data.frame(SettlementID=NA,SettlementName="  ",
-                                    matrix(rep(NA,21),ncol=21,
+                                    matrix(rep(NA,22),ncol=22,
                                            dimnames=list(NULL,
-                                                         colnames(Flotim.ContData.Techreport.status.PLOTFORMAT)[3:23])),
+                                                         colnames(Flotim.ContData.Techreport.status.PLOTFORMAT)[3:24])),
                                     SettLevel="Dummy")) %>%
   ggplot(aes(x=SettlementName)) +
   geom_hline(aes(yintercept=1.56),size=0.25,colour="#505050") +
@@ -229,13 +243,13 @@ Flotim.fs.statusplot <-
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
-
+  
   geom_text(aes(x=length(SettlementName),y=(0.5*(6.06-4.02))+4.02,label="Food secure"),
-             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   geom_text(aes(x=length(SettlementName),y=(0.5*(4.02-1.56))+1.56,label="Food insecure\nwithout hunger"),
-             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   geom_text(aes(x=length(SettlementName),y=0.5*1.56,label="Food insecure\nwith hunger"),
-             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,6.06)) +
   scale_fill_manual(values=fillcols.status) +
@@ -259,7 +273,7 @@ Flotim.fs.statusplot
 
 # - MATERIAL ASSETS
 Flotim.ma.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT,
-                             aes(x=SettlementName)) +
+                               aes(x=SettlementName)) +
   geom_bar(aes(y=MAMean,
                fill=SettLevel),
            stat="identity",
@@ -284,8 +298,8 @@ Flotim.ma.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT
             nudge_y=0.28,
             size=rel(4),
             colour=errcols.status["NotDummy"]) +
- geom_text(data=Flotim.statusplot.sigpos,
-           aes(x=SettlementName,y=MA.ref),
+  geom_text(data=Flotim.statusplot.sigpos,
+            aes(x=SettlementName,y=MA.ref),
             label=Flotim.statusplot.asterisks$MA.ref,
             size=rel(3),
             nudge_x=0.02,
@@ -302,7 +316,7 @@ Flotim.ma.statusplot
 
 # - PLACE ATTACHMENT
 Flotim.pa.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT,
-                             aes(x=SettlementName)) +
+                               aes(x=SettlementName)) +
   geom_bar(aes(y=PAMean,
                fill=SettLevel),
            stat="identity",
@@ -343,7 +357,7 @@ Flotim.pa.statusplot
 
 # - MARINE TENURE
 Flotim.mt.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT,
-                             aes(x=SettlementName)) +
+                               aes(x=SettlementName)) +
   geom_bar(aes(y=MTMean,
                fill=SettLevel),
            stat="identity",
@@ -383,7 +397,7 @@ Flotim.mt.statusplot
 
 # - SCHOOL ENROLLMENT
 Flotim.se.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT,
-                             aes(x=SettlementName)) +
+                               aes(x=SettlementName)) +
   geom_bar(aes(y=SEMean,
                fill=SettLevel),
            stat="identity",
@@ -424,7 +438,7 @@ Flotim.se.statusplot
 
 # - TIME TO MARKET
 Flotim.time.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT,
-                             aes(x=SettlementName)) +
+                                 aes(x=SettlementName)) +
   geom_bar(aes(y=TimeMarketMean,
                fill=SettLevel),
            stat="identity",
@@ -446,28 +460,27 @@ Flotim.time.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORM
                 y=Market),
             label=Flotim.statusplot.asterisks$Market,
             nudge_x=-0.07,
-            nudge_y=1.6,
+            nudge_y=0.07,
             size=rel(4),
             colour=errcols.status["NotDummy"]) +
   geom_text(data=Flotim.statusplot.sigpos,
             aes(x=SettlementName,y=Market.ref),
             label=Flotim.statusplot.asterisks$Market.ref,
             size=rel(3),
-            nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,max(Flotim.ContData.Techreport.status.PLOTFORMAT$TimeMarketMean,na.rm=T)+
-                                      max(Flotim.ContData.Techreport.status.PLOTFORMAT$TimeMarketErr,na.rm=T)+
+                                max(Flotim.ContData.Techreport.status.PLOTFORMAT$TimeMarketErr,na.rm=T)+
                                 0.03*max(Flotim.ContData.Techreport.status.PLOTFORMAT$TimeMarketMean,na.rm=T))) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
-  coord_flip() + Statusplot.labs["Market"] + plot.theme
+  coord_flip() + Statusplot.labs["Time"] + plot.theme
 Flotim.time.statusplot
 
 # - DAYS UNWELL
 Flotim.unwell.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT,
-                             aes(x=SettlementName)) +
+                                   aes(x=SettlementName)) +
   geom_bar(aes(y=UnwellMean,
                fill=SettLevel),
            stat="identity",
@@ -574,11 +587,10 @@ Flotim.religion.statusplot
 # - PRIMARY OCCUPATION
 Flotim.primaryocc.statusplot <- 
   melt(Flotim.PropData.Techreport.status.PLOTFORMAT,
-       id.vars="SettlementName",measure.vars=c("Percent.PrimaryOcc.Other",  
-                                               "Percent.PrimaryOcc.Aquaculture","Percent.PrimaryOcc.Tourism",
-                                               "Percent.PrimaryOcc.Extraction","Percent.PrimaryOcc.WageLabor",
-                                               "Percent.PrimaryOcc.HarvestForest", 
-                                               "Percent.PrimaryOcc.Fish","Percent.PrimaryOcc.Farm")) %>%
+       id.vars="SettlementName",measure.vars=c("Percent.PrimaryOcc.Other", 
+                                               "Percent.PrimaryOcc.WageLabor",
+                                               "Percent.PrimaryOcc.Tourism",
+                                               "Percent.PrimaryOcc.Fish","Percent.PrimaryOcc.HarvestForest", "Percent.PrimaryOcc.Farm")) %>%
   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -593,10 +605,11 @@ Flotim.primaryocc.statusplot <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["PrimaryOcc"]],
-                    labels=c("Other", "Aquaculture", "Tourism", "Extraction of non-renewable marine resources",  "Other Wage Labor",
-                             "Harvest Forest Products","Fishing", "Farming")) +
+                    labels=c("Other","Other Wage Labor","Tourism",
+                             "Fishing","Harvest Forest Products", "Farming")) +
   coord_flip() + plot.theme + Statusplot.labs["PrimaryOcc"] + plot.guides.techreport
 Flotim.primaryocc.statusplot
+
 
 # - FISHING FREQUENCY
 Flotim.freqfish.statusplot <- 
@@ -977,7 +990,7 @@ Flotim.conflict.statusplot <-
 Flotim.NumThreat.statusplot <- 
   melt(Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Threat.Minimum.Five","Threat.Four", "Threat.Three",
-"Threat.Two","Threat.One","Threat.None")) %>%
+                                               "Threat.Two","Threat.One","Threat.None")) %>%
   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -1016,13 +1029,13 @@ Flotim.ThreatType.statusplot <-
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["ThreatType"]],
                     labels=c("Other", "Other marine resource uses", "Natural processes", "Habitat loss", 
-                              "Climate change", "Illegal fishing", "Destructive fishing", "Pollution")) +
+                             "Climate change", "Illegal fishing", "Destructive fishing", "Pollution")) +
   coord_flip() + plot.theme + Statusplot.labs["ThreatTypes"] + plot.guides.techreport
 
 
 # - Number of Ethnicities
 Flotim.ethnicity.statusplot <- ggplot(data=Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
-                                    aes(x=SettlementName)) +
+                                      aes(x=SettlementName)) +
   geom_bar(aes(y=Num.EthnicGroups,
                fill="NotDummy"),
            stat="identity",
@@ -1043,7 +1056,7 @@ Flotim.ethnicity.statusplot <- ggplot(data=Flotim.SBSPropData.Techreport.status.
 
 # - Contribution
 Flotim.contribution.statusplot <- ggplot(data=Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
-                                       aes(x=SettlementName)) +
+                                         aes(x=SettlementName)) +
   geom_bar(aes(y=Contribution,
                fill="NotDummy"),
            stat="identity",
@@ -1100,20 +1113,20 @@ Flotim.fs.trendplot <-
                      limits=c(0,6.06)) +
   scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   coord_flip() + Flotim.trendplot.labs["FS"] + theme(axis.ticks=element_blank(),
-                                                  panel.background=element_rect(fill="white",
-                                                                                colour="#909090"),
-                                                  panel.border=element_rect(fill=NA,
-                                                                            size=0.25,
-                                                                            colour="#C0C0C0"),
-                                                  panel.grid.major.x=element_blank(),
-                                                  panel.grid.major.y=element_blank(),
-                                                  axis.title=element_text(size=10,
-                                                                          angle=0,
-                                                                          face="bold",
-                                                                          colour="#303030"),
-                                                  axis.text=element_text(size=8,
-                                                                         angle=0,
-                                                                         colour="#303030"))
+                                                     panel.background=element_rect(fill="white",
+                                                                                   colour="#909090"),
+                                                     panel.border=element_rect(fill=NA,
+                                                                               size=0.25,
+                                                                               colour="#C0C0C0"),
+                                                     panel.grid.major.x=element_blank(),
+                                                     panel.grid.major.y=element_blank(),
+                                                     axis.title=element_text(size=10,
+                                                                             angle=0,
+                                                                             face="bold",
+                                                                             colour="#303030"),
+                                                     axis.text=element_text(size=8,
+                                                                            angle=0,
+                                                                            colour="#303030"))
 Flotim.fs.trendplot
 
 # - MATERIAL ASSETS
@@ -1261,7 +1274,7 @@ Flotim.unwell.trendplot
 Flotim.gender.trendplot <- 
   melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="MonitoringYear",measure.vars=c("HHH.female","HHH.male")) %>%
-  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
            width=0.65,
@@ -1269,7 +1282,7 @@ Flotim.gender.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Gender"]],
                     labels=c("Female","Male")) +
@@ -1280,7 +1293,7 @@ Flotim.gender.trendplot
 Flotim.religion.trendplot <- 
   melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="MonitoringYear",measure.vars=c("Percent.Rel.Other","Percent.Rel.Muslim","Percent.Rel.Christian")) %>%
-  ggplot(aes(x=MonitoringYear,
+  ggplot(aes(x=rev(MonitoringYear),
              y=value)) +
   geom_bar(aes(fill=variable),
            stat="identity",
@@ -1290,7 +1303,7 @@ Flotim.religion.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Religion"]],
                     labels=c("Other","Muslim","Christian")) +
@@ -1315,7 +1328,7 @@ Flotim.primaryocc.trendplot <-
        id.vars="MonitoringYear",measure.vars=c("Percent.PrimaryOcc.Other","Percent.PrimaryOcc.WageLabor",
                                                "Percent.PrimaryOcc.Tourism","Percent.PrimaryOcc.Fish",
                                                "Percent.PrimaryOcc.HarvestForest","Percent.PrimaryOcc.Farm")) %>%
-  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  ggplot(aes(x=(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
            width=0.65,
@@ -1323,7 +1336,7 @@ Flotim.primaryocc.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["PrimaryOcc"]],
                     labels=c("Other","Other Wage Labor","Tourism",
@@ -1331,13 +1344,13 @@ Flotim.primaryocc.trendplot <-
   coord_flip() + plot.theme + Flotim.trendplot.labs["PrimaryOcc"] + plot.guides.techreport 
 Flotim.primaryocc.trendplot
 
-# - FISHING FREQUENCY
-Flotim.freqfish.trendplot <- 
+#USED TO CHECK DISTRIBUTION OF SECONDARY OCCUPATIONS
+Flotim.Secondaryocc.trendplot <- 
   melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
-       id.vars="MonitoringYear",measure.vars=c("Prop.Fish.MoreFewTimesWk","Prop.Fish.FewTimesPerWk",
-                                               "Prop.Fish.FewTimesPerMo","Prop.Fish.FewTimesPer6Mo",
-                                               "Prop.Fish.AlmostNever")) %>%
-  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+       id.vars="MonitoringYear",measure.vars=c("Percent.SecondaryOcc.Other","Percent.SecondaryOcc.WageLabor",
+                                               "Percent.SecondaryOcc.Tourism","Percent.SecondaryOcc.Fish",
+                                               "Percent.SecondaryOcc.HarvestForest","Percent.SecondaryOcc.Farm")) %>%
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
            width=0.65,
@@ -1345,7 +1358,30 @@ Flotim.freqfish.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["SecondaryOcc"]],
+                    labels=c("Other","Other Wage Labor","Tourism",
+                             "Fishing","Harvest Forest Products","Farming")) +
+  coord_flip() + plot.theme + labs(y="Secondary occupation (% households)",x="Monitoring Year") + plot.guides.techreport 
+Flotim.Secondaryocc.trendplot
+
+
+# - FISHING FREQUENCY
+Flotim.freqfish.trendplot <- 
+  melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
+       id.vars="MonitoringYear",measure.vars=c("Prop.Fish.MoreFewTimesWk","Prop.Fish.FewTimesPerWk",
+                                               "Prop.Fish.FewTimesPerMo","Prop.Fish.FewTimesPer6Mo",
+                                               "Prop.Fish.AlmostNever")) %>%
+  ggplot(aes(x=(MonitoringYear),y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.65,
+           size=0.15,
+           colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FreqFish"]],
                     labels=c("More than a few times per week","A few times per week",
@@ -1360,7 +1396,7 @@ Flotim.freqsellfish.trendplot <-
        id.vars="MonitoringYear",measure.vars=c("Prop.SellFish.MoreFewTimesWk","Prop.SellFish.FewTimesPerWk",
                                                "Prop.SellFish.FewTimesPerMo","Prop.SellFish.FewTimesPer6Mo",
                                                "Prop.SellFish.AlmostNever")) %>%
-  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  ggplot(aes(x=(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
            width=0.65,
@@ -1368,7 +1404,7 @@ Flotim.freqsellfish.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FreqSellFish"]],
                     labels=c("More than a few times per week","A few times per week",
@@ -1383,7 +1419,7 @@ Flotim.incfish.trendplot <-
        id.vars="MonitoringYear",measure.vars=c("Prop.IncFish.All","Prop.IncFish.Most",
                                                "Prop.IncFish.Half","Prop.IncFish.Some",
                                                "Prop.IncFish.None")) %>%
-  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  ggplot(aes(x=(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
            width=0.65,
@@ -1391,7 +1427,7 @@ Flotim.incfish.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["IncFish"]],
                     labels=c("All","Most","About half","Some","None")) +
@@ -1404,7 +1440,7 @@ Flotim.fishtech.trendplot <-
        id.vars="MonitoringYear",measure.vars=c("Prop.FishTech.MobileLine","Prop.FishTech.StatLine",
                                                "Prop.FishTech.MobileNet","Prop.FishTech.StatNet",
                                                "Prop.FishTech.ByHand")) %>%
-  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  ggplot(aes(x=(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
            width=0.65,
@@ -1412,7 +1448,7 @@ Flotim.fishtech.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FishTech"]],
                     labels=c("Mobile line","Stationary line",
@@ -1424,7 +1460,7 @@ Flotim.fishtech.trendplot
 Flotim.childfs.trendplot <- 
   melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="MonitoringYear",measure.vars=c("Child.FS.yes","Child.FS.no")) %>%
-  ggplot(aes(x=MonitoringYear,
+  ggplot(aes(x=(MonitoringYear),
              y=value)) +
   geom_bar(aes(fill=variable),
            stat="identity",
@@ -1434,7 +1470,7 @@ Flotim.childfs.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["ChildFS"]],
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
@@ -1447,7 +1483,7 @@ Flotim.proteinfish.trendplot <-
        id.vars="MonitoringYear",measure.vars=c("ProteinFish.All","ProteinFish.Most",
                                                "ProteinFish.Half","ProteinFish.Some",
                                                "ProteinFish.None")) %>%
-  ggplot(aes(x=MonitoringYear,y=value,fill=variable)) +
+  ggplot(aes(x=(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
            width=0.65,
@@ -1455,7 +1491,7 @@ Flotim.proteinfish.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.annexplot.monitoryear.labs) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Protein"]],
                     labels=c("All","Most","About half","Some","None")) +
@@ -1778,10 +1814,10 @@ Flotim.unwell.annexplot
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
-dir.create(paste("C:/Users/HP/Dropbox/Products7-3",
+dir.create(paste("C:/Users/HP/Dropbox/Products/",
                  format(Sys.Date(),format="%Y_%m_%d"),sep="_"))
 
-FigureFileName <- paste("C:/Users/HP/Dropbox/Products7-3",
+FigureFileName <- paste("C:/Users/HP/Dropbox/Products/",
                         format(Sys.Date(),format="%Y_%m_%d"),sep="_")
 
 png(paste(FigureFileName,"FS.trend.png",sep="/"),
@@ -1946,6 +1982,18 @@ png(paste(FigureFileName,"PrimaryOcc.trend.png",sep="/"),
 plot(Flotim.primaryocc.trendplot)
 dev.off()
 
+# ---- 6.15 Secondary occupation ----
+
+png(paste(FigureFileName,"SecondaryOcc.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.Secondaryocc.statusplot)
+dev.off()
+
+png(paste(FigureFileName,"SecondaryOcc.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.Secondaryocc.trendplot)
+dev.off()
+
 
 # ---- 6.11 Fishing frequency ----
 
@@ -2025,7 +2073,7 @@ plot(Flotim.proteinfish.trendplot)
 dev.off()
 
 # ---- 6.17 Age/Gender ----
-
+library(grid)
 png(paste(FigureFileName,"Age.gender.png",sep="/"),
     units="in",height=10,width=4,res=400)
 grid.newpage()
@@ -2039,5 +2087,4 @@ png(paste(FigureFileName,"Num.Ethnic.png",sep="/"),
     units="in",height=4,width=6,res=400)
 plot(Flotim.ethnic.statusplot)
 dev.off()
-
 

@@ -1121,7 +1121,7 @@ Statusplot.labs <- list(FS=labs(y="Mean household food security",x="Settlement")
                         PA=labs(y="Mean place attachment",x="Settlement"),
                         MT=labs(y="Mean household marine tenure",x="Settlement"),
                         SE=labs(y="School enrollment (% children ages 5-18 years old)",x="Settlement"),
-                        Time=labs(y="Mean travel time to closest market (hours)",x="Settlement"),
+                        Time=labs(y="Distance to market (hours)",x="Settlement"),
                         Unwell=labs(y="Mean time suffering from illness or injury in past 4 weeks (days)",
                                     x="Settlement"),
                         Gender=labs(y="Gender (% head of household)",x="Settlement"),
@@ -1155,7 +1155,7 @@ Statusplot.labs <- list(FS=labs(y="Mean household food security",x="Settlement")
 
 continuous.variables.plotlabs <- c("Mean household food security","Mean household assets",
                                    "Mean place attachment","Mean household marine tenure",
-                                   "School enrollment (% children ages 5-18 years old)",
+                                   "School enrollment (% children ages 5-18 years old)", "Distance to market (hours)",
                                    "Mean time suffering from illness or injury in past 4 weeks (days)")
 
 
