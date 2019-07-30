@@ -72,6 +72,3 @@ mpa.trends <- function(MPA=NULL) {
   
 }
 
-# ---- 1.2 Calculate trends, by MPA ----
-
-

@@ -8,26 +8,39 @@
 # created: July 2019
 
 
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 1: CALCULATE TRENDS ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+
+# ---- 1.1 Source function to calculate trends ----
+
 source('2_Functions/Function_calculate_trends.R')
 
-mpa.trends(MPA=)
 
+# ---- 1.2 Run the function for your MPA of choice ----
 
-# For your notes:
+# -- PERHATIAN! DO NOT RUN ENTIRE SCRIPT AT ONCE!
+
 
 # -- Bird's Head Seascape
-# MPAID 1 = Teluk Mayalibit
-# MPAID 2 = Teluk Cenderawasih
-# MPAID 3 = Kaimana
-# MPAID 4 = Kofiau dan Pulau Boo
-# MPAID 5 = Selat Dampier
-# MPAID 6 = Misool Selatan Timur
+mpa.trends(MPA=1) # Teluk Mayalibit
+mpa.trends(MPA=2) # Teluk Cenderawasih
+mpa.trends(MPA=3) # Kaimana
+mpa.trends(MPA=4) # Kofiau dan Pulau Boo
+mpa.trends(MPA=5) # Selat Dampier
+mpa.trends(MPA=6) # Misool Selatan Timur
+
 
 # -- Sunda Banda Seascape
-# MPAID 15 = Selat Pantar
-# MPAID 16 = Flores Timur
-# MPAID 17 = Kei Kecil
-# MPAID 18 = Koon
-# MPAID 19 = Yamdena
-# MPAID 20 = Sulawesi Tenggara
-# MPAID 21 = Wakatobi
+mpa.trends(MPA=15) # Selat Pantar
+mpa.trends(MPA=16) # Flores Timur
+mpa.trends(MPA=17) # Kei Kecil
+mpa.trends(MPA=18) # Koon
+mpa.trends(MPA=19) # Yamdena
+mpa.trends(MPA=20) # Sulawesi Tenggara
+mpa.trends(MPA=21) # Wakatobi
