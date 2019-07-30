@@ -40,8 +40,6 @@
 
 # ---- 1.1 Load libraries & data ----
 
-pacman::p_load(dplyr,rio)
-
 # Sourcing most recent files
 
 # Date in format YYYYMMDD (could be changed but we believe it makes most sense 
@@ -251,7 +249,7 @@ Organization <-
 
 Settlements <- 
   SETTLEMENT %>%
-  dplyr::mutate(Seascape = ifelse(MPAID %in% c(1,2,3,4,5,6), 1,  #Seascape 1 is Bird's Head, and Seascape 2 is Sunda Banda
+  dplyr::mutate(Seascape = ifelse(MPAID %in% c(1,2,3,4,5,6), 1,  # Seascape 1 is Bird's Head, and Seascape 2 is Sunda Banda
                                   ifelse(MPAID %in% c(15,16,17,18,19,20), 2,
                                          NA))) %>%
   dplyr::select(.,c("SettlementID","SettlementName","MPAID","Treatment","Seascape"))
@@ -270,18 +268,44 @@ HHData$MonitoringYear <- factor(mapply(a=HHData$MPAID,
                                                      ThreeYear=Baseline+3,
                                                      FourYear=Baseline+4,
                                                      FiveYear=Baseline+5,
-                                                     SixYear=Baseline+6) %>%
+                                                     SixYear=Baseline+6,
+                                                     SevenYear=Baseline+7,
+                                                     EightYear=Baseline+8,
+                                                     NineYear=Baseline+9,
+                                                     TenYear=Baseline+10,
+                                                     ElevenYear=Baseline+11,
+                                                     TwelveYear=Baseline+12,
+                                                     ThirteenYear=Baseline+13,
+                                                     FourteenYear=Baseline+14,
+                                                     FifteenYear=Baseline+15,
+                                                     SixteenYear=Baseline+16,
+                                                     SeventeenYear=Baseline+17,
+                                                     EighteenYear=Baseline+18) %>%
                                            na.omit(.)
                                          
                                          mon.year <- ifelse(b==define$Baseline[define$MPAID==a],"Baseline",
-                                                            ifelse(b==define$TwoYear[define$MPAID==a],"2 Year Post",
-                                                                   ifelse(b==define$ThreeYear[define$MPAID==a],"3 Year Post",
-                                                                          ifelse(b==define$FourYear[define$MPAID==a],"4 Year Post",
-                                                                                 ifelse(b==define$FiveYear[define$MPAID==a],"5 Year Post",
-                                                                                        ifelse(b==define$SixYear[define$MPAID==a],"6 Year Post",NA))))))
+                                                     ifelse(b==define$TwoYear[define$MPAID==a],"2 Year Post",
+                                                     ifelse(b==define$ThreeYear[define$MPAID==a],"3 Year Post",
+                                                     ifelse(b==define$FourYear[define$MPAID==a],"4 Year Post",
+                                                     ifelse(b==define$FiveYear[define$MPAID==a],"5 Year Post",
+                                                     ifelse(b==define$SixYear[define$MPAID==a],"6 Year Post",
+                                                     ifelse(b==define$SevenYear[define$MPAID==a],"7 Year Post",
+                                                     ifelse(b==define$EightYear[define$MPAID==a],"8 Year Post",
+                                                     ifelse(b==define$NineYear[define$MPAID==a],"9 Year Post",
+                                                     ifelse(b==define$TenYear[define$MPAID==a],"10 Year Post",
+                                                     ifelse(b==define$ElevenYear[define$MPAID==a],"11 Year Post",
+                                                     ifelse(b==define$TwelveYear[define$MPAID==a],"12 Year Post",
+                                                     ifelse(b==define$ThirteenYear[define$MPAID==a],"13 Year Post",
+                                                     ifelse(b==define$FourteenYear[define$MPAID==a],"14 Year Post",
+                                                     ifelse(b==define$FifteenYear[define$MPAID==a],"15 Year Post",
+                                                     ifelse(b==define$SixteenYear[define$MPAID==a],"16 Year Post",
+                                                     ifelse(b==define$SeventeenYear[define$MPAID==a],"17 Year Post",
+                                                     ifelse(b==define$EighteenYear[define$MPAID==a],"18 Year Post", NA))))))))))))))))))
                                          mon.year
                                        }),
-                                levels=c("Baseline", "2 Year Post", "3 Year Post", "4 Year Post", "5 Year Post", "6 Year Post"),
+                                levels=c("Baseline", "2 Year Post", "3 Year Post", "4 Year Post", "5 Year Post", "6 Year Post",
+                                         "7 Year Post", "8 Year Post", "9 Year Post", "10 Year Post", "11 Year Post", "12 Year Post",
+                                         "13 Year Post", "14 Year Post", "15 Year Post", "16 Year Post", "17 Year Post", "18 Year Post"),
                                 ordered=T)
 
 # 
@@ -366,43 +390,27 @@ HHData <-
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# ---- SECTION 4: OPTIONAL FILTERING BY SEASCAPE OR MPA ----
+# ---- SECTION 4: FILTERING BY MPA ----
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 
-# ---- 4.1 Filter by seascape ----
-
-# adjust filter() function with either "Seascape %in% 1" for Bird's Head, or "Seascape %in% 2" for Sunda Banda
-
-# HHData <-
-#   HHData %>%
-#   dplyr::filter(Seascape %in% 2)
-# 
-# IndDemos <-
-#   left_join(IndDemos,HHData[,c("HouseholdID","Seascape")],by=c("HouseholdID"))
-#   dplyr::filter(Seascape %in% 2)
-# 
-# Organization <-
-#   left_join(Organization,HHData[,c("HouseholdID","Seascape")],by="HouseholdID") %>%
-#   dplyr::filter(Seascape %in% 2)
+# ---- 4.1 Filter by MPA ----
 
 
-# ---- 4.2 Filter by MPA ----
+HHData <-
+  HHData %>%
+  dplyr::filter(MPAID==15)
 
-# adjust filter() function with "MPAID %in%" whatever list of MPAs you'd like to filter by
+IndDemos <-
+  left_join(IndDemos,HHData[,c("HouseholdID","Seascape")],by=c("HouseholdID")) %>%
+  dplyr::filter(MPAID==15)
 
-# HHData <-
-#   HHData %>%
-#   dplyr::filter(MPAID %in% c(1,2,3))
-# 
-# IndDemos <-
-#   left_join(IndDemos,HHData[,c("HouseholdID","Seascape")],by=c("HouseholdID")) %>%
-#   dplyr::filter(MPAID %in% c(1,2,3))
-# 
-# Organization <-
-#   left_join(Organization,HHData[,c("HouseholdID","Seascape")],by="HouseholdID") %>%
-#   dplyr::filter(MPAID %in% c(1,2,3))
+Organization <-
+  left_join(Organization,HHData[,c("HouseholdID","Seascape")],by="HouseholdID") %>%
+  dplyr::filter(MPAID==15)
+
 
 
 rm(baseline.dummy.rows)
+
