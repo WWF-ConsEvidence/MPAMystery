@@ -2,37 +2,49 @@
 title: "Quality checking Source data"
 author: "David Gill"
 date: "6/12/2019"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
-getwd()
-knitr::opts_knit$set(root.dir = getwd())
-```
+pacman::p_load(rio, lubridate,cowplot,tidyverse)
+knitr::opts_chunk$set(fig.width=10, fig.height=6) 
+options(width = 500)
+# functions
+sum2=function(x){sum(x,na.rm=TRUE)}
+mean2=function(x){mean(x,na.rm=TRUE)}
+median2=function(x){median(x,na.rm=TRUE)}
+sd2 <- function(x){sd(x,na.rm=TRUE)}
+min2 <- function(x){min(x,na.rm=TRUE)}
+max2 <- function(x){max(x,na.rm=TRUE)}
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
 
-Script that goes through the relevant variables in the Wellbeing and Demographic tables to ensure that all variables are recoded correctly in the Source_social_data_flat_files.R script. 
-
-### ---- SECTION 1 Load libraries and import data 
-```{r warning=FALSE, echo=FALSE}
-pacman::p_load(dplyr,rio)
 
 # Files (with package rio)
 last.file <- function(dir.nam,nam){
   import(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))}
-
-
-WELLBEING <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_WELLBEING')
-DEMOGRAPHIC <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_DEMOGRAPHIC')
-SETTLEMENT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_SETTLEMENT')
-ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_ORGANIZATION')
 ```
 
+Script that goes through the relevant variables in the Wellbeing and Demographic tables to ensure that all variables are recoded correctly in the Source_social_data_flat_files.R script. 
 
-### ---- SECTION 2: GET SUMMARIES AND UNIQUE VALUES FROM TABLES 
+#### ---- Section 1: Load libraries and import data 
+```{r warning=FALSE, echo=FALSE,eval=F}
+WELLBEING <- last.file(dir.nam=paste0('x_Flat_data_files/1_Social/Inputs/Master_database_exports/'),nam='HH_tbl_WELLBEING')
+DEMOGRAPHIC <- last.file(dir.nam=paste0('x_Flat_data_files/1_Social/Inputs/Master_database_exports/'),nam='HH_tbl_DEMOGRAPHIC')
+SETTLEMENT <- last.file(dir.nam=paste0('x_Flat_data_files/1_Social/Inputs/Master_database_exports/'),nam='HH_tbl_SETTLEMENT')
+ORGANIZATION <- last.file(dir.nam=paste0('x_Flat_data_files/1_Social/Inputs/Master_database_exports/'),nam='HH_tbl_ORGANIZATION')
+```
+
+(skip)
+#### ---- Section 2: Get summaries, unique values 
 Prints out summaries, unique values, and headers for the wellbeing and demographic tables 
 
 #### 2.1 Wellbeing table
-```{r echo=FALSE}
+```{r warning=FALSE, echo=FALSE,eval=F}
 
 for (i in 1:ncol(WELLBEING)){
   
@@ -51,8 +63,8 @@ for (i in 1:ncol(WELLBEING)){
 }
 
 ```
-#### 2.2 Demographic table
-```{r echo=FALSE}
+##### 2.2 Demographic table
+```{r warning=FALSE, echo=FALSE,eval=F}
 
 for (i in 1:ncol(DEMOGRAPHIC)){
   
@@ -71,10 +83,189 @@ for (i in 1:ncol(DEMOGRAPHIC)){
 }
 
 ```
+(skip)
 
-#### 3. Display incorrect values
-```{r echo=FALSE}
-blind.codes <- c(994,997,998,999)
+#### ---- Section 3: Get summaries from Arvo output
+##### 3.1 Enumerator summaries
+```{r warning=FALSE, echo=FALSE,eval=T}
+
+raw.data <- last.file(dir.nam=paste0('x_Flat_data_files/1_Social/Outputs/QAQCtest/'),nam='DATA_ANALYSIS-995140938 22 Juni-6') 
+
+# interviews per settlement
+print("interviews per settlement")
+raw.data %>% 
+  group_by(MPAID_Site,Identifier) %>% 
+  summarise(n.per.id= n()) %>% 
+  group_by(MPAID_Site) %>%
+  summarise(n.per.site= n())  
+
+# interviews per day
+int.info <- raw.data %>% 
+  mutate(int.date=dmy_hms(raw.data$`Submission Date`)) %>% 
+  group_by(Identifier,int.date) %>% 
+  summarise(tot.int.per.day=n()) %>% 
+  arrange(-tot.int.per.day) %>% 
+  left_join(raw.data %>%
+              mutate(int.duration=period_to_seconds(hms(Duration))/60) %>%
+              group_by(Identifier) %>%
+              summarise(int.time=mean2(int.duration)),by="Identifier")
+  
+ggplot(int.info, aes(x=tot.int.per.day)) +
+    geom_bar() +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5)) +
+    labs(x="Interviews per day")
+head(int.info)
+
+ggplot(int.info, aes(x=int.time)) +
+    geom_histogram() +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5)) +
+    labs(x="Interview time")
+
+print("Interview time is < 15 min  or over an hour")
+print(as.data.frame(int.info %>% 
+                      select(-tot.int.per.day) %>% 
+                        filter(int.time<15 | int.time>60) %>% 
+                        arrange(int.time)))
 
 
+```
+
+##### 3.1 Continuous data summaries
+```{r warning=FALSE, echo=F,eval=T}
+# range.check <- raw.data %>% 
+#   mutate_at(vars(AssetRadio:AssetTruck), .funs = list(`pct99`= ~ quantile(.[.<990],0.99,na.rm=T)+1)) %>% 
+# #  mutate_at(vars(AssetRadio:AssetTruck), .funs = list(.= ~ ifelse(.>(quantile(.[.<990],0.99,na.rm=T)+1) | .<990 | .>0,.,NA))) %>% 
+# #  filter_at(vars(AssetRadio:AssetTruck), any_vars(.>quantile(.[.<990],0.99,na.rm=T)+1 & .<990)) %>% 
+# #  select(Identifier,AssetRadio:AssetTruck) 
+#   select(Identifier,AssetRadio:AssetTruck,AssetRadio_pct99:AssetTruck_pct99) 
+  # select(sort(names(range.check))) %>% 
+  # select(Identifier,everything())
+
+#### - plots and summaries by values
+
+sel.data <- raw.data %>% 
+  select(Identifier,AssetRadio:AssetTruck)
+
+#head(select(raw.data,contains("Place"),contains("Rights"),starts_with("FS")))
+sel.data <- raw.data %>% 
+  mutate_at(vars(contains("Place"),contains("Rights"),starts_with("FS"),
+                 IndividualGender_HHH,IndividualUnwell_HHH,RelationHHH_NotHHH,IndividualUnwell_NotHHH,
+                 Religion,PrimaryLivelihood,SecondaryLivelihood,TertiaryLivelihood,
+                 FreqFish_3,FreqSaleFish_3,FreqEatFish_3,PercentIncomeFish_3, PercentProteinFish_3,
+                 MajorFishTechnique_3,PoorCatch_3, PoorCatchUnits_3, GoodCatchUnits_3,EconomicStatusTrend,
+                 CookingFuel,Gender, HouseholdBirth,SocialConflict, MarinePosition,VoteDistrict,VoteNational),
+            .funs = list(~ as.numeric(.))) %>% 
+  select_if(is.numeric) %>% 
+  select(RelationHHH_HHH:PlaceBeMyself) %>% 
+  bind_cols(select(raw.data,Identifier)) %>% 
+  select(Identifier,everything())
+
+bad.data <- list()
+for (i in 2:ncol(sel.data)){
+  range.val <- quantile(sel.data[i][sel.data[i]<990],c(0.1,0.99),na.rm = T)
+  sel.data1 <- filter(sel.data, sel.data[i]<990)
+print(ggplot(sel.data1, aes(x=sel.data1[,i])) +
+    geom_bar() +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5)) +
+    geom_vline(xintercept = range.val, linetype="dashed") +
+    labs(x=names(sel.data1)[i]))
+#  ggsave(paste0("x_Flat_data_files/1_Social/Outputs/QAQCtest/",names(sel.data1)[i],".png"), height = 5, width = 5)
+  
+  sel.data2<-sel.data1 %>% 
+    select(1,i) %>% 
+    filter(sel.data1[i]>range.val[2]+1) %>% 
+    mutate(pct99=range.val[2])
+  
+  # missing data
+# myColors <- data.frame(col.val=c("deepskyblue3","indianred1", "red"), data.type=c("filled", "blind code", "x.NA"),
+#                        stringsAsFactors = F)
+  prop.missing <- sel.data1 %>%
+    transmute(data.type=ifelse(sel.data1[,i]>990,"blind code",
+                     ifelse(is.na(sel.data1[,i]),"NA",
+                            ifelse(sel.data1[,i]%in%c(970:990),"bad blind code",
+                                  "filled")))) %>%
+    group_by(data.type) %>%
+    count()
+  
+    if (nrow(prop.missing)>1){
+    print("bad or missing data")
+    print(prop.missing)
+    }
+#     left_join(myColors, by="data.type") %>%
+#     mutate(col.val=ifelse(is.na(data.type),"red",col.val))
+# 
+#   manual_scale_colors <- setNames(prop.missing$col.val, prop.missing$data.type)
+# 
+#    print(ggplot(prop.missing, aes(x="",y=n, fill=data.type)) +
+#     geom_bar(width = 1, stat = "identity")  +
+# #    coord_polar("y", start=0) +
+#     scale_fill_manual(values = manual_scale_colors) +
+#     labs(title="Missing data") +
+#     theme_void())
+
+# # plot figures
+#  
+#    
+#     # printing bad data
+#     # bad blind codes
+    # print("bad blind codes")
+    # sel.data1 %>%
+    # select(1,i) %>%
+    # filter(sel.data1[i]%in%c(970:990)) %>%
+    # mutate(pct99=range.val[2])
+
+    # extreme outliers
+  if (nrow(sel.data2)>0){
+      print("extreme outliers")
+      bad.data[[i]] <- sel.data2
+      print(sel.data2)
+  }
+}
+```
+
+#### Other summaries
+##### 4.1 Ethnic groups
+```{r warning=FALSE, echo=F,eval=T}
+# 
+print("Ethnic groups")
+sort(unique(raw.data$PaternalEthnicity))
+          
+```
+
+##### 4.2 Logic arguments
+```{r warning=FALSE, echo=F,eval=T}
+
+# Child food security info when no children in household
+print("Child food security info when no children in household")
+ raw.data %>% 
+  select(Identifier,contains("Child"),IndividualAge_HHH) %>% 
+  # group_by(Identifier) %>% 
+  # summarise_all(funs(min2, first))  %>% 
+  mutate_at(vars(contains("Child")), .funs = list(~ as.numeric(.))) %>% 
+  filter_at(vars(contains("Child")),any_vars(!is.na(.) & .<989)) %>% 
+#    select_at(vars(contains("Child")))  %>% 
+  group_by(Identifier) %>% 
+  summarise_all(funs(min2, first))  %>% 
+  filter(IndividualAge_HHH_min2>19) %>% 
+  select(Identifier,FSChildPortion_first:FSNoMealChild_first,IndividualAge_HHH_min2)
+
+  
+
+# length of time in settlment greater than age
+print("length of time in settlment greater than age")
+raw.data %>% 
+  select(Identifier,IndividualAge_HHH,YearsResident) %>% 
+  filter(IndividualAge_HHH<YearsResident)
+
+# inconsistent occupation data entries
+print("inconsistent occupation data entries")
+raw.data %>% 
+  select(Identifier,PrimaryLivelihood,SecondaryLivelihood,TertiaryLivelihood) %>% 
+  filter((PrimaryLivelihood%in%c("997","998") & !SecondaryLivelihood%in%c("997","998")) | (PrimaryLivelihood%in%c("997","998") & !TertiaryLivelihood%in%c("997","998")))
+
+          
+            
 ```
