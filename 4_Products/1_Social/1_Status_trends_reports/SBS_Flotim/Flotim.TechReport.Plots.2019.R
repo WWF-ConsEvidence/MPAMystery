@@ -39,7 +39,7 @@ source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Flotim.TechReport.Datase
 
 
 #DETERMINING HOW MANY PEOPLE ACTUALLY RESPONDED TO THE FISH QUESTIONS
-HHData %>%
+answer.props <- HHData %>%
   filter(MPAID==16) %>%
   filter(Treatment==1) %>%
   group_by(SettlementName,InterviewYear) %>%
@@ -49,9 +49,22 @@ HHData %>%
             actualpercentinc=length(PercentIncFish[!is.na(PercentIncFish)]),
             actualmajfishtech=length(MajFishTechnique[!is.na(MajFishTechnique)]),
             actualproteinfish=length(PercentProteinFish[!is.na(PercentProteinFish)]),
-            actualeatfish=length(FreqEatFish[!is.na(FreqEatFish)])) %>% View()
+            actualeatfish=length(FreqEatFish[!is.na(FreqEatFish)]),
+            Prop.PrimaryLivelihood=length(PrimaryLivelihood[!is.na(PrimaryLivelihood)]),
+            Prop.SecondaryLivelihood=length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]),
+            Prop.TertiaryLivelihood=length(TertiaryLivelihood[!is.na(TertiaryLivelihood)]),
+            Total=length(HouseholdID),
+            FSIndex=length(FSIndex[!is.na(FSIndex)]),
+            MAIndex=length(MAIndex[!is.na(MAIndex)]),
+            SERate=length(SERate[!is.na(SERate)]),
+            PAIndex=length(PAIndex[!is.na(PAIndex)]),
+            MTIndex=length(MTIndex[!is.na(MTIndex)]))
+write.csv(answer.props,file="answer.props.csv")
 
-
+Flotim.SBSContData.Techreport.trend.PLOTFORMAT <- read.csv("Flotim.SBSContData.Techreport.TREND.PLOTFORMAT")
+Flotim.SBSPropData.Techreport.trend.PLOTFORMAT <- read.csv("Flotim.SBSPropData.Techreport.trend.PLOTFORMAT")
+Synth.DemosSBS.ByMPA.All <- read.csv("Synth.DemosSBS.ByMPA.All")
+Flotim.SBSPropData.Techreport.status.PLOTFORMAT <- read.csv("Flotim.SBSPropData.Techreport.status.PLOTFORMAT")
 # ---- 1.2 Define significance labels and (x,y) coordinates for plots ----
 
 library(gridExtra)
@@ -69,7 +82,7 @@ Flotim.statusplot.sigpos <-
 # ---- 1.3 Define Flotim-specific plot labels, with significance asterisks ----
 
 Flotim.annexplot.monitoryear.labs <- rev(define.year.monitoryear.column(Flotim.AnnexContData.Techreport.PLOTFORMAT))
-Flotim.trendplot.monitoryear.labs <- (define.year.monitoryear.column(Flotim.AnnexContData.Techreport.PLOTFORMAT))
+Flotim.trendplot.monitoryear.labs <- define.year.monitoryear.column(Flotim.AnnexContData.Techreport.PLOTFORMAT)
 
 Flotim.conttrendplot.ylabs <- 
   define.conttrendplot.ylabels.withasterisks(Flotim.TrendContData.Techreport.PLOTFORMAT
@@ -99,13 +112,18 @@ Flotim.trendplot.labs <- list(FS=labs(y=as.character(Flotim.conttrendplot.ylabs[
                               IncFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Income from fishing in past 6 months (% households)"]),x="Monitoring Year"),
                               FishTech=labs(y=as.character(Flotim.proptrendplot.ylabs["Fishing technique most often used in past 6 months (% households)"]),x="Monitoring Year"),
                               ChildFS=labs(y=as.character(Flotim.proptrendplot.ylabs["Child hunger (% households)"]),x="Monitoring Year"),
-                              Protein=labs(y=as.character(Flotim.proptrendplot.ylabs["Dietary protein from fish in past 6 months (% households)"]),x="Monitoring Year"))
+                              Protein=labs(y=as.character(Flotim.proptrendplot.ylabs["Dietary protein from fish in past 6 months (% households)"]),x="Monitoring Year"),
+                              AdultEduc=labs(y="Education completed (% adults 18 years and older)",x="Monitoring Year"),
+                              HHHEducation=labs(y="Education completed (% heads of households)",x="Monitoring Year"),
+                              NumThreat=labs(y="Percentage of respondents identifying threats to marine environment ***",x="Monitoring Year"),
+                              EconStatus=labs(y="Change in economic status of fishing households (% households)",x="Monitoring Year"))
 
 Flotim.annexplot.settnames <- 
   define.annexplot.settname.labels(annex.sigvals.Flotim)
 
 Flotim.annexplot.settnames[3,] <- rep("",length(Flotim.annexplot.settnames[3,]))
 
+Flotim.treatment.labs<-list(trend=labs("Treatment\n Settlements", "Control\n Settlements"))
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -782,6 +800,18 @@ Flotim.FSCategorical.statusplot <-
   coord_flip() + plot.theme + Statusplot.labs["FSCategorical"] + plot.guides.techreport
 Flotim.FSCategorical.statusplot
 
+Flotim.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Flotim.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName),"",
+         as.character(Flotim.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName))
+
+Flotim.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  factor(Flotim.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName,
+         levels=unique(Flotim.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName),
+         ordered=T)
+
+# - add row for plot fill colour formatting
+Flotim.SBSPropData.Techreport.status.PLOTFORMAT$Dummy <- 
+  ifelse(Flotim.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
 # ADULT EDUCATION
 Flotim.AdultEduc.statusplot <- 
   melt(Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
@@ -803,7 +833,7 @@ Flotim.AdultEduc.statusplot <-
                     values=multianswer.fillcols.status[["AdultEducation"]],
                     labels=c("Further or higher education","High school education","Middle school education","Primary school education","Pre-school education", "No formal education")) +
   coord_flip() + plot.theme + Statusplot.labs["AdultEduc"] + plot.guides.techreport
-
+Flotim.AdultEduc.statusplot
 
 # HOUSEHOLD HEAD EDUCATION
 Flotim.HHHEduc.statusplot <- 
@@ -826,7 +856,7 @@ Flotim.HHHEduc.statusplot <-
                     values=multianswer.fillcols.status[["HHHEducation"]],
                     labels=c("Further or higher education","High school education","Middle school education","Primary school education","Pre-school education", "No formal education")) +
   coord_flip() + plot.theme + Statusplot.labs["HHHEduc"] + plot.guides.techreport
-
+Flotim.HHHEduc.statusplot
 
 # ECONOMIC STATUS
 Flotim.econ.statusplot <- 
@@ -850,6 +880,7 @@ Flotim.econ.statusplot <-
                     values=multianswer.fillcols.status[["EconStatus"]],
                     labels=c("Much better","Slightly better","Neither better or worse","Slightly worse","Much worse")) +
   coord_flip() + plot.theme + Statusplot.labs["EconStatus"] + plot.guides.techreport
+Flotim.econ.statusplot
 
 # RULES
 Flotim.rules.statusplot <- 
@@ -870,6 +901,7 @@ Flotim.rules.statusplot <-
                     values=multianswer.fillcols.status[["PropRules"]],
                     labels=c("Important species","Important habitats")) +
   coord_flip() + plot.theme + Statusplot.labs["Rules"] + plot.guides.techreport
+Flotim.rules.statusplot 
 
 # PARTICIPATION IN DECISION-MAKING
 Flotim.participation.statusplot <- 
@@ -891,7 +923,7 @@ Flotim.participation.statusplot <-
                     values=multianswer.fillcols.status[["Participate"]],
                     labels=c("Setting appropriation rules", "MPA boundary delineation", "Design of MPA management body", "Design of MPA-managing organization")) +
   coord_flip() + plot.theme + Statusplot.labs["Participation"] + plot.guides.techreport
-
+Flotim.participation.statusplot
 
 # - MEMBER OF MARINE RESOURCE ORGANIZATION
 Flotim.member.statusplot <- 
@@ -915,7 +947,7 @@ Flotim.member.statusplot <-
                     values=multianswer.fillcols.status[["Member"]],
                     labels=c("Non-member","Member")) +
   coord_flip() + plot.theme + Statusplot.labs["Member"] + plot.guides.techreport
-
+Flotim.member.statusplot
 
 # - MEETING ATTENDANCE
 Flotim.meeting.statusplot <- 
@@ -939,6 +971,7 @@ Flotim.meeting.statusplot <-
                     values=multianswer.fillcols.status[["Attendance"]],
                     labels=c("Have not attended a meeting","Attended a meeting")) +
   coord_flip() + plot.theme + Statusplot.labs["Attendance"] + plot.guides.techreport
+Flotim.meeting.statusplot
 
 # - ILLNESS
 Flotim.illness.statusplot <- 
@@ -962,8 +995,9 @@ Flotim.illness.statusplot <-
                     values=multianswer.fillcols.status[["Illness"]],
                     labels=c("Ill or injured ","Not Ill or injured")) +
   coord_flip() + plot.theme + Statusplot.labs["Ill"] + plot.guides.techreport
+Flotim.illness.statusplot
 
-# MARINE RESOUCE CONFLICT
+# MARINE RESOURCE CONFLICT
 Flotim.conflict.statusplot <- 
   melt(Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Percent.GreatlyDecreased.SocConflict","Percent.Decreased.SocConflict",
@@ -985,6 +1019,7 @@ Flotim.conflict.statusplot <-
                     values=multianswer.fillcols.status[["SocialConflict"]],
                     labels=c("Greatly decreased","Decreased","Neither increased or decreased","Increased","Greatly Increased")) +
   coord_flip() + plot.theme + Statusplot.labs["Conflict"] + plot.guides.techreport
+Flotim.conflict.statusplot
 
 # NUMBER OF LOCAL THREATS
 Flotim.NumThreat.statusplot <- 
@@ -1007,7 +1042,7 @@ Flotim.NumThreat.statusplot <-
                     values=multianswer.fillcols.status[["NumThreats"]],
                     labels=c("More than five threats","Four threats","Three threats","Two threats","One threat", "No threats")) +
   coord_flip() + plot.theme + Statusplot.labs["NumLocalThreats"] + plot.guides.techreport
-
+Flotim.NumThreat.statusplot
 
 # - THREAT TYPES
 Flotim.ThreatType.statusplot <- 
@@ -1031,7 +1066,7 @@ Flotim.ThreatType.statusplot <-
                     labels=c("Other", "Other marine resource uses", "Natural processes", "Habitat loss", 
                              "Climate change", "Illegal fishing", "Destructive fishing", "Pollution")) +
   coord_flip() + plot.theme + Statusplot.labs["ThreatTypes"] + plot.guides.techreport
-
+Flotim.ThreatType.statusplot
 
 # - Number of Ethnicities
 Flotim.ethnicity.statusplot <- ggplot(data=Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
@@ -1052,7 +1087,7 @@ Flotim.ethnicity.statusplot <- ggplot(data=Flotim.SBSPropData.Techreport.status.
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["Ethnicity"] + plot.theme
-
+Flotim.ethnicity.statusplot
 
 # - Contribution
 Flotim.contribution.statusplot <- ggplot(data=Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
@@ -1091,7 +1126,7 @@ Flotim.fs.trendplot <-
   geom_hline(aes(yintercept=1.56),size=0.25,colour="#505050") +
   geom_hline(aes(yintercept=4.02),size=0.25,colour="#505050") +
   geom_bar(aes(x=MonitoringYear,
-               y=FSMean),
+               y=FSMean))),
            fill=fillcols.trend,
            stat="identity",
            position="dodge",
@@ -1133,11 +1168,11 @@ Flotim.fs.trendplot
 Flotim.ma.trendplot <- 
   ggplot(data=Flotim.TrendContData.Techreport.PLOTFORMAT
          [!is.na(Flotim.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
-         aes(x=MonitoringYear)) +
-  geom_bar(aes(y=MAMean),
+         aes(x=SettlementName)) +
+  geom_bar(aes(y=MAMean,group=MonitoringYear),
            fill=fillcols.trend,
            stat="identity",
-           position="dodge",
+           position=position_dodge(width=1),
            width=0.65) +
   geom_errorbar(aes(ymin=MAMean-MAErr,
                     ymax=MAMean+MAErr),
@@ -1149,8 +1184,8 @@ Flotim.ma.trendplot <-
                      limits=c(0,max(Flotim.TrendContData.Techreport.PLOTFORMAT$MAMean,na.rm=T)+
                                 max(Flotim.TrendContData.Techreport.PLOTFORMAT$MAErr,na.rm=T)+
                                 0.03*max(Flotim.TrendContData.Techreport.PLOTFORMAT$MAMean,na.rm=T))) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
-  coord_flip() + Flotim.trendplot.labs["MA"] + plot.theme
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) + 
+  coord_flip() + Flotim.trendplot.labs["MA"] + plot.theme 
 Flotim.ma.trendplot
 
 # - PLACE ATTACHMENT
@@ -1267,6 +1302,57 @@ Flotim.unwell.trendplot <-
   scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
   coord_flip() + Flotim.trendplot.labs["Unwell"] + plot.theme
 Flotim.unwell.trendplot
+
+#Contributions by organization
+#UPDATE ASTERISKS FOR MPA'S OTHER THAN FLOTIM
+Flotim.contribution.trendplot <- 
+  ggplot(data=Flotim.SBSContData.Techreport.trend.PLOTFORMAT
+         [!is.na(Flotim.SBSContData.Techreport.trend.PLOTFORMAT$MonitoringYear),],
+         aes(x=MonitoringYear)) +
+  geom_bar(aes(y=Contribution),
+           fill=fillcols.trend,
+           stat="identity",
+           position="dodge",
+           width=0.65) +
+  geom_errorbar(aes(ymin=Contribution-ContributionErr,
+                    ymax=Contribution+ContributionErr),
+                colour=errcols.trend,
+                width=0.15,
+                size=0.5,
+                position=position_dodge(width=1)) +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(Flotim.SBSContData.Techreport.trend.PLOTFORMAT$Contribution,na.rm=T)+
+                                max(Flotim.SBSContData.Techreport.trend.PLOTFORMAT$ContributionErr,na.rm=T)+
+                                0.03*max(Flotim.SBSContData.Techreport.trend.PLOTFORMAT$Contribution,na.rm=T))) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  coord_flip() + labs(y="Mean household contributions (Indonesian Rupiah) *") + plot.theme
+Flotim.contribution.trendplot
+
+# Mean threats trend
+
+Flotim.Threat.Mean.trendplot <- 
+  ggplot(data=Flotim.SBSContData.Techreport.trend.PLOTFORMAT
+         [!is.na(Flotim.SBSContData.Techreport.trend.PLOTFORMAT$MonitoringYear),],
+         aes(x=MonitoringYear)) +
+  geom_bar(aes(y=Threat.Mean),
+           fill=fillcols.trend,
+           stat="identity",
+           position="dodge",
+           width=0.65) +
+  geom_errorbar(aes(ymin=Threat.Mean-Threat.MeanErr,
+                    ymax=Threat.Mean+Threat.MeanErr),
+                colour=errcols.trend,
+                width=0.15,
+                size=0.5,
+                position=position_dodge(width=1)) +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(Flotim.SBSContData.Techreport.trend.PLOTFORMAT$Threat.Mean,na.rm=T)+
+                                max(Flotim.SBSContData.Techreport.trend.PLOTFORMAT$Threat.MeanErr,na.rm=T)+
+                                0.03*max(Flotim.SBSContData.Techreport.trend.PLOTFORMAT$Threat.Mean,na.rm=T))) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  coord_flip() + labs(y="Mean number of threats to marine environments identified ***") + plot.theme
+Flotim.Threat.Mean.trendplot
+
 
 # ---- 4.2 Proportional data plots ----
 
@@ -1497,6 +1583,89 @@ Flotim.proteinfish.trendplot <-
                     labels=c("All","Most","About half","Some","None")) +
   coord_flip() + plot.theme + Flotim.trendplot.labs["Protein"] + plot.guides.techreport
 Flotim.proteinfish.trendplot
+
+# - CHANGE IN ECONOMIC STATUS FOR FISHERS
+Flotim.fishecon.trendplot <- 
+  melt(Flotim.SBSPropData.Techreport.trend.PLOTFORMAT,
+       id.vars="MonitoringYear",measure.vars=c("Econ.Status.Much.Better","Econ.Status.Slightly.Better",
+                                               "Econ.Status.Neutral","Econ.Status.Slighly.Worse",
+                                               "Econ.Status.Much.Worse")) %>%
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.65,
+           size=0.15,
+           colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["EconStatus"]],
+                    labels=c("Much better","Slightly better","Neither better or worse",
+                             "Slightly worse","Much worse")) +
+  coord_flip() + plot.theme + Flotim.trendplot.labs["EconStatus"] + plot.guides.techreport
+Flotim.fishecon.trendplot
+
+#Adult education trend
+Flotim.AdultEduc.trendplot <- 
+  melt(Synth.DemosSBS.ByMPA.All,
+       id.vars="MonitoringYear",measure.vars=c("AdultEducHigher", "AdultEducSec", "AdultEducMid",
+                                               "AdultEducPrim", "AdultEducPre", "AdultEducNone")) %>%
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.65,
+           size=0.15,
+           colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["AdultEducation"]],
+                    labels=c("Further or higher education","High school education","Middle school education",
+                             "Primary school education","Pre-school education", "No formal education")) +
+  coord_flip() + plot.theme + Flotim.trendplot.labs["AdultEduc"]+ plot.guides.techreport
+Flotim.AdultEduc.trendplot
+
+# HHH education trend
+Flotim.HHHEduc.trendplot <- 
+  melt(Synth.DemosSBS.ByMPA.All,
+       id.vars="MonitoringYear",measure.vars=c("HHHEducHigher", "HHHEducSec", "HHHEducMid",
+                                               "HHHEducPrim", "HHHEducPre", "HHHEducNone")) %>%
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.65,
+           size=0.15,
+           colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["HHHEducation"]],
+                    labels=c("Further or higher education","High school education","Middle school education",
+                             "Primary school education","Pre-school education", "No formal education")) +
+  coord_flip() + plot.theme + Flotim.trendplot.labs["HHHEducation"] + plot.guides.techreport
+Flotim.HHHEduc.trendplot
+
+Flotim.NumThreat.trendplot <- 
+  melt(Flotim.SBSPropData.Techreport.trend.PLOTFORMAT,
+       id.vars="MonitoringYear",measure.vars=c("Threat.Minimum.Five","Threat.Four", "Threat.Three",
+                                               "Threat.Two","Threat.One","Threat.None")) %>%
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.65,
+           size=0.15,
+           colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["NumThreats"]],
+                    labels=c("More than five threats","Four threats","Three threats","Two threats","One threat", "No threats")) +
+  coord_flip() + plot.theme + Flotim.trendplot.labs["NumThreat"] + plot.guides.techreport
+Flotim.NumThreat.trendplot
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -2085,6 +2254,114 @@ dev.off()
 
 png(paste(FigureFileName,"Num.Ethnic.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.ethnic.statusplot)
+plot(Flotim.ethnicity.statusplot)
 dev.off()
+
+# ---- 6.19 Adult education ----
+
+png(paste(FigureFileName,"AdultEduc.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.AdultEduc.statusplot)
+dev.off()
+
+png(paste(FigureFileName,"AdultEduc.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.AdultEduc.trendplot)
+dev.off()
+
+
+
+# ---- 6.2 Househousehold Head Education  ----
+
+png(paste(FigureFileName,"HHHEduc.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.HHHEduc.statusplot)
+dev.off()
+
+png(paste(FigureFileName,"HHHEduc.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.HHHEduc.trendplot)
+dev.off()
+
+# ---- 6.21 Change in economic status ----
+
+png(paste(FigureFileName,"EconChange.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.econ.statusplot)
+dev.off()
+
+png(paste(FigureFileName,"Flotim.fishecon.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.fishecon.trendplot)
+dev.off()
+
+# ---- 6.22 Rules ----
+
+png(paste(FigureFileName,"Rules.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.rules.statusplot)
+dev.off()
+
+# ---- 6.23 Participation in decision-making ----
+
+png(paste(FigureFileName,"Decisions.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.participation.statusplot)
+dev.off()
+
+# ---- 6.24 Member of an organization ----
+
+png(paste(FigureFileName,"OrgMem.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.member.statusplot)
+dev.off()
+
+# ---- 6.25 Meeting attendance ----
+
+png(paste(FigureFileName,"Attendance.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.meeting.statusplot)
+dev.off()
+
+# ---- 6.26 Illness ----
+
+png(paste(FigureFileName,"Illness.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.illness.statusplot)
+dev.off()
+
+# ---- 6.27 Marine Resource Conflict ----
+
+png(paste(FigureFileName,"Conflict.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.conflict.statusplot)
+dev.off()
+
+# ---- 6.28 Number of Threats ----
+
+png(paste(FigureFileName,"Threats.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.NumThreat.statusplot)
+dev.off()
+
+png(paste(FigureFileName,"Threats.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.NumThreat.trendplot)
+dev.off()
+
+# ---- 6.29 Contributions ----
+
+png(paste(FigureFileName,"Contribution.status.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.contribution.statusplot)
+dev.off()
+
+png(paste(FigureFileName,"Contribution.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(Flotim.contribution.trendplot)
+dev.off()
+
+
+
+
 

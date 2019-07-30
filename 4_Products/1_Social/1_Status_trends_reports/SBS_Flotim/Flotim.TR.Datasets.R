@@ -277,9 +277,12 @@ Flotim.TrendPropData.Techreport.PLOTFORMAT <-
 
 # ---- 2.4 Trend dataset for Flotim, MPA-level continuous data (with p values) ----
 
+
 Flotim.TrendContData.Techreport.PLOTFORMAT <- 
-  rbind.data.frame(Flotim.level.ContData.annex[,c(3:17)],
-                   trend.sigvals.Flotim)
+  rbind.data.frame(Flotim.level.ContData.control.annex[,c(2,3:17)],
+                   Flotim.level.ContData.annex[,c(1,3:17)],
+                   trend.sigvals.Flotim,
+                   control.sigvals.Flotim)
 
 # - make MonitoringYear an ordered factor for plotting
 Flotim.TrendContData.Techreport.PLOTFORMAT$MonitoringYear <-
@@ -402,7 +405,7 @@ define.statusplot.asterisk.pos <- function(x,asterisks) {
 define.conttrendplot.ylabels.withasterisks <- function(x) {
   result <- x
   labs <- continuous.variables.plotlabs
-  for(a in 1:7) {
+  for(a in 1:9) {
     result[a] <- ifelse(as.numeric(x[a])<0.01,paste(labs[a],"***",sep=" "),
                         ifelse(as.numeric(x[a])<0.05 & as.numeric(x[a])>=0.01,paste(labs[a],"**",sep=" "),
                                ifelse(as.numeric(x[a])<0.1 & as.numeric(x[a])>=0.05,paste(labs[a],"*",sep=" "),
@@ -410,6 +413,7 @@ define.conttrendplot.ylabels.withasterisks <- function(x) {
   }
   result
 }
+
 
 # Define y labels, with asterisks -- proportional variables trend plots
 define.proptrendplot.ylabels.withasterisks <- function(x) {

@@ -500,14 +500,26 @@ colnames(trend.non.parametric.test.byMPA.Flotim) <- colnames(sigvals.Flotim[2:8]
 colnames(trend.non.parametric.test.byControl.Flotim) <- colnames(sigvals.Flotim[2:8])
 
 trend.sigvals.Flotim <- 
-  cbind.data.frame(MonitoringYear="p.value",trend.non.parametric.test.byMPA.Flotim["sl",1],NA,trend.non.parametric.test.byMPA.Flotim["sl",2],
+  cbind.data.frame(SettlementName="TS",MonitoringYear="p.value",trend.non.parametric.test.byMPA.Flotim["sl",1],NA,trend.non.parametric.test.byMPA.Flotim["sl",2],
                    NA,trend.non.parametric.test.byMPA.Flotim["sl",3],NA,trend.non.parametric.test.byMPA.Flotim["sl",4],NA,trend.non.parametric.test.byMPA.Flotim["sl",5],
                    NA,trend.non.parametric.test.byMPA.Flotim["sl",6],NA,trend.non.parametric.test.byMPA.Flotim["sl",7],NA)
 
-colnames(trend.sigvals.Flotim) <- c("MonitoringYear","FSMean","FSErr","MAMean","MAErr","PAMean","PAErr","MTMean","MTErr","SEMean","SEErr",
-                                    "MarketMean","MarketErr","UnwellMean","UnwellErr")
+colnames(trend.sigvals.Flotim) <- c("SettlementName","MonitoringYear","FSMean","FSErr","MAMean","MAErr","PAMean","PAErr","MTMean","MTErr","SEMean","SEErr",
+                                    "TimeMarketMean","TimeMarketErr","UnwellMean","UnwellErr")
 
 trend.sigvals.Flotim <- unlist(trend.sigvals.Flotim)
+
+control.sigvals.Flotim <- 
+  cbind.data.frame(SettlementName="CS",MonitoringYear="p.value",trend.non.parametric.test.byControl.Flotim["sl",1],NA,trend.non.parametric.test.byControl.Flotim["sl",2],
+                   NA,trend.non.parametric.test.byControl.Flotim["sl",3],NA,trend.non.parametric.test.byControl.Flotim["sl",4],NA,trend.non.parametric.test.byControl.Flotim["sl",5],
+                   NA,trend.non.parametric.test.byControl.Flotim["sl",6],NA,trend.non.parametric.test.byControl.Flotim["sl",7],NA)
+
+colnames(control.sigvals.Flotim) <- c("SettlementName","MonitoringYear","FSMean","FSErr","MAMean","MAErr","PAMean","PAErr","MTMean","MTErr","SEMean","SEErr",
+                                      "TimeMarketMean","TimeMarketErr","UnwellMean","UnwellErr")
+
+control.sigvals.Flotim <- unlist(control.sigvals.Flotim)
+
+
 
 # ---- 4.4 Create function that will output TREND significance values for non-parametric variables, BY SETTLEMENT ----
 #          (for annex plots)

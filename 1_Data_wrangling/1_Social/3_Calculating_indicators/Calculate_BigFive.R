@@ -40,7 +40,7 @@
 #
 
 pacman::p_load(reshape2,ggplot2,dplyr)
-
+library(reshape2)
 # ---- 1.1 Import data ----
 
 # FROM FLAT FILE
@@ -93,8 +93,9 @@ HHData$FSIndex <-
                                         "FreqAdultSkip", "Hungry")],
                               na.rm=TRUE),
                       NA)) %>%
-  revalue(., c("0"="0", "1"="2.04","2"="2.99","3"="3.77","4"="4.5","5"="5.38","6"="6.06"))
+  plyr::revalue(., c("0"="0", "1"="2.04","2"="2.99","3"="3.77","4"="4.5","5"="5.38","6"="6.06"))
 HHData$FSIndex <- 6.06-as.numeric(HHData$FSIndex) 
+
 
 HHData <- 
   IndDemos %>%
@@ -128,8 +129,8 @@ BigFive.SettleGroup <-
             SEErr=round(sd(SERate,na.rm=T)/sqrt(length(SERate)),2)) %>%
   na.omit()
 
-BigFive.SettleGroup <- rbind.data.frame(BigFive.SettleGroup,
-                                        data.frame(SettlementID=c(72,104:112,113:115),
+#BigFive.SettleGroup <- rbind.data.frame(BigFive.SettleGroup,
+                                        data.frame(SettlementID=c(116:228),
                                                    SettlementName=c(as.character(unique(BigFive.SettleGroup$SettlementName[BigFive.SettleGroup$SettlementID==72])),
                                                                     as.character(unique(BigFive.SettleGroup$SettlementName[BigFive.SettleGroup$MPAID==2 &
                                                                                                                              BigFive.SettleGroup$Treatment==1 &
