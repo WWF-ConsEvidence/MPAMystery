@@ -495,12 +495,11 @@ trend.non.parametric.test.byControl.Flotim <-
                                     i[Flotim.Trend.Data$InterviewYear==unique(Flotim.Trend.Data$InterviewYear)[2]]))
                     }))
 
-
 colnames(trend.non.parametric.test.byMPA.Flotim) <- colnames(sigvals.Flotim[2:8])
 colnames(trend.non.parametric.test.byControl.Flotim) <- colnames(sigvals.Flotim[2:8])
 
 trend.sigvals.Flotim <- 
-  cbind.data.frame(SettlementName="TS",MonitoringYear="p.value",trend.non.parametric.test.byMPA.Flotim["sl",1],NA,trend.non.parametric.test.byMPA.Flotim["sl",2],
+  cbind.data.frame(trend.non.parametric.test.byMPA.Flotim["sl",1],MonitoringYear="p.value",trend.non.parametric.test.byMPA.Flotim["sl",1],NA,trend.non.parametric.test.byMPA.Flotim["sl",2],
                    NA,trend.non.parametric.test.byMPA.Flotim["sl",3],NA,trend.non.parametric.test.byMPA.Flotim["sl",4],NA,trend.non.parametric.test.byMPA.Flotim["sl",5],
                    NA,trend.non.parametric.test.byMPA.Flotim["sl",6],NA,trend.non.parametric.test.byMPA.Flotim["sl",7],NA)
 
@@ -510,7 +509,7 @@ colnames(trend.sigvals.Flotim) <- c("SettlementName","MonitoringYear","FSMean","
 trend.sigvals.Flotim <- unlist(trend.sigvals.Flotim)
 
 control.sigvals.Flotim <- 
-  cbind.data.frame(SettlementName="CS",MonitoringYear="p.value",trend.non.parametric.test.byControl.Flotim["sl",1],NA,trend.non.parametric.test.byControl.Flotim["sl",2],
+  cbind.data.frame(trend.non.parametric.test.byControl.Flotim["sl",1],MonitoringYear="p.value",trend.non.parametric.test.byControl.Flotim["sl",1],NA,trend.non.parametric.test.byControl.Flotim["sl",2],
                    NA,trend.non.parametric.test.byControl.Flotim["sl",3],NA,trend.non.parametric.test.byControl.Flotim["sl",4],NA,trend.non.parametric.test.byControl.Flotim["sl",5],
                    NA,trend.non.parametric.test.byControl.Flotim["sl",6],NA,trend.non.parametric.test.byControl.Flotim["sl",7],NA)
 

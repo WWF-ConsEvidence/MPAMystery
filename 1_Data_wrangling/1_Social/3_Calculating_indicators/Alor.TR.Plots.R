@@ -1,5 +1,5 @@
 # 
-# code:  Flotim Technical Report Plots
+# code:  Alor Technical Report Plots
 # 
 # github: WWF-ConsEvidence/MPAMystery/2_Social/TechnicalReports/SBS/Plots
 # --- Duplicate all code from "2_Social" onward, to maintain file structure for sourced code
@@ -10,8 +10,8 @@
 # 
 # 
 # ---- inputs ----
-#  1) Source Flotim.TR.Datasets.R 
-#     - Dependencies: Flotim.TR.SigTest.R
+#  1) Source Alor.TR.Datasets.R 
+#     - Dependencies: Alor.TR.SigTest.R
 #                     After_Calculate_BigFive.R
 #                     Calculate_BigFive.R
 # 
@@ -33,102 +33,80 @@
 # 
 source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/SBS_TechReport_Calculations.R")
 
-source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Flotim.TechReport.SigTest.2019.R")
+source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Alor.TechReport.SigTest.2019.R")
 
-source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Flotim.TechReport.Datasets.2019.R")
+source("C:/Users/bauer-intern/Dropbox/MPAMystery/MyWork/Alor.TechReport.Datasets.2019.R")
 
 
-#DETERMINING HOW MANY PEOPLE ACTUALLY RESPONDED TO THE FISH QUESTIONS
-answer.props <- HHData %>%
-  filter(MPAID==16) %>%
-  filter(Treatment==1) %>%
-  group_by(SettlementName,InterviewYear) %>%
-  summarise(total=length(HouseholdID),
-            actualfishfreq=length(FreqFish[!is.na(FreqFish)]),
-            actualfreqsale=length(FreqSaleFish[!is.na(FreqSaleFish)]),
-            actualpercentinc=length(PercentIncFish[!is.na(PercentIncFish)]),
-            actualmajfishtech=length(MajFishTechnique[!is.na(MajFishTechnique)]),
-            actualproteinfish=length(PercentProteinFish[!is.na(PercentProteinFish)]),
-            actualeatfish=length(FreqEatFish[!is.na(FreqEatFish)]),
-            Prop.PrimaryLivelihood=length(PrimaryLivelihood[!is.na(PrimaryLivelihood)]),
-            Prop.SecondaryLivelihood=length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]),
-            Prop.TertiaryLivelihood=length(TertiaryLivelihood[!is.na(TertiaryLivelihood)]),
-            Total=length(HouseholdID),
-            FSIndex=length(FSIndex[!is.na(FSIndex)]),
-            MAIndex=length(MAIndex[!is.na(MAIndex)]),
-            SERate=length(SERate[!is.na(SERate)]),
-            PAIndex=length(PAIndex[!is.na(PAIndex)]),
-            MTIndex=length(MTIndex[!is.na(MTIndex)]))
-write.csv(answer.props,file="answer.props.csv")
 
-Flotim.SBSContData.Techreport.trend.PLOTFORMAT <- read.csv("Flotim.SBSContData.Techreport.TREND.PLOTFORMAT")
-Flotim.SBSPropData.Techreport.trend.PLOTFORMAT <- read.csv("Flotim.SBSPropData.Techreport.trend.PLOTFORMAT")
+
+Alor.SBSContData.Techreport.trend.PLOTFORMAT <- read.csv("Alor.SBSContData.Techreport.TREND.PLOTFORMAT")
+Alor.SBSPropData.Techreport.trend.PLOTFORMAT <- read.csv("Alor.SBSPropData.Techreport.trend.PLOTFORMAT")
 Synth.DemosSBS.ByMPA.All <- read.csv("Synth.DemosSBS.ByMPA.All")
-Flotim.SBSPropData.Techreport.status.PLOTFORMAT <- read.csv("Flotim.SBSPropData.Techreport.status.PLOTFORMAT")
+Alor.SBSPropData.Techreport.status.PLOTFORMAT <- read.csv("Alor.SBSPropData.Techreport.status.PLOTFORMAT")
 # ---- 1.2 Define significance labels and (x,y) coordinates for plots ----
 
 library(gridExtra)
 
-Flotim.statusplot.asterisks <- 
-  define.statusplot.asterisks(Flotim.ContData.Techreport.status.PLOTFORMAT[,c("SettlementName","FS.pval",
+Alor.statusplot.asterisks <- 
+  define.statusplot.asterisks(Alor.ContData.Techreport.status.PLOTFORMAT[,c("SettlementName","FS.pval",
                                                                               "MA.pval","MT.pval","PA.pval",
                                                                               "SE.pval", "TimeMarket.pval",
                                                                               "Unwell.pval")])
-Flotim.statusplot.sigpos <- 
-  define.statusplot.asterisk.pos(Flotim.ContData.Techreport.status.PLOTFORMAT,
-                                 Flotim.statusplot.asterisks)  
+Alor.statusplot.sigpos <- 
+  define.statusplot.asterisk.pos(Alor.ContData.Techreport.status.PLOTFORMAT,
+                                 Alor.statusplot.asterisks)  
 
 
-# ---- 1.3 Define Flotim-specific plot labels, with significance asterisks ----
+# ---- 1.3 Define Alor-specific plot labels, with significance asterisks ----
 
-Flotim.annexplot.monitoryear.labs <- rev(define.year.monitoryear.column(Flotim.AnnexContData.Techreport.PLOTFORMAT))
-Flotim.trendplot.monitoryear.labs <- define.year.monitoryear.column((Flotim.AnnexContData.Techreport.PLOTFORMAT))
+Alor.annexplot.monitoryear.labs <- rev(define.year.monitoryear.column(Alor.AnnexContData.Techreport.PLOTFORMAT))
+Alor.trendplot.monitoryear.labs <- define.year.monitoryear.column((Alor.AnnexContData.Techreport.PLOTFORMAT))
 
-Flotim.trendplot.monitoryear.labss <- paste(Flotim.trendplot.monitoryear.labs[2],"\n\n\n\n",Flotim.trendplot.monitoryear.labs[1])
+Alor.trendplot.monitoryear.labss <- paste(Alor.trendplot.monitoryear.labs[2],"\n\n\n\n",Alor.trendplot.monitoryear.labs[1])
 
-Flotim.trendplot.monitoryear.labs <- append(Flotim.trendplot.monitoryear.labss,"",after=length(1))
-Flotim.trendplot.monitoryear.labs <- append(Flotim.trendplot.monitoryear.labss,Flotim.trendplot.monitoryear.labs,after=length(2))
+Alor.trendplot.monitoryear.labs <- append(Alor.trendplot.monitoryear.labss,"",after=length(1))
+Alor.trendplot.monitoryear.labs <- append(Alor.trendplot.monitoryear.labss,Alor.trendplot.monitoryear.labs,after=length(2))
 
-Flotim.conttrendplot.ylabs <- 
-  define.conttrendplot.ylabels.withasterisks(Flotim.TrendContData.Techreport.PLOTFORMAT
-                                             [is.na(Flotim.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
+Alor.conttrendplot.ylabs <- 
+  define.conttrendplot.ylabels.withasterisks(Alor.TrendContData.Techreport.PLOTFORMAT
+                                             [is.na(Alor.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),
                                                c("FSMean","MAMean","PAMean","MTMean",
                                                  "SEMean","TimeMarketMean","UnwellMean")])
 
-proportional.variables.plotlabs <-colnames(propdata.trend.test.Flotim)
+proportional.variables.plotlabs <-colnames(propdata.trend.test.Alor)
 
-Flotim.proptrendplot.ylabs <- 
-  define.proptrendplot.ylabels.withasterisks(propdata.trend.test.Flotim)
+Alor.proptrendplot.ylabs <- 
+  define.proptrendplot.ylabels.withasterisks(propdata.trend.test.Alor)
 
 
-Flotim.trendplot.labs <- list(FS=labs(y=as.character(Flotim.conttrendplot.ylabs["FSMean"]),x="Monitoring Year"),
-                              MA=labs(y=as.character(Flotim.conttrendplot.ylabs["MAMean"]),x="Monitoring Year"),
-                              MT=labs(y=as.character(Flotim.conttrendplot.ylabs["MTMean"]),x="Monitoring Year"),
-                              PA=labs(y=as.character(Flotim.conttrendplot.ylabs["PAMean"]),x="Monitoring Year"),
-                              SE=labs(y=as.character(Flotim.conttrendplot.ylabs["SEMean"]),x="Monitoring Year"),
-                              Market=labs(y=as.character(Flotim.conttrendplot.ylabs["TimeMarketMean"]),
+Alor.trendplot.labs <- list(FS=labs(y=as.character(Alor.conttrendplot.ylabs["FSMean"]),x="Monitoring Year"),
+                              MA=labs(y=as.character(Alor.conttrendplot.ylabs["MAMean"]),x="Monitoring Year"),
+                              MT=labs(y=as.character(Alor.conttrendplot.ylabs["MTMean"]),x="Monitoring Year"),
+                              PA=labs(y=as.character(Alor.conttrendplot.ylabs["PAMean"]),x="Monitoring Year"),
+                              SE=labs(y=as.character(Alor.conttrendplot.ylabs["SEMean"]),x="Monitoring Year"),
+                              Market=labs(y=as.character(Alor.conttrendplot.ylabs["TimeMarketMean"]),
                                           x="Monitoring Year"),
-                              Unwell=labs(y=as.character(Flotim.conttrendplot.ylabs["UnwellMean"]),x="Monitoring Year"),
+                              Unwell=labs(y=as.character(Alor.conttrendplot.ylabs["UnwellMean"]),x="Monitoring Year"),
                               Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
                               Religion=labs(y="Religion (% households)",x="Monitoring Year"),
-                              PrimaryOcc=labs(y=as.character(Flotim.proptrendplot.ylabs["Primary occupation (% households)"]),x="Monitoring Year"),
-                              FreqFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Frequency of fishing (% households)"]),x="Monitoring Year"),
-                              FreqSellFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Frequency of selling at least some catch (% households)"]),x="Monitoring Year"),
-                              IncFish=labs(y=as.character(Flotim.proptrendplot.ylabs["Income from fishing in past 6 months (% households)"]),x="Monitoring Year"),
-                              FishTech=labs(y=as.character(Flotim.proptrendplot.ylabs["Fishing technique most often used in past 6 months (% households)"]),x="Monitoring Year"),
-                              ChildFS=labs(y=as.character(Flotim.proptrendplot.ylabs["Child hunger (% households)"]),x="Monitoring Year"),
-                              Protein=labs(y=as.character(Flotim.proptrendplot.ylabs["Dietary protein from fish in past 6 months (% households)"]),x="Monitoring Year"),
+                              PrimaryOcc=labs(y=as.character(Alor.proptrendplot.ylabs["Primary occupation (% households)"]),x="Monitoring Year"),
+                              FreqFish=labs(y=as.character(Alor.proptrendplot.ylabs["Frequency of fishing (% households)"]),x="Monitoring Year"),
+                              FreqSellFish=labs(y=as.character(Alor.proptrendplot.ylabs["Frequency of selling at least some catch (% households)"]),x="Monitoring Year"),
+                              IncFish=labs(y=as.character(Alor.proptrendplot.ylabs["Income from fishing in past 6 months (% households)"]),x="Monitoring Year"),
+                              FishTech=labs(y=as.character(Alor.proptrendplot.ylabs["Fishing technique most often used in past 6 months (% households)"]),x="Monitoring Year"),
+                              ChildFS=labs(y=as.character(Alor.proptrendplot.ylabs["Child hunger (% households)"]),x="Monitoring Year"),
+                              Protein=labs(y=as.character(Alor.proptrendplot.ylabs["Dietary protein from fish in past 6 months (% households)"]),x="Monitoring Year"),
                               AdultEduc=labs(y="Education completed (% adults 18 years and older)",x="Monitoring Year"),
                               HHHEducation=labs(y="Education completed (% heads of households)",x="Monitoring Year"),
                               NumThreat=labs(y="Percentage of respondents identifying threats to marine environment ***",x="Monitoring Year"),
                               EconStatus=labs(y="Change in economic status of fishing households (% households)",x="Monitoring Year"))
 
-Flotim.annexplot.settnames <- 
-  define.annexplot.settname.labels(annex.sigvals.Flotim)
+Alor.annexplot.settnames <- 
+  define.annexplot.settname.labels(annex.sigvals.Alor)
 
-Flotim.annexplot.settnames[3,] <- rep("",length(Flotim.annexplot.settnames[3,]))
+Alor.annexplot.settnames[3,] <- rep("",length(Alor.annexplot.settnames[3,]))
 
-Flotim.treatment.labs<-list(trend=labs("Treatment\n Settlements", "Control\n Settlements"))
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -140,8 +118,8 @@ Flotim.treatment.labs<-list(trend=labs("Treatment\n Settlements", "Control\n Set
 
 
 # ---- 2.1 3 Year ----
-Flotim.age.gender.3Year <- 
-  melt(Flotim.AgeGender,id.vars="AgeCat",measure.vars=c("Female.3Year","Male.3Year")) %>%
+Alor.age.gender.3Year <- 
+  melt(Alor.AgeGender,id.vars="AgeCat",measure.vars=c("Female.3Year","Male.3Year")) %>%
   ggplot() +
   geom_bar(aes(x=AgeCat,
                y=value,
@@ -159,11 +137,11 @@ Flotim.age.gender.3Year <-
                              "Male.3Year"=alpha("#253494",0.95)))+ 
   coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="2017 Population distribution (% of individuals by gender)")+
   theme(legend.position="none")
-Flotim.age.gender.3Year
+Alor.age.gender.3Year
 
 # ---- 2.2 Baseline ----
-Flotim.age.gender.Baseline <- 
-  melt(Flotim.AgeGender,id.vars="AgeCat",measure.vars=c("Female.Baseline","Male.Baseline")) %>%
+Alor.age.gender.Baseline <- 
+  melt(Alor.AgeGender,id.vars="AgeCat",measure.vars=c("Female.Baseline","Male.Baseline")) %>%
   ggplot() +
   geom_bar(aes(x=AgeCat,
                y=value,
@@ -182,10 +160,10 @@ Flotim.age.gender.Baseline <-
   coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="2014 Population distribution (% of individuals by gender)")+
   theme(legend.position="none")
 
-Flotim.age.gender.Baseline
+Alor.age.gender.Baseline
 
-Flotim.agegender.legend.plot <-
-  melt(Flotim.AgeGender,id.vars="AgeCat",measure.vars=c("Female.3Year","Male.3Year")) %>%
+Alor.agegender.legend.plot <-
+  melt(Alor.AgeGender,id.vars="AgeCat",measure.vars=c("Female.3Year","Male.3Year")) %>%
   ggplot() +
   geom_bar(aes(x=AgeCat,
                y=value,
@@ -203,15 +181,15 @@ Flotim.agegender.legend.plot <-
                              "Male.3Year"=alpha("#253494",0.95)),
                     labels=c("Female","Male")) +
   coord_flip() + plot.guides.techreport + theme(legend.justification="right")
-Flotim.agegender.legend.plot
+Alor.agegender.legend.plot
 
-Flotim.agegender.legend <- g_legend(Flotim.agegender.legend.plot)
+Alor.agegender.legend <- g_legend(Alor.agegender.legend.plot)
 
-Flotim.age.gender.plot <- 
-  grid.arrange(Flotim.agegender.legend,
+Alor.age.gender.plot <- 
+  grid.arrange(Alor.agegender.legend,
                arrangeGrob(
-                 Flotim.age.gender.3Year,
-                 Flotim.age.gender.Baseline,ncol=1),nrow=2,heights=c(0.35,10))
+                 Alor.age.gender.3Year,
+                 Alor.age.gender.Baseline,ncol=1),nrow=2,heights=c(0.35,10))
 
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -225,12 +203,12 @@ Flotim.age.gender.plot <-
 # ---- 3.1 Continuous data plots ----
 
 # - FOOD SECURITY
-Flotim.fs.statusplot <- 
-  rbind.data.frame(Flotim.ContData.Techreport.status.PLOTFORMAT,
+Alor.fs.statusplot <- 
+  rbind.data.frame(Alor.ContData.Techreport.status.PLOTFORMAT,
                    cbind.data.frame(SettlementID=NA,SettlementName="  ",
                                     matrix(rep(NA,22),ncol=22,
                                            dimnames=list(NULL,
-                                                         colnames(Flotim.ContData.Techreport.status.PLOTFORMAT)[3:24])),
+                                                         colnames(Alor.ContData.Techreport.status.PLOTFORMAT)[3:24])),
                                     SettLevel="Dummy")) %>%
   ggplot(aes(x=SettlementName)) +
   geom_hline(aes(yintercept=1.56),size=0.25,colour="#505050") +
@@ -251,17 +229,17 @@ Flotim.fs.statusplot <-
              linetype=2,
              size=0.35,
              colour="#505050") +
-  geom_text(data=Flotim.statusplot.sigpos,
+  geom_text(data=Alor.statusplot.sigpos,
             aes(x=SettlementName,
                 y=FS),
-            label=Flotim.statusplot.asterisks$FS,
+            label=Alor.statusplot.asterisks$FS,
             nudge_x=-0.07,
             nudge_y=-0.1,
             size=rel(4),
             colour=errcols.status["NotDummy"]) +
-  geom_text(data=Flotim.statusplot.sigpos,
+  geom_text(data=Alor.statusplot.sigpos,
             aes(x=SettlementName,y=FS.ref),
-            label=Flotim.statusplot.asterisks$FS.ref,
+            label=Alor.statusplot.asterisks$FS.ref,
             size=rel(3),
             nudge_x=0.02,
             fontface="bold.italic",
@@ -292,10 +270,10 @@ Flotim.fs.statusplot <-
                                                axis.text=element_text(size=8,
                                                                       angle=0,
                                                                       colour="#303030"))
-Flotim.fs.statusplot
+Alor.fs.statusplot
 
 # - MATERIAL ASSETS
-Flotim.ma.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT,
+Alor.ma.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
                                aes(x=SettlementName)) +
   geom_bar(aes(y=MAMean,
                fill=SettLevel),
@@ -313,32 +291,32 @@ Flotim.ma.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT
              linetype=2,
              size=0.35,
              colour="#505050") + 
-  geom_text(data=Flotim.statusplot.sigpos,
+  geom_text(data=Alor.statusplot.sigpos,
             aes(x=SettlementName,
                 y=MA),
-            label=Flotim.statusplot.asterisks$MA,
+            label=Alor.statusplot.asterisks$MA,
             nudge_x=-0.07,
             nudge_y=0.28,
             size=rel(4),
             colour=errcols.status["NotDummy"]) +
-  geom_text(data=Flotim.statusplot.sigpos,
+  geom_text(data=Alor.statusplot.sigpos,
             aes(x=SettlementName,y=MA.ref),
-            label=Flotim.statusplot.asterisks$MA.ref,
+            label=Alor.statusplot.asterisks$MA.ref,
             size=rel(3),
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,max(Flotim.ContData.Techreport.status.PLOTFORMAT$MAMean,na.rm=T)+
-                                max(Flotim.ContData.Techreport.status.PLOTFORMAT$MAErr,na.rm=T)+
-                                0.03*max(Flotim.ContData.Techreport.status.PLOTFORMAT$MAMean,na.rm=T))) +
+                     limits=c(0,max(Alor.ContData.Techreport.status.PLOTFORMAT$MAMean,na.rm=T)+
+                                max(Alor.ContData.Techreport.status.PLOTFORMAT$MAErr,na.rm=T)+
+                                0.03*max(Alor.ContData.Techreport.status.PLOTFORMAT$MAMean,na.rm=T))) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["MA"] + plot.theme
-Flotim.ma.statusplot
+Alor.ma.statusplot
 
 # - PLACE ATTACHMENT
-Flotim.pa.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT,
+Alor.pa.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
                                aes(x=SettlementName)) +
   geom_bar(aes(y=PAMean,
                fill=SettLevel),
@@ -356,17 +334,17 @@ Flotim.pa.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT
              linetype=2,
              size=0.35,
              colour="#505050") +
-  geom_text(data=Flotim.statusplot.sigpos,
+  geom_text(data=Alor.statusplot.sigpos,
             aes(x=SettlementName,
                 y=PA),
-            label=Flotim.statusplot.asterisks$PA,
+            label=Alor.statusplot.asterisks$PA,
             nudge_x=-0.07,
             nudge_y=0.07,
             size=rel(4),
             colour=errcols.status["NotDummy"]) +
-  geom_text(data=Flotim.statusplot.sigpos,
+  geom_text(data=Alor.statusplot.sigpos,
             aes(x=SettlementName,y=PA.ref),
-            label=Flotim.statusplot.asterisks$PA.ref,
+            label=Alor.statusplot.asterisks$PA.ref,
             size=rel(3),
             nudge_x=0.02,
             fontface="bold.italic",
@@ -376,10 +354,10 @@ Flotim.pa.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["PA"] + plot.theme
-Flotim.pa.statusplot
+Alor.pa.statusplot
 
 # - MARINE TENURE
-Flotim.mt.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT,
+Alor.mt.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
                                aes(x=SettlementName)) +
   geom_bar(aes(y=MTMean,
                fill=SettLevel),
@@ -397,16 +375,16 @@ Flotim.mt.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT
              linetype=2,
              size=0.35,
              colour="#505050") +
-  geom_text(data=Flotim.statusplot.sigpos,
+  geom_text(data=Alor.statusplot.sigpos,
             aes(x=SettlementName,
                 y=MT+(0.05*MT)),
-            label=Flotim.statusplot.asterisks$MT,
+            label=Alor.statusplot.asterisks$MT,
             nudge_x=-0.07,
             size=rel(4),
             colour=errcols.status["NotDummy"]) +
-  geom_text(data=Flotim.statusplot.sigpos,
+  geom_text(data=Alor.statusplot.sigpos,
             aes(x=SettlementName,y=MT.ref),
-            label=Flotim.statusplot.asterisks$MT.ref,
+            label=Alor.statusplot.asterisks$MT.ref,
             size=rel(3),
             nudge_x=0.02,
             fontface="bold.italic",
@@ -416,10 +394,10 @@ Flotim.mt.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["MT"] + plot.theme
-Flotim.mt.statusplot
+Alor.mt.statusplot
 
 # - SCHOOL ENROLLMENT
-Flotim.se.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT,
+Alor.se.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
                                aes(x=SettlementName)) +
   geom_bar(aes(y=SEMean,
                fill=SettLevel),
@@ -437,16 +415,16 @@ Flotim.se.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT
              linetype=2,
              size=0.35,
              colour="#505050") +
-  geom_text(data=Flotim.statusplot.sigpos,
+  geom_text(data=Alor.statusplot.sigpos,
             aes(x=SettlementName,
                 y=SE),
-            label=Flotim.statusplot.asterisks$SE,
+            label=Alor.statusplot.asterisks$SE,
             nudge_x=-0.07,
             size=rel(4),
             colour=errcols.status["NotDummy"]) +
-  geom_text(data=Flotim.statusplot.sigpos,
+  geom_text(data=Alor.statusplot.sigpos,
             aes(x=SettlementName,y=SE.ref),
-            label=Flotim.statusplot.asterisks$SE.ref,
+            label=Alor.statusplot.asterisks$SE.ref,
             size=rel(3),
             nudge_x=0.02,
             fontface="bold.italic",
@@ -457,10 +435,10 @@ Flotim.se.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["SE"] + plot.theme
-Flotim.se.statusplot
+Alor.se.statusplot
 
 # - TIME TO MARKET
-Flotim.time.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT,
+Alor.time.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
                                  aes(x=SettlementName)) +
   geom_bar(aes(y=TimeMarketMean,
                fill=SettLevel),
@@ -478,31 +456,31 @@ Flotim.time.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORM
              linetype=2,
              size=0.35,
              colour="#505050") +
-  geom_text(data=Flotim.statusplot.sigpos,
+  geom_text(data=Alor.statusplot.sigpos,
             aes(x=SettlementName,
                 y=Market),
-            label=Flotim.statusplot.asterisks$Market,
+            label=Alor.statusplot.asterisks$Market,
             nudge_x=-0.07,
             nudge_y=0.07,
             size=rel(4),
             colour=errcols.status["NotDummy"]) +
-  geom_text(data=Flotim.statusplot.sigpos,
+  geom_text(data=Alor.statusplot.sigpos,
             aes(x=SettlementName,y=Market.ref),
-            label=Flotim.statusplot.asterisks$Market.ref,
+            label=Alor.statusplot.asterisks$Market.ref,
             size=rel(3),
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,max(Flotim.ContData.Techreport.status.PLOTFORMAT$TimeMarketMean,na.rm=T)+
-                                max(Flotim.ContData.Techreport.status.PLOTFORMAT$TimeMarketErr,na.rm=T)+
-                                0.03*max(Flotim.ContData.Techreport.status.PLOTFORMAT$TimeMarketMean,na.rm=T))) +
+                     limits=c(0,max(Alor.ContData.Techreport.status.PLOTFORMAT$TimeMarketMean,na.rm=T)+
+                                max(Alor.ContData.Techreport.status.PLOTFORMAT$TimeMarketErr,na.rm=T)+
+                                0.03*max(Alor.ContData.Techreport.status.PLOTFORMAT$TimeMarketMean,na.rm=T))) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["Time"] + plot.theme
-Flotim.time.statusplot
+Alor.time.statusplot
 
 # - DAYS UNWELL
-Flotim.unwell.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFORMAT,
+Alor.unwell.statusplot <- ggplot(data=Alor.ContData.Techreport.status.PLOTFORMAT,
                                    aes(x=SettlementName)) +
   geom_bar(aes(y=UnwellMean,
                fill=SettLevel),
@@ -520,36 +498,36 @@ Flotim.unwell.statusplot <- ggplot(data=Flotim.ContData.Techreport.status.PLOTFO
              linetype=2,
              size=0.35,
              colour="#505050") +
-  geom_text(data=Flotim.statusplot.sigpos,
+  geom_text(data=Alor.statusplot.sigpos,
             aes(x=SettlementName,
                 y=Unwell),
-            label=Flotim.statusplot.asterisks$Unwell,
+            label=Alor.statusplot.asterisks$Unwell,
             nudge_x=-0.07,
             nudge_y=-0.1,
             size=rel(4),
             colour=errcols.status["NotDummy"]) +
-  geom_text(data=Flotim.statusplot.sigpos,
+  geom_text(data=Alor.statusplot.sigpos,
             aes(x=SettlementName,y=Unwell.ref),
-            label=Flotim.statusplot.asterisks$Unwell.ref,
+            label=Alor.statusplot.asterisks$Unwell.ref,
             size=rel(3),
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,max(Flotim.ContData.Techreport.status.PLOTFORMAT$UnwellMean,na.rm=T)+
-                                max(Flotim.ContData.Techreport.status.PLOTFORMAT$UnwellErr,na.rm=T)+
-                                0.03*max(Flotim.ContData.Techreport.status.PLOTFORMAT$UnwellMean,na.rm=T))) +
+                     limits=c(0,max(Alor.ContData.Techreport.status.PLOTFORMAT$UnwellMean,na.rm=T)+
+                                max(Alor.ContData.Techreport.status.PLOTFORMAT$UnwellErr,na.rm=T)+
+                                0.03*max(Alor.ContData.Techreport.status.PLOTFORMAT$UnwellMean,na.rm=T))) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["Unwell"] + plot.theme
-Flotim.unwell.statusplot
+Alor.unwell.statusplot
 
 
 # ---- 3.2 Proportional data plots ----
 
 # - GENDER OF HEAD OF HOUSEHOLD
-Flotim.gender.statusplot <- 
-  melt(Flotim.PropData.Techreport.status.PLOTFORMAT,
+Alor.gender.statusplot <- 
+  melt(Alor.PropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("HHH.female","HHH.male")) %>%
   ggplot(aes(x=SettlementName,
              y=value)) +
@@ -569,11 +547,11 @@ Flotim.gender.statusplot <-
                     values=multianswer.fillcols.status[["Gender"]],
                     labels=c("Female","Male")) +
   coord_flip() + plot.theme + Statusplot.labs["Gender"] + plot.guides.techreport
-Flotim.gender.statusplot
+Alor.gender.statusplot
 
 # - RELIGION
-Flotim.religion.statusplot <- 
-  melt(Flotim.PropData.Techreport.status.PLOTFORMAT,
+Alor.religion.statusplot <- 
+  melt(Alor.PropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Percent.Rel.Other","Percent.Rel.Muslim","Percent.Rel.Christian")) %>%
   ggplot(aes(x=SettlementName,
              y=value)) +
@@ -605,11 +583,11 @@ Flotim.religion.statusplot <-
                            keywidth=unit(0.75,"cm"),
                            keyheight=unit(0.5,"cm"),
                            reverse=T))
-Flotim.religion.statusplot
+Alor.religion.statusplot
 
 # - PRIMARY OCCUPATION
-Flotim.primaryocc.statusplot <- 
-  melt(Flotim.PropData.Techreport.status.PLOTFORMAT,
+Alor.primaryocc.statusplot <- 
+  melt(Alor.PropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Percent.PrimaryOcc.Other", 
                                                "Percent.PrimaryOcc.WageLabor",
                                                "Percent.PrimaryOcc.Tourism",
@@ -631,12 +609,12 @@ Flotim.primaryocc.statusplot <-
                     labels=c("Other","Other Wage Labor","Tourism",
                              "Fishing","Harvest Forest Products", "Farming")) +
   coord_flip() + plot.theme + Statusplot.labs["PrimaryOcc"] + plot.guides.techreport
-Flotim.primaryocc.statusplot
+Alor.primaryocc.statusplot
 
 
 # - FISHING FREQUENCY
-Flotim.freqfish.statusplot <- 
-  melt(Flotim.PropData.Techreport.status.PLOTFORMAT,
+Alor.freqfish.statusplot <- 
+  melt(Alor.PropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Prop.Fish.MoreFewTimesWk","Prop.Fish.FewTimesPerWk",
                                                "Prop.Fish.FewTimesPerMo","Prop.Fish.FewTimesPer6Mo",
                                                "Prop.Fish.AlmostNever")) %>%
@@ -658,11 +636,11 @@ Flotim.freqfish.statusplot <-
                              "A few times per month","A few times per six months",
                              "Once every six months")) +
   coord_flip() + plot.theme + Statusplot.labs["FreqFish"] + plot.guides.techreport
-Flotim.freqfish.statusplot
+Alor.freqfish.statusplot
 
 # - SELL FISH FREQUENCY
-Flotim.freqsellfish.statusplot <- 
-  melt(Flotim.PropData.Techreport.status.PLOTFORMAT,
+Alor.freqsellfish.statusplot <- 
+  melt(Alor.PropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Prop.SellFish.MoreFewTimesWk","Prop.SellFish.FewTimesPerWk",
                                                "Prop.SellFish.FewTimesPerMo","Prop.SellFish.FewTimesPer6Mo",
                                                "Prop.SellFish.AlmostNever")) %>%
@@ -684,11 +662,11 @@ Flotim.freqsellfish.statusplot <-
                              "A few times per month","A few times per six months",
                              "Once every six months")) +
   coord_flip() + plot.theme + Statusplot.labs["FreqSellFish"] + plot.guides.techreport
-Flotim.freqsellfish.statusplot
+Alor.freqsellfish.statusplot
 
 # - INCOME FROM FISHING
-Flotim.incfish.statusplot <- 
-  melt(Flotim.PropData.Techreport.status.PLOTFORMAT,
+Alor.incfish.statusplot <- 
+  melt(Alor.PropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Prop.IncFish.All","Prop.IncFish.Most",
                                                "Prop.IncFish.Half","Prop.IncFish.Some",
                                                "Prop.IncFish.None")) %>%
@@ -708,11 +686,11 @@ Flotim.incfish.statusplot <-
                     values=multianswer.fillcols.status[["IncFish"]],
                     labels=c("All","Most","About half","Some","None")) +
   coord_flip() + plot.theme + Statusplot.labs["IncFish"] + plot.guides.techreport
-Flotim.incfish.statusplot
+Alor.incfish.statusplot
 
 # - FISHING TECHNIQUE
-Flotim.fishtech.statusplot <- 
-  melt(Flotim.PropData.Techreport.status.PLOTFORMAT,
+Alor.fishtech.statusplot <- 
+  melt(Alor.PropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Prop.FishTech.MobileLine","Prop.FishTech.StatLine",
                                                "Prop.FishTech.MobileNet","Prop.FishTech.StatNet",
                                                "Prop.FishTech.ByHand")) %>%
@@ -733,11 +711,11 @@ Flotim.fishtech.statusplot <-
                     labels=c("Mobile line","Stationary line",
                              "Mobile net","Stationary net","Fishing by hand")) +
   coord_flip() + plot.theme + Statusplot.labs["FishTech"] + plot.guides.techreport
-Flotim.fishtech.statusplot
+Alor.fishtech.statusplot
 
 # - CHILDHOOD FOOD SECURITY
-Flotim.childfs.statusplot <- 
-  melt(Flotim.PropData.Techreport.status.PLOTFORMAT,
+Alor.childfs.statusplot <- 
+  melt(Alor.PropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Child.FS.yes","Child.FS.no")) %>%
   ggplot(aes(x=SettlementName,
              y=value)) +
@@ -757,11 +735,11 @@ Flotim.childfs.statusplot <-
                     values=multianswer.fillcols.status[["ChildFS"]],
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
   coord_flip() + plot.theme + Statusplot.labs["ChildFS"] + plot.guides.techreport
-Flotim.childfs.statusplot
+Alor.childfs.statusplot
 
 # - PROTEIN FROM FISH
-Flotim.proteinfish.statusplot <- 
-  melt(Flotim.PropData.Techreport.status.PLOTFORMAT,
+Alor.proteinfish.statusplot <- 
+  melt(Alor.PropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("ProteinFish.All","ProteinFish.Most",
                                                "ProteinFish.Half","ProteinFish.Some",
                                                "ProteinFish.None")) %>%
@@ -781,11 +759,11 @@ Flotim.proteinfish.statusplot <-
                     values=multianswer.fillcols.status[["Protein"]],
                     labels=c("All","Most","About half","Some","None")) +
   coord_flip() + plot.theme + Statusplot.labs["FishProtein"] + plot.guides.techreport
-Flotim.proteinfish.statusplot
+Alor.proteinfish.statusplot
 
 # - CATEGORICAL FOOD SECURITY
-Flotim.FSCategorical.statusplot <-
-  melt(Flotim.PropData.Techreport.status.PLOTFORMAT,
+Alor.FSCategorical.statusplot <-
+  melt(Alor.PropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Percent.FoodInsecure.YesHunger", "Percent.FoodInsecure.NoHunger", "Percent.FoodSecure")) %>%
   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
   geom_bar(stat="identity",
@@ -803,23 +781,23 @@ Flotim.FSCategorical.statusplot <-
                     values=multianswer.fillcols.status[["FSCategorical"]],
                     labels=c("Food insecure with hunger", "Food insecure without hunger","Food secure" )) +
   coord_flip() + plot.theme + Statusplot.labs["FSCategorical"] + plot.guides.techreport
-Flotim.FSCategorical.statusplot
+Alor.FSCategorical.statusplot
 
-Flotim.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName <-
-  ifelse(is.na(Flotim.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName),"",
-         as.character(Flotim.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName))
+Alor.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Alor.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName),"",
+         as.character(Alor.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName))
 
-Flotim.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName <-
-  factor(Flotim.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName,
-         levels=unique(Flotim.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName),
+Alor.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  factor(Alor.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName,
+         levels=unique(Alor.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName),
          ordered=T)
 
 # - add row for plot fill colour formatting
-Flotim.SBSPropData.Techreport.status.PLOTFORMAT$Dummy <- 
-  ifelse(Flotim.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
+Alor.SBSPropData.Techreport.status.PLOTFORMAT$Dummy <- 
+  ifelse(Alor.SBSPropData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
 # ADULT EDUCATION
-Flotim.AdultEduc.statusplot <- 
-  melt(Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
+Alor.AdultEduc.statusplot <- 
+  melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("AdultEducHigher", "AdultEducSec", "AdultEducMid",
                                                "AdultEducPrim", "AdultEducPre", "AdultEducNone")) %>%
   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
@@ -838,11 +816,11 @@ Flotim.AdultEduc.statusplot <-
                     values=multianswer.fillcols.status[["AdultEducation"]],
                     labels=c("Further or higher education","High school education","Middle school education","Primary school education","Pre-school education", "No formal education")) +
   coord_flip() + plot.theme + Statusplot.labs["AdultEduc"] + plot.guides.techreport
-Flotim.AdultEduc.statusplot
+Alor.AdultEduc.statusplot
 
 # HOUSEHOLD HEAD EDUCATION
-Flotim.HHHEduc.statusplot <- 
-  melt(Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
+Alor.HHHEduc.statusplot <- 
+  melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("HHHEducHigher", "HHHEducSec", "HHHEducMid",
                                                "HHHEducPrim", "HHHEducPre", "HHHEducNone")) %>%
   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
@@ -861,11 +839,11 @@ Flotim.HHHEduc.statusplot <-
                     values=multianswer.fillcols.status[["HHHEducation"]],
                     labels=c("Further or higher education","High school education","Middle school education","Primary school education","Pre-school education", "No formal education")) +
   coord_flip() + plot.theme + Statusplot.labs["HHHEduc"] + plot.guides.techreport
-Flotim.HHHEduc.statusplot
+Alor.HHHEduc.statusplot
 
 # ECONOMIC STATUS
-Flotim.econ.statusplot <- 
-  melt(Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
+Alor.econ.statusplot <- 
+  melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Econ.Status.Much.Better","Econ.Status.Slightly.Better",
                                                "Econ.Status.Neutral","Econ.Status.Slighly.Worse",
                                                "Econ.Status.Much.Worse")) %>%
@@ -885,11 +863,11 @@ Flotim.econ.statusplot <-
                     values=multianswer.fillcols.status[["EconStatus"]],
                     labels=c("Much better","Slightly better","Neither better or worse","Slightly worse","Much worse")) +
   coord_flip() + plot.theme + Statusplot.labs["EconStatus"] + plot.guides.techreport
-Flotim.econ.statusplot
+Alor.econ.statusplot
 
 # RULES
-Flotim.rules.statusplot <- 
-  melt(Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
+Alor.rules.statusplot <- 
+  melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("PropRuleHab", "PropRuleSpp")) %>%
   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
   geom_bar(stat="identity",
@@ -906,11 +884,11 @@ Flotim.rules.statusplot <-
                     values=multianswer.fillcols.status[["PropRules"]],
                     labels=c("Important species","Important habitats")) +
   coord_flip() + plot.theme + Statusplot.labs["Rules"] + plot.guides.techreport
-Flotim.rules.statusplot 
+Alor.rules.statusplot 
 
 # PARTICIPATION IN DECISION-MAKING
-Flotim.participation.statusplot <- 
-  melt(Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
+Alor.participation.statusplot <- 
+  melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("ParticipateRules","ParticipateBnd","ParticipateOrg", "ParticipateEstablish")) %>%
   filter(., SettlementName!= "Control\nSettlements") %>%
   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
@@ -928,11 +906,11 @@ Flotim.participation.statusplot <-
                     values=multianswer.fillcols.status[["Participate"]],
                     labels=c("Setting appropriation rules", "MPA boundary delineation", "Design of MPA management body", "Design of MPA-managing organization")) +
   coord_flip() + plot.theme + Statusplot.labs["Participation"] + plot.guides.techreport
-Flotim.participation.statusplot
+Alor.participation.statusplot
 
 # - MEMBER OF MARINE RESOURCE ORGANIZATION
-Flotim.member.statusplot <- 
-  melt(Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
+Alor.member.statusplot <- 
+  melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Member.No","Member.Yes")) %>%
   ggplot(aes(x=SettlementName,
              y=value)) +
@@ -952,11 +930,11 @@ Flotim.member.statusplot <-
                     values=multianswer.fillcols.status[["Member"]],
                     labels=c("Non-member","Member")) +
   coord_flip() + plot.theme + Statusplot.labs["Member"] + plot.guides.techreport
-Flotim.member.statusplot
+Alor.member.statusplot
 
 # - MEETING ATTENDANCE
-Flotim.meeting.statusplot <- 
-  melt(Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
+Alor.meeting.statusplot <- 
+  melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Prop.Member.Yes.Meeting.No", "Prop.Member.Yes.Meeting.Yes")) %>%
   ggplot(aes(x=SettlementName,
              y=value)) +
@@ -976,11 +954,11 @@ Flotim.meeting.statusplot <-
                     values=multianswer.fillcols.status[["Attendance"]],
                     labels=c("Have not attended a meeting","Attended a meeting")) +
   coord_flip() + plot.theme + Statusplot.labs["Attendance"] + plot.guides.techreport
-Flotim.meeting.statusplot
+Alor.meeting.statusplot
 
 # - ILLNESS
-Flotim.illness.statusplot <- 
-  melt(Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
+Alor.illness.statusplot <- 
+  melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Percent.Not.Ill", "Percent.Ill")) %>%
   ggplot(aes(x=SettlementName,
              y=value)) +
@@ -1000,11 +978,11 @@ Flotim.illness.statusplot <-
                     values=multianswer.fillcols.status[["Illness"]],
                     labels=c("Ill or injured ","Not Ill or injured")) +
   coord_flip() + plot.theme + Statusplot.labs["Ill"] + plot.guides.techreport
-Flotim.illness.statusplot
+Alor.illness.statusplot
 
 # MARINE RESOURCE CONFLICT
-Flotim.conflict.statusplot <- 
-  melt(Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
+Alor.conflict.statusplot <- 
+  melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Percent.GreatlyDecreased.SocConflict","Percent.Decreased.SocConflict",
                                                "Percent.Same.SocConflict","Percent.Increased.SocConflict",
                                                "Percent.GreatlyIncreased.SocConflict")) %>%
@@ -1024,11 +1002,11 @@ Flotim.conflict.statusplot <-
                     values=multianswer.fillcols.status[["SocialConflict"]],
                     labels=c("Greatly decreased","Decreased","Neither increased or decreased","Increased","Greatly Increased")) +
   coord_flip() + plot.theme + Statusplot.labs["Conflict"] + plot.guides.techreport
-Flotim.conflict.statusplot
+Alor.conflict.statusplot
 
 # NUMBER OF LOCAL THREATS
-Flotim.NumThreat.statusplot <- 
-  melt(Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
+Alor.NumThreat.statusplot <- 
+  melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Threat.Minimum.Five","Threat.Four", "Threat.Three",
                                                "Threat.Two","Threat.One","Threat.None")) %>%
   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
@@ -1047,11 +1025,11 @@ Flotim.NumThreat.statusplot <-
                     values=multianswer.fillcols.status[["NumThreats"]],
                     labels=c("More than five threats","Four threats","Three threats","Two threats","One threat", "No threats")) +
   coord_flip() + plot.theme + Statusplot.labs["NumLocalThreats"] + plot.guides.techreport
-Flotim.NumThreat.statusplot
+Alor.NumThreat.statusplot
 
 # - THREAT TYPES
-Flotim.ThreatType.statusplot <- 
-  melt(Flotim.Threat.Types.PLOTFORMAT,
+Alor.ThreatType.statusplot <- 
+  melt(Alor.Threat.Types.PLOTFORMAT,
        id.vars="SettlementName",measure.vars=c("Other", "OtherMarineUses", "NaturalProcesses", "HabitatLoss", 
                                                "ClimateChange", "IllegalFishing", "DestructiveFishing", "Pollution")) %>%
   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
@@ -1071,10 +1049,10 @@ Flotim.ThreatType.statusplot <-
                     labels=c("Other", "Other marine resource uses", "Natural processes", "Habitat loss", 
                              "Climate change", "Illegal fishing", "Destructive fishing", "Pollution")) +
   coord_flip() + plot.theme + Statusplot.labs["ThreatTypes"] + plot.guides.techreport
-Flotim.ThreatType.statusplot
+Alor.ThreatType.statusplot
 
 # - Number of Ethnicities
-Flotim.ethnicity.statusplot <- ggplot(data=Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
+Alor.ethnicity.statusplot <- ggplot(data=Alor.SBSPropData.Techreport.status.PLOTFORMAT,
                                       aes(x=SettlementName)) +
   geom_bar(aes(y=Num.EthnicGroups,
                fill="NotDummy"),
@@ -1087,15 +1065,15 @@ Flotim.ethnicity.statusplot <- ggplot(data=Flotim.SBSPropData.Techreport.status.
              size=0.35,
              colour="#505050") +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,max(Flotim.SBSPropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T) + 
-                                0.03*max(Flotim.SBSPropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T))) +
+                     limits=c(0,max(Alor.SBSPropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T) + 
+                                0.03*max(Alor.SBSPropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T))) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["Ethnicity"] + plot.theme
-Flotim.ethnicity.statusplot
+Alor.ethnicity.statusplot
 
 # - Contribution
-Flotim.contribution.statusplot <- ggplot(data=Flotim.SBSPropData.Techreport.status.PLOTFORMAT,
+Alor.contribution.statusplot <- ggplot(data=Alor.SBSPropData.Techreport.status.PLOTFORMAT,
                                          aes(x=SettlementName)) +
   geom_bar(aes(y=Contribution,
                fill="NotDummy"),
@@ -1108,8 +1086,8 @@ Flotim.contribution.statusplot <- ggplot(data=Flotim.SBSPropData.Techreport.stat
              size=0.35,
              colour="#505050") +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,max(Flotim.SBSPropData.Techreport.status.PLOTFORMAT$Contribution,na.rm=T) + 
-                                1.5* max(Flotim.SBSPropData.Techreport.status.PLOTFORMAT$Contribution,na.rm=T)), labels = scales::comma) +
+                     limits=c(0,max(Alor.SBSPropData.Techreport.status.PLOTFORMAT$Contribution,na.rm=T) + 
+                                1.5* max(Alor.SBSPropData.Techreport.status.PLOTFORMAT$Contribution,na.rm=T)), labels = scales::comma) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["Contribution"] + plot.theme
@@ -1121,15 +1099,13 @@ Flotim.contribution.statusplot <- ggplot(data=Flotim.SBSPropData.Techreport.stat
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
-Flotim.TrendContData.Techreport.PLOTFORMAT$order<-c(1,2,3,4,NA,NA,NA)
 
 # ---- 4.1 Continuous data plots ----
-Flotim.TrendContData.Techreport.PLOTFORMAT <- Flotim.TrendContData.Techreport.PLOTFORMAT %>%
-  filter(!is.na(MonitoringYear))
+
 # - FOOD SECURITY 
-Flotim.fs.trendplot <- 
-  ggplot(data=Flotim.TrendContData.Techreport.PLOTFORMAT
-         [!is.na(Flotim.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
+Alor.fs.trendplot <- 
+  ggplot(data=Alor.TrendContData.Techreport.PLOTFORMAT
+         [!is.na(Alor.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
          aes(x=SettlementName)) +
   geom_hline(aes(yintercept=1.56),size=0.25,colour="#505050") +
   geom_hline(aes(yintercept=4.02),size=0.25,colour="#505050") +
@@ -1159,8 +1135,8 @@ Flotim.fs.trendplot <-
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,6.06)) +
-  scale_x_discrete(labels=rev(Flotim.trendplot.monitoryear.labs)) +
-  coord_flip() + Flotim.trendplot.labs["FS"] + theme(axis.ticks=element_blank(),
+  scale_x_discrete(labels=(Alor.trendplot.monitoryear.labs)) +
+  coord_flip() + Alor.trendplot.labs["FS"] + theme(axis.ticks=element_blank(),
                                                      panel.background=element_rect(fill="white",
                                                                                    colour="#909090"),
                                                      panel.border=element_rect(fill=NA,
@@ -1175,13 +1151,13 @@ Flotim.fs.trendplot <-
                                                      axis.text=element_text(size=8,
                                                                             angle=0,
                                                                             colour="#303030"))
-Flotim.fs.trendplot
+Alor.fs.trendplot
 
 # - MATERIAL ASSETS
 
-Flotim.ma.trendplot <- 
-  ggplot(data=Flotim.TrendContData.Techreport.PLOTFORMAT
-         [!is.na(Flotim.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
+Alor.ma.trendplot <- 
+  ggplot(data=Alor.TrendContData.Techreport.PLOTFORMAT
+         [!is.na(Alor.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
          aes(x=SettlementName)) +
   geom_bar(aes(y=MAMean,group=MonitoringYear),
            fill=fillcols.trend,
@@ -1200,17 +1176,17 @@ Flotim.ma.trendplot <-
   geom_text(aes(x=1.47,y=max(MAMean),label="Control"),
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,max(Flotim.TrendContData.Techreport.PLOTFORMAT$MAMean,na.rm=T)+
-                                max(Flotim.TrendContData.Techreport.PLOTFORMAT$MAErr,na.rm=T)+
-                                0.03*max(Flotim.TrendContData.Techreport.PLOTFORMAT$MAMean,na.rm=T))) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
-  coord_flip() + Flotim.trendplot.labs["MA"] + plot.theme 
-Flotim.ma.trendplot
+                     limits=c(0,max(Alor.TrendContData.Techreport.PLOTFORMAT$MAMean,na.rm=T)+
+                                max(Alor.TrendContData.Techreport.PLOTFORMAT$MAErr,na.rm=T)+
+                                0.03*max(Alor.TrendContData.Techreport.PLOTFORMAT$MAMean,na.rm=T))) +
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
+  coord_flip() + Alor.trendplot.labs["MA"] + plot.theme 
+Alor.ma.trendplot
 
 # - PLACE ATTACHMENT
-Flotim.pa.trendplot <- 
-  ggplot(data=Flotim.TrendContData.Techreport.PLOTFORMAT
-         [!is.na(Flotim.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
+Alor.pa.trendplot <- 
+  ggplot(data=Alor.TrendContData.Techreport.PLOTFORMAT
+         [!is.na(Alor.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
          aes(x=SettlementName)) +
   geom_bar(aes(y=PAMean,group=MonitoringYear),
            fill=fillcols.trend,
@@ -1231,14 +1207,14 @@ Flotim.pa.trendplot <-
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,5)) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
-  coord_flip() + Flotim.trendplot.labs["PA"] + plot.theme
-Flotim.pa.trendplot
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
+  coord_flip() + Alor.trendplot.labs["PA"] + plot.theme
+Alor.pa.trendplot
 
 # - MARINE TENURE
-Flotim.mt.trendplot <- 
-  ggplot(data=Flotim.TrendContData.Techreport.PLOTFORMAT
-         [!is.na(Flotim.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
+Alor.mt.trendplot <- 
+  ggplot(data=Alor.TrendContData.Techreport.PLOTFORMAT
+         [!is.na(Alor.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
          aes(x=SettlementName)) +
   geom_bar(aes(y=MTMean,group=MonitoringYear),
            fill=fillcols.trend,
@@ -1259,14 +1235,14 @@ Flotim.mt.trendplot <-
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,5)) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
-  coord_flip() + Flotim.trendplot.labs["MT"] + plot.theme
-Flotim.mt.trendplot
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
+  coord_flip() + Alor.trendplot.labs["MT"] + plot.theme
+Alor.mt.trendplot
 
 # - SCHOOL ENROLLMENT
-Flotim.se.trendplot <- 
-  ggplot(data=Flotim.TrendContData.Techreport.PLOTFORMAT
-         [!is.na(Flotim.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
+Alor.se.trendplot <- 
+  ggplot(data=Alor.TrendContData.Techreport.PLOTFORMAT
+         [!is.na(Alor.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
          aes(x=SettlementName)) +
   geom_bar(aes(y=SEMean,group=MonitoringYear),
            fill=fillcols.trend,
@@ -1288,14 +1264,14 @@ Flotim.se.trendplot <-
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format(),
                      limits=c(0,1)) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
-  coord_flip() + Flotim.trendplot.labs["SE"] + plot.theme
-Flotim.se.trendplot
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
+  coord_flip() + Alor.trendplot.labs["SE"] + plot.theme
+Alor.se.trendplot
 
 # - TIME TO MARKET
-Flotim.time.trendplot <- 
-  ggplot(data=Flotim.TrendContData.Techreport.PLOTFORMAT
-         [!is.na(Flotim.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
+Alor.time.trendplot <- 
+  ggplot(data=Alor.TrendContData.Techreport.PLOTFORMAT
+         [!is.na(Alor.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
          aes(x=SettlementName)) +
   geom_bar(aes(y=TimeMarketMean,group=MonitoringYear),
            fill=fillcols.trend,
@@ -1315,48 +1291,50 @@ Flotim.time.trendplot <-
   geom_text(aes(x=1.47,y=max(TimeMarketMean)+0.16,label="Control"),
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,max(Flotim.TrendContData.Techreport.PLOTFORMAT$TimeMarketMean,na.rm=T)+
-                                max(Flotim.TrendContData.Techreport.PLOTFORMAT$TimeMarketErr,na.rm=T)+
-                                0.03*max(Flotim.TrendContData.Techreport.PLOTFORMAT$TimeMarketMean,na.rm=T))) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
-  coord_flip() + Flotim.trendplot.labs["Market"] + plot.theme
-Flotim.time.trendplot
+                     limits=c(0,max(Alor.TrendContData.Techreport.PLOTFORMAT$TimeMarketMean,na.rm=T)+
+                                max(Alor.TrendContData.Techreport.PLOTFORMAT$TimeMarketErr,na.rm=T)+
+                                0.03*max(Alor.TrendContData.Techreport.PLOTFORMAT$TimeMarketMean,na.rm=T))) +
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
+  coord_flip() + Alor.trendplot.labs["Market"] + plot.theme
+Alor.time.trendplot
 
 # - DAYS UNWELL
-Flotim.unwell.trendplot <- 
-  ggplot(data=Flotim.TrendContData.Techreport.PLOTFORMAT
-         [!is.na(Flotim.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
-         aes(x=MonitoringYear)) +
-  geom_bar(aes(y=UnwellMean),
+
+Alor.unwell.trendplot <- 
+  ggplot(data=Alor.TrendContData.Techreport.PLOTFORMAT
+         [!is.na(Alor.TrendContData.Techreport.PLOTFORMAT$MonitoringYear),],
+         aes(x=SettlementName)) +
+  geom_bar(aes(y=UnwellMean,group=MonitoringYear),
            fill=fillcols.trend,
            stat="identity",
-           position="dodge",
+           position=position_dodge(width=0.75),
            width=0.65) +
   geom_errorbar(aes(ymin=UnwellMean-UnwellErr,
-                    ymax=UnwellMean+UnwellErr),
+                    ymax=UnwellMean+UnwellErr,
+                    group=order),
                 colour=errcols.trend,
                 width=0.15,
                 size=0.5,
-                position=position_dodge(width=1)) +
+                position=position_dodge(width=0.75)) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,max(Flotim.TrendContData.Techreport.PLOTFORMAT$UnwellMean,na.rm=T)+
-                                max(Flotim.TrendContData.Techreport.PLOTFORMAT$UnwellErr,na.rm=T)+
-                                0.03*max(Flotim.TrendContData.Techreport.PLOTFORMAT$UnwellMean,na.rm=T))) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
-  coord_flip() + Flotim.trendplot.labs["Unwell"] + plot.theme
-Flotim.unwell.trendplot
+                     limits=c(0,max(Alor.TrendContData.Techreport.PLOTFORMAT$UnwellMean,na.rm=T)+
+                                max(Alor.TrendContData.Techreport.PLOTFORMAT$UnwellErr,na.rm=T)+
+                                0.03*max(Alor.TrendContData.Techreport.PLOTFORMAT$UnwellMean,na.rm=T))) +
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
+  coord_flip() + Alor.trendplot.labs["Unwell"] + plot.theme
+Alor.unwell.trendplot
 
 #Contributions by organization
-Flotim.level.trend$order <-c(1,2,3,4)
-Flotim.level.trend$year<-c("Baseline\n(2014)","3 Year Post\nBaseline\n(2017)","Baseline\n(2014)","3 Year Post\nBaseline\n(2017)")
+Alor.level.trend$order <-c(1,2,3,4)
+Alor.level.trend$year<-c("Baseline\n(2014)","3 Year Post\nBaseline\n(2017)","Baseline\n(2014)","3 Year Post\nBaseline\n(2017)")
 
 #UPDATE ASTERISKS FOR MPA'S OTHER THAN FLOTIM
-Flotim.level.trend<-read.csv("Flotim.level.trend.csv")
-Flotim.level.trend$SettlementName <-c("Control","Control","MPA","MPA")
+Alor.level.trend<-read.csv("Alor.level.trend.csv")
+Alor.level.trend$SettlementName <-c("Control","Control","MPA","MPA")
 
-Flotim.contribution.trendplot <- 
-  ggplot(data=Flotim.level.trend
-         [!is.na(Flotim.level.trend$MonitoringYear),],
+Alor.contribution.trendplot <- 
+  ggplot(data=Alor.level.trend
+         [!is.na(Alor.level.trend$MonitoringYear),],
          aes(x=SettlementName)) +
   geom_bar(aes(y=Contribution,group=rev(MonitoringYear)),
            fill=fillcols.trend,
@@ -1376,18 +1354,18 @@ Flotim.contribution.trendplot <-
   geom_text(aes(x=1.47,y=165000,label="Control"),
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,max(Flotim.level.trend$Contribution,na.rm=T)+
-                                max(Flotim.level.trend$ContributionErr,na.rm=T)+
-                                0.03*max(Flotim.level.trend$Contribution,na.rm=T))) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+                     limits=c(0,max(Alor.level.trend$Contribution,na.rm=T)+
+                                max(Alor.level.trend$ContributionErr,na.rm=T)+
+                                0.03*max(Alor.level.trend$Contribution,na.rm=T))) +
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
   coord_flip() + labs(y="Mean household contributions (Indonesian Rupiah) *",x="Monitoring Year") + plot.theme
-Flotim.contribution.trendplot
+Alor.contribution.trendplot
 
 # Mean threats trend
 
-Flotim.Threat.Mean.trendplot <- 
-  ggplot(data=Flotim.SBSContData.Techreport.trend.PLOTFORMAT
-         [!is.na(Flotim.SBSContData.Techreport.trend.PLOTFORMAT$MonitoringYear),],
+Alor.Threat.Mean.trendplot <- 
+  ggplot(data=Alor.SBSContData.Techreport.trend.PLOTFORMAT
+         [!is.na(Alor.SBSContData.Techreport.trend.PLOTFORMAT$MonitoringYear),],
          aes(x=MonitoringYear)) +
   geom_bar(aes(y=Threat.Mean),
            fill=fillcols.trend,
@@ -1401,19 +1379,19 @@ Flotim.Threat.Mean.trendplot <-
                 size=0.5,
                 position=position_dodge(width=1)) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,max(Flotim.SBSContData.Techreport.trend.PLOTFORMAT$Threat.Mean,na.rm=T)+
-                                max(Flotim.SBSContData.Techreport.trend.PLOTFORMAT$Threat.MeanErr,na.rm=T)+
-                                0.03*max(Flotim.SBSContData.Techreport.trend.PLOTFORMAT$Threat.Mean,na.rm=T))) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+                     limits=c(0,max(Alor.SBSContData.Techreport.trend.PLOTFORMAT$Threat.Mean,na.rm=T)+
+                                max(Alor.SBSContData.Techreport.trend.PLOTFORMAT$Threat.MeanErr,na.rm=T)+
+                                0.03*max(Alor.SBSContData.Techreport.trend.PLOTFORMAT$Threat.Mean,na.rm=T))) +
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
   coord_flip() + labs(y="Mean number of threats to marine environments identified ***") + plot.theme
-Flotim.Threat.Mean.trendplot
+Alor.Threat.Mean.trendplot
 
 
 # ---- 4.2 Proportional data plots ----
 
 # - GENDER OF HEAD OF HOUSEHOLD
-Flotim.gender.trendplot <- 
-  melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
+Alor.gender.trendplot <- 
+  melt(Alor.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="MonitoringYear",measure.vars=c("HHH.female","HHH.male")) %>%
   ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
   geom_bar(stat="identity",
@@ -1423,16 +1401,16 @@ Flotim.gender.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Gender"]],
                     labels=c("Female","Male")) +
-  coord_flip() + Flotim.trendplot.labs["Gender"] + plot.theme + plot.guides.techreport
-Flotim.gender.trendplot
+  coord_flip() + Alor.trendplot.labs["Gender"] + plot.theme + plot.guides.techreport
+Alor.gender.trendplot
 
 # - RELIGION
-Flotim.religion.trendplot <- 
-  melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
+Alor.religion.trendplot <- 
+  melt(Alor.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="MonitoringYear",measure.vars=c("Percent.Rel.Other","Percent.Rel.Muslim","Percent.Rel.Christian")) %>%
   ggplot(aes(x=rev(MonitoringYear),
              y=value)) +
@@ -1444,11 +1422,11 @@ Flotim.religion.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Religion"]],
                     labels=c("Other","Muslim","Christian")) +
-  coord_flip() + plot.theme + Flotim.trendplot.labs["Religion"] + 
+  coord_flip() + plot.theme + Alor.trendplot.labs["Religion"] + 
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
                                                     angle=0,
@@ -1461,14 +1439,14 @@ Flotim.religion.trendplot <-
                            keywidth=unit(0.75,"cm"),
                            keyheight=unit(0.5,"cm"),
                            reverse=T))
-Flotim.religion.trendplot
+Alor.religion.trendplot
 
 # - PRIMARY OCCUPATION
-Flotim.primaryocc.trendplot <- 
-  melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
+Alor.primaryocc.trendplot <- 
+  melt(Alor.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="order",measure.vars=c("Percent.PrimaryOcc.Other","Percent.PrimaryOcc.WageLabor",
-                                               "Percent.PrimaryOcc.Tourism","Percent.PrimaryOcc.Fish",
-                                               "Percent.PrimaryOcc.HarvestForest","Percent.PrimaryOcc.Farm")) %>%
+                                      "Percent.PrimaryOcc.Tourism","Percent.PrimaryOcc.Fish",
+                                      "Percent.PrimaryOcc.HarvestForest","Percent.PrimaryOcc.Farm")) %>%
   ggplot(aes(x=factor(order),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -1482,17 +1460,17 @@ Flotim.primaryocc.trendplot <-
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.TrendPropData.Techreport.PLOTFORMAT$year) +
+  scale_x_discrete(labels=Alor.TrendPropData.Techreport.PLOTFORMAT$year) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["PrimaryOcc"]],
                     labels=c("Other","Other Wage Labor","Tourism",
                              "Fishing","Harvest Forest Products","Farming")) +
-  coord_flip() + plot.theme + Flotim.trendplot.labs["PrimaryOcc"] + plot.guides.techreport 
-Flotim.primaryocc.trendplot
+  coord_flip() + plot.theme + Alor.trendplot.labs["PrimaryOcc"] + plot.guides.techreport 
+Alor.primaryocc.trendplot
 
 #USED TO CHECK DISTRIBUTION OF SECONDARY OCCUPATIONS
-Flotim.Secondaryocc.trendplot <- 
-  melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
+Alor.Secondaryocc.trendplot <- 
+  melt(Alor.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="MonitoringYear",measure.vars=c("Percent.SecondaryOcc.Other","Percent.SecondaryOcc.WageLabor",
                                                "Percent.SecondaryOcc.Tourism","Percent.SecondaryOcc.Fish",
                                                "Percent.SecondaryOcc.HarvestForest","Percent.SecondaryOcc.Farm")) %>%
@@ -1504,22 +1482,20 @@ Flotim.Secondaryocc.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["SecondaryOcc"]],
                     labels=c("Other","Other Wage Labor","Tourism",
                              "Fishing","Harvest Forest Products","Farming")) +
   coord_flip() + plot.theme + labs(y="Secondary occupation (% households)",x="Monitoring Year") + plot.guides.techreport 
-Flotim.Secondaryocc.trendplot
+Alor.Secondaryocc.trendplot
 
-Flotim.TrendPropData.Techreport.PLOTFORMAT$order <- c(1,4,2,5,3)
-Flotim.TrendPropData.Techreport.PLOTFORMAT$year<-c("Baseline\n(2014)","3 Year Post\nBaseline\n(2017)","","Baseline\n(2014)","3 Year Post\nBaseline\n(2017)")
 # - FISHING FREQUENCY
-Flotim.freqfish.trendplot <- 
-  melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
+Alor.freqfish.trendplot <- 
+  melt(Alor.TrendPropData.Techreport.PLOTFORMAT,
        id.vars=c("order","MonitoringYear","Treatment"),measure.vars=c("Prop.Fish.MoreFewTimesWk","Prop.Fish.FewTimesPerWk",
-                                               "Prop.Fish.FewTimesPerMo","Prop.Fish.FewTimesPer6Mo",
-                                               "Prop.Fish.AlmostNever")) %>%
+                                                                      "Prop.Fish.FewTimesPerMo","Prop.Fish.FewTimesPer6Mo",
+                                                                      "Prop.Fish.AlmostNever")) %>%
   ggplot(aes(x=factor(order),y=value,fill=variable)) +
   geom_bar(stat="identity", 
            position="fill",
@@ -1533,21 +1509,21 @@ Flotim.freqfish.trendplot <-
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.TrendPropData.Techreport.PLOTFORMAT$year) +
+  scale_x_discrete(labels=Alor.TrendPropData.Techreport.PLOTFORMAT$year) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FreqFish"]],
                     labels=c("More than a few times per week","A few times per week",
                              "A few times per month","A few times per six months",
                              "Once every six months")) +
-  coord_flip() + plot.theme + Flotim.trendplot.labs["FreqFish"] + plot.guides.techreport
-Flotim.freqfish.trendplot
+  coord_flip() + plot.theme + Alor.trendplot.labs["FreqFish"] + plot.guides.techreport
+Alor.freqfish.trendplot
 
 # - SELL FISH FREQUENCY
-Flotim.freqsellfish.trendplot <- 
-  melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
+Alor.freqsellfish.trendplot <- 
+  melt(Alor.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="order",measure.vars=c("Prop.SellFish.MoreFewTimesWk","Prop.SellFish.FewTimesPerWk",
-                                               "Prop.SellFish.FewTimesPerMo","Prop.SellFish.FewTimesPer6Mo",
-                                               "Prop.SellFish.AlmostNever")) %>%
+                                      "Prop.SellFish.FewTimesPerMo","Prop.SellFish.FewTimesPer6Mo",
+                                      "Prop.SellFish.AlmostNever")) %>%
   ggplot(aes(x=factor(order),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -1561,21 +1537,21 @@ Flotim.freqsellfish.trendplot <-
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.TrendPropData.Techreport.PLOTFORMAT$year) +
+  scale_x_discrete(labels=Alor.TrendPropData.Techreport.PLOTFORMAT$year) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FreqSellFish"]],
                     labels=c("More than a few times per week","A few times per week",
                              "A few times per month","A few times per six months",
                              "Once every six months")) +
-  coord_flip() + plot.theme + Flotim.trendplot.labs["FreqSellFish"] + plot.guides.techreport
-Flotim.freqsellfish.trendplot
+  coord_flip() + plot.theme + Alor.trendplot.labs["FreqSellFish"] + plot.guides.techreport
+Alor.freqsellfish.trendplot
 
 # - INCOME FROM FISHING
-Flotim.incfish.trendplot <- 
-  melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
+Alor.incfish.trendplot <- 
+  melt(Alor.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="order",measure.vars=c("Prop.IncFish.All","Prop.IncFish.Most",
-                                               "Prop.IncFish.Half","Prop.IncFish.Some",
-                                               "Prop.IncFish.None")) %>%
+                                      "Prop.IncFish.Half","Prop.IncFish.Some",
+                                      "Prop.IncFish.None")) %>%
   ggplot(aes(x=factor(order),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -1589,19 +1565,19 @@ Flotim.incfish.trendplot <-
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.TrendPropData.Techreport.PLOTFORMAT$year) +
+  scale_x_discrete(labels=Alor.TrendPropData.Techreport.PLOTFORMAT$year) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["IncFish"]],
                     labels=c("All","Most","About half","Some","None")) +
-  coord_flip() + plot.theme + Flotim.trendplot.labs["IncFish"] + plot.guides.techreport
-Flotim.incfish.trendplot 
+  coord_flip() + plot.theme + Alor.trendplot.labs["IncFish"] + plot.guides.techreport
+Alor.incfish.trendplot 
 
 # - FISHING TECHNIQUE
-Flotim.fishtech.trendplot <- 
-  melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
+Alor.fishtech.trendplot <- 
+  melt(Alor.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="order",measure.vars=c("Prop.FishTech.MobileLine","Prop.FishTech.StatLine",
-                                               "Prop.FishTech.MobileNet","Prop.FishTech.StatNet",
-                                               "Prop.FishTech.ByHand")) %>%
+                                      "Prop.FishTech.MobileNet","Prop.FishTech.StatNet",
+                                      "Prop.FishTech.ByHand")) %>%
   ggplot(aes(x=factor(order),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -1615,17 +1591,17 @@ Flotim.fishtech.trendplot <-
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.TrendPropData.Techreport.PLOTFORMAT$year) +
+  scale_x_discrete(labels=Alor.TrendPropData.Techreport.PLOTFORMAT$year) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FishTech"]],
                     labels=c("Mobile line","Stationary line",
                              "Mobile net","Stationary net","Fishing by hand")) +
-  coord_flip() + plot.theme + Flotim.trendplot.labs["FishTech"] + plot.guides.techreport
-Flotim.fishtech.trendplot
+  coord_flip() + plot.theme + Alor.trendplot.labs["FishTech"] + plot.guides.techreport
+Alor.fishtech.trendplot
 
 # - CHILDHOOD FOOD SECURITY
-Flotim.childfs.trendplot <- 
-  melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
+Alor.childfs.trendplot <- 
+  melt(Alor.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="order",measure.vars=c("Child.FS.yes","Child.FS.no")) %>%
   ggplot(aes(x=factor(order),
              y=value)) +
@@ -1642,19 +1618,19 @@ Flotim.childfs.trendplot <-
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.TrendPropData.Techreport.PLOTFORMAT$year) +
+  scale_x_discrete(labels=Alor.TrendPropData.Techreport.PLOTFORMAT$year) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["ChildFS"]],
                     labels=c("Evidence of child hunger","No evidence of child hunger")) +
-  coord_flip() + plot.theme + Flotim.trendplot.labs["ChildFS"] + plot.guides.techreport
-Flotim.childfs.trendplot
+  coord_flip() + plot.theme + Alor.trendplot.labs["ChildFS"] + plot.guides.techreport
+Alor.childfs.trendplot
 
 # - PROTEIN FROM FISH
-Flotim.proteinfish.trendplot <- 
-  melt(Flotim.TrendPropData.Techreport.PLOTFORMAT,
+Alor.proteinfish.trendplot <- 
+  melt(Alor.TrendPropData.Techreport.PLOTFORMAT,
        id.vars="order",measure.vars=c("ProteinFish.All","ProteinFish.Most",
-                                               "ProteinFish.Half","ProteinFish.Some",
-                                               "ProteinFish.None")) %>%
+                                      "ProteinFish.Half","ProteinFish.Some",
+                                      "ProteinFish.None")) %>%
   ggplot(aes(x=factor(order),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -1668,19 +1644,19 @@ Flotim.proteinfish.trendplot <-
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.TrendPropData.Techreport.PLOTFORMAT$year) +
+  scale_x_discrete(labels=Alor.TrendPropData.Techreport.PLOTFORMAT$year) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Protein"]],
                     labels=c("All","Most","About half","Some","None")) +
-  coord_flip() + plot.theme + Flotim.trendplot.labs["Protein"] + plot.guides.techreport
-Flotim.proteinfish.trendplot
+  coord_flip() + plot.theme + Alor.trendplot.labs["Protein"] + plot.guides.techreport
+Alor.proteinfish.trendplot
 
 # - CHANGE IN ECONOMIC STATUS FOR FISHERS
-Flotim.fishecon.trendplot <- 
-  melt(Flotim.SBSPropData.Techreport.trend.PLOTFORMAT,
+Alor.fishecon.trendplot <- 
+  melt(Alor.SBSPropData.Techreport.trend.PLOTFORMAT,
        id.vars="order",measure.vars=c("Econ.Status.Much.Better","Econ.Status.Slightly.Better",
-                                               "Econ.Status.Neutral","Econ.Status.Slighly.Worse",
-                                               "Econ.Status.Much.Worse")) %>%
+                                      "Econ.Status.Neutral","Econ.Status.Slighly.Worse",
+                                      "Econ.Status.Much.Worse")) %>%
   ggplot(aes(x=factor(order),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -1694,25 +1670,25 @@ Flotim.fishecon.trendplot <-
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.SBSPropData.Techreport.trend.PLOTFORMAT$year) +
+  scale_x_discrete(labels=Alor.SBSPropData.Techreport.trend.PLOTFORMAT$year) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["EconStatus"]],
                     labels=c("Much better","Slightly better","Neither better or worse",
                              "Slightly worse","Much worse")) +
-  coord_flip() + plot.theme + Flotim.trendplot.labs["EconStatus"] + plot.guides.techreport
-Flotim.fishecon.trendplot
+  coord_flip() + plot.theme + Alor.trendplot.labs["EconStatus"] + plot.guides.techreport
+Alor.fishecon.trendplot
 
 null.row.ContData <- 
-  cbind.data.frame(matrix(rep(NA,length(Flotim.SBSPropData.Techreport.trend.PLOTFORMAT)),ncol=45,dimnames=list(NULL,colnames(Flotim.SBSPropData.Techreport.trend.PLOTFORMAT))))
+  cbind.data.frame(matrix(rep(NA,length(Alor.SBSPropData.Techreport.trend.PLOTFORMAT)),ncol=45,dimnames=list(NULL,colnames(Alor.SBSPropData.Techreport.trend.PLOTFORMAT))))
 
-Flotim.SBSPropData.Techreport.trend.PLOTFORMAT <- rbind(Flotim.SBSPropData.Techreport.trend.PLOTFORMAT,null.row.ContData)
-Flotim.SBSPropData.Techreport.trend.PLOTFORMAT$order <-c(1,2,4,5,3)
-Flotim.SBSPropData.Techreport.trend.PLOTFORMAT$year <-c("Baseline\n(2014)","3 Year Post\nBaseline\n(2017)","","Baseline\n(2014)","3 Year Post\nBaseline\n(2017)")
+Alor.SBSPropData.Techreport.trend.PLOTFORMAT <- rbind(Alor.SBSPropData.Techreport.trend.PLOTFORMAT,null.row.ContData)
+Alor.SBSPropData.Techreport.trend.PLOTFORMAT$order <-c(1,2,4,5,3)
+Alor.SBSPropData.Techreport.trend.PLOTFORMAT$year <-c("Baseline\n(2014)","3 Year Post\nBaseline\n(2017)","","Baseline\n(2014)","3 Year Post\nBaseline\n(2017)")
 #Adult education trend
-Flotim.AdultEduc.trendplot <- 
-  melt(Flotim.SBSContData.Techreport.trend.PLOTFORMAT,
+Alor.AdultEduc.trendplot <- 
+  melt(Alor.SBSContData.Techreport.trend.PLOTFORMAT,
        id.vars="order",measure.vars=c("AdultEducHigher", "AdultEducSec", "AdultEducMid",
-                                               "AdultEducPrim", "AdultEducPre", "AdultEducNone")) %>%
+                                      "AdultEducPrim", "AdultEducPre", "AdultEducNone")) %>%
   ggplot(aes(x=factor(order),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -1726,16 +1702,16 @@ Flotim.AdultEduc.trendplot <-
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.SBSContData.Techreport.trend.PLOTFORMAT$year) +
+  scale_x_discrete(labels=Alor.SBSContData.Techreport.trend.PLOTFORMAT$year) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["AdultEducation"]],
                     labels=c("Further or higher education","High school education","Middle school education",
                              "Primary school education","Pre-school education", "No formal education")) +
-  coord_flip() + plot.theme + Flotim.trendplot.labs["AdultEduc"]+ plot.guides.techreport
-Flotim.AdultEduc.trendplot
+  coord_flip() + plot.theme + Alor.trendplot.labs["AdultEduc"]+ plot.guides.techreport
+Alor.AdultEduc.trendplot
 
 # HHH education trend
-Flotim.HHHEduc.trendplot <- 
+Alor.HHHEduc.trendplot <- 
   melt(Synth.DemosSBS.ByMPA.All,
        id.vars="MonitoringYear",measure.vars=c("HHHEducHigher", "HHHEducSec", "HHHEducMid",
                                                "HHHEducPrim", "HHHEducPre", "HHHEducNone")) %>%
@@ -1747,18 +1723,18 @@ Flotim.HHHEduc.trendplot <-
            colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=Alor.trendplot.monitoryear.labs) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["HHHEducation"]],
                     labels=c("Further or higher education","High school education","Middle school education",
                              "Primary school education","Pre-school education", "No formal education")) +
-  coord_flip() + plot.theme + Flotim.trendplot.labs["HHHEducation"] + plot.guides.techreport
-Flotim.HHHEduc.trendplot
+  coord_flip() + plot.theme + Alor.trendplot.labs["HHHEducation"] + plot.guides.techreport
+Alor.HHHEduc.trendplot
 
-Flotim.NumThreat.trendplot <- 
-  melt(Flotim.SBSPropData.Techreport.trend.PLOTFORMAT,
+Alor.NumThreat.trendplot <- 
+  melt(Alor.SBSPropData.Techreport.trend.PLOTFORMAT,
        id.vars="order",measure.vars=c("Threat.Minimum.Five","Threat.Four", "Threat.Three",
-                                               "Threat.Two","Threat.One","Threat.None")) %>%
+                                      "Threat.Two","Threat.One","Threat.None")) %>%
   ggplot(aes(x=factor(order),y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -1772,12 +1748,12 @@ Flotim.NumThreat.trendplot <-
             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=Flotim.SBSPropData.Techreport.trend.PLOTFORMAT$year) +
+  scale_x_discrete(labels=Alor.SBSPropData.Techreport.trend.PLOTFORMAT$year) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["NumThreats"]],
                     labels=c("More than five threats","Four threats","Three threats","Two threats","One threat", "No threats")) +
-  coord_flip() + plot.theme + Flotim.trendplot.labs["NumThreat"] + plot.guides.techreport
-Flotim.NumThreat.trendplot
+  coord_flip() + plot.theme + Alor.trendplot.labs["NumThreat"] + plot.guides.techreport
+Alor.NumThreat.trendplot
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1790,12 +1766,12 @@ Flotim.NumThreat.trendplot
 
 # ---- 5.1 Food security -----
 
-Flotim.fs.annexplot <- 
-  rbind.data.frame(Flotim.AnnexContData.Techreport.PLOTFORMAT,
+Alor.fs.annexplot <- 
+  rbind.data.frame(Alor.AnnexContData.Techreport.PLOTFORMAT,
                    cbind.data.frame(MonitoringYear=NA,SettlementID=NA,SettlementName="  ",
                                     matrix(rep(NA,14),ncol=14,
                                            dimnames=list(NULL,
-                                                         colnames(Flotim.AnnexContData.Techreport.PLOTFORMAT)[4:17])),
+                                                         colnames(Alor.AnnexContData.Techreport.PLOTFORMAT)[4:17])),
                                     SettLevel="Dummy")) %>%
   ggplot() +
   geom_hline(aes(yintercept=1.56),size=0.25,colour="#505050") +
@@ -1830,11 +1806,11 @@ Flotim.fs.annexplot <-
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.3,0.6,1),
-                     labels=(Flotim.annexplot.monitoryear.labs),
+                     labels=(Alor.annexplot.monitoryear.labs),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
-  scale_x_discrete(labels=c(Flotim.annexplot.settnames[,"FS"]," "),
+  scale_x_discrete(labels=c(Alor.annexplot.settnames[,"FS"]," "),
                    na.value=" ") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,6.06)) +
@@ -1856,12 +1832,12 @@ Flotim.fs.annexplot <-
                                                                         legend.position="top",
                                                                         legend.justification="right",
                                                                         legend.box.spacing=unit(0.1,"cm"))
-Flotim.fs.annexplot
+Alor.fs.annexplot
 
 # ---- 5.2 Material assets -----
 
-Flotim.ma.annexplot <- 
-  ggplot(data=Flotim.AnnexContData.Techreport.PLOTFORMAT,
+Alor.ma.annexplot <- 
+  ggplot(data=Alor.AnnexContData.Techreport.PLOTFORMAT,
          aes(x=SettlementName,
              y=MAMean)) +
   geom_bar(aes(alpha=MonitoringYear),
@@ -1885,23 +1861,23 @@ Flotim.ma.annexplot <-
              colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.3,0.6,1),
-                     labels=Flotim.annexplot.monitoryear.labs,
+                     labels=Alor.annexplot.monitoryear.labs,
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
-  scale_x_discrete(labels=Flotim.annexplot.settnames[,"MA"]) +
+  scale_x_discrete(labels=Alor.annexplot.settnames[,"MA"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,max(Flotim.AnnexContData.Techreport.PLOTFORMAT$MAMean,na.rm=T)+
-                                max(Flotim.AnnexContData.Techreport.PLOTFORMAT$MAErr,na.rm=T)+
-                                0.03*max(Flotim.AnnexContData.Techreport.PLOTFORMAT$MAMean,na.rm=T))) +
+                     limits=c(0,max(Alor.AnnexContData.Techreport.PLOTFORMAT$MAMean,na.rm=T)+
+                                max(Alor.AnnexContData.Techreport.PLOTFORMAT$MAErr,na.rm=T)+
+                                0.03*max(Alor.AnnexContData.Techreport.PLOTFORMAT$MAMean,na.rm=T))) +
   coord_flip() + Statusplot.labs["MA"] + plot.guides.techreport + plot.theme
 
-Flotim.ma.annexplot
+Alor.ma.annexplot
 
 # ---- 5.3 Place attachment -----
 
-Flotim.pa.annexplot <- 
-  ggplot(data=Flotim.AnnexContData.Techreport.PLOTFORMAT,
+Alor.pa.annexplot <- 
+  ggplot(data=Alor.AnnexContData.Techreport.PLOTFORMAT,
          aes(x=SettlementName,
              y=PAMean)) +
   geom_bar(aes(alpha=MonitoringYear),
@@ -1925,20 +1901,20 @@ Flotim.pa.annexplot <-
              colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.3,0.6,1),
-                     labels=Flotim.annexplot.monitoryear.labs,
+                     labels=Alor.annexplot.monitoryear.labs,
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
-  scale_x_discrete(labels=Flotim.annexplot.settnames[,"PA"]) +
+  scale_x_discrete(labels=Alor.annexplot.settnames[,"PA"]) +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,5)) +
   coord_flip() + Statusplot.labs["PA"] + plot.guides.techreport + plot.theme
-Flotim.pa.annexplot
+Alor.pa.annexplot
 
 # ---- 5.4 Marine tenure -----
 
-Flotim.mt.annexplot <- 
-  ggplot(data=Flotim.AnnexContData.Techreport.PLOTFORMAT,
+Alor.mt.annexplot <- 
+  ggplot(data=Alor.AnnexContData.Techreport.PLOTFORMAT,
          aes(x=SettlementName,
              y=MTMean)) +
   geom_bar(aes(alpha=MonitoringYear),
@@ -1962,21 +1938,21 @@ Flotim.mt.annexplot <-
              colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.3,0.6,1),
-                     labels=Flotim.annexplot.monitoryear.labs,
+                     labels=Alor.annexplot.monitoryear.labs,
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
-  scale_x_discrete(labels=Flotim.annexplot.settnames[,"MT"]) +
+  scale_x_discrete(labels=Alor.annexplot.settnames[,"MT"]) +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,5)) +
   coord_flip() + Statusplot.labs["MT"] + plot.guides.techreport + plot.theme
-Flotim.mt.annexplot
+Alor.mt.annexplot
 
 
 # ---- 5.5 School enrollment -----
 
-Flotim.se.annexplot <- 
-  ggplot(data=Flotim.AnnexContData.Techreport.PLOTFORMAT,
+Alor.se.annexplot <- 
+  ggplot(data=Alor.AnnexContData.Techreport.PLOTFORMAT,
          aes(x=SettlementName,
              y=SEMean)) +
   geom_bar(aes(alpha=MonitoringYear),
@@ -2000,19 +1976,19 @@ Flotim.se.annexplot <-
              colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.3,0.6,1),
-                     labels=Flotim.annexplot.monitoryear.labs,
+                     labels=Alor.annexplot.monitoryear.labs,
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
-  scale_x_discrete(labels=Flotim.annexplot.settnames[,"SE"]) +
+  scale_x_discrete(labels=Alor.annexplot.settnames[,"SE"]) +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   coord_flip() + Statusplot.labs["SE"] + plot.guides.techreport + plot.theme
-Flotim.se.annexplot
+Alor.se.annexplot
 
 # ---- 5.6 Time to market -----
-Flotim.time.annexplot <- 
-  ggplot(data=Flotim.AnnexContData.Techreport.PLOTFORMAT,
+Alor.time.annexplot <- 
+  ggplot(data=Alor.AnnexContData.Techreport.PLOTFORMAT,
          aes(x=SettlementName,
              y=TimeMarketMean)) +
   geom_bar(aes(alpha=MonitoringYear),
@@ -2036,22 +2012,22 @@ Flotim.time.annexplot <-
              colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.3,0.6,1),
-                     labels=Flotim.annexplot.monitoryear.labs,
+                     labels=Alor.annexplot.monitoryear.labs,
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
-  scale_x_discrete(labels=Flotim.annexplot.settnames[,"TimeMarket"]) +
+  scale_x_discrete(labels=Alor.annexplot.settnames[,"TimeMarket"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,max(Flotim.AnnexContData.Techreport.PLOTFORMAT$TimeMarketMean,na.rm=T)+
-                                max(Flotim.AnnexContData.Techreport.PLOTFORMAT$TimeMarketErr,na.rm=T)+
-                                0.03*max(Flotim.AnnexContData.Techreport.PLOTFORMAT$TimeMarketMean,na.rm=T))) +
+                     limits=c(0,max(Alor.AnnexContData.Techreport.PLOTFORMAT$TimeMarketMean,na.rm=T)+
+                                max(Alor.AnnexContData.Techreport.PLOTFORMAT$TimeMarketErr,na.rm=T)+
+                                0.03*max(Alor.AnnexContData.Techreport.PLOTFORMAT$TimeMarketMean,na.rm=T))) +
   coord_flip() + Statusplot.labs["Time"] + plot.guides.techreport + plot.theme
-Flotim.time.annexplot
+Alor.time.annexplot
 
 # ---- 5.7 Days unwell -----
 
-Flotim.unwell.annexplot <- 
-  ggplot(data=Flotim.AnnexContData.Techreport.PLOTFORMAT,
+Alor.unwell.annexplot <- 
+  ggplot(data=Alor.AnnexContData.Techreport.PLOTFORMAT,
          aes(x=SettlementName,
              y=UnwellMean)) +
   geom_bar(aes(alpha=MonitoringYear),
@@ -2075,17 +2051,17 @@ Flotim.unwell.annexplot <-
              colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.3,0.6,1),
-                     labels=Flotim.annexplot.monitoryear.labs,
+                     labels=Alor.annexplot.monitoryear.labs,
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
-  scale_x_discrete(labels=Flotim.annexplot.settnames[,"Unwell"]) +
+  scale_x_discrete(labels=Alor.annexplot.settnames[,"Unwell"]) +
   scale_y_continuous(expand=c(0,0),
-                     limits=c(0,max(Flotim.AnnexContData.Techreport.PLOTFORMAT$UnwellMean,na.rm=T)+
-                                max(Flotim.AnnexContData.Techreport.PLOTFORMAT$UnwellErr,na.rm=T)+
-                                0.03*max(Flotim.AnnexContData.Techreport.PLOTFORMAT$UnwellMean,na.rm=T))) +
+                     limits=c(0,max(Alor.AnnexContData.Techreport.PLOTFORMAT$UnwellMean,na.rm=T)+
+                                max(Alor.AnnexContData.Techreport.PLOTFORMAT$UnwellErr,na.rm=T)+
+                                0.03*max(Alor.AnnexContData.Techreport.PLOTFORMAT$UnwellMean,na.rm=T))) +
   coord_flip() + Statusplot.labs["Unwell"] + plot.guides.techreport + plot.theme
-Flotim.unwell.annexplot
+Alor.unwell.annexplot
 
 
 # 
@@ -2103,17 +2079,17 @@ FigureFileName <- paste("C:/Users/HP/Dropbox/Products/",
 
 png(paste(FigureFileName,"FS.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.fs.trendplot)
+plot(Alor.fs.trendplot)
 dev.off()
 
 png(paste(FigureFileName,"FS.annex.png",sep="/"),
     units="in",height=7.5,width=7.5,res=400)
-plot(Flotim.fs.annexplot)
+plot(Alor.fs.annexplot)
 dev.off()
 
 png(paste(FigureFileName,"FS.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.fs.statusplot)
+plot(Alor.fs.statusplot)
 dev.off()
 
 
@@ -2121,17 +2097,17 @@ dev.off()
 
 png(paste(FigureFileName,"MA.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.ma.statusplot)
+plot(Alor.ma.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"MA.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.ma.trendplot)
+plot(Alor.ma.trendplot)
 dev.off()
 
 png(paste(FigureFileName,"MA.annex.png",sep="/"),
     units="in",height=7.5,width=7.5,res=400)
-plot(Flotim.ma.annexplot)
+plot(Alor.ma.annexplot)
 dev.off()
 
 
@@ -2139,17 +2115,17 @@ dev.off()
 
 png(paste(FigureFileName,"PA.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.pa.statusplot)
+plot(Alor.pa.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"PA.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.pa.trendplot)
+plot(Alor.pa.trendplot)
 dev.off()
 
 png(paste(FigureFileName,"PA.annex.png",sep="/"),
     units="in",height=7.5,width=7.5,res=400)
-plot(Flotim.pa.annexplot)
+plot(Alor.pa.annexplot)
 dev.off()
 
 
@@ -2157,17 +2133,17 @@ dev.off()
 
 png(paste(FigureFileName,"MT.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.mt.statusplot)
+plot(Alor.mt.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"MT.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.mt.trendplot)
+plot(Alor.mt.trendplot)
 dev.off()
 
 png(paste(FigureFileName,"MT.annex.png",sep="/"),
     units="in",height=7.5,width=7.5,res=400)
-plot(Flotim.mt.annexplot)
+plot(Alor.mt.annexplot)
 dev.off()
 
 
@@ -2175,17 +2151,17 @@ dev.off()
 
 png(paste(FigureFileName,"SE.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.se.statusplot)
+plot(Alor.se.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"SE.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.se.trendplot)
+plot(Alor.se.trendplot)
 dev.off()
 
 png(paste(FigureFileName,"SE.annex.png",sep="/"),
     units="in",height=7.5,width=7.5,res=400)
-plot(Flotim.se.annexplot)
+plot(Alor.se.annexplot)
 dev.off()
 
 
@@ -2193,17 +2169,17 @@ dev.off()
 
 png(paste(FigureFileName,"TimeMarket.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.time.statusplot)
+plot(Alor.time.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"TimeMarket.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.time.trendplot)
+plot(Alor.time.trendplot)
 dev.off()
 
 y7png(paste(FigureFileName,"TimeMarket.annex.png",sep="/"),
-    units="in",height=7.5,width=7.5,res=400)
-plot(Flotim.time.annexplot)
+      units="in",height=7.5,width=7.5,res=400)
+plot(Alor.time.annexplot)
 dev.off()
 
 
@@ -2211,17 +2187,17 @@ dev.off()
 
 png(paste(FigureFileName,"DaysUnwell.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.unwell.statusplot)
+plot(Alor.unwell.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"DaysUnwell.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.unwell.trendplot)
+plot(Alor.unwell.trendplot)
 dev.off()
 
 png(paste(FigureFileName,"DaysUnwell.annex.png",sep="/"),
     units="in",height=7.5,width=7.5,res=400)
-plot(Flotim.unwell.annexplot)
+plot(Alor.unwell.annexplot)
 dev.off()
 
 
@@ -2229,12 +2205,12 @@ dev.off()
 
 png(paste(FigureFileName,"Gender.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.gender.statusplot)
+plot(Alor.gender.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"Gender.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.gender.trendplot)
+plot(Alor.gender.trendplot)
 dev.off()
 
 
@@ -2242,12 +2218,12 @@ dev.off()
 
 png(paste(FigureFileName,"Religion.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.religion.statusplot)
+plot(Alor.religion.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"Religion.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.religion.trendplot)
+plot(Alor.religion.trendplot)
 dev.off()
 
 
@@ -2255,24 +2231,24 @@ dev.off()
 
 png(paste(FigureFileName,"PrimaryOcc.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.primaryocc.statusplot)
+plot(Alor.primaryocc.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"PrimaryOcc.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.primaryocc.trendplot)
+plot(Alor.primaryocc.trendplot)
 dev.off()
 
 # ---- 6.15 Secondary occupation ----
 
 png(paste(FigureFileName,"SecondaryOcc.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.Secondaryocc.statusplot)
+plot(Alor.Secondaryocc.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"SecondaryOcc.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.Secondaryocc.trendplot)
+plot(Alor.Secondaryocc.trendplot)
 dev.off()
 
 
@@ -2280,12 +2256,12 @@ dev.off()
 
 png(paste(FigureFileName,"FreqFish.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.freqfish.statusplot)
+plot(Alor.freqfish.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"FreqFish.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.freqfish.trendplot)
+plot(Alor.freqfish.trendplot)
 dev.off()
 
 
@@ -2293,12 +2269,12 @@ dev.off()
 
 png(paste(FigureFileName,"FreqSellFish.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.freqsellfish.statusplot)
+plot(Alor.freqsellfish.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"FreqSellFish.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.freqsellfish.trendplot)
+plot(Alor.freqsellfish.trendplot)
 dev.off()
 
 
@@ -2306,12 +2282,12 @@ dev.off()
 
 png(paste(FigureFileName,"IncFish.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.incfish.statusplot)
+plot(Alor.incfish.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"IncFish.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.incfish.trendplot)
+plot(Alor.incfish.trendplot)
 dev.off()
 
 
@@ -2319,12 +2295,12 @@ dev.off()
 
 png(paste(FigureFileName,"FishTech.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.fishtech.statusplot)
+plot(Alor.fishtech.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"FishTech.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.fishtech.trendplot)
+plot(Alor.fishtech.trendplot)
 dev.off()
 
 
@@ -2332,12 +2308,12 @@ dev.off()
 
 png(paste(FigureFileName,"ChildFS.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.childfs.statusplot)
+plot(Alor.childfs.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"ChildFS.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.childfs.trendplot)
+plot(Alor.childfs.trendplot)
 dev.off()
 
 
@@ -2345,12 +2321,12 @@ dev.off()
 
 png(paste(FigureFileName,"FishProtein.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.proteinfish.statusplot)
+plot(Alor.proteinfish.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"FishProtein.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.proteinfish.trendplot)
+plot(Alor.proteinfish.trendplot)
 dev.off()
 
 # ---- 6.17 Age/Gender ----
@@ -2358,7 +2334,7 @@ library(grid)
 png(paste(FigureFileName,"Age.gender.png",sep="/"),
     units="in",height=10,width=4,res=400)
 grid.newpage()
-grid.draw(Flotim.age.gender.plot)
+grid.draw(Alor.age.gender.plot)
 dev.off()
 
 
@@ -2366,19 +2342,19 @@ dev.off()
 
 png(paste(FigureFileName,"Num.Ethnic.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.ethnicity.statusplot)
+plot(Alor.ethnicity.statusplot)
 dev.off()
 
 # ---- 6.19 Adult education ----
 
 png(paste(FigureFileName,"AdultEduc.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.AdultEduc.statusplot)
+plot(Alor.AdultEduc.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"AdultEduc.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.AdultEduc.trendplot)
+plot(Alor.AdultEduc.trendplot)
 dev.off()
 
 
@@ -2387,90 +2363,90 @@ dev.off()
 
 png(paste(FigureFileName,"HHHEduc.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.HHHEduc.statusplot)
+plot(Alor.HHHEduc.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"HHHEduc.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.HHHEduc.trendplot)
+plot(Alor.HHHEduc.trendplot)
 dev.off()
 
 # ---- 6.21 Change in economic status ----
 
 png(paste(FigureFileName,"EconChange.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.econ.statusplot)
+plot(Alor.econ.statusplot)
 dev.off()
 
-png(paste(FigureFileName,"Flotim.fishecon.trend.png",sep="/"),
+png(paste(FigureFileName,"Alor.fishecon.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.fishecon.trendplot)
+plot(Alor.fishecon.trendplot)
 dev.off()
 
 # ---- 6.22 Rules ----
 
 png(paste(FigureFileName,"Rules.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.rules.statusplot)
+plot(Alor.rules.statusplot)
 dev.off()
 
 # ---- 6.23 Participation in decision-making ----
 
 png(paste(FigureFileName,"Decisions.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.participation.statusplot)
+plot(Alor.participation.statusplot)
 dev.off()
 
 # ---- 6.24 Member of an organization ----
 
 png(paste(FigureFileName,"OrgMem.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.member.statusplot)
+plot(Alor.member.statusplot)
 dev.off()
 
 # ---- 6.25 Meeting attendance ----
 
 png(paste(FigureFileName,"Attendance.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.meeting.statusplot)
+plot(Alor.meeting.statusplot)
 dev.off()
 
 # ---- 6.26 Illness ----
 
 png(paste(FigureFileName,"Illness.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.illness.statusplot)
+plot(Alor.illness.statusplot)
 dev.off()
 
 # ---- 6.27 Marine Resource Conflict ----
 
 png(paste(FigureFileName,"Conflict.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.conflict.statusplot)
+plot(Alor.conflict.statusplot)
 dev.off()
 
 # ---- 6.28 Number of Threats ----
 
 png(paste(FigureFileName,"Threats.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.NumThreat.statusplot)
+plot(Alor.NumThreat.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"Threats.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.NumThreat.trendplot)
+plot(Alor.NumThreat.trendplot)
 dev.off()
 
 # ---- 6.29 Contributions ----
 
 png(paste(FigureFileName,"Contribution.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.contribution.statusplot)
+plot(Alor.contribution.statusplot)
 dev.off()
 
 png(paste(FigureFileName,"Contribution.trend.png",sep="/"),
     units="in",height=4,width=6,res=400)
-plot(Flotim.contribution.trendplot)
+plot(Alor.contribution.trendplot)
 dev.off()
 
 

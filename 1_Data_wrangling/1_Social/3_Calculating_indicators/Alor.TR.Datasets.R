@@ -1,16 +1,16 @@
 # 
-# code:   Flotim Technical Report Datasets
+# code:   Alor Technical Report Datasets
 # 
 # github: WWF-ConsEvidence/MPAMystery/2_Social/TechnicalReports/SBS
 # --- Duplicate all code from "2_Social" onward, to maintain file structure for sourced code
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
-# created: November 2016
+# created: November 2015
 # modified: November 2017
 # 
 # 
 # ---- inputs ----
-#  1) Source: Flotim.TR.SigTest.R
+#  1) Source: Alor.TR.SigTest.R
 #     - Dependencies: 
 #                     After_Calculate_BigFive.R
 #                     Calculate_BigFive.R
@@ -34,27 +34,27 @@
 source("C:/Users/HP/Dropbox/NotThisOne/Source_social_data_flat_files.R")
 source("C:/Users/HP/Dropbox/NotThisOne/Calculate_BigFive.R")
 source("C:/Users/HP/Dropbox/NotThisOne/AFTER_CALCULATE_BIGFIVE.R")
-source("C:/Users/HP/Dropbox/NotThisOne/Flotim.TR.SigTest.R")
+source("C:/Users/HP/Dropbox/NotThisOne/Alor.TR.SigTest.R")
 
 
-# ---- 1.3 Subset Proportional Data of Age/Gender for Flotim----
+# ---- 1.3 Subset Proportional Data of Age/Gender for Alor----
 
-Flotim.AgeGender <- 
+Alor.AgeGender <- 
   data.frame(AgeCat=factor(c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
                              "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
                            levels=c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
                                     "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
                            ordered=T),
-             Male.Baseline=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==16 &
+             Male.Baseline=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==15 &
                                                     AgeGenderDemos.ByMPA$MonitoringYear=="Baseline",
                                                   seq(3,41,by=2)]),
-             Female.Baseline=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==16 &
+             Female.Baseline=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==15 &
                                                       AgeGenderDemos.ByMPA$MonitoringYear=="Baseline",
                                                     seq(4,42,by=2)]),
-             Male.3Year=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==16 &
+             Male.3Year=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==15 &
                                                  AgeGenderDemos.ByMPA$MonitoringYear=="3 Year Post",
                                                seq(3,41,by=2)]),
-             Female.3Year=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==16 &
+             Female.3Year=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MPAID==15 &
                                                    AgeGenderDemos.ByMPA$MonitoringYear=="3 Year Post",
                                                  seq(4,42,by=2)]),
              row.names=NULL)
@@ -62,10 +62,10 @@ Flotim.AgeGender <-
 
 # ---- 1.4 MPA-level Proportional data (row to be added to bottom of status and annex plots in tech report) ----
 
-Flotim.level.PropData.status <- 
+Alor.level.PropData.status <- 
   rbind.data.frame(data.frame(MonitoringYear="3 Year Post",
                               SettlementName="Control Settlements",
-                              Techreport.ByMPA.control[Techreport.ByMPA.control$MPAID==16 & Techreport.ByMPA.control$MonitoringYear=="3 Year Post",c("HHH.female", "HHH.male", "Percent.Rel.Christian", "Percent.Rel.Muslim", 
+                              Techreport.ByMPA.control[Techreport.ByMPA.control$MPAID==15 & Techreport.ByMPA.control$MonitoringYear=="3 Year Post",c("HHH.female", "HHH.male", "Percent.Rel.Christian", "Percent.Rel.Muslim", 
                                                                                                                                                      "Percent.Rel.Other", "Percent.PrimaryOcc.Fish", "Percent.PrimaryOcc.Farm", 
                                                                                                                                                      "Percent.PrimaryOcc.WageLabor", "Percent.PrimaryOcc.HarvestForest", 
                                                                                                                                                      "Percent.PrimaryOcc.Tourism", "Percent.PrimaryOcc.Aquaculture", "Percent.PrimaryOcc.Extraction", 
@@ -81,54 +81,54 @@ Flotim.level.PropData.status <-
                                                                                                                                                      "ProteinFish.Most", "ProteinFish.All","Percent.FoodInsecure.NoHunger","Percent.FoodInsecure.YesHunger","Percent.FoodSecure")]),
                    
                    data.frame(MonitoringYear="3 Year Post",
-                              SettlementName="Flores Timur MPA",
-                              Techreport.Trend.ByMPA[Techreport.Trend.ByMPA$MPAID==16 &  Techreport.Trend.ByMPA$Treatment==1 & Techreport.Trend.ByMPA$MonitoringYear=="3 Year Post",c("HHH.female", "HHH.male", "Percent.Rel.Christian", "Percent.Rel.Muslim", 
-                                                                                                                                               "Percent.Rel.Other", "Percent.PrimaryOcc.Fish", "Percent.PrimaryOcc.Farm", 
-                                                                                                                                               "Percent.PrimaryOcc.WageLabor", "Percent.PrimaryOcc.HarvestForest", 
-                                                                                                                                               "Percent.PrimaryOcc.Tourism", "Percent.PrimaryOcc.Aquaculture", "Percent.PrimaryOcc.Extraction", 
-                                                                                                                                               "Percent.PrimaryOcc.Other", "Prop.Fish.AlmostNever", 
-                                                                                                                                               "Prop.Fish.FewTimesPer6Mo", "Prop.Fish.FewTimesPerMo", "Prop.Fish.FewTimesPerWk", 
-                                                                                                                                               "Prop.Fish.MoreFewTimesWk", "Prop.SellFish.AlmostNever", "Prop.SellFish.FewTimesPer6Mo", 
-                                                                                                                                               "Prop.SellFish.FewTimesPerMo", "Prop.SellFish.FewTimesPerWk", 
-                                                                                                                                               "Prop.SellFish.MoreFewTimesWk", "Prop.IncFish.None", "Prop.IncFish.Some", 
-                                                                                                                                               "Prop.IncFish.Half", "Prop.IncFish.Most", "Prop.IncFish.All", 
-                                                                                                                                               "Prop.FishTech.ByHand", "Prop.FishTech.StatNet", "Prop.FishTech.MobileNet", 
-                                                                                                                                               "Prop.FishTech.StatLine", "Prop.FishTech.MobileLine", "Child.FS.no", 
-                                                                                                                                               "Child.FS.yes","ProteinFish.None", "ProteinFish.Some", "ProteinFish.Half", 
-                                                                                                                                               "ProteinFish.Most", "ProteinFish.All","Percent.FoodInsecure.NoHunger","Percent.FoodInsecure.YesHunger","Percent.FoodSecure")]))
+                              SettlementName="Alor MPA",
+                              Techreport.Trend.ByMPA[Techreport.Trend.ByMPA$MPAID==15 &  Techreport.Trend.ByMPA$Treatment==1 & Techreport.Trend.ByMPA$MonitoringYear=="3 Year Post",c("HHH.female", "HHH.male", "Percent.Rel.Christian", "Percent.Rel.Muslim", 
+                                                                                                                                                                                      "Percent.Rel.Other", "Percent.PrimaryOcc.Fish", "Percent.PrimaryOcc.Farm", 
+                                                                                                                                                                                      "Percent.PrimaryOcc.WageLabor", "Percent.PrimaryOcc.HarvestForest", 
+                                                                                                                                                                                      "Percent.PrimaryOcc.Tourism", "Percent.PrimaryOcc.Aquaculture", "Percent.PrimaryOcc.Extraction", 
+                                                                                                                                                                                      "Percent.PrimaryOcc.Other", "Prop.Fish.AlmostNever", 
+                                                                                                                                                                                      "Prop.Fish.FewTimesPer6Mo", "Prop.Fish.FewTimesPerMo", "Prop.Fish.FewTimesPerWk", 
+                                                                                                                                                                                      "Prop.Fish.MoreFewTimesWk", "Prop.SellFish.AlmostNever", "Prop.SellFish.FewTimesPer6Mo", 
+                                                                                                                                                                                      "Prop.SellFish.FewTimesPerMo", "Prop.SellFish.FewTimesPerWk", 
+                                                                                                                                                                                      "Prop.SellFish.MoreFewTimesWk", "Prop.IncFish.None", "Prop.IncFish.Some", 
+                                                                                                                                                                                      "Prop.IncFish.Half", "Prop.IncFish.Most", "Prop.IncFish.All", 
+                                                                                                                                                                                      "Prop.FishTech.ByHand", "Prop.FishTech.StatNet", "Prop.FishTech.MobileNet", 
+                                                                                                                                                                                      "Prop.FishTech.StatLine", "Prop.FishTech.MobileLine", "Child.FS.no", 
+                                                                                                                                                                                      "Child.FS.yes","ProteinFish.None", "ProteinFish.Some", "ProteinFish.Half", 
+                                                                                                                                                                                      "ProteinFish.Most", "ProteinFish.All","Percent.FoodInsecure.NoHunger","Percent.FoodInsecure.YesHunger","Percent.FoodSecure")]))
 
 
 
 
 null.row.PropData <- 
-  matrix(rep(NA,length(Flotim.level.PropData.status)),ncol=length(Flotim.level.PropData.status),dimnames=list(NULL,colnames(Flotim.level.PropData.status)))
+  matrix(rep(NA,length(Alor.level.PropData.status)),ncol=length(Alor.level.PropData.status),dimnames=list(NULL,colnames(Alor.level.PropData.status)))
 
 
 
 # ---- 1.5 MPA-level Continuous data (row to be added to bottom of status and annex plots in tech report) ----
 
 
-Flotim.level.ContData.status <- 
+Alor.level.ContData.status <- 
   rbind.data.frame(cbind.data.frame(SettlementID=0,SettlementName="Control Settlements",
-                                  Techreport.ByMPA.control[Techreport.ByMPA.control$MPAID==16 & Techreport.ByMPA.control$MonitoringYear=="3 Year Post",c("MonitoringYear","FSMean", "FSErr",
-                                  "MAMean", "MAErr", "MTMean","MTErr", "PAMean", "PAErr", "SEMean", "SEErr","TimeMarketMean","TimeMarketErr","UnwellMean","UnwellErr")]),
-                   cbind.data.frame(SettlementID=0,SettlementName="Flores Timur MPA",
-                                    Techreport.Trend.ByMPA[Techreport.Trend.ByMPA$MPAID==16 & Techreport.Trend.ByMPA$Treatment==1 & 
-                                    Techreport.Trend.ByMPA$MonitoringYear=="3 Year Post",c("MonitoringYear","FSMean", "FSErr", "MAMean", 
-                                      "MAErr", "MTMean","MTErr","PAMean", "PAErr", "SEMean", "SEErr","TimeMarketMean","TimeMarketErr","UnwellMean","UnwellErr")]))
+                                    Techreport.ByMPA.control[Techreport.ByMPA.control$MPAID==15 & Techreport.ByMPA.control$MonitoringYear=="3 Year Post",c("MonitoringYear","FSMean", "FSErr",
+                                                                                                                                                           "MAMean", "MAErr", "MTMean","MTErr", "PAMean", "PAErr", "SEMean", "SEErr","TimeMarketMean","TimeMarketErr","UnwellMean","UnwellErr")]),
+                   cbind.data.frame(SettlementID=0,SettlementName="MPA Settlements",
+                                    Techreport.Trend.ByMPA[Techreport.Trend.ByMPA$MPAID==15 & Techreport.Trend.ByMPA$Treatment==1 & 
+                                                             Techreport.Trend.ByMPA$MonitoringYear=="3 Year Post",c("MonitoringYear","FSMean", "FSErr", "MAMean", 
+                                                                                                                    "MAErr", "MTMean","MTErr","PAMean", "PAErr", "SEMean", "SEErr","TimeMarketMean","TimeMarketErr","UnwellMean","UnwellErr")]))
 
-Flotim.level.ContData.control.annex <- 
+Alor.level.ContData.control.annex <- 
   cbind.data.frame(SettlementID=0,SettlementName="Control Settlements",
-                   Techreport.ByMPA.control[Techreport.ByMPA.control$MPAID==16,c("MonitoringYear","FSMean", "FSErr", "MAMean", 
+                   Techreport.ByMPA.control[Techreport.ByMPA.control$MPAID==15,c("MonitoringYear","FSMean", "FSErr", "MAMean", 
                                                                                  "MAErr", "MTMean","MTErr","PAMean", "PAErr", "SEMean", "SEErr","TimeMarketMean","TimeMarketErr","UnwellMean","UnwellErr")])
 
-Flotim.level.ContData.annex <-
-  cbind.data.frame(SettlementName="MPA", SettlementID=0,
-                   Techreport.Trend.ByMPA[Techreport.Trend.ByMPA$MPAID==16 & Techreport.Trend.ByMPA$Treatment==1,c("MonitoringYear","FSMean", "FSErr", "MAMean", 
-                                                                             "MAErr", "MTMean","MTErr","PAMean", "PAErr", "SEMean", "SEErr","TimeMarketMean","TimeMarketErr","UnwellMean","UnwellErr")])
+Alor.level.ContData.annex <-
+  cbind.data.frame(SettlementName="MPA Settlements", SettlementID=0,
+                   Techreport.Trend.ByMPA[Techreport.Trend.ByMPA$MPAID==15 & Techreport.Trend.ByMPA$Treatment==1,c("MonitoringYear","FSMean", "FSErr", "MAMean", 
+                                                                                                                   "MAErr", "MTMean","MTErr","PAMean", "PAErr", "SEMean", "SEErr","TimeMarketMean","TimeMarketErr","UnwellMean","UnwellErr")])
 
 null.row.ContData <- 
-  cbind.data.frame(matrix(rep(NA,length(Flotim.level.ContData.status)),ncol=17,dimnames=list(NULL,colnames(Flotim.level.ContData.status))))
+  cbind.data.frame(matrix(rep(NA,length(Alor.level.ContData.status)),ncol=17,dimnames=list(NULL,colnames(Alor.level.ContData.status))))
 
 
 # 
@@ -140,35 +140,35 @@ null.row.ContData <-
 # 
 
 
-# ---- 2.1 Status dataset for Flotim, proportional data ----
+# ---- 2.1 Status dataset for Alor, proportional data ----
 
-Flotim.PropData.Techreport.status <- 
-  (Techreport.Status.BySett[Techreport.Status.BySett$MPAID==16 & Techreport.Status.BySett$Treatment==1 & 
+Alor.PropData.Techreport.status <- 
+  (Techreport.Status.BySett[Techreport.Status.BySett$MPAID==15 & Techreport.Status.BySett$Treatment==1 & 
                               Techreport.Status.BySett$MonitoringYear=="3 Year Post",
-                                                            c( "SettlementName", "HHH.female", "HHH.male", 
-                                                          "Percent.Rel.Christian", "Percent.Rel.Muslim", "Percent.Rel.Other", 
-                                                          "Percent.PrimaryOcc.Fish", "Percent.PrimaryOcc.Farm", "Percent.PrimaryOcc.WageLabor", 
-                                                          "Percent.PrimaryOcc.HarvestForest", "Percent.PrimaryOcc.Tourism", 
-                                                          "Percent.PrimaryOcc.Aquaculture", "Percent.PrimaryOcc.Extraction",
-                                                          "Percent.PrimaryOcc.Other", "Prop.Fish.AlmostNever", "Prop.Fish.FewTimesPer6Mo", 
-                                                          "Prop.Fish.FewTimesPerMo", "Prop.Fish.FewTimesPerWk", "Prop.Fish.MoreFewTimesWk", 
-                                                          "Prop.SellFish.AlmostNever", "Prop.SellFish.FewTimesPer6Mo", 
-                                                          "Prop.SellFish.FewTimesPerMo", "Prop.SellFish.FewTimesPerWk", 
-                                                          "Prop.SellFish.MoreFewTimesWk", "Prop.IncFish.None", "Prop.IncFish.Some", 
-                                                          "Prop.IncFish.Half", "Prop.IncFish.Most", "Prop.IncFish.All", 
-                                                          "Prop.FishTech.ByHand", "Prop.FishTech.StatNet", "Prop.FishTech.MobileNet", 
-                                                         "Prop.FishTech.StatLine", "Prop.FishTech.MobileLine", "Child.FS.no", 
-                                                          "Child.FS.yes", "ProteinFish.None", "ProteinFish.Some", 
-                                                          "ProteinFish.Half", "ProteinFish.Most", "ProteinFish.All",
-                                                          "Percent.FoodInsecure.NoHunger","Percent.FoodInsecure.YesHunger","Percent.FoodSecure")])
+                            c( "SettlementName", "HHH.female", "HHH.male", 
+                               "Percent.Rel.Christian", "Percent.Rel.Muslim", "Percent.Rel.Other", 
+                               "Percent.PrimaryOcc.Fish", "Percent.PrimaryOcc.Farm", "Percent.PrimaryOcc.WageLabor", 
+                               "Percent.PrimaryOcc.HarvestForest", "Percent.PrimaryOcc.Tourism", 
+                               "Percent.PrimaryOcc.Aquaculture", "Percent.PrimaryOcc.Extraction",
+                               "Percent.PrimaryOcc.Other", "Prop.Fish.AlmostNever", "Prop.Fish.FewTimesPer6Mo", 
+                               "Prop.Fish.FewTimesPerMo", "Prop.Fish.FewTimesPerWk", "Prop.Fish.MoreFewTimesWk", 
+                               "Prop.SellFish.AlmostNever", "Prop.SellFish.FewTimesPer6Mo", 
+                               "Prop.SellFish.FewTimesPerMo", "Prop.SellFish.FewTimesPerWk", 
+                               "Prop.SellFish.MoreFewTimesWk", "Prop.IncFish.None", "Prop.IncFish.Some", 
+                               "Prop.IncFish.Half", "Prop.IncFish.Most", "Prop.IncFish.All", 
+                               "Prop.FishTech.ByHand", "Prop.FishTech.StatNet", "Prop.FishTech.MobileNet", 
+                               "Prop.FishTech.StatLine", "Prop.FishTech.MobileLine", "Child.FS.no", 
+                               "Child.FS.yes", "ProteinFish.None", "ProteinFish.Some", 
+                               "ProteinFish.Half", "ProteinFish.Most", "ProteinFish.All",
+                               "Percent.FoodInsecure.NoHunger","Percent.FoodInsecure.YesHunger","Percent.FoodSecure")])
 
 
 
-Flotim.PropData.Techreport.status <- 
-  Flotim.PropData.Techreport.status[rev(order(Flotim.PropData.Techreport.status$SettlementName)),]
+Alor.PropData.Techreport.status <- 
+  Alor.PropData.Techreport.status[rev(order(Alor.PropData.Techreport.status$SettlementName)),]
 
-Flotim.PropData.Techreport.status.PLOTFORMAT <- 
-  rbind.data.frame(Flotim.level.PropData.status[c("SettlementName", "HHH.female", "HHH.male", 
+Alor.PropData.Techreport.status.PLOTFORMAT <- 
+  rbind.data.frame(Alor.level.PropData.status[c("SettlementName", "HHH.female", "HHH.male", 
                                                   "Percent.Rel.Christian", "Percent.Rel.Muslim", "Percent.Rel.Other", 
                                                   "Percent.PrimaryOcc.Fish", "Percent.PrimaryOcc.Farm", "Percent.PrimaryOcc.WageLabor", 
                                                   "Percent.PrimaryOcc.HarvestForest", "Percent.PrimaryOcc.Tourism", 
@@ -197,153 +197,173 @@ Flotim.PropData.Techreport.status.PLOTFORMAT <-
                                         "Prop.FishTech.StatLine", "Prop.FishTech.MobileLine", "Child.FS.no", 
                                         "Child.FS.yes", "ProteinFish.None", "ProteinFish.Some", "ProteinFish.Half", 
                                         "ProteinFish.Most", "ProteinFish.All","Percent.FoodInsecure.NoHunger","Percent.FoodInsecure.YesHunger","Percent.FoodSecure")],
-                   Flotim.PropData.Techreport.status)
+                   Alor.PropData.Techreport.status)
 
 
 # - make SettlementName an ordered factor for plotting
-Flotim.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
-  ifelse(is.na(Flotim.PropData.Techreport.status.PLOTFORMAT$SettlementName),"",
-         as.character(Flotim.PropData.Techreport.status.PLOTFORMAT$SettlementName))
+Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName),"",
+         as.character(Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName))
 
-Flotim.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
-  factor(Flotim.PropData.Techreport.status.PLOTFORMAT$SettlementName,
-         levels=unique(Flotim.PropData.Techreport.status.PLOTFORMAT$SettlementName),
+Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName <-
+  factor(Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName,
+         levels=unique(Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName),
          ordered=T)
 
 # - add row for plot fill colour formatting
-Flotim.PropData.Techreport.status.PLOTFORMAT$Dummy <- 
-  ifelse(Flotim.PropData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
+Alor.PropData.Techreport.status.PLOTFORMAT$Dummy <- 
+  ifelse(Alor.PropData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
 
 
-# ---- 2.2 Status dataset for Flotim, continuous data (with p values) ----
+# ---- 2.2 Status dataset for Alor, continuous data (with p values) ----
 
-Flotim.ContData.Techreport.status  <- 
+Alor.ContData.Techreport.status  <- 
   Techreport.Status.BySett[Techreport.Status.BySett$Treatment==1 &
-                             Techreport.Status.BySett$MPAID==16 &
+                             Techreport.Status.BySett$MPAID==15 &
                              Techreport.Status.BySett$MonitoringYear=="3 Year Post",
                            c("SettlementID", "SettlementName", "MonitoringYear", "FSMean", "FSErr", "MAMean", 
                              "MAErr", "MTMean","MTErr", "PAMean", "PAErr", "SEMean", "SEErr","TimeMarketMean","TimeMarketErr", "UnwellMean", "UnwellErr"
                            )]
 
 
-Flotim.ContData.Techreport.status <- 
-  Flotim.ContData.Techreport.status[rev(order(Flotim.ContData.Techreport.status$SettlementName)),]
+Alor.ContData.Techreport.status <- 
+  Alor.ContData.Techreport.status[rev(order(Alor.ContData.Techreport.status$SettlementName)),]
 
-Flotim.ContData.Techreport.status.withMPA <- 
-  rbind.data.frame(Flotim.level.ContData.status,
+Alor.ContData.Techreport.status.withMPA <- 
+  rbind.data.frame(Alor.level.ContData.status,
                    null.row.ContData,
-                   Flotim.ContData.Techreport.status)
+                   Alor.ContData.Techreport.status)
 
 
 # - plot-formatted dataset
-Flotim.ContData.Techreport.status.PLOTFORMAT <- 
-  left_join(Flotim.ContData.Techreport.status.withMPA,
-            sigvals.Flotim,by="SettlementName")
+Alor.ContData.Techreport.status.PLOTFORMAT <- 
+  left_join(Alor.ContData.Techreport.status.withMPA,
+            sigvals.Alor,by="SettlementName")
 
 # - make SettlementName an ordered factor for plotting
-Flotim.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
-  ifelse(is.na(Flotim.ContData.Techreport.status.PLOTFORMAT$SettlementName),"",
-         Flotim.ContData.Techreport.status.PLOTFORMAT$SettlementName)
+Alor.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Alor.ContData.Techreport.status.PLOTFORMAT$SettlementName),"",
+         Alor.ContData.Techreport.status.PLOTFORMAT$SettlementName)
 
-Flotim.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
-  factor(Flotim.ContData.Techreport.status.PLOTFORMAT$SettlementName,
-         levels=unique(Flotim.ContData.Techreport.status.PLOTFORMAT$SettlementName),
+Alor.ContData.Techreport.status.PLOTFORMAT$SettlementName <-
+  factor(Alor.ContData.Techreport.status.PLOTFORMAT$SettlementName,
+         levels=unique(Alor.ContData.Techreport.status.PLOTFORMAT$SettlementName),
          ordered=T)
 
 # - add column for plot fill colour formatting
-Flotim.ContData.Techreport.status.PLOTFORMAT$SettLevel <- 
-  ifelse(Flotim.ContData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
+Alor.ContData.Techreport.status.PLOTFORMAT$SettLevel <- 
+  ifelse(Alor.ContData.Techreport.status.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
 
 
-# ---- 2.3 Trend dataset for Flotim, MPA-level proportional data ----
+# ---- 2.3 Trend dataset for Alor, MPA-level proportional data ----
 
-Flotim.TrendPropData.Techreport.PLOTFORMAT <- 
-  Techreport.Trend.ByMPA[Techreport.Trend.ByMPA$MPAID==16 & Techreport.Trend.ByMPA$Treatment==1,c( "MonitoringYear","HHH.female", "HHH.male", 
-                         "Percent.Rel.Christian", "Percent.Rel.Muslim", "Percent.Rel.Other", 
-                         "Percent.PrimaryOcc.Fish", "Percent.PrimaryOcc.Farm", "Percent.PrimaryOcc.WageLabor", 
-                         "Percent.PrimaryOcc.HarvestForest", "Percent.PrimaryOcc.Tourism", 
-                         "Percent.PrimaryOcc.Aquaculture", "Percent.PrimaryOcc.Extraction",
-                         "Percent.PrimaryOcc.Other", "Prop.Fish.AlmostNever", "Prop.Fish.FewTimesPer6Mo", 
-                         "Prop.Fish.FewTimesPerMo", "Prop.Fish.FewTimesPerWk", "Prop.Fish.MoreFewTimesWk", 
-                         "Prop.SellFish.AlmostNever", "Prop.SellFish.FewTimesPer6Mo", 
-                         "Prop.SellFish.FewTimesPerMo", "Prop.SellFish.FewTimesPerWk", 
-                         "Prop.SellFish.MoreFewTimesWk", "Prop.IncFish.None", "Prop.IncFish.Some", 
-                         "Prop.IncFish.Half", "Prop.IncFish.Most", "Prop.IncFish.All", 
-                         "Prop.FishTech.ByHand", "Prop.FishTech.StatNet", "Prop.FishTech.MobileNet", 
-                         "Prop.FishTech.StatLine", "Prop.FishTech.MobileLine", "Child.FS.no", 
-                         "Child.FS.yes", "ProteinFish.None", "ProteinFish.Some", "ProteinFish.Half", 
-                         "ProteinFish.Most", "ProteinFish.All","Percent.FoodInsecure.NoHunger","Percent.FoodInsecure.YesHunger","Percent.FoodSecure")]
+Alor.TrendPropData.Techreport.PLOTFORMAT <- 
+  rbind.data.frame(Techreport.Trend.ByMPA[Techreport.Trend.ByMPA$MPAID==15 ,c("Treatment","MonitoringYear","HHH.female", "HHH.male", 
+                                                               "Percent.Rel.Christian", "Percent.Rel.Muslim", "Percent.Rel.Other", 
+                                                               "Percent.PrimaryOcc.Fish", "Percent.PrimaryOcc.Farm", "Percent.PrimaryOcc.WageLabor", 
+                                                               "Percent.PrimaryOcc.HarvestForest", "Percent.PrimaryOcc.Tourism", 
+                                                               "Percent.PrimaryOcc.Aquaculture", "Percent.PrimaryOcc.Extraction",
+                                                               "Percent.PrimaryOcc.Other", "Prop.Fish.AlmostNever", "Prop.Fish.FewTimesPer6Mo", 
+                                                               "Prop.Fish.FewTimesPerMo", "Prop.Fish.FewTimesPerWk", "Prop.Fish.MoreFewTimesWk", 
+                                                               "Prop.SellFish.AlmostNever", "Prop.SellFish.FewTimesPer6Mo", 
+                                                               "Prop.SellFish.FewTimesPerMo", "Prop.SellFish.FewTimesPerWk", 
+                                                               "Prop.SellFish.MoreFewTimesWk", "Prop.IncFish.None", "Prop.IncFish.Some", 
+                                                               "Prop.IncFish.Half", "Prop.IncFish.Most", "Prop.IncFish.All", 
+                                                               "Prop.FishTech.ByHand", "Prop.FishTech.StatNet", "Prop.FishTech.MobileNet", 
+                                                               "Prop.FishTech.StatLine", "Prop.FishTech.MobileLine", "Child.FS.no", 
+                                                               "Child.FS.yes", "ProteinFish.None", "ProteinFish.Some", "ProteinFish.Half", 
+                                                               "ProteinFish.Most", "ProteinFish.All","Percent.FoodInsecure.NoHunger","Percent.FoodInsecure.YesHunger","Percent.FoodSecure")],
+        null.row.PropData[c("Treatment","MonitoringYear","HHH.female", "HHH.male", 
+                    "Percent.Rel.Christian", "Percent.Rel.Muslim", "Percent.Rel.Other", 
+                    "Percent.PrimaryOcc.Fish", "Percent.PrimaryOcc.Farm", "Percent.PrimaryOcc.WageLabor", 
+                    "Percent.PrimaryOcc.HarvestForest", "Percent.PrimaryOcc.Tourism", 
+                    "Percent.PrimaryOcc.Aquaculture", "Percent.PrimaryOcc.Extraction",
+                    "Percent.PrimaryOcc.Other", "Prop.Fish.AlmostNever", "Prop.Fish.FewTimesPer6Mo", 
+                    "Prop.Fish.FewTimesPerMo", "Prop.Fish.FewTimesPerWk", "Prop.Fish.MoreFewTimesWk", 
+                    "Prop.SellFish.AlmostNever", "Prop.SellFish.FewTimesPer6Mo", 
+                    "Prop.SellFish.FewTimesPerMo", "Prop.SellFish.FewTimesPerWk", 
+                    "Prop.SellFish.MoreFewTimesWk", "Prop.IncFish.None", "Prop.IncFish.Some", 
+                    "Prop.IncFish.Half", "Prop.IncFish.Most", "Prop.IncFish.All", 
+                    "Prop.FishTech.ByHand", "Prop.FishTech.StatNet", "Prop.FishTech.MobileNet", 
+                    "Prop.FishTech.StatLine", "Prop.FishTech.MobileLine", "Child.FS.no", 
+                    "Child.FS.yes", "ProteinFish.None", "ProteinFish.Some", "ProteinFish.Half", 
+                    "ProteinFish.Most", "ProteinFish.All","Percent.FoodInsecure.NoHunger","Percent.FoodInsecure.YesHunger","Percent.FoodSecure")])
+
+Alor.TrendPropData.Techreport.PLOTFORMAT$order <- c(1,4,2,5,3)
+Alor.TrendPropData.Techreport.PLOTFORMAT$year<-c("Baseline\n(2014)","3 Year Post\nBaseline\n(2017)","","Baseline\n(2014)","3 Year Post\nBaseline\n(2017)")
+
+# ---- 2.4 Trend dataset for Alor, MPA-level continuous data (with p values) ----
 
 
-# ---- 2.4 Trend dataset for Flotim, MPA-level continuous data (with p values) ----
-
-
-Flotim.TrendContData.Techreport.PLOTFORMAT <- 
-  rbind.data.frame(Flotim.level.ContData.control.annex[,c(1,3:17)],
-                   Flotim.level.ContData.annex[,c(3,1,4:17)],
-                   null.row.ContData[,c(1,3:17)],
-                   trend.sigvals.Flotim,
-                   control.sigvals.Flotim)
+Alor.TrendContData.Techreport.PLOTFORMAT <- 
+  rbind.data.frame(Alor.level.ContData.control.annex[,c(2:17)],
+                   Alor.level.ContData.annex[,c(3,1,4:17)],
+                   trend.sigvals.Alor)
 
 # - make MonitoringYear an ordered factor for plotting
-Flotim.TrendContData.Techreport.PLOTFORMAT$MonitoringYear <-
-  factor(Flotim.TrendContData.Techreport.PLOTFORMAT$MonitoringYear,
+Alor.TrendContData.Techreport.PLOTFORMAT$MonitoringYear <-
+  factor(Alor.TrendContData.Techreport.PLOTFORMAT$MonitoringYear,
          levels=c("Baseline","3 Year Post"),
          ordered=T)
-Flotim.TrendContData.Techreport.PLOTFORMAT$SettLevel <- ifelse(is.na(Flotim.TrendContData.Techreport.PLOTFORMAT$MAMean),"Dummy","NotDummy")
+Alor.TrendContData.Techreport.PLOTFORMAT$SettLevel <- ifelse(is.na(Alor.TrendContData.Techreport.PLOTFORMAT$MAMean),"Dummy","NotDummy")
 
+Alor.TrendContData.Techreport.PLOTFORMAT <- Alor.TrendContData.Techreport.PLOTFORMAT %>%
+  filter(!is.na(MonitoringYear))
+Alor.TrendContData.Techreport.PLOTFORMAT$order<-c(1,2,3,4)
 
-# ---- 2.6 Annex dataset for Flotim, Settlement-level continuous data (with p values) ----
+# ---- 2.6 Annex dataset for Alor, Settlement-level continuous data (with p values) ----
 
+#ADJUST FOR REMOVAL OF SETTLEMENTS, DETERMINE AFTER FINAL RECORD CHECKS ARE IN 
 Techreport.Status.BySett <- Techreport.Status.BySett %>%
-  filter(SettlementID != 150 & SettlementID !=149)
+  filter(SettlementID != 128 & SettlementID !=125 
+         & SettlementID !=131 & SettlementID !=116)
 
-Flotim.AnnexContData.Techreport <- 
+Alor.AnnexContData.Techreport <- 
   Techreport.Status.BySett[Techreport.Status.BySett$Treatment==1 &
-                             Techreport.Status.BySett$MPAID==16,
+                             Techreport.Status.BySett$MPAID==15,
                            c("SettlementID", "SettlementName", "MonitoringYear","FSMean", "FSErr", "MAMean", 
                              "MAErr", "MTMean","MTErr", "PAMean", "PAErr", "SEMean", "SEErr","TimeMarketMean","TimeMarketErr", "UnwellMean", "UnwellErr"
                            )]
 
 
-Flotim.AnnexContData.Techreport$MonitoringYear <- 
-  factor(Flotim.AnnexContData.Techreport$MonitoringYear,
+Alor.AnnexContData.Techreport$MonitoringYear <- 
+  factor(Alor.AnnexContData.Techreport$MonitoringYear,
          levels=c("3 Year Post","Baseline"),ordered=T)
 
-Flotim.AnnexContData.Techreport <- 
-  Flotim.AnnexContData.Techreport[rev(order(Flotim.AnnexContData.Techreport$SettlementName,
-                                            Flotim.AnnexContData.Techreport$MonitoringYear)),]
+Alor.AnnexContData.Techreport <- 
+  Alor.AnnexContData.Techreport[rev(order(Alor.AnnexContData.Techreport$SettlementName,
+                                            Alor.AnnexContData.Techreport$MonitoringYear)),]
 
 
-Flotim.AnnexContData.Techreport.PLOTFORMAT <- 
-  rbind.data.frame(Flotim.level.ContData.annex[Flotim.level.ContData.annex$MonitoringYear=="3 Year Post",],
-                   Flotim.level.ContData.annex[Flotim.level.ContData.annex$MonitoringYear=="Baseline",],
-                   Flotim.level.ContData.control.annex[Flotim.level.ContData.control.annex$MonitoringYear=="3 Year Post",],
-                   Flotim.level.ContData.control.annex[Flotim.level.ContData.control.annex$MonitoringYear=="Baseline",],
+Alor.AnnexContData.Techreport.PLOTFORMAT <- 
+  rbind.data.frame(Alor.level.ContData.annex[Alor.level.ContData.annex$MonitoringYear=="3 Year Post",],
+                   Alor.level.ContData.annex[Alor.level.ContData.annex$MonitoringYear=="Baseline",],
+                   Alor.level.ContData.control.annex[Alor.level.ContData.control.annex$MonitoringYear=="3 Year Post",],
+                   Alor.level.ContData.control.annex[Alor.level.ContData.control.annex$MonitoringYear=="Baseline",],
                    null.row.ContData,
-                   Flotim.AnnexContData.Techreport)
+                   Alor.AnnexContData.Techreport)
 
 # - make MonitoringYear an ordered factor for plotting
-Flotim.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear <-
-  factor(Flotim.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear,
+Alor.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear <-
+  factor(Alor.AnnexContData.Techreport.PLOTFORMAT$MonitoringYear,
          levels=c("3 Year Post","Baseline"),
          ordered=T)
 
 # - make SettlementName an ordered factor for plotting
 
-Flotim.AnnexContData.Techreport.PLOTFORMAT$SettlementName <-
-  ifelse(is.na(Flotim.AnnexContData.Techreport.PLOTFORMAT$SettlementName),"",
-         Flotim.AnnexContData.Techreport.PLOTFORMAT$SettlementName)
+Alor.AnnexContData.Techreport.PLOTFORMAT$SettlementName <-
+  ifelse(is.na(Alor.AnnexContData.Techreport.PLOTFORMAT$SettlementName),"",
+         Alor.AnnexContData.Techreport.PLOTFORMAT$SettlementName)
 
-Flotim.AnnexContData.Techreport.PLOTFORMAT$SettlementName <-
-  factor(Flotim.AnnexContData.Techreport.PLOTFORMAT$SettlementName,
-         levels=unique(Flotim.AnnexContData.Techreport.PLOTFORMAT$SettlementName),
+Alor.AnnexContData.Techreport.PLOTFORMAT$SettlementName <-
+  factor(Alor.AnnexContData.Techreport.PLOTFORMAT$SettlementName,
+         levels=unique(Alor.AnnexContData.Techreport.PLOTFORMAT$SettlementName),
          ordered=T)
 
 
 # - add row for plot fill colour formatting
-Flotim.AnnexContData.Techreport.PLOTFORMAT$SettLevel <- 
-  ifelse(Flotim.AnnexContData.Techreport.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
+Alor.AnnexContData.Techreport.PLOTFORMAT$SettLevel <- 
+  ifelse(Alor.AnnexContData.Techreport.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
 
 
 #
@@ -407,7 +427,7 @@ define.statusplot.asterisk.pos <- function(x,asterisks) {
 define.conttrendplot.ylabels.withasterisks <- function(x) {
   result <- x
   labs <- continuous.variables.plotlabs
-  for(a in 1:9) {
+  for(a in 1:7) {
     result[a] <- ifelse(as.numeric(x[a])<0.01,paste(labs[a],"***",sep=" "),
                         ifelse(as.numeric(x[a])<0.05 & as.numeric(x[a])>=0.01,paste(labs[a],"**",sep=" "),
                                ifelse(as.numeric(x[a])<0.1 & as.numeric(x[a])>=0.05,paste(labs[a],"*",sep=" "),
