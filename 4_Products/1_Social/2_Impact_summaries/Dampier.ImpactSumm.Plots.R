@@ -30,10 +30,8 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-
-source('2_Social/ImpactSummaries/BHS/SignificanceTestCodes/Dampier.ImpactSumm.SigTests.R')
-
-
+  
+  
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -202,79 +200,113 @@ Damp.MPAimpact.summ.se.st <- ggplot(data=Damp.status.trend,
 # 
 
 
+pacman::p_load(rio,ggplot2,tidyr,dplyr)
+
+source('2_Functions/3_Plotting/Function_plotthemes.R')
+
+
+
+macp.flotim.impacts <- 
+  import('x_Flat_data_files/1_Social/Outputs/impact_analysis/Flores Timur/macp_plots_output.csv') %>%
+  filter(MPAID==16 & !(grepl("_z",Response))) %>%
+  mutate(p.val=2*pnorm(-abs(z.score)),
+         sig.labs=ifelse(p.val<=0.01,"*\n*\n*",
+                         ifelse(p.val<=0.05 & p.val>0.01, "*\n*",
+                                ifelse(p.val<=0.1 & p.val>0.05, "*", ""))),
+         term=factor(term,ordered=T,levels=c("Impact","Treatment_Trend","Control_Trend"))) 
+
+
+impact.arrows <- data.frame(mapply(i=t(macp.flotim.impacts%>%filter(term=="Treatment_Trend")%>%select(estimate)),
+                                            j=t(macp.flotim.impacts%>%filter(term=="Control_Trend")%>%select(estimate)),
+                                            function(i,j){
+                                              if(i>0 & j>0 & i>j) {seq(i-(0.1*(i-j)),j+(0.1*(i-j)),length.out=4)} else
+                                                if(i>0 & j>0 & i<j) {seq(i+(0.1*(j-i)),j-(0.1*(j-i)),length.out=4)} else
+                                                  if(i<0 & j<0 & i>j) {seq(i-(0.1*(abs(i-j))),j+(0.1*(abs(i-j))),length.out=4)} else
+                                                    if(i<0 & j<0 & i<j) {seq(i+(0.1*(abs(j-i))),j-(0.1*(abs(j-i))),length.out=4)} else
+                                                      if(i<0 & j>0) {seq(i+(0.1*(abs(i-j))),j-(0.1*(abs(i-j))),length.out=4)} else
+                                                        if(i>0 & j<0) {seq(i-(0.1*(abs(j-i))),j+(0.1*(abs(j-i))),length.out=4)} else {NA}
+                                            }),
+                                     x=rep(0.3,4)) %>%
+  rename(FS=X1,MA=X2,MT=X3,PA=X4,SE=X5)
+
+
+plotrange <- mapply(imin=t(macp.flotim.impacts%>%filter(term=="Treatment_Trend")%>%select(estimate)),
+                         imax=t(macp.flotim.impacts%>%filter(term=="Treatment_Trend")%>%select(estimate)),
+                         jmin=t(macp.flotim.impacts%>%filter(term=="Control_Trend")%>%select(estimate)),
+                         jmax=t(macp.flotim.impacts%>%filter(term=="Control_Trend")%>%select(estimate)),
+                         function(imin,imax,jmin,jmax){
+                           max <- ifelse((imax>0 & jmax<=0) | (imax>0 & jmax>0 & imax>jmax),imax,
+                                             ifelse((imax<=0 & jmax>0) | (imax>0 & jmax>0 & imax<jmax),jmax,0))
+                           min <- ifelse((imin<0 & jmin>0) | (imin<0 & jmin<0 & imin<jmin),imin,
+                                             ifelse((imin>0 & jmin<0) | (imin<0 & jmin<0 & imin>jmin),jmin,0))
+                           abs(max)+abs(min)
+                         })
+
+sig.pos <- data.frame(TwoYr=mapply(i=t(macp.flotim.impacts%>%filter(term=="Treatment_Trend")%>%select(estimate)),
+                                        j=t(macp.flotim.impacts%>%filter(term=="Control_Trend")%>%select(estimate)),
+                                        k=t(macp.flotim.impacts%>%filter(term=="Impact")%>%select(sig.labs)),
+                                        range=plotrange,
+                                        function(i,j,k,range){
+                                          if(k=="*\n*\n*" & i<j) {i-0.03*range} else
+                                            if(k=="*\n*\n*" & i>j) {i+0.03*range} else
+                                              if(k=="*\n*" & i<j) {i-0.02*range} else
+                                                if(k=="*\n*" & i>j) {i+0.02*range} else
+                                                  if(k=="*" & i<j) {i-0.01*range} else
+                                                    if(k=="*" & i>j) {i+0.01*range} else {0}
+                                        }))
+
+rownames(sig.pos) <- c("FS","MA","MT","PA","SE")
+
+
+
+fill.cols.MPAimpacts <- c("Treatment_Trend"=alpha("#2C7FB8",0.95),"Control_Trend"=alpha("#6B6B6B",0.4))
+
+
+
 # ---- 3.1 Food Security ----
 
-Damp.MPAimpact.summ.fs.i <- ggplot(data=Damp.impacts,
-                                   aes(x=Year,y=FS)) +
-  geom_bar(aes(fill=Treatment,width=0.5,group=Treatment),
+MPAimpact.summ.fs.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flotim.impacts$term) & 
+                                                              macp.flotim.impacts$Response=="FSIndex",],
+                                   aes(x=term,y=estimate)) +
+  geom_bar(aes(fill=term),
            stat="identity",
            position="dodge",
+           width=0.9,
            show.legend=F) +
   geom_hline(aes(yintercept=0,size="Baseline Score"),
              linetype="longdash",
              colour="#303030",
              show.legend=F) +
-  geom_segment(aes(x=0.6,xend=0.7,y=FS[Treatment=="Control" & Year=="2 Year"],
-                   yend=FS[Treatment=="Control"& Year=="2 Year"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Control_Trend"],
+                   yend=estimate[term=="Control_Trend"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.6,xend=0.7,y=FS[Treatment=="MPA" & Year=="2 Year"],
-                   yend=FS[Treatment=="MPA" & Year=="2 Year"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Treatment_Trend"],
+                   yend=estimate[term=="Treatment_Trend"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.6,xend=0.6,y=FS[Treatment=="Control" & Year=="2 Year"],
-                   yend=FS[Treatment=="MPA" & Year=="2 Year"]),
+  geom_segment(aes(x=0.3,xend=0.3,y=estimate[term=="Control_Trend"],
+                   yend=estimate[term=="Treatment_Trend"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=1.6,xend=1.7,y=FS[Treatment=="Control" & Year=="4 Year"],
-                   yend=FS[Treatment=="Control"& Year=="4 Year"]),
-               lineend="square",
-               size=1) +
-  geom_segment(aes(x=1.6,xend=1.7,y=FS[Treatment=="MPA" & Year=="4 Year"],
-                   yend=FS[Treatment=="MPA" & Year=="4 Year"]),
-               lineend="square",
-               size=1) +
-  geom_segment(aes(x=1.6,xend=1.6,y=FS[Treatment=="Control" & Year=="4 Year"],
-                   yend=FS[Treatment=="MPA" & Year=="4 Year"]),
-               lineend="square",
-               size=1) +
-  geom_errorbar(aes(ymin=FS-FSErr,
-                    ymax=FS+FSErr,
-                    colour=Treatment),
-                width=0.055,
-                size=0.65,
-                position=position_dodge(width=0.5),
-                show.legend=F) +
-  geom_point(data=Damp.impact.arrows.2yr,
+  geom_point(data=impact.arrows,
              aes(x=x,y=FS,shape="2yr"),
              fill="black",
              size=2.75,
              show.legend=F) +
-  geom_point(data=Damp.impact.arrows.4yr,
-             aes(x=x,y=FS,shape="4yr"),
-             fill="black",
-             size=2.75,
-             show.legend=F) +
-  annotate("text",y=Damp.sig.pos["FS","TwoYr"],x=0.65,
-           label=Damp.sig.labs["FS","impact.2yrlabs"],
+  annotate("text",y=sig.pos["FS","TwoYr"],x=0.35,
+           label=macp.flotim.impacts%>%filter(term=="Impact" & Response=="FSIndex")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
-  annotate("text",y=Damp.sig.pos["FS","FourYr"],x=1.65,
-           label=Damp.sig.labs["FS","impact.2yrlabs"],
-           colour="black",
-           size=4,
-           lineheight=0.4) +
-  scale_fill_manual(labels=c("MPA","Control"),
-                    values=fill.cols.MPAimpact.summ) +
+  scale_fill_manual(labels=c("Treatment_Trend","Control_Trend"),
+                    values=fill.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_colour_manual(values=err.cols.MPAimpact.summ) +
-  scale_shape_manual(values=c("2yr"=ifelse(Damp.impacts$FS[Damp.impacts$Treatment=="MPA" & Damp.impacts$Year=="2 Year"]>
-                                             Damp.impacts$FS[Damp.impacts$Treatment=="Control" & Damp.impacts$Year=="2 Year"],24,25),
-                              "4yr"=ifelse(Damp.impacts$FS[Damp.impacts$Treatment=="MPA" & Damp.impacts$Year=="4 Year"]>
-                                             Damp.impacts$FS[Damp.impacts$Treatment=="Control" & Damp.impacts$Year=="4 Year"],24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(macp.flotim.impacts%>%filter(term=="Treatment_Trend" & Response=="FSIndex")%>%select(estimate)>
+                                             macp.flotim.impacts%>%filter(term=="Control_Trend" & Response=="FSIndex")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
+  expand_limits(x=c(-0.2,3)) +
   plot.theme.MPAimpact.summ + plot.fs.labs.i + plot.guides.MPAimpact.summ
 
 

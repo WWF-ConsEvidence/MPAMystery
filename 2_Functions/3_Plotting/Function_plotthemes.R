@@ -56,6 +56,29 @@ age.gender.plot.theme <- theme(axis.ticks=element_blank(),
                                legend.box.spacing=unit(0.1,"cm"))
 
 
+plot.theme.impact <- theme(axis.ticks=element_blank(),
+                    panel.background=element_rect(fill="white",
+                                                  colour="#909090"),
+                    panel.border=element_rect(fill=NA,
+                                              size=0.25,
+                                              colour="#C0C0C0"),
+                    panel.grid.major.y=element_line(colour="#C0C0C0",
+                                                    size=0.25,
+                                                    linetype=3),
+                    panel.grid.major.x=element_blank(),
+                    plot.margin=margin(t=0,r=20,b=5,l=5,unit="pt"),
+                    axis.title=element_text(size=rel(0.9),
+                                            angle=0,
+                                            face="bold",
+                                            colour="#303030"),
+                    axis.text=element_text(size=rel(0.9),
+                                           angle=0,
+                                           colour="#303030",
+                                           lineheight=0.7),
+                    legend.position="top",
+                    legend.justification="right",
+                    legend.box.spacing=unit(0.1,"cm"))
+
 
 fillcols.status <- c("NotDummy"=alpha("#2C7FB8",0.95),"Dummy"=alpha("#FFFFFF",0))
 fillcols.trend <- c(alpha("#2C7FB8",0.95))
@@ -227,10 +250,10 @@ snapshot.plot.theme.MPAimpact.summ <- theme(panel.background=element_blank(),
 
 plot.theme.MPAimpact.summ <- theme(axis.ticks=element_blank(),
                                    axis.text=element_text(vjust=0.5,
-                                                          size=rel(1.1),
+                                                          size=rel(1),
                                                           colour="#505050"),
                                    axis.title.y=element_text(face="bold",
-                                                             size=rel(1.15),
+                                                             size=rel(1),
                                                              angle=90,
                                                              colour="#505050"),
                                    axis.title.x=element_blank(),
@@ -378,7 +401,8 @@ snapshot.plot.guide.MPAimpact.summ <- guides(fill=guide_legend(order=1,
                                                                                         colour="#505050",
                                                                                         face="bold",
                                                                                         lineheight=0.8),
-                                                               title.hjust=0.5),
+                                                               title.hjust=0.5,
+                                                               reverse=T),
                                              linetype=guide_legend(order=3,
                                                                    keywidth=unit(2.5,"cm"),
                                                                    title.theme=element_text(size=10,
@@ -467,11 +491,16 @@ plot.pa.labs.st <- labs(y="Household Place Attachment\n ",title="STATUS AND TREN
 plot.mt.labs.st <- labs(y="Household Marine Tenure\n ",title="STATUS AND TREND")
 plot.se.labs.st <- labs(y="Enrollment Rate\n ",title="STATUS AND TREND")
 
-plot.fs.labs.i <- labs(y="Change in Household Food Security\nsince Baseline",title="IMPACT")
-plot.ma.labs.i <- labs(y="Change in Household Material Assets\nsince Baseline",title="IMPACT")
-plot.pa.labs.i <- labs(y="Change in Household Place Attachment\nsince Baseline",title="IMPACT")
-plot.mt.labs.i <- labs(y="Change in Household Marine Tenure\nsince Baseline",title="IMPACT")
-plot.se.labs.i <- labs(y="Change in Enrollment Rate\nsince Baseline",title="IMPACT")
+plot.fs.labs.i <- labs(x="",y="Change in Household Food Security\nsince Baseline",title="")
+plot.ma.labs.i <- labs(x="",y="Change in Household Material Assets\nsince Baseline",title="")
+plot.pa.labs.i <- labs(x="",y="Change in Household Place Attachment\nsince Baseline",title="")
+plot.mt.labs.i <- labs(x="",y="Change in Household Marine Tenure\nsince Baseline",title="")
+plot.se.labs.i <- labs(x="",y="Change in Enrollment Rate\nsince Baseline",title="")
+
+plot.ma.hh.labs.i <- labs(x="",y="Change in Household Assets\nsince Baseline",title="Household assets sub-class")
+plot.ma.boatnomotor.labs.i <- labs(x="",y="Change in Motor-less Boat Assets\nsince Baseline",title="Motor-less boat assets sub-class")
+plot.ma.boatmotor.labs.i <- labs(x="",y="Change in Motorized Boat Assets\nsince Baseline",title="Motorized boat assets sub-class")
+plot.ma.vehicles.labs.i <- labs(x="",y="Change in Land Vehicle Assets\nsince Baseline",title="Land vehicle assets sub-class")
 
 impact.x.labs <- c("MPA\nHouseholds","Control\nHouseholds")
 
