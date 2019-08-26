@@ -44,6 +44,12 @@ pscore <- glm(Treatment ~ TimeMarket + n.child  + ed.level + dom.eth + YearsResi
 DiD.data <- cbind(DiD.data,pscore)  
 
 ###------Generating subGroup indicators
+###------Generating subGroup indicators
+###------Generating subGroup indicators
+###------Generating subGroup indicators
+###------Generating subGroup indicators
+###------Generating subGroup indicators
+###------Generating subGroup indicators
 
 ###Indicator for Fisher, Male, ethnic dominant (dummies)
 DiD.data <- DiD.data %>% 
@@ -62,7 +68,7 @@ MA.quint.breaks <- DiD.data %>%
             quint4 = quantile(MAIndex, probs = c(.8), na.rm = T))
 
 ##Note: the wealthQuint factor is reverse; so that richest quintile==1; poorest==5
-## So that in the later regressions the richest quintile will be the base/omitted category
+## So that in the later regressions the richest quintile will be the base/reference category
 DiD.data <- DiD.data %>% 
   left_join(MA.quint.breaks, by = "yearsPost") %>% 
   mutate(wealthQuint=ifelse(MAIndex<=quint1,5,
@@ -1527,170 +1533,21 @@ for (i in varNames) {
   plot_grid(FS.plot_z,MT.plot_z,PA.plot_z,SE.plot_z,MA.plot_z,ncol=3)
   ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/BHS/subGroup_DDD/ethDom/","DDD_ethDom_z_BigFive_MPAlevel.jpg"),width = 12, height = 6)
   
-  
-
 
   
   
-  ###################################################################################
-  ###################################################################################
-  ###################################################################################
-  ###################################################################################
-  ###################################################################################
-  ###################################################################################
-  ###################################################################################
-  ###################################################################################
-  ###################################################################################
-  ###################################################################################
-  ###################################################################################
-  
-  
-  ##----Differential impact by wealth Quintile
-  ##----Differential impact by wealth Quintile
-  ##----Differential impact by wealth Quintile
-  ##----Differential impact by wealth Quintile
-  
-  ##################################################################################
-  ##################################################################################
-  ###1. Seascape-level Impact#######################################################
-  ###1. Seascape-level Impact#######################################################
-  ###1. Seascape-level Impact#######################################################
-  ###1. Seascape-level Impact#######################################################
-  ##################################################################################
-  ##################################################################################
-  ##################################################################################
-  ##############
-  ##############Using lfe (felm) for high dimensional FE DiD (similar to reghdfe)
-  ##############Seascape level impacts
-  varNames <- c("FSIndex","MAIndex","MTIndex","PAIndex","SERate", "FSIndex_z","MAIndex_z","MTIndex_z","PAIndex_z","SERate_z")
-  
-  
-  ##----Differential impact by eth.dom
-  model.out.ethDom <- data.frame()
-  for (i in varNames) {
-    print(i)
-    Y <- DiD.data[,i]
-    regValue.ethDom <- felm(Y  ~  n.child  + ed.level  + dom.eth + YearsResident + IndividualGender + IndividualAge +
-                              Treatment + yearsPostF + Treatment:yearsPostF + ethDom:Treatment + ethDom:yearsPostF + ethDom:Treatment:yearsPostF
-                            | SettlementID + InterviewYear + MPAID:InterviewYear | 0 | SettlementID,
-                            data=DiD.data,exactDOF = TRUE)
-    summary(regValue.ethDom)
-    reg.broom <- tidy(regValue.ethDom) %>%
-      mutate(Response=i)
-    
-    model.out.ethDom <- rbind(model.out.ethDom,reg.broom)
-  }
-  
-  
-  ##########################
-  #####BigFive's Impact plots
-  ###########################
-  
-  ###Rename Treatment:yearsPostF2:ethDom into t2 and so on
-  model.out.ethDom1 <- model.out.ethDom %>% 
-    filter(term%in%c("Treatment:yearsPostF2:ethDom","Treatment:yearsPostF4:ethDom")) %>% 
-    mutate(term=gsub("Treatment:yearsPostF","t",term)) %>% 
-    filter(term%in%c("t2:ethDom","t4:ethDom")) %>% 
-    mutate(term=gsub(":ethDom","",term))
-  
-  
-  pd <- position_dodge(width=.3) # move them .05 to the left and right
-  
-  
-  FS.plot <- ggplot(filter(model.out.ethDom1,Response=="FSIndex"),aes(x=term,y=estimate)) + 
-    geom_point(stat="identity", position =pd, fill='blue', size=3)+ theme_bw() +
-    geom_line( position = pd) + 
-    geom_errorbar(aes(ymin=estimate-1.645*std.error, ymax=estimate+1.645*std.error), width=0.2, position = pd ) +
-    geom_hline(yintercept = 0, linetype = "dashed") +
-    labs(x="",y="DDD Estimate", title="Food Security")  
-  #+ facet_grid(.~Response)
-  
-  MT.plot <- ggplot(filter(model.out.ethDom1,Response=="MTIndex"),aes(x=term,y=estimate)) + 
-    geom_point(stat="identity", position =pd, fill='blue', size=3)+ theme_bw() +
-    geom_line( position = pd) + 
-    geom_errorbar(aes(ymin=estimate-1.645*std.error, ymax=estimate+1.645*std.error), width=0.2, position = pd ) +
-    geom_hline(yintercept = 0, linetype = "dashed") +
-    labs(x="",y="DDD Estimate", title="Marine Tenure")  
-  
-  
-  MA.plot <- ggplot(filter(model.out.ethDom1,Response=="MAIndex"),aes(x=term,y=estimate)) + 
-    geom_point(stat="identity", position =pd, fill='blue', size=3)+ theme_bw() +
-    geom_line( position = pd) + 
-    geom_errorbar(aes(ymin=estimate-1.645*std.error, ymax=estimate+1.645*std.error), width=0.2, position = pd ) +
-    geom_hline(yintercept = 0, linetype = "dashed") +
-    labs(x="",y="DDD Estimate", title="Material Assets")  
-  
-  
-  PA.plot <- ggplot(filter(model.out.ethDom1,Response=="PAIndex"),aes(x=term,y=estimate)) + 
-    geom_point(stat="identity", position =pd, fill='blue', size=3)+ theme_bw() +
-    geom_line( position = pd) + 
-    geom_errorbar(aes(ymin=estimate-1.645*std.error, ymax=estimate+1.645*std.error), width=0.2, position = pd ) +
-    geom_hline(yintercept = 0, linetype = "dashed") +
-    labs(x="",y="DDD Estimate", title="Place Attachment")  
-  
-  
-  SE.plot <- ggplot(filter(model.out.ethDom1,Response=="SERate"),aes(x=term,y=estimate)) + 
-    geom_point(stat="identity", position =pd, fill='blue', size=3)+ theme_bw() +
-    geom_line( position = pd) + 
-    geom_errorbar(aes(ymin=estimate-1.645*std.error, ymax=estimate+1.645*std.error), width=0.2, position = pd ) +
-    geom_hline(yintercept = 0, linetype = "dashed") +
-    labs(x="",y="DDD Estimate", title="School Enrollment")  
-  
-  
-  #library(cowplot)
-  #Combine "regular BigFive"
-  plot_grid(FS.plot,MT.plot,PA.plot,SE.plot,MA.plot,ncol=3)
-  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/BHS/subGroup_DDD/ethDom/","DDD_ethDom_BigFive_seascape.jpg"),width = 12, height = 6)
-  
-  
-  #####################Repeat the 5 plots, now using standardized scores
-  
-  FS.plot <- ggplot(filter(model.out.ethDom1,Response=="FSIndex_z"),aes(x=term,y=estimate)) + 
-    geom_point(stat="identity", position =pd, fill='blue', size=3)+ theme_bw() +
-    geom_line( position = pd) + 
-    geom_errorbar(aes(ymin=estimate-1.645*std.error, ymax=estimate+1.645*std.error), width=0.2, position = pd ) +
-    geom_hline(yintercept = 0, linetype = "dashed") +
-    labs(x="",y="DDD Estimate", title="Food Security")  
-  #+ facet_grid(.~Response)
-  
-  MT.plot <- ggplot(filter(model.out.ethDom1,Response=="MTIndex_z"),aes(x=term,y=estimate)) + 
-    geom_point(stat="identity", position =pd, fill='blue', size=3)+ theme_bw() +
-    geom_line( position = pd) + 
-    geom_errorbar(aes(ymin=estimate-1.645*std.error, ymax=estimate+1.645*std.error), width=0.2, position = pd ) +
-    geom_hline(yintercept = 0, linetype = "dashed") +
-    labs(x="",y="DDD Estimate", title="Marine Tenure")  
-  
-  
-  MA.plot <- ggplot(filter(model.out.ethDom1,Response=="MAIndex_z"),aes(x=term,y=estimate)) + 
-    geom_point(stat="identity", position =pd, fill='blue', size=3)+ theme_bw() +
-    geom_line( position = pd) + 
-    geom_errorbar(aes(ymin=estimate-1.645*std.error, ymax=estimate+1.645*std.error), width=0.2, position = pd ) +
-    geom_hline(yintercept = 0, linetype = "dashed") +
-    labs(x="",y="DDD Estimate", title="Material Assets")  
-  
-  
-  PA.plot <- ggplot(filter(model.out.ethDom1,Response=="PAIndex_z"),aes(x=term,y=estimate)) + 
-    geom_point(stat="identity", position =pd, fill='blue', size=3)+ theme_bw() +
-    geom_line( position = pd) + 
-    geom_errorbar(aes(ymin=estimate-1.645*std.error, ymax=estimate+1.645*std.error), width=0.2, position = pd ) +
-    geom_hline(yintercept = 0, linetype = "dashed") +
-    labs(x="",y="DDD Estimate", title="Place Attachment")  
-  
-  
-  SE.plot <- ggplot(filter(model.out.ethDom1,Response=="SERate_z"),aes(x=term,y=estimate)) + 
-    geom_point(stat="identity", position =pd, fill='blue', size=3)+ theme_bw() +
-    geom_line( position = pd) + 
-    geom_errorbar(aes(ymin=estimate-1.645*std.error, ymax=estimate+1.645*std.error), width=0.2, position = pd ) +
-    geom_hline(yintercept = 0, linetype = "dashed") +
-    labs(x="",y="DDD Estimate", title="School Enrollment")  
-  
-  #Combine "standardize BigFive"
-  plot_grid(FS.plot,MT.plot,PA.plot,SE.plot,MA.plot,ncol=3)
-  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/BHS/subGroup_DDD/ethDom/","DDD_ethDom_BigFive_z_seascape.jpg"),width = 12, height = 6)
-  
 
-
-
+  ###################################################################################
+  ###################################################################################
+  ###################################################################################
+  ###################################################################################
+  ###################################################################################
+  ###################################################################################
+  ###################################################################################
+  ###################################################################################
+  ###################################################################################
+  ###################################################################################
+  ###################################################################################
   ##----Differential impact by wealth Quintile
   ##----Differential impact by wealth Quintile
   ##----Differential impact by wealth Quintile
