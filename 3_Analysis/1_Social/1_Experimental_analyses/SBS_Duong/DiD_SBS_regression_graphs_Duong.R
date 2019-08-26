@@ -1169,15 +1169,11 @@ ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/
 
 
 
+##----------------BEGIN----------------------------------------------------------------------##
+##----------------BEGIN----------------------------------------------------------------------##
+##----------------BEGIN----------------------------------------------------------------------##
+##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
 
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
 
 ## Produce trend plots (separately for control and treatment settlements) for each MPA
 MPA_name <- c("Flores Timur")
@@ -1263,29 +1259,23 @@ for (mpa in MPA_name) {
     scale_fill_manual(values = c("grey93", "royalblue4")) 
   ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Assets_Boat_withMotor.jpg"),width = 12, height = 6)
   
-  }
+}
+##----------------END----------------------------------------------------------------------##
+##----------------END----------------------------------------------------------------------##
+##----------------END----------------------------------------------------------------------##
 
 
 
 
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
-##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
 
-##2. DiD Impact Plots -- for MACP reports (i.e. show trends for COntrol vs Treatment)
-##2. DiD Impact Plots -- for MACP reports (i.e. show trends for COntrol vs Treatment)
-##2. DiD Impact Plots -- for MACP reports (i.e. show trends for COntrol vs Treatment)
-##2. DiD Impact Plots -- for MACP reports (i.e. show trends for COntrol vs Treatment)
+##----------------BEGIN----------------------------------------------------------------------##
+##----------------BEGIN----------------------------------------------------------------------##
+##----------------BEGIN----------------------------------------------------------------------##
+##----------------MACP Plots: Separate trend/impact plots for sub-Asset classes--------------##
+##----------------Preparing output frame ready for Kelly to produce MACP impact plots--------##
+
 
 ##-------Using lfe (felm) for high dimensional FE DiD (similar to reghdfe)----##
-##-------Seascape level impacts-----------------------------------------------## 
-##--------------------NOTE--------------------------##
-##-------Exclude time and settlement FEs in order to plot trends--------------##
 ###generating short MPA names
 mpa.nam <- mpa.nam %>% 
   mutate(MPAName_short = ifelse(MPACode==1,"  Telma",
@@ -1375,112 +1365,6 @@ export(model.out.MACP.impact1 %>%
          select(term, estimate, Response, MPAID, std.error, Group, MPAName_short) %>%  
          arrange(MPAID,Response), 
        "R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Impact_MACP_result/SBS/macp_plots_output_Asset_subClasses.csv")
-
-
-
-# 
-##Export out the output frame used to plot MACP impacts
-# export(model.out.MACP.impact1 %>%
-#          select(term, estimate, Response, MPAID, std.error.toUse, Group, MPAName_short) %>%
-#          arrange(MPAID,Response),
-#        "R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Impact_MACP_result/SBS/macp_plots_output_Asset_subClasses.csv")
-# 
-# 
-# ##Export out the output frame used to plot big five compilation
-# export(model.out.MACP.impact1 %>% 
-#          select(term, estimate, std.error, Response, MPAID, MPAName_short) %>%  
-#          filter(term%in%c("Impact")) %>% 
-#          filter(Response%in%c("FSIndex_z","MAIndex_z","PAIndex_z","MTIndex_z","SERate_z")) %>% 
-#          arrange(MPAID,Response), 
-#        "R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Impact_MACP_result/SBS/macp_plots_output_standardized_Big5.csv")
-
-
-##----------Individual MPA Impact plots (mainly for MACP repots)-------------------##
-##----------Approach 2------------------------------------------------------------##
-##----------Approach 2------------------------------------------------------------##
-##----------Approach 2------------------------------------------------------------##
-## Produce impact plots (separately for control and treatment settlements) for each MPA
-MPA_name <- c("Flores Timur")
-pd <- position_dodge() # move them .05 to the left and right
-
-##---loop through each MPA to generate independent plots
-for (mpa in MPA_name) {
-  print(mpa)
-  mpa.impact.data <- model.out.MACP.impact2 %>% 
-    filter(MPAName_short==mpa) %>% 
-    ungroup() 
-  
-  
-  HHasset.impact.plot <- ggplot(filter(mpa.impact.data,Response=="Household_asset"),aes(x=Group,y=estimate, fill=Group)) + 
-    geom_bar(stat="identity", position=position_dodge(), width=0.7, color="black") + theme_bw() + 
-    theme(axis.text=element_text(size=15), axis.title=element_text(size=16,face="bold")) +
-    geom_line(position = pd) + 
-    geom_errorbar(aes(ymin=estimate - std.error.toUse, ymax=estimate + std.error.toUse), width=0.2, position = position_dodge(.7), linetype = "longdash") +
-    labs(x=" Three Year Post-Baseline",y="Change Since Baseline", title=paste0(mpa, " Impact Plot: Household Asset"))  +
-    scale_colour_manual(values = c("grey93", "royalblue4","white")) +
-    scale_fill_manual(values = c("grey93", "royalblue4","white")) 
-  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Impact_Assets_HouseholdItem.jpg"),width = 12, height = 6)
-  
-  
-  Vehicles.impact.plot <- ggplot(filter(mpa.impact.data,Response=="Vehicles_w2"),aes(x=Group,y=estimate, fill=Group)) + 
-    geom_bar(stat="identity", position=position_dodge(), width=0.7, color="black") + theme_bw() + 
-    theme(axis.text=element_text(size=15), axis.title=element_text(size=16,face="bold")) +
-    geom_line(position = pd) + 
-    geom_errorbar(aes(ymin=estimate - std.error.toUse, ymax=estimate + std.error.toUse), width=0.2, position = position_dodge(.7), linetype = "longdash") +
-    labs(x=" Three Year Post-Baseline",y="Change Since Baseline", title=paste0(mpa, " Impact Plot: Vehicle Ownership"))  +
-    scale_colour_manual(values = c("grey93", "royalblue4","white")) +
-    scale_fill_manual(values = c("grey93", "royalblue4","white")) 
-  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Impact_Assets_Vehicles.jpg"),width = 12, height = 6)
-  
-  Boats.impact.plot <- ggplot(filter(mpa.impact.data,Response=="Boats_w2"),aes(x=Group,y=estimate, fill=Group)) + 
-    geom_bar(stat="identity", position=position_dodge(), width=0.7, color="black") + theme_bw() + 
-    theme(axis.text=element_text(size=15), axis.title=element_text(size=16,face="bold")) +
-    geom_line(position = pd) + 
-    geom_errorbar(aes(ymin=estimate - std.error.toUse, ymax=estimate + std.error.toUse), width=0.2, position = position_dodge(.7), linetype = "longdash") +
-    labs(x=" Three Year Post-Baseline",y="Change Since Baseline", title=paste0(mpa, " Impact Plot:  Boat Ownership"))  +
-    scale_colour_manual(values = c("grey93", "royalblue4","white")) +
-    scale_fill_manual(values = c("grey93", "royalblue4","white")) 
-  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Impact_Assets_BoatAll.jpg"),width = 12, height = 6)
-  
-  BoatNoMotor.impact.plot <- ggplot(filter(mpa.impact.data,Response=="BoatNoMotor"),aes(x=Group,y=estimate, fill=Group)) + 
-    geom_bar(stat="identity", position=position_dodge(), width=0.7, color="black") + theme_bw() + 
-    theme(axis.text=element_text(size=15), axis.title=element_text(size=16,face="bold")) +
-    geom_line(position = pd) + 
-    geom_errorbar(aes(ymin=estimate - std.error.toUse, ymax=estimate + std.error.toUse), width=0.2, position = position_dodge(.7), linetype = "longdash") +
-    labs(x=" Three Year Post-Baseline",y="Change Since Baseline", title=paste0(mpa, " Impact Plot: No-motor Boat Ownership"))  +
-    scale_colour_manual(values = c("grey93", "royalblue4","white")) +
-    scale_fill_manual(values = c("grey93", "royalblue4","white")) 
-  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Impact_Assets_BoatNoMotor.jpg"),width = 12, height = 6)
-  
-  BoatInboard.impact.plot <- ggplot(filter(mpa.impact.data,Response=="BoatInboard"),aes(x=Group,y=estimate, fill=Group)) + 
-    geom_bar(stat="identity", position=position_dodge(), width=0.7, color="black") + theme_bw() + 
-    theme(axis.text=element_text(size=15), axis.title=element_text(size=16,face="bold")) +
-    geom_line(position = pd) + 
-    geom_errorbar(aes(ymin=estimate - std.error.toUse, ymax=estimate + std.error.toUse), width=0.2, position = position_dodge(.7), linetype = "longdash") +
-    labs(x=" Three Year Post-Baseline",y="Change Since Baseline", title=paste0(mpa, " Impact Plot: In-board Boat Ownership"))  +
-    scale_colour_manual(values = c("grey93", "royalblue4","white")) +
-    scale_fill_manual(values = c("grey93", "royalblue4","white")) 
-  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Impact_Assets_BoatInboard.jpg"),width = 12, height = 6)
-  
-  BoatOutboard.impact.plot <- ggplot(filter(mpa.impact.data,Response=="BoatOutboard"),aes(x=Group,y=estimate, fill=Group)) + 
-    geom_bar(stat="identity", position=position_dodge(), width=0.7, color="black") + theme_bw() + 
-    theme(axis.text=element_text(size=15), axis.title=element_text(size=16,face="bold")) +
-    geom_line(position = pd) + 
-    geom_errorbar(aes(ymin=estimate - std.error.toUse, ymax=estimate + std.error.toUse), width=0.2, position = position_dodge(.7), linetype = "longdash") +
-    labs(x=" Three Year Post-Baseline",y="Change Since Baseline", title=paste0(mpa, " Impact Plot: Out-board Boat Ownership"))  +
-    scale_colour_manual(values = c("grey93", "royalblue4","white")) +
-    scale_fill_manual(values = c("grey93", "royalblue4","white")) 
-  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Impact_Assets_BoatOutboard.jpg"),width = 12, height = 6)
-  
-  Boat.Motor.impact.plot <- ggplot(filter(mpa.impact.data,Response=="Boats_motor_w2"),aes(x=Group,y=estimate, fill=Group)) + 
-    geom_bar(stat="identity", position=position_dodge(), width=0.7, color="black") + theme_bw() + 
-    theme(axis.text=element_text(size=15), axis.title=element_text(size=16,face="bold")) +
-    geom_line(position = pd) + 
-    geom_errorbar(aes(ymin=estimate - std.error.toUse, ymax=estimate + std.error.toUse), width=0.2, position = position_dodge(.7), linetype = "longdash") +
-    labs(x=" Three Year Post-Baseline",y="Change Since Baseline", title=paste0(mpa, " Impact Plot: Motorized Boat Ownership"))  +
-    scale_colour_manual(values = c("grey93", "royalblue4","white")) +
-    scale_fill_manual(values = c("grey93", "royalblue4","white")) 
-  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Impact_Assets_Boat_withMotor.jpg"),width = 12, height = 6)
-  
-}
-
+##----------------END----------------------------------------------------------------------##
+##----------------END----------------------------------------------------------------------##
+##----------------END----------------------------------------------------------------------##

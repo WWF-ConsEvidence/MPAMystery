@@ -1,5 +1,3 @@
-  # .libPaths()
-  # .libPaths("C:/Users/Duong Le/Documents/R/R-3.6.0/library")
 source('R:/Gill/DLe/MPAMystery/2_Functions/2_Analysis/Function_process_covariates.R')
 library(lfe)
 library(cowplot)
