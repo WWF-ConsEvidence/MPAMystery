@@ -107,17 +107,33 @@ HHData <-   WELLBEING %>%
                                               ifelse((DidNotLast==1 & BalancedDiet==1 & FreqAdultSkip==1 & AdultSkip==1 & EatLess==1),1,NA),HungryCoded)),
                    
                    # Assets
-                   CarTruck = as.integer(ifelse(AssetCarTruck>989,NA,AssetCarTruck*11)),
                    Bicycle = as.integer(ifelse(AssetBicycle>989,NA,AssetBicycle*9)),
                    Motorcycle = as.integer(ifelse(AssetMotorcycle>989,NA,AssetMotorcycle*10)),
                    BoatNoMotor = as.integer(ifelse(AssetBoatNoMotor>989,NA,AssetBoatNoMotor*6)),
                    BoatOutboard = as.integer(ifelse(AssetBoatOutboard>989,NA,AssetBoatOutboard*7)),
                    BoatInboard =  as.integer(ifelse(AssetBoatInboard>989,NA,AssetBoatInboard*8)),
-                   PhoneCombined = as.integer(ifelse(AssetPhoneCombined>989,NA,AssetPhoneCombined*4)),
                    TV = as.integer(ifelse(AssetTV>989,NA,AssetTV*2)),
                    Entertain = as.integer(ifelse(AssetEntertain>989,NA,AssetEntertain*1)),
                    Satellite = as.integer(ifelse(AssetSatellite>989,NA,AssetSatellite*3)),
                    Generator = as.integer(ifelse(AssetGenerator>989,NA,AssetGenerator*5)),
+                   
+                   Car = as.integer(ifelse(AssetCar>989,NA,AssetCar)),
+                   Truck = as.integer(ifelse(AssetTruck>989,NA,AssetTruck)),
+                   CarTruck = as.integer(ifelse(AssetCarTruck<993,AssetCarTruck*11,
+                                                ifelse(AssetCarTruck==993,(Car+Truck)*11,NA))),
+                   
+                   LandlinePhone = as.integer(ifelse(AssetLandlinePhone>989,NA,AssetLandlinePhone)),
+                   CellPhone = as.integer(ifelse(AssetCellPhone>989,NA,AssetCellPhone)),
+                   PhoneCombined = as.integer(ifelse(AssetPhoneCombined<993,AssetPhoneCombined*4,
+                                                     ifelse(AssetPhoneCombined==993,(LandlinePhone+CellPhone)*4,NA))),
+                   
+                   Radio = as.integer(ifelse(AssetRadio>989,NA,AssetRadio)),
+                   Stereo = as.integer(ifelse(AssetStereo>989,NA,AssetStereo)),
+                   CD = as.integer(ifelse(AssetCD>989,NA,AssetCD)),
+                   DVD = as.integer(ifelse(AssetDVD>989,NA,AssetDVD)),
+                   Entertain = as.integer(ifelse(AssetEntertain<993,AssetEntertain*1,
+                                                 ifelse(AssetEntertain==993,Radio+Stereo+CD+DVD,NA))),
+                   
                    
                    # Place Attachment
                    PlaceHappy = as.integer(ifelse(PlaceHappy%in%c(1:5),PlaceHappy,NA)),
