@@ -101,8 +101,10 @@ HHData$FSIndex <- 6.06-as.numeric(HHData$FSIndex)
 
 HHData <- 
   IndDemos %>%
+           mutate(One=1) %>% 
            group_by(HouseholdID) %>%
-           summarise(NumberChild=sum(SchoolAge,na.rm=T),
+           summarise(Household.Size=sum(One,na.rm=T),
+                     NumberChild=sum(SchoolAge,na.rm=T),
                      NumberEnrolled=sum(ChildEnrolled,na.rm=T),
                      PercentEnrolled=ifelse(NumberChild!=0 & !is.na(NumberEnrolled),
                                             as.character(round((NumberEnrolled/NumberChild)*100,2)),

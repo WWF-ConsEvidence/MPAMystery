@@ -106,7 +106,7 @@ HHData <-   WELLBEING %>%
                    Hungry = as.integer(ifelse(HungryCoded==990,
                                               ifelse((DidNotLast==1 & BalancedDiet==1 & FreqAdultSkip==1 & AdultSkip==1 & EatLess==1),1,NA),HungryCoded)),
                    
-                   # Assets
+                   # Assets and Economic Well-being
                    Bicycle = as.integer(ifelse(AssetBicycle>989,NA,AssetBicycle*9)),
                    Motorcycle = as.integer(ifelse(AssetMotorcycle>989,NA,AssetMotorcycle*10)),
                    BoatNoMotor = as.integer(ifelse(AssetBoatNoMotor>989,NA,AssetBoatNoMotor*6)),
@@ -134,6 +134,8 @@ HHData <-   WELLBEING %>%
                    Entertain = as.integer(ifelse(AssetEntertain<993,AssetEntertain*1,
                                                  ifelse(AssetEntertain==993,Radio+Stereo+CD+DVD,NA))),
                    
+                   CookingFuel.Biomass = as.integer(ifelse(CookingFuel=1|CookingFuel=2,0,
+                                                           ifelse(CookingFuel==3|CookingFuel==4|CookingFuel==5|CookingFuel==6,1,NA))),
                    
                    # Place Attachment
                    PlaceHappy = as.integer(ifelse(PlaceHappy%in%c(1:5),PlaceHappy,NA)),
@@ -159,18 +161,18 @@ HHData <-   WELLBEING %>%
                    NoMealChildCoded = as.integer(ifelse((FSNoMealChild==1 | FSNoMealChild==2),1,ifelse(FSNoMealChild==3,0,990))),
                    
                    LowCostFood = as.integer(ifelse(LowCostFoodCoded==990,
-                                                  ifelse((ChildPortionCoded==1 | ChildSkipCoded==1 | FreqChildSkipCoded==1 |NoMealChildCoded==1),1,NA),LowCostFoodCoded)),
+                                                   ifelse((ChildPortionCoded==1 | ChildSkipCoded==1 | FreqChildSkipCoded==1 |NoMealChildCoded==1),1,NA),LowCostFoodCoded)),
                    ChildBalancedMeal = as.integer(ifelse((LowCostFood==1 & (ChildPortionCoded==1 | ChildSkipCoded==1 | FreqChildSkipCoded==1 | NoMealChildCoded==1)),1,0)),
                    ChildNotEnough =  as.integer(ifelse((LowCostFood==1 & (ChildPortionCoded==1 | ChildSkipCoded==1 |FreqChildSkipCoded==1 | NoMealChildCoded==1)),1,0)),
                    ChildPortion = as.integer(ifelse(ChildPortionCoded==990,
-                                                   ifelse((LowCostFood==1 & (ChildSkipCoded==1 | FreqChildSkipCoded==1 |NoMealChildCoded==1)),1,NA),ChildPortionCoded)),
+                                                    ifelse((LowCostFood==1 & (ChildSkipCoded==1 | FreqChildSkipCoded==1 |NoMealChildCoded==1)),1,NA),ChildPortionCoded)),
                    ChildHungry = as.integer(ifelse((LowCostFood==1 & ChildPortion==1 & (ChildSkipCoded==1 | FreqChildSkipCoded==1 | NoMealChildCoded==1)),1,0)),
                    ChildSkip = as.integer(ifelse(ChildSkipCoded==990,
-                                                ifelse((LowCostFood==1 & ChildPortion==1 & (FreqChildSkipCoded==1 | NoMealChildCoded==1)),1,NA),ChildSkipCoded)),
+                                                 ifelse((LowCostFood==1 & ChildPortion==1 & (FreqChildSkipCoded==1 | NoMealChildCoded==1)),1,NA),ChildSkipCoded)),
                    FreqChildSkip = as.integer(ifelse(FreqChildSkipCoded==990,
-                                                    ifelse((LowCostFood==1 & ChildPortion==1 & ChildSkip==1 & NoMealChildCoded==1),1,NA),FreqChildSkipCoded)),
+                                                     ifelse((LowCostFood==1 & ChildPortion==1 & ChildSkip==1 & NoMealChildCoded==1),1,NA),FreqChildSkipCoded)),
                    NoMealChild =  as.integer(ifelse(NoMealChildCoded==990,
-                                                   ifelse((LowCostFood==1 & ChildPortion==1 & ChildSkip==1 & FreqChildSkip==1),1,NA),NoMealChildCoded)),
+                                                    ifelse((LowCostFood==1 & ChildPortion==1 & ChildSkip==1 & FreqChildSkip==1),1,NA),NoMealChildCoded)),
                    
                    
                    # Livelihoods & Occupations
