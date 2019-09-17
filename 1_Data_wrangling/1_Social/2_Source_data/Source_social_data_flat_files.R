@@ -40,7 +40,7 @@
 
 # ---- 1.1 Load libraries & data ----
 
-pacman::p_load(dplyr,rio)
+pacman::p_load(rio,dplyr)
 
 # Sourcing most recent files
 
@@ -68,6 +68,8 @@ WELLBEING <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_databas
 DEMOGRAPHIC <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_DEMOGRAPHIC')
 SETTLEMENT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_SETTLEMENT')
 ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_ORGANIZATION')
+LTHREAT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_LTHREAT')
+LSTEPS <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_LSTEPS')
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

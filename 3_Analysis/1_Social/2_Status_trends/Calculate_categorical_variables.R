@@ -9,7 +9,7 @@
 source("C:/Users/HP/Dropbox/NotThisOne/Source_social_data_flat_files.R")
 source("C:/Users/HP/Dropbox/NotThisOne/Calculate_BigFive.R")
 
-library(reldist)
+library(reldist,dplyr)
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -53,9 +53,7 @@ HHData$HHsize <- sapply(HHData$HouseholdID,
                                    })
 
 #Creating the variable Unwell, that is the average days unwell, on a household basis
-HHData<- left_join(HHData,(IndDemos %>%
-  group_by(HouseholdID) %>% 
-  mutate(DaysUnwell=sum(DaysUnwell,na.rm=T)/length(HouseholdID))),by="HouseholdID")
+HHData<- left_join(HHData,IndDemos %>% group_by(HouseholdID) %>% summarise(DaysUnwell=sum(DaysUnwell,na.rm=T)/length(HouseholdID)),by="HouseholdID")
 
 # ---- 1.2 Settlement-level analysis, for status and annex plots ----
 

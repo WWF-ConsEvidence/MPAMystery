@@ -45,7 +45,7 @@
 source('1_Data_wrangling/1_Social/2_Source_data/Source_social_data_flat_files.R')
 
 
-pacman::p_load(plyr,tidyverse)
+
 
 # Whichever option you chose above, you will still need to upload Ethnicity data from a flat file
 
