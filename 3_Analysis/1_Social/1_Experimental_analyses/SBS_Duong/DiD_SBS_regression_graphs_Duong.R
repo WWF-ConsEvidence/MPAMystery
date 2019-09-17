@@ -28,7 +28,7 @@ library(psych) #summary statistics by groups
 
 # --- DiD specification 
 DiD.data <- match.covariate %>% 
-  left_join(select(HHData,MAIndex:FSIndex,SERate,HouseholdID,InterviewYear), by="HouseholdID") %>% 
+  left_join(select(HHData,DidNotLast:EconStatusReason,MAIndex:FSIndex,SERate,HouseholdID,InterviewYear), by="HouseholdID") %>% 
   left_join(mpa.nam,by="MPAID") %>% 
   select(HouseholdID:InterviewYear,MPAName) %>% 
   mutate(TreatFactor= as.factor(ifelse(Treatment==0,0,MPAID)),
@@ -36,6 +36,42 @@ DiD.data <- match.covariate %>%
          MPAID=as.factor(MPAID),
          InterviewYear=as.factor(InterviewYear)) %>% 
   filter(!is.na(IndividualGender))
+
+## --- Modifying Asset Items to generate sub-Asset Groups (i.e. Household assets (discretionary & appliances), Productive Marine-based Assets (the boats), and land-based (vehicles)
+DiD.data <- DiD.data %>% 
+  mutate(Entertain = Entertain,
+         PhoneCombined = PhoneCombined/2,
+         Satellite = Satellite/3,
+         TV = TV/4,
+         Generator = Generator/5,
+         BoatNoMotor = BoatNoMotor/6,
+         BoatOutboard = BoatOutboard/7,
+         BoatInboard = BoatInboard/8,
+         Bicycle = Bicycle/9,
+         Motorcycle = Motorcycle/10,
+         CarTruck = CarTruck/11) %>% 
+  mutate(Entertain_dum = ifelse(Entertain>0,1,0),
+         PhoneCombined_dum = ifelse(PhoneCombined>0,1,0),
+         Satellite_dum = ifelse(Satellite>0,1,0),
+         TV_dum = ifelse(TV>0,1,0),
+         Generator_dum = ifelse(Generator>0,1,0),
+         BoatNoMotor_dum = ifelse(BoatNoMotor>0,1,0),
+         BoatOutboard_dum = ifelse(BoatOutboard>0,1,0),
+         BoatInboard_dum = ifelse(BoatInboard>0,1,0),
+         Bicycle_dum = ifelse(Bicycle>0,1,0),
+         Motorcycle_dum = ifelse(Motorcycle>0,1,0),
+         CarTruck_dum = ifelse(CarTruck>0,1,0)) %>%
+  mutate(Household_asset = Entertain + 2*PhoneCombined + 3*Satellite + 4*TV + 5*Generator,
+         Boats_w1 = BoatNoMotor + 2*BoatOutboard + 3*BoatInboard,
+         Boats_w2 = 6*BoatNoMotor + 7*BoatOutboard + 8*BoatInboard,
+         Boats_motor_w1 = 1*BoatOutboard + 2*BoatInboard,
+         Boats_motor_w2 = 7*BoatOutboard + 8*BoatInboard,
+         Vehicles_w1 = Bicycle + 2*Motorcycle + 3*CarTruck,
+         Vehicles_w2 = 9*Bicycle + 10*Motorcycle + 11*CarTruck) %>% 
+  mutate(Boats_dum = ifelse(BoatNoMotor>0 | BoatOutboard >0 | BoatInboard >0,1,0),
+         Boats_motor_dum = ifelse(BoatOutboard >0 | BoatInboard >0,1,0),
+         Vehicles_dum = ifelse(Bicycle>0 | Motorcycle>0 | CarTruck>0,1,0))
+
 
 # --- summary(DiD.data)
 DiD.data.summary <- DiD.data %>% 
@@ -51,7 +87,7 @@ DiD.data <- DiD.data %>%
 # calculate Z scores (standardized values for each of the Big Five)
 DiD.data <- DiD.data %>% 
   group_by(MPAID,MonitoringYear) %>% 
-  mutate_at(vars(MAIndex:SERate), .funs = list(`z`= ~ (.-mean(.,na.rm=T))/sd(.,na.rm = T))) %>% 
+  mutate_at(vars(MAIndex:SERate, Household_asset:Vehicles_w2), .funs = list(`z`= ~ (.-mean(.,na.rm=T))/sd(.,na.rm = T))) %>% 
   ungroup()
 
 # mean2 <- function(x){ mean(x,na.rm=T)}
@@ -78,21 +114,20 @@ DiD.data <- cbind(DiD.data,pscore)
 ####---1. Finding group means for trend and summary statistics tables
 ####---1. Finding group means for trend and summary statistics tables
 
-
 #Seascape-wide stats
 sumStat.BigFive.Seascape <- DiD.data %>% 
-  select(Treatment, MPAID, yearsPostF,FSIndex,MAIndex,MTIndex,PAIndex,SERate, FSIndex_z,MAIndex_z,MTIndex_z,PAIndex_z,SERate_z) %>% 
+  select(Treatment, MPAID, yearsPostF,FSIndex:SERate, FSIndex_z:SERate_z, BoatNoMotor:BoatInboard, Entertain_dum:Vehicles_dum, Household_asset_z:Vehicles_w2_z) %>% 
   group_by(Treatment, yearsPostF) %>% 
-  summarise_at(vars(FSIndex:SERate_z), .funs = list(~ mean(., na.rm = TRUE),~ sd(., na.rm = TRUE), ~ median(., na.rm = TRUE))) %>% 
+  summarise_at(vars(FSIndex:SERate, FSIndex_z:SERate_z, BoatNoMotor:BoatInboard, Entertain_dum:Vehicles_dum, Household_asset_z:Vehicles_w2_z), .funs = list(~ mean(., na.rm = TRUE),~ sd(., na.rm = TRUE), ~ median(., na.rm = TRUE))) %>% 
   mutate(MPAID=0,
          MPAID=as.factor(MPAID)) #assign 0 for mpaid for seascapewide; to merge with mpa-specific sumstat later
 
 
 #MPA-specific stats
 sumStat.BigFive <- DiD.data %>% 
-  select(Treatment, MPAID, yearsPostF,FSIndex,MAIndex,MTIndex,PAIndex,SERate, FSIndex_z,MAIndex_z,MTIndex_z,PAIndex_z,SERate_z) %>% 
+  select(Treatment, MPAID, yearsPostF,FSIndex:SERate, FSIndex_z:SERate_z, BoatNoMotor:BoatInboard, Entertain_dum:Vehicles_dum, Household_asset_z:Vehicles_w2_z) %>% 
   group_by(MPAID,Treatment, yearsPostF) %>% 
-  summarise_at(vars(FSIndex:SERate_z), .funs = list(~ mean(., na.rm = TRUE),~ sd(., na.rm = TRUE), ~ median(., na.rm = TRUE))) %>% 
+  summarise_at(vars(FSIndex:SERate, FSIndex_z:SERate_z, BoatNoMotor:BoatInboard, Entertain_dum:Vehicles_dum, Household_asset_z:Vehicles_w2_z), .funs = list(~ mean(., na.rm = TRUE),~ sd(., na.rm = TRUE), ~ median(., na.rm = TRUE))) %>% 
   rbind(.,sumStat.BigFive.Seascape) %>% #merge seascape stats (mpaid==0) into this table
   mutate(MPAName_short = ifelse(MPAID==15,"Selat Pantar",
                                 ifelse(MPAID==16,"Flores Timur",
@@ -102,8 +137,15 @@ summary(sumStat.BigFive)
 
 
 
-mySum <- DiD.data %>% 
-  my_summarize(FSIndex,MPAID,Treatment,yearsPostF)
+
+
+##----------------------------------------------------------------------------------------------------------------------------------##
+##----------------------------------------------------------------------------------------------------------------------------------##
+##----------------------------------------------------------------------------------------------------------------------------------##
+##----------------------------------------------------------------------------------------------------------------------------------##
+##----------------------------------------------------------------------------------------------------------------------------------##
+##----------------------------------------------------------------------------------------------------------------------------------##
+##----------------------------------------------------------------------------------------------------------------------------------##
 
 ## Produce trend plots (separately for control and treatment settlements) for each MPA
 MPA_name <- c("Seascape","Selat Pantar", "Flores Timur")
@@ -295,8 +337,13 @@ for (mpaid in 15:16) {
                      | MPAID | 0 | SettlementID,
                      data=DiD.MACP.impact,exactDOF = TRUE)
     summary(regValue)
+    
+    ###Get covariance value between yearsPostF3 and Treatment:yearsPostF3 (need this for calculating S.E. of treatment trend later (alpha2 + alpha3))
+    vcov.matrix<-vcov(regValue) 
+    vcov <- vcov.matrix[8,9] 
+    
     reg.broom <- tidy(regValue) %>% 
-      mutate(Response=i, MPAID=mpaid)
+      mutate(Response=i, MPAID=mpaid,vcov_alpha2_3=vcov)
     
     model.out.MACP.impact <- rbind(model.out.MACP.impact,reg.broom)
   }
@@ -309,18 +356,26 @@ model.out.MACP.impact1 <- model.out.MACP.impact %>%
   mutate(term=gsub("Treatment:yearsPostF3","Impact",term)) %>% 
   mutate(term=gsub("yearsPostF3","Control_Trend",term))  
 
-## spead dataframe to compute treatment trend (=control trend + Impact)
-model.out.MACP.impact1.rearrange<-model.out.MACP.impact1 %>% 
-  select(Response,MPAID,term,estimate) %>% 
+## spead dataframe to compute treatment trend's estimates (=control trend + Impact)
+model.out.MACP.impact1.rearrange.estimate<-model.out.MACP.impact1 %>% 
+  select(Response,MPAID,term,estimate,vcov_alpha2_3) %>% 
   spread(term,estimate) %>% 
   mutate(estimate = Control_Trend + Impact) %>% 
   select(Response, MPAID, estimate) %>% 
-  mutate(term="Treatment_Trend",std.error=0,statistic=0,p.value=0)
+  mutate(term="Treatment_Trend",statistic=0,p.value=0,vcov_alpha2_3=0)
 
-model.out.MACP.impact1<-rbind(model.out.MACP.impact1,model.out.MACP.impact1.rearrange)
+## spead dataframe to compute treatment trend's std.error (=squareRoot(var(alpha2) + var(alpha3) + 2cov(alpha2,3)Xstderr2Xstderr3)
+model.out.MACP.impact1.rearrange.stderr<-model.out.MACP.impact1 %>% 
+  select(Response,MPAID,term,std.error,vcov_alpha2_3) %>% 
+  spread(term,std.error) %>% 
+  mutate(std.error = sqrt(abs(Control_Trend^2 + Impact^2 + 2*Control_Trend*Impact*vcov_alpha2_3))) %>% ##getting std.error for treatment trend here
+  select(std.error) 
+
+model.out.MACP.impact1.rearrange.estimate<-cbind(model.out.MACP.impact1.rearrange.estimate,model.out.MACP.impact1.rearrange.stderr) 
+
+model.out.MACP.impact1<-rbind(model.out.MACP.impact1,model.out.MACP.impact1.rearrange.estimate)
 
 model.out.MACP.impact1 <- model.out.MACP.impact1 %>% 
-  mutate(std.error.toUse=ifelse(term=="Control_Trend",0,std.error)) %>% 
   mutate(Group=ifelse(term=="Control_Trend"," Control",
                        ifelse(term=="Treatment_Trend"," Treatment","Impact"))) %>% 
   mutate(MPAName_short = ifelse(MPAID==1,"  Telma",
@@ -336,6 +391,23 @@ model.out.MACP.impact1 <- model.out.MACP.impact1 %>%
 model.out.MACP.impact2 <- model.out.MACP.impact1 %>% 
   filter(Group%in%c(" Control", " Treatment")) 
   
+
+##Export out the output frame used to plot MACP impacts
+export(model.out.MACP.impact1 %>% 
+         select(term, estimate, Response, MPAID, std.error, Group, MPAName_short) %>%  
+        arrange(MPAID,Response), 
+         "R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Impact_MACP_result/SBS/macp_plots_output.csv")
+
+
+##Export out the output frame used to plot big five compilation
+export(model.out.MACP.impact1 %>% 
+         select(term, estimate, std.error, Response, MPAID, MPAName_short) %>%  
+         filter(term%in%c("Impact")) %>% 
+         filter(Response%in%c("FSIndex_z","MAIndex_z","PAIndex_z","MTIndex_z","SERate_z")) %>% 
+         arrange(MPAID,Response), 
+       "R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Impact_MACP_result/SBS/macp_plots_output_standardized_Big5.csv")
+
+
 ##----------Individual MPA Impact plots (mainly for MACP repots)-------------------##
 ##----------Approach 1------------------------------------------------------------##
 ##----------Approach 1------------------------------------------------------------##
@@ -1095,3 +1167,204 @@ ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/DiD_result/
 
 
 
+
+
+##----------------BEGIN----------------------------------------------------------------------##
+##----------------BEGIN----------------------------------------------------------------------##
+##----------------BEGIN----------------------------------------------------------------------##
+##----------------Exploratory Plots: Separate trend/impact plots for sub-Asset classes--------------##
+
+
+## Produce trend plots (separately for control and treatment settlements) for each MPA
+MPA_name <- c("Flores Timur")
+
+pd <- position_dodge() # move them .05 to the left and right
+
+##---loop through each MPAID to generate independent plots
+for (mpa in MPA_name) {
+  print(mpa)
+  mpa.status.data <- sumStat.BigFive %>% 
+    filter(MPAName_short==mpa) %>% 
+    ungroup() %>% 
+    mutate(Group=ifelse(Treatment==1,"Treatment","Control"))
+  
+  HHasset.status.plot <- ggplot(mpa.status.data,aes(x=yearsPostF,y=Household_asset_mean, fill=Group)) + 
+    geom_bar(stat="identity", position=position_dodge(), width=0.6, color="black") + theme_bw() + 
+    theme(axis.text=element_text(size=15), axis.title=element_text(size=16,face="bold")) +
+    geom_line(position = pd) + 
+    geom_errorbar(aes(ymin=Household_asset_mean - Household_asset_sd, ymax=Household_asset_mean + Household_asset_sd), width=0.2, position = position_dodge(.6), linetype = "longdash") +
+    labs(x="Years since Baseline",y="Index Value", title=paste0(mpa, " MA Index: Household Assets"))  +
+    scale_colour_manual(values = c("grey93", "royalblue4")) +
+    scale_fill_manual(values = c("grey93", "royalblue4")) 
+  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Assets_HouseholdItems.jpg"),width = 12, height = 6)
+  
+  
+  Boats.status.plot <- ggplot(mpa.status.data,aes(x=yearsPostF,y=Boats_w2_mean, fill=Group)) + 
+    geom_bar(stat="identity", position=position_dodge(), width=0.6, color="black") + theme_bw() + 
+    theme(axis.text=element_text(size=15), axis.title=element_text(size=16,face="bold")) +
+    geom_line(position = pd) + 
+    geom_errorbar(aes(ymin=Boats_w2_mean - Boats_w2_sd, ymax=Boats_w2_mean + Boats_w2_sd), width=0.2, position = position_dodge(.6), linetype = "longdash") +
+    labs(x="Years since Baseline",y="Index Value", title=paste0(mpa, " MA Index: Marine-based Assets (Boats)"))  +
+    scale_colour_manual(values = c("grey93", "royalblue4")) +
+    scale_fill_manual(values = c("grey93", "royalblue4")) 
+  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Assets_BoatAll.jpg"),width = 12, height = 6)
+  
+  Vehicles.status.plot <- ggplot(mpa.status.data,aes(x=yearsPostF,y=Vehicles_w2_mean, fill=Group)) + 
+    geom_bar(stat="identity", position=position_dodge(), width=0.6, color="black") + theme_bw() + 
+    theme(axis.text=element_text(size=15), axis.title=element_text(size=16,face="bold")) +
+    geom_line(position = pd) + 
+    geom_errorbar(aes(ymin=Vehicles_w2_mean - Vehicles_w2_sd, ymax=Vehicles_w2_mean + Vehicles_w2_sd), width=0.2, position = position_dodge(.6), linetype = "longdash") +
+    labs(x="Years since Baseline",y="Index Value", title=paste0(mpa, " MA Index: Land-based Assets (Vehicles)"))  +
+    scale_colour_manual(values = c("grey93", "royalblue4")) +
+    scale_fill_manual(values = c("grey93", "royalblue4")) 
+  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Assets_Vehicle.jpg"),width = 12, height = 6)
+  
+  Boats.noMotor.status.plot <- ggplot(mpa.status.data,aes(x=yearsPostF,y=Boats_w2_mean, fill=Group)) + 
+    geom_bar(stat="identity", position=position_dodge(), width=0.6, color="black") + theme_bw() + 
+    theme(axis.text=element_text(size=15), axis.title=element_text(size=16,face="bold")) +
+    geom_line(position = pd) + 
+    geom_errorbar(aes(ymin=BoatNoMotor_mean - BoatNoMotor_sd, ymax=BoatNoMotor_mean + BoatNoMotor_sd), width=0.2, position = position_dodge(.6), linetype = "longdash") +
+    labs(x="Years since Baseline",y="Index Value", title=paste0(mpa, " No-motor Boat Ownership"))  +
+    scale_colour_manual(values = c("grey93", "royalblue4")) +
+    scale_fill_manual(values = c("grey93", "royalblue4")) 
+  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Assets_BoatNoMotor.jpg"),width = 12, height = 6)
+  
+  Boats.outBoard.status.plot <- ggplot(mpa.status.data,aes(x=yearsPostF,y=Boats_w2_mean, fill=Group)) + 
+    geom_bar(stat="identity", position=position_dodge(), width=0.6, color="black") + theme_bw() + 
+    theme(axis.text=element_text(size=15), axis.title=element_text(size=16,face="bold")) +
+    geom_line(position = pd) + 
+    geom_errorbar(aes(ymin=BoatOutboard_mean - BoatOutboard_sd, ymax=BoatOutboard_mean + BoatOutboard_sd), width=0.2, position = position_dodge(.6), linetype = "longdash") +
+    labs(x="Years since Baseline",y="Index Value", title=paste0(mpa, " Out-board Boat Ownership"))  +
+    scale_colour_manual(values = c("grey93", "royalblue4")) +
+    scale_fill_manual(values = c("grey93", "royalblue4")) 
+  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Assets_BoatOutBoard.jpg"),width = 12, height = 6)
+  
+  Boats.inBoard.status.plot <- ggplot(mpa.status.data,aes(x=yearsPostF,y=Boats_w2_mean, fill=Group)) + 
+    geom_bar(stat="identity", position=position_dodge(), width=0.6, color="black") + theme_bw() + 
+    theme(axis.text=element_text(size=15), axis.title=element_text(size=16,face="bold")) +
+    geom_line(position = pd) + 
+    geom_errorbar(aes(ymin=BoatInboard_mean - BoatInboard_sd, ymax=BoatInboard_mean + BoatInboard_sd), width=0.2, position = position_dodge(.6), linetype = "longdash") +
+    labs(x="Years since Baseline",y="Index Value", title=paste0(mpa, " In-board Boat Ownership"))  +
+    scale_colour_manual(values = c("grey93", "royalblue4")) +
+    scale_fill_manual(values = c("grey93", "royalblue4")) 
+  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Assets_BoatInBoard.jpg"),width = 12, height = 6)
+  
+  Boats.Motor.status.plot <- ggplot(mpa.status.data,aes(x=yearsPostF,y=Boats_w2_mean, fill=Group)) + 
+    geom_bar(stat="identity", position=position_dodge(), width=0.6, color="black") + theme_bw() + 
+    theme(axis.text=element_text(size=15), axis.title=element_text(size=16,face="bold")) +
+    geom_line(position = pd) + 
+    geom_errorbar(aes(ymin=Boats_motor_w2_mean - Boats_motor_w2_sd, ymax=Boats_motor_w2_mean + Boats_motor_w2_sd), width=0.2, position = position_dodge(.6), linetype = "longdash") +
+    labs(x="Years since Baseline",y="Index Value", title=paste0(mpa, " Motorized Boat Ownership"))  +
+    scale_colour_manual(values = c("grey93", "royalblue4")) +
+    scale_fill_manual(values = c("grey93", "royalblue4")) 
+  ggsave(paste0("R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Exploratory/SBS/MaterialAsset_subClasses/",mpa,"_Assets_Boat_withMotor.jpg"),width = 12, height = 6)
+  
+}
+##----------------END----------------------------------------------------------------------##
+##----------------END----------------------------------------------------------------------##
+##----------------END----------------------------------------------------------------------##
+
+
+
+
+
+##----------------BEGIN----------------------------------------------------------------------##
+##----------------BEGIN----------------------------------------------------------------------##
+##----------------BEGIN----------------------------------------------------------------------##
+##----------------MACP Plots: Separate trend/impact plots for sub-Asset classes--------------##
+##----------------Preparing output frame ready for Kelly to produce MACP impact plots--------##
+
+
+##-------Using lfe (felm) for high dimensional FE DiD (similar to reghdfe)----##
+###generating short MPA names
+mpa.nam <- mpa.nam %>% 
+  mutate(MPAName_short = ifelse(MPACode==1,"  Telma",
+                                ifelse(MPACode==2,"  TNTC",
+                                       ifelse(MPACode==3," Kaimana",
+                                              ifelse(MPACode==4," Kofiau",
+                                                     ifelse(MPACode==5,"Dampier",
+                                                            ifelse(MPACode==6,"Misool",
+                                                                   ifelse(MPACode==15,"Selat Pantar",
+                                                                          ifelse(MPACode==16,"Flores Timur","")))))))))
+
+
+varNames <- c("Household_asset","Boats_w2","Boats_motor_w2","Vehicles_w2","BoatNoMotor","BoatOutboard", "BoatInboard")
+model.out.MACP.impact <- data.frame()
+
+
+for (mpaid in 15:16) {
+  DiD.MACP.impact <- DiD.data %>% filter(MPAID==mpaid)
+  print(mpaid)
+  
+  for (i in varNames) {
+    print(i)
+    
+    Y <- DiD.MACP.impact[,i]
+    
+    regValue <- felm(Y  ~  n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge + Treatment + yearsPostF + Treatment:yearsPostF
+                     | MPAID | 0 | SettlementID,
+                     data=DiD.MACP.impact,exactDOF = TRUE)
+    summary(regValue)
+    
+    ###Get covariance value between yearsPostF3 and Treatment:yearsPostF3 (need this for calculating S.E. of treatment trend later (alpha2 + alpha3))
+    vcov.matrix<-vcov(regValue) 
+    vcov <- vcov.matrix[8,9] 
+    
+    reg.broom <- tidy(regValue) %>% 
+      mutate(Response=i, MPAID=mpaid,vcov_alpha2_3=vcov)
+    
+    model.out.MACP.impact <- rbind(model.out.MACP.impact,reg.broom)
+  }
+}
+
+
+##keeping only 2 terms yearsPostF3 (i.e. time trend) and Treatment:yearsPostF3 (i.e. DiD impact)
+model.out.MACP.impact1 <- model.out.MACP.impact %>% 
+  filter(term%in%c("yearsPostF3", "Treatment:yearsPostF3")) %>% 
+  mutate(term=gsub("Treatment:yearsPostF3","Impact",term)) %>% 
+  mutate(term=gsub("yearsPostF3","Control_Trend",term))  
+
+## spead dataframe to compute treatment trend's estimates (=control trend + Impact)
+model.out.MACP.impact1.rearrange.estimate<-model.out.MACP.impact1 %>% 
+  select(Response,MPAID,term,estimate,vcov_alpha2_3) %>% 
+  spread(term,estimate) %>% 
+  mutate(estimate = Control_Trend + Impact) %>% 
+  select(Response, MPAID, estimate) %>% 
+  mutate(term="Treatment_Trend",statistic=0,p.value=0,vcov_alpha2_3=0)
+
+## spead dataframe to compute treatment trend's std.error (=squareRoot(var(alpha2) + var(alpha3) + 2cov(alpha2,3)Xstderr2Xstderr3)
+model.out.MACP.impact1.rearrange.stderr<-model.out.MACP.impact1 %>% 
+  select(Response,MPAID,term,std.error,vcov_alpha2_3) %>% 
+  spread(term,std.error) %>% 
+  mutate(std.error = sqrt(abs(Control_Trend^2 + Impact^2 + 2*Control_Trend*Impact*vcov_alpha2_3))) %>% ##getting std.error for treatment trend here
+  select(std.error) 
+
+model.out.MACP.impact1.rearrange.estimate<-cbind(model.out.MACP.impact1.rearrange.estimate,model.out.MACP.impact1.rearrange.stderr) 
+
+model.out.MACP.impact1<-rbind(model.out.MACP.impact1,model.out.MACP.impact1.rearrange.estimate)
+
+model.out.MACP.impact1 <- model.out.MACP.impact1 %>% 
+  mutate(Group=ifelse(term=="Control_Trend"," Control",
+                      ifelse(term=="Treatment_Trend"," Treatment","Impact"))) %>% 
+  mutate(MPAName_short = ifelse(MPAID==1,"  Telma",
+                                ifelse(MPAID==2,"  TNTC",
+                                       ifelse(MPAID==3," Kaimana",
+                                              ifelse(MPAID==4," Kofiau",
+                                                     ifelse(MPAID==5,"Dampier",
+                                                            ifelse(MPAID==6,"Misool",
+                                                                   ifelse(MPAID==15,"Selat Pantar",
+                                                                          ifelse(MPAID==16,"Flores Timur","")))))))))
+
+
+model.out.MACP.impact2 <- model.out.MACP.impact1 %>% 
+  filter(Group%in%c(" Control", " Treatment")) 
+
+
+##Export out the output frame used to plot MACP impacts
+export(model.out.MACP.impact1 %>% 
+         select(term, estimate, Response, MPAID, std.error, Group, MPAName_short) %>%  
+         arrange(MPAID,Response), 
+       "R:/Gill/MPAMystery/x_Flat_data_files/1_Social/Outputs/Impact_MACP_result/SBS/macp_plots_output_Asset_subClasses.csv")
+##----------------END----------------------------------------------------------------------##
+##----------------END----------------------------------------------------------------------##
+##----------------END----------------------------------------------------------------------##

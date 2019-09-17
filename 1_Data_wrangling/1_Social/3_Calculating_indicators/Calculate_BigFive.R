@@ -46,6 +46,8 @@ source('1_Data_wrangling/1_Social/2_Source_data/Source_social_data_flat_files.R'
 
 
 
+pacman::p_load(tidyverse)
+
 
 # Whichever option you chose above, you will still need to upload Ethnicity data from a flat file
 
@@ -101,8 +103,10 @@ HHData$FSIndex <- 6.06-as.numeric(HHData$FSIndex)
 
 HHData <- 
   IndDemos %>%
+           mutate(One=1) %>% 
            group_by(HouseholdID) %>%
-           summarise(NumberChild=sum(SchoolAge,na.rm=T),
+           summarise(Household.Size=sum(One,na.rm=T),
+                     NumberChild=sum(SchoolAge,na.rm=T),
                      NumberEnrolled=sum(ChildEnrolled,na.rm=T),
                      PercentEnrolled=ifelse(NumberChild!=0 & !is.na(NumberEnrolled),
                                             as.character(round((NumberEnrolled/NumberChild)*100,2)),
