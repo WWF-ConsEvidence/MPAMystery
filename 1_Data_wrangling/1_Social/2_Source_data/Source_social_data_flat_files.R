@@ -61,7 +61,8 @@ last.file <- function(dir.nam,nam){
 #   load(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))
 # }
 
-
+#getwd()
+#setwd("D:/Dropbox/MPA_research/MPAMystery/")
 # ---- 1.2 Import data ----
 
 WELLBEING <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_WELLBEING')
@@ -71,6 +72,7 @@ ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_data
 NMORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam="HH_tbl_NMORGANIZATION")
 LTHREAT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_LTHREAT')
 LSTEPS <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_LSTEPS')
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -193,9 +195,20 @@ HHData <-   WELLBEING %>%
                    PercentProteinFish = as.integer(ifelse(PercentProteinFish%in%c(1:5),PercentProteinFish,NA)),
                    
                    
-                   # Economic Well-being
+                   # Economic Well-being (Sujective)
                    EconStatusTrend = as.integer(ifelse(EconomicStatusTrend%in%c(1:5),EconomicStatusTrend,NA)),
                    EconStatusReason = ifelse(EconomicStatusReason %in% c("994", "995", "996", "997", "998", "999"), NA, as.character(EconomicStatusReason)), 
+                   
+                   # Community Organization
+                   MarineGroup = as.integer(ifelse(MarineGroup%in%c(0:1),MarineGroup,NA)),
+                   OtherGroup = as.integer(ifelse(OtherGroup%in%c(0:1),OtherGroup,NA)),    
+                   VoteDistrict = as.integer(ifelse(VoteDistrict%in%c(0:1),VoteDistrict,NA)),
+                   VoteNational = as.integer(ifelse(VoteNational%in%c(0:1),VoteNational,NA)),   
+                   
+                   NumLocalThreat = as.integer(ifelse(NumLocalThreat>989,NA,NumLocalThreat)), 
+                   NumGlobalThreat = as.integer(ifelse(NumGlobalThreat>989,NA,NumGlobalThreat)), 
+                   NumLocalAction = as.integer(ifelse(NumLocalAction>989,NA,NumLocalAction)),   
+                   NumGlobalAction = as.integer(ifelse(NumGlobalAction>989,NA,NumGlobalAction)), 
                    
                    
                    # Other Characteristics
@@ -234,6 +247,7 @@ HHData <-   WELLBEING %>%
                 LowCostFood, ChildBalancedMeal, ChildNotEnough, ChildPortion, ChildHungry, ChildSkip, FreqChildSkip, NoMealChild, RemovecFS,
                 PrimaryLivelihood, SecondaryLivelihood, TertiaryLivelihood, FreqFish, FreqSaleFish, PercentIncFish, MajFishTechnique, FreqEatFish, PercentProteinFish, 
                 EconStatusTrend, EconStatusReason, Religion, YrResident, TimeMarket, SocialConflict,
+                MarineGroup, OtherGroup, VoteDistrict, VoteNational, NumLocalThreat, NumGlobalThreat, NumLocalAction, NumGlobalAction, 
                 LessProductiveDaysFishing, PoorCatch, PoorCatchUnits, MoreProductiveDaysFishing, GoodCatch, GoodCatchUnits, PaternalEthnicity)
 
 
