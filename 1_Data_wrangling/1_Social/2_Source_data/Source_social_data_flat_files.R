@@ -68,6 +68,7 @@ WELLBEING <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_databas
 DEMOGRAPHIC <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_DEMOGRAPHIC')
 SETTLEMENT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_SETTLEMENT')
 ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_ORGANIZATION')
+NMORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam="HH_tbl_NMORGANIZATION")
 LTHREAT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_LTHREAT')
 LSTEPS <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_LSTEPS')
 
@@ -136,7 +137,7 @@ HHData <-   WELLBEING %>%
                    Entertain = as.integer(ifelse(AssetEntertain<993,AssetEntertain*1,
                                                  ifelse(AssetEntertain==993,Radio+Stereo+CD+DVD,NA))),
                    
-                   CookingFuel.Biomass = as.integer(ifelse(CookingFuel=1|CookingFuel=2,0,
+                   CookingFuel.Biomass = as.integer(ifelse(CookingFuel==1|CookingFuel==2,0,
                                                            ifelse(CookingFuel==3|CookingFuel==4|CookingFuel==5|CookingFuel==6,1,NA))),
                    
                    # Place Attachment
@@ -257,15 +258,19 @@ IndDemos <-
   left_join(., HHData[,c("HouseholdID","MPAID","SettlementID")], by="HouseholdID")
 
 
-# ---- 2.3 Call, clean, & post-code ORGANIZATION to create Organization for analysis ----
+# ---- 2.3 Call, clean, & post-code ORGANIZATION to create Organization & NMOrganization (non-marine organization) for analysis ----
 
 Organization <- 
   ORGANIZATION %>%
-  dplyr::transmute(HouseholdID = HouseholdID,
-                   MarineMeeting = ifelse(MarineMeeting%in%c(0:1),MarineMeeting, NA),
-                   MarineContribution = ifelse(MarineContribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, MarineContribution)) %>%
-  left_join(HHData[,c("HouseholdID","MPAID")], ., by="HouseholdID")
+  dplyr::mutate(MarineMeeting = ifelse(MarineMeeting%in%c(0:1),MarineMeeting, NA),
+                MarineContribution = ifelse(MarineContribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, MarineContribution)) %>%
+  left_join(HHData[,c("HouseholdID","MPAID","SettlementID")], by="HouseholdID")
 
+NMOrganization <-
+  NMORGANIZATION %>%
+  dplyr::mutate(OtherGroupMeeting = ifelse(MarineMeeting%in%c(0:1),MarineMeeting, NA),
+                OtherGroupContribution = ifelse(MarineContribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, MarineContribution)) %>%
+  left_join(HHData[,c("HouseholdID","MPAID","SettlementID")], by="HouseholdID")
 
 # ---- 2.4 Add seascape column to SETTLEMENTS for analysis ----
 
@@ -342,6 +347,23 @@ Settlements <- Settlements[!is.na(Settlements$SettlementID) &
                              Settlements$SettlementID!=101,]
 Settlements$SettlementName <- as.character(Settlements$SettlementName)
 
+Organization <- Organization[!is.na(Organization$SettlementID) &
+                               Organization$SettlementID!=84 &
+                               Organization$SettlementID!=96 &
+                               Organization$SettlementID!=97 &
+                               Organization$SettlementID!=98 &
+                               Organization$SettlementID!=99 &
+                               Organization$SettlementID!=100 &
+                               Organization$SettlementID!=101,]
+
+NMOrganization <- NMOrganization[!is.na(NMOrganization$SettlementID) &
+                                   NMOrganization$SettlementID!=84 &
+                                   NMOrganization$SettlementID!=96 &
+                                   NMOrganization$SettlementID!=97 &
+                                   NMOrganization$SettlementID!=98 &
+                                   NMOrganization$SettlementID!=99 &
+                                   NMOrganization$SettlementID!=100 &
+                                   NMOrganization$SettlementID!=101,]
 
 # remove household from baseline that refused every question but material assets (no demographic info, etc.)
 
