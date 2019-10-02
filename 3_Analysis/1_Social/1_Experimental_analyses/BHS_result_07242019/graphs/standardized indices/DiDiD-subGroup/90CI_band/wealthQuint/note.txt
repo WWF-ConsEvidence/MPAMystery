@@ -1,3 +1,0 @@
-Quintiles are rank in reserve order, so that the reference group in each plot is the richest quintile (q1).
-Vice versa, poorest group is q5.
-Each estimate shows the diffrential impact of the corresponding quintile q2-q5 to the richest (q1)
