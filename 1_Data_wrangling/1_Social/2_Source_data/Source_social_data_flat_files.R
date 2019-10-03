@@ -282,8 +282,8 @@ Organization <-
 
 NMOrganization <-
   NMORGANIZATION %>%
-  dplyr::mutate(OtherGroupMeeting = ifelse(MarineMeeting%in%c(0:1),MarineMeeting, NA),
-                OtherGroupContribution = ifelse(MarineContribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, MarineContribution)) %>%
+  dplyr::mutate(OtherGroupMeeting = ifelse(OtherGroupMeeting%in%c(0:1),OtherGroupMeeting, NA),
+                OtherGroupContribution = ifelse(OtherGroupContribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, OtherGroupContribution)) %>%
   left_join(HHData[,c("HouseholdID","MPAID","SettlementID")], by="HouseholdID")
 
 # ---- 2.4 Add seascape column to SETTLEMENTS for analysis ----
