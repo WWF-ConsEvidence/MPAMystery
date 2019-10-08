@@ -332,7 +332,7 @@ HHData$MonitoringYear <- factor(mapply(a=HHData$MPAID,
 #
 
 
-# ---- 3.1 Remove observations from BHS that do not have post-baseline data ----
+# ---- 3.1 Remove observations from BHS & SBS that do not have post-baseline data ----
 
 HHData <- HHData[HHData$SettlementID!=84 &
                    HHData$SettlementID!=96 &
@@ -340,7 +340,9 @@ HHData <- HHData[HHData$SettlementID!=84 &
                    HHData$SettlementID!=98 &
                    HHData$SettlementID!=99 &
                    HHData$SettlementID!=100 &
-                   HHData$SettlementID!=101,]
+                   HHData$SettlementID!=101 &
+                   HHData$SettlementID!=124 &
+                   HHData$SettlementID!=131,]
 
 IndDemos <- IndDemos[!is.na(IndDemos$SettlementID) &
                        IndDemos$SettlementID!=84 &
@@ -349,7 +351,9 @@ IndDemos <- IndDemos[!is.na(IndDemos$SettlementID) &
                        IndDemos$SettlementID!=98 &
                        IndDemos$SettlementID!=99 &
                        IndDemos$SettlementID!=100 &
-                       IndDemos$SettlementID!=101,]
+                       IndDemos$SettlementID!=101 &
+                       IndDemos$SettlementID!=124 &
+                       IndDemos$SettlementID!=131,]
 
 Settlements <- Settlements[!is.na(Settlements$SettlementID) &
                              Settlements$SettlementID!=84 &
@@ -358,7 +362,9 @@ Settlements <- Settlements[!is.na(Settlements$SettlementID) &
                              Settlements$SettlementID!=98 &
                              Settlements$SettlementID!=99 &
                              Settlements$SettlementID!=100 &
-                             Settlements$SettlementID!=101,]
+                             Settlements$SettlementID!=101 &
+                             Settlements$SettlementID!=124 &
+                             Settlements$SettlementID!=131,]
 Settlements$SettlementName <- as.character(Settlements$SettlementName)
 
 Organization <- Organization[!is.na(Organization$SettlementID) &
@@ -368,7 +374,9 @@ Organization <- Organization[!is.na(Organization$SettlementID) &
                                Organization$SettlementID!=98 &
                                Organization$SettlementID!=99 &
                                Organization$SettlementID!=100 &
-                               Organization$SettlementID!=101,]
+                               Organization$SettlementID!=101 &
+                               Organization$SettlementID!=124 &
+                               Organization$SettlementID!=131,]
 
 NMOrganization <- NMOrganization[!is.na(NMOrganization$SettlementID) &
                                    NMOrganization$SettlementID!=84 &
@@ -377,12 +385,15 @@ NMOrganization <- NMOrganization[!is.na(NMOrganization$SettlementID) &
                                    NMOrganization$SettlementID!=98 &
                                    NMOrganization$SettlementID!=99 &
                                    NMOrganization$SettlementID!=100 &
-                                   NMOrganization$SettlementID!=101,]
+                                   NMOrganization$SettlementID!=101 &
+                                   NMOrganization$SettlementID!=124 &
+                                   NMOrganization$SettlementID!=131,]
 
 # remove household from baseline that refused every question but material assets (no demographic info, etc.)
 
 HHData <- HHData[HHData$HouseholdID!=1347,]
 IndDemos <-IndDemos[IndDemos$HouseholdID!=1347,]
+
 
 # ---- 3.2 Re-code settlements in Kaimana MPA that changed designation after baseline year ----
 
@@ -390,7 +401,7 @@ Settlements$Treatment <- ifelse(Settlements$SettlementID==83 | Settlements$Settl
                                 0,Settlements$Treatment)
 
 
-# ---- 3.3. Add dummy row of data for all settlements (in Bird's Head) that do not have baseline data ----
+# ---- 3.3 Add dummy row of data for all settlements (in Bird's Head) that do not have baseline data ----
 
 baseline.dummy.rows <- 
   data.frame(HouseholdID=rep(NA,13),
