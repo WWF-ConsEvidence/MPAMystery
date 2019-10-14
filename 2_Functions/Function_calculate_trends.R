@@ -39,7 +39,7 @@
 
 mpa.trends <- function(MPA=NULL) {
   
-  pacman::p_load(rio,reldist,ggplot2,dplyr)
+  pacman::p_load(rio, reldist, Kendall, reshape2, ggplot2, grid, gridExtra, dplyr)
   
   MPA.name <- 
     import('x_Flat_data_files/1_Social/Inputs/Master_database_exports/HH_tbl_MPA.xlsx') %>%
@@ -52,13 +52,13 @@ mpa.trends <- function(MPA=NULL) {
   source('1_Data_wrangling/1_Social/2_Source_data/Source_social_data_for_function.R', local=T)
   
   # define status year
-  status <- as.character(max(HHData$InterviewYear))
+  status <- as.numeric(as.character(max(HHData$InterviewYear)))
   
   # define number of repeat monitoring years
   num.years <- length(unique(HHData$MonitoringYear))
   
   # calculate indicators at household level, settlement level, and MPA level
-  source('1_Data_wrangling/1_Social/3_Calculating_indicators/Calculate_BigFive.R', local=T)
+  source('1_Data_wrangling/1_Social/3_Calculating_indicators/Calculate_household_indices.R', local=T)
   source('3_Analysis/1_Social/2_Status_trends/Sett_MPA_level_means.R', local=T)
   
   # significance tests, based on number of repeat monitoring years
@@ -72,6 +72,11 @@ mpa.trends <- function(MPA=NULL) {
                 ifelse(num.years==3, source('4_Products/1_Social/1_Status_trends_reports/Status_trends_tworepeat_datasets.R', local=T), NA)))
   
   # plots, based on number of repeat monitoring years
+  # --- source plotting functions first
+  source('2_Functions/3_Plotting/Function_plotthemes.R', local=T)
+  source('2_Functions/3_Plotting/Function_define_asteriskplotting.R', local=T)
+  
+  # --- source plot scripts
   ifelse(num.years==1, source('4_Products/1_Social/1_Status_trends_reports/Status_trends_norepeat_plots.R', local=T), 
          ifelse(num.years==2, source('4_Products/1_Social/1_Status_trends_reports/Status_trends_onerepeat_plots.R', local=T),
                 ifelse(num.years==3, source('4_Products/1_Social/1_Status_trends_reports/Status_trends_tworepeat_plots,R', local=T), NA)))
@@ -83,10 +88,25 @@ mpa.trends <- function(MPA=NULL) {
   OutputFileName <- paste(paste("x_Flat_data_files/1_Social/Outputs/Status_trends_analysis", MPA.name$MPAName.final, sep="/"),
                            format(Sys.Date(),format="%Y%m%d"),sep="_")
   
-  # output HHData & IndDemos
+  # output HHData, IndDemos, local threats & steps
   export(HHData, paste(paste(OutputFileName,MPA.name$MPAName.final,sep="/"),"HHData.xlsx",sep="_"))
   export(IndDemos, paste(paste(OutputFileName,MPA.name$MPAName.final,sep="/"),"IndDemos.xlsx",sep="_"))
-  export(Sett.Level.Means, paste(paste(OutputFileName,MPA.name$MPAName.final,sep="/"),"Sett.Level.Means.xlsx",sep="_"))
+  export(Sett.Level.Means, paste(paste(OutputFileName,MPA.name$MPAName.final,sep="/"),"Sett_Level_Means.xlsx",sep="_"))
+  
+  # output plot-formatted datasets, with pvalues
+  export(list(Continuous_status=Sett.level.ContData.status.PLOTFORMAT,
+              Proportional_status=Sett.level.PropData.status.PLOTFORMAT,
+              Continuous_trend=Sett.level.ContData.annex.PLOTFORMAT,
+              Continuous_trend_pvalues=annex.sigvals), 
+         paste(paste(OutputFileName,MPA.name$MPAName.final,sep="/"),"Sett_Level_Data_forplotting.xlsx",sep="_"))
+  
+  export(list(Continuous_trend=MPA.level.ContData.trend.PLOTFORMAT,
+              Proportional_trend=MPA.level.PropData.trend.PLOTFORMAT,
+              Proportional_trend_pvalues=propdata.trend.test),
+         paste(paste(OutputFileName,MPA.name$MPAName.final,sep="/"),"MPA_Level_Data_forplotting.xlsx",sep="_"))
+  
+  # output plots
+  source('4_Products/1_Social/1_Status_trends_reports/Export_status_trends_plots.R', local=T)
   
 }
 

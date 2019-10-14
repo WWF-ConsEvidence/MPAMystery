@@ -4,7 +4,7 @@
 # author: Amari Bauer
 # created: June 2019
 # Adapted from New_SBS_MPA_Mystery.R
-
+# modified: Kelly Claborn, October 2019
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -23,7 +23,7 @@
 
 Sett.Level.Means <- 
   HHData %>%
-  group_by(SettlementID,SettlementName,MPAID,MonitoringYear,Treatment) %>%
+  group_by(SettlementID,SettlementName,MPAID,MonitoringYear,InterviewYear,Treatment) %>%
   summarise(FSMean=round(mean(FSIndex,na.rm=T),2),
             FSErr=round(sd(FSIndex,na.rm=T)/sqrt(length(FSIndex)),2),
             MAMean=round(mean(MAIndex,na.rm=T),2),
@@ -35,10 +35,10 @@ Sett.Level.Means <-
             SEMean=round(mean(SERate,na.rm=T),2),
             SEErr=round(sd(SERate,na.rm=T)/sqrt(length(SERate)),2),
             YrResident=mean(YrResident,na.rm=T),
-            HHH.female=(length(IndividualGender[IndividualGender==0 &
-                                                  !is.na(IndividualGender)])/length(IndividualGender[!is.na(IndividualGender)]))*100,
-            HHH.male=(length(IndividualGender[IndividualGender==1 &
-                                                !is.na(IndividualGender)])/length(IndividualGender[!is.na(IndividualGender)]))*100,
+            HHH.female=(length(HHHGender[HHHGender==0 &
+                                           !is.na(HHHGender)])/length(HHHGender[!is.na(HHHGender)]))*100,
+            HHH.male=(length(HHHGender[HHHGender==1 &
+                                         !is.na(HHHGender)])/length(HHHGender[!is.na(HHHGender)]))*100,
             Percent.Rel.Christian=(length(Religion[Religion==1 &
                                                      !is.na(Religion)])/length(Religion[!is.na(Religion)]))*100,
             Percent.Rel.Muslim=(length(Religion[Religion==2 &
@@ -120,7 +120,24 @@ Sett.Level.Means <-
             MatAssets.gini=gini(MAIndex),
             Percent.FoodSecure=(length(HouseholdID[FSIndex>=4.02 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
             Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex>=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
-            Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100)
+            Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
+            Percent.SecondaryOcc.Fish=(length(SecondaryLivelihood[SecondaryLivelihood==3 &
+                                                                !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.Farm=(length(SecondaryLivelihood[SecondaryLivelihood==1 &
+                                                                !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.WageLabor=(length(SecondaryLivelihood[SecondaryLivelihood==7 &
+                                                                     !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.HarvestForest=(length(SecondaryLivelihood[SecondaryLivelihood==2 &
+                                                                         !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.Tourism=(length(SecondaryLivelihood[SecondaryLivelihood==6 &
+                                                                   !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.Aquaculture=(length(SecondaryLivelihood[SecondaryLivelihood==4 &
+                                                                       !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.Extraction=(length(SecondaryLivelihood[SecondaryLivelihood==5 &
+                                                                      !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.Other=(length(SecondaryLivelihood[SecondaryLivelihood==996 & !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.OneOcc=(length(HouseholdID[!is.na(PrimaryLivelihood) & is.na(SecondaryLivelihood) & is.na(TertiaryLivelihood)])/length(HouseholdID[!is.na(PrimaryLivelihood)]))*100,
+            Percent.MultipleOcc=(length(HouseholdID[!is.na(PrimaryLivelihood) & (!is.na(SecondaryLivelihood) | !is.na(TertiaryLivelihood))])/length(HouseholdID[!is.na(PrimaryLivelihood)]))*100)
 
 # Sett.Level.Means <- Sett.Level.Means[!is.na(Sett.Level.Means$SettlementID),]
 
@@ -132,7 +149,7 @@ Sett.Level.Means <-
 
 MPA.Level.Means <- 
   HHData %>%
-  group_by(MPAID,MonitoringYear,Treatment) %>%
+  group_by(MPAID,MonitoringYear,InterviewYear,Treatment) %>%
   summarise(FSMean=round(mean(FSIndex,na.rm=T),2),
             FSErr=round(sd(FSIndex,na.rm=T)/sqrt(length(FSIndex)),2),
             MAMean=round(mean(MAIndex,na.rm=T),2),
@@ -144,10 +161,10 @@ MPA.Level.Means <-
             SEMean=round(mean(SERate,na.rm=T),2),
             SEErr=round(sd(SERate,na.rm=T)/sqrt(length(SERate)),2),
             YrResident=mean(YrResident,na.rm=T),
-            HHH.female=(length(IndividualGender[IndividualGender==0 &
-                                                  !is.na(IndividualGender)])/length(IndividualGender[!is.na(IndividualGender)]))*100,
-            HHH.male=(length(IndividualGender[IndividualGender==1 &
-                                                !is.na(IndividualGender)])/length(IndividualGender[!is.na(IndividualGender)]))*100,
+            HHH.female=(length(HHHGender[HHHGender==0 &
+                                                  !is.na(HHHGender)])/length(HHHGender[!is.na(HHHGender)]))*100,
+            HHH.male=(length(HHHGender[HHHGender==1 &
+                                                !is.na(HHHGender)])/length(HHHGender[!is.na(HHHGender)]))*100,
             Percent.Rel.Christian=(length(Religion[Religion==1 &
                                                      !is.na(Religion)])/length(Religion[!is.na(Religion)]))*100,
             Percent.Rel.Muslim=(length(Religion[Religion==2 &
@@ -229,7 +246,24 @@ MPA.Level.Means <-
             MatAssets.gini=gini(MAIndex),
             Percent.FoodSecure=(length(HouseholdID[FSIndex>=4.02 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
             Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex>=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
-            Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100)
+            Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
+            Percent.SecondaryOcc.Fish=(length(SecondaryLivelihood[SecondaryLivelihood==3 &
+                                                                    !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.Farm=(length(SecondaryLivelihood[SecondaryLivelihood==1 &
+                                                                    !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.WageLabor=(length(SecondaryLivelihood[SecondaryLivelihood==7 &
+                                                                         !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.HarvestForest=(length(SecondaryLivelihood[SecondaryLivelihood==2 &
+                                                                             !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.Tourism=(length(SecondaryLivelihood[SecondaryLivelihood==6 &
+                                                                       !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.Aquaculture=(length(SecondaryLivelihood[SecondaryLivelihood==4 &
+                                                                           !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.Extraction=(length(SecondaryLivelihood[SecondaryLivelihood==5 &
+                                                                          !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.Other=(length(SecondaryLivelihood[SecondaryLivelihood==996 & !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.OneOcc=(length(HouseholdID[!is.na(PrimaryLivelihood) & is.na(SecondaryLivelihood) & is.na(TertiaryLivelihood)])/length(HouseholdID[!is.na(PrimaryLivelihood)]))*100,
+            Percent.MultipleOcc=(length(HouseholdID[!is.na(PrimaryLivelihood) & (!is.na(SecondaryLivelihood) | !is.na(TertiaryLivelihood))])/length(HouseholdID[!is.na(PrimaryLivelihood)]))*100)
 
 MPA.Level.Means <- MPA.Level.Means[!is.na(MPA.Level.Means$MPAID),]
 
@@ -244,7 +278,8 @@ MPA.Level.Means <- MPA.Level.Means[!is.na(MPA.Level.Means$MPAID),]
 
 # ----  2.1 Calculating Age and Gender breakdown by MPA, settlement, and treatment ----
 
-AgeGenderDemos <- left_join(HHData[,c("HouseholdID", "MPAID", "SettlementID", "MonitoringYear", "SettlementName","Treatment")],
+AgeGenderDemos <- left_join(HHData[,c("HouseholdID", "MPAID", "SettlementID", "MonitoringYear", "InterviewYear", 
+                                      "SettlementName", "Treatment")],
                             IndDemos[,c("HouseholdID", "IndividualGender", "IndividualAge")],
                             by="HouseholdID")
 
@@ -252,19 +287,19 @@ AgeGenderDemos <- left_join(HHData[,c("HouseholdID", "MPAID", "SettlementID", "M
 AgeGender.AvgAge.byMPA <-
   AgeGenderDemos %>%
   filter(Treatment==1)%>%
-  group_by(MPAID,MonitoringYear) %>%
+  group_by(MPAID,MonitoringYear,InterviewYear) %>%
   summarise(AvgAge=mean(IndividualAge,na.rm=T))
 
 AgeGender.AvgAge.bySett <-
   AgeGenderDemos %>%
   filter(Treatment==1) %>%
-  group_by(SettlementName,MPAID,MonitoringYear) %>%
+  group_by(SettlementName,MPAID,MonitoringYear,InterviewYear) %>%
   summarise(AvgAge=mean(IndividualAge,na.rm=T))
 
 AgeGender.AvgAge.control <-
   AgeGenderDemos %>%
   filter(Treatment==0) %>%
-  group_by(MPAID,MonitoringYear) %>%
+  group_by(MPAID,MonitoringYear,InterviewYear) %>%
   summarise(AvgAge=mean(IndividualAge,na.rm=T))
 
 

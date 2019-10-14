@@ -27,22 +27,20 @@
 # - "MPA Household Data" dataset -- includes household level data for only treatment households from most recent year
 MPA.HHData <- 
   HHData %>%
-  filter(.,Treatment==1 & InterviewYear==2017)
-
-MPA.HHData$SettlementName <- 
-  factor(MPA.HHData$SettlementName)
+  filter(Treatment==1 & InterviewYear==status) %>% 
+  mutate(SettlementName=factor(SettlementName))
 
 
 # - "MPA versus Control" dataset -- includes household level data for treatment and control, for most recent year only
 MPA.v.Control <- 
   HHData %>%
-  filter(InterviewYear==2017)
+  filter(InterviewYear==status)
 
 
 # - "MPA Settlement Means" dataset -- includes settlement level data for only treatment settlements from most recent year
 MPA.Sett.Means<-
   Sett.Level.Means %>%
-  filter(.,Treatment==1 & InterviewYear==2017)
+  filter(Treatment==1 & InterviewYear==status)
 
 # Removing the settlement with an NA in order for function to run
 MPA.Sett.Means <- 
@@ -125,21 +123,21 @@ sett.names <- factor(MPA.Sett.Means$SettlementName)
 # ---- 2.1 Create list of median settlement for each continuous variable (whether the variable is parametric or non-parametric) ----
 
 even.number.setts.function <- 
-  mapply(a=MPA.Sett.Means[,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
+  mapply(a=MPA.Sett.Means[,c("FSMean","MAMean","MTMean","PAMean","SEMean","TimeMarketMean","UnwellMean")],
          b=MPA.HHData[,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
          function(a,b){
            med <- median(a,na.rm=T)
-           equal <- c(a[which(a==med)])
            upper <- c(a[which(a>med)])
            upper <- min(upper,na.rm=T)
            lower <- c(a[which(a<med)]) 
            lower <- max(lower,na.rm=T)
+           sett.equal.med <- c(MPA.Sett.Means$SettlementName[which(a==med)])
            upper.sett <- MPA.Sett.Means$SettlementName[a==upper]
-           upper.sett <- ifelse(length(upper.sett)>1 & length(upper.sett)<3,
+           upper.sett <- ifelse(length(upper.sett)==2,
                                 ifelse((sd(b[MPA.HHData$SettlementName==upper.sett[1]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==upper.sett[1] & !is.na(b)])))<
                                          (sd(b[MPA.HHData$SettlementName==upper.sett[2]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==upper.sett[2] & !is.na(b)]))),
                                        as.character(upper.sett[1]),as.character(upper.sett[2])),
-                                ifelse(length(upper.sett)>1 & length(upper.sett)<4,
+                                ifelse(length(upper.sett)==3,
                                        ifelse((sd(b[MPA.HHData$SettlementName==upper.sett[1]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==upper.sett[1] & !is.na(b)])))<
                                                 (sd(b[MPA.HHData$SettlementName==upper.sett[2]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==upper.sett[2] & !is.na(b)]))) &
                                                 (sd(b[MPA.HHData$SettlementName==upper.sett[1]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==upper.sett[1] & !is.na(b)])))<
@@ -151,13 +149,15 @@ even.number.setts.function <-
                                                        (sd(b[MPA.HHData$SettlementName==upper.sett[3]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==upper.sett[3] & !is.na(b)]))),
                                                      as.character(upper.sett[2]),
                                                      as.character(upper.sett[3]))),
-                                       as.character(upper.sett)))
+                                       ifelse(length(upper.sett)>3,
+                                              as.character(upper.sett[1]),
+                                              as.character(upper.sett))))
            lower.sett <- MPA.Sett.Means$SettlementName[a==lower]
-           lower.sett <- ifelse(length(lower.sett)>1 & length(lower.sett)<3,
+           lower.sett <- ifelse(length(lower.sett)==2,
                                 ifelse((sd(b[MPA.HHData$SettlementName==lower.sett[1]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==lower.sett[1] & !is.na(b)])))<
                                          (sd(b[MPA.HHData$SettlementName==lower.sett[2]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==lower.sett[2] & !is.na(b)]))),
                                        as.character(lower.sett[1]),as.character(lower.sett[2])),
-                                ifelse(length(lower.sett)>1 & length(lower.sett)<4,
+                                ifelse(length(lower.sett)==3,
                                        ifelse((sd(b[MPA.HHData$SettlementName==lower.sett[1]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==lower.sett[1] & !is.na(b)])))<
                                                 (sd(b[MPA.HHData$SettlementName==lower.sett[2]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==lower.sett[2] & !is.na(b)]))) &
                                                 (sd(b[MPA.HHData$SettlementName==lower.sett[1]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==lower.sett[1] & !is.na(b)])))<
@@ -169,13 +169,14 @@ even.number.setts.function <-
                                                        (sd(b[MPA.HHData$SettlementName==lower.sett[3]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==lower.sett[3] & !is.na(b)]))),
                                                      as.character(lower.sett[2]),
                                                      as.character(lower.sett[3]))),
-                                       as.character(lower.sett)))
-           sett.equal.med <- MPA.Sett.Means$SettlementName[a==equal]
-           sett.equal.med <- ifelse(length(sett.equal.med)>1 & length(sett.equal.med)<3,
+                                       ifelse(length(lower.sett)>3,
+                                              as.character(lower.sett[1]),
+                                              as.character(lower.sett))))
+           sett.equal.med <- ifelse(length(sett.equal.med)==2,
                                     ifelse((sd(b[MPA.HHData$SettlementName==sett.equal.med[1]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==sett.equal.med[1] & !is.na(b)])))<
                                              (sd(b[MPA.HHData$SettlementName==sett.equal.med[2]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==sett.equal.med[2] & !is.na(b)]))),
                                            as.character(sett.equal.med[1]),as.character(sett.equal.med[2])),
-                                    ifelse(length(sett.equal.med)>2 & length(sett.equal.med)<4,
+                                    ifelse(length(sett.equal.med)==3,
                                            ifelse((sd(b[MPA.HHData$SettlementName==sett.equal.med[1]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==sett.equal.med[1] & !is.na(b)])))<
                                                     (sd(b[MPA.HHData$SettlementName==sett.equal.med[2]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==sett.equal.med[2] & !is.na(b)]))) &
                                                     (sd(b[MPA.HHData$SettlementName==sett.equal.med[1]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==sett.equal.med[1] & !is.na(b)])))<
@@ -187,9 +188,11 @@ even.number.setts.function <-
                                                            (sd(b[MPA.HHData$SettlementName==sett.equal.med[3]],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==sett.equal.med[3] & !is.na(b)]))),
                                                          as.character(sett.equal.med[2]),
                                                          as.character(sett.equal.med[3]))),
-                                           ifelse(is.na(sett.equal.med),
-                                                  NA,
-                                                  as.character(sett.equal.med))))
+                                           ifelse(length(sett.equal.med)>3,
+                                                  as.character(sett.equal.med[1]),
+                                                  ifelse(is.na(sett.equal.med),
+                                                         NA,
+                                                         as.character(sett.equal.med)))))
     
         
            median.sett <- ifelse(!is.na(sett.equal.med),
@@ -201,7 +204,7 @@ even.number.setts.function <-
          })
 
 median.setts <- 
-  mapply(i=MPA.Sett.Means[,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
+  mapply(i=MPA.Sett.Means[,c("FSMean","MAMean","MTMean","PAMean","SEMean","TimeMarketMean","UnwellMean")],
          j=names(even.number.setts.function),
          function(i,j){
            med <- median(i,na.rm=T)
@@ -217,138 +220,138 @@ median.setts <-
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-# ---- 3.1 Food security score distribution ----
-
-dist.FS <- 
-  ggplot(MPA.HHData) +
-  geom_histogram(aes(x=FSIndex,y=..density..),
-                 bins=5,fill="#5971C7",colour="#262F52",na.rm=T) +
-  stat_function(fun=dnorm,args=list(mean=mean(MPA.HHData$FSIndex),
-                                    sd=sd(MPA.HHData$FSIndex)),
-                colour="#262F52",size=1,na.rm=T) +
-  labs(x="Food Security Scores\n(per household)",
-       y="Density",
-       title=paste("Food Security Score Distribution",unique(MPA.HHData$InterviewYear),sep=", ")) +
-  dist.plot.theme
-dist.FS
-
-qqnorm(MPA.HHData$FSIndex)
-qqline(MPA.HHData$FSIndex,col="green")
-
-
-# ---- 3.2 Material assets score distribution ----
-
-dist.MA <- 
-  ggplot(MPA.HHData) +
-  geom_histogram(aes(x=MAIndex,y=..density..),
-                 bins=20,fill="#5971C7",colour="#262F52",na.rm=T) +
-  stat_function(fun=dnorm,args=list(mean=mean(MPA.HHData$MAIndex),
-                                    sd=sd(MPA.HHData$MAIndex)),
-                colour="#262F52",size=1,na.rm=T) +
-  labs(x="Material Assets\n(per household)",
-       y="Density",
-       title=paste("HH Material Assets Distribution", unique(MPA.HHData$InterviewYear),sep=", ")) +
-  dist.plot.theme
-dist.MA
-
-log.MA <- log(MPA.HHData$MAIndex[MPA.HHData$MAIndex!=0])
-
-qqnorm(log.MA)
-qqline(log.MA,col="green")
-
-
-# ---- 3.3 Place attachment score distribution ----
-
-dist.PA <- 
-  ggplot(MPA.HHData) +
-  geom_histogram(aes(x=PAIndex,y=..density..),
-                 bins=20,fill="#5971C7",colour="#262F52",na.rm=T) +
-  stat_function(fun=dnorm,args=list(mean=mean(MPA.HHData$PAIndex),
-                                    sd=sd(MPA.HHData$PAIndex)),
-                colour="#262F52",size=1,na.rm=T) +
-  labs(x="Place Attachment Score\nPer Household",
-       y="Density",
-       title=paste("Place Attachment Score Distribution", unique(MPA.HHData$InterviewYear),sep=", ")) +
-  dist.plot.theme
-dist.PA
-
-qqnorm(MPA.HHData$PAIndex)
-qqline(MPA.HHData$PAIndex,col="green")
-
-
-# ---- 3.4 Marine tenure score distribution ----
-dist.MT <- 
-  ggplot(MPA.HHData) +
-  geom_histogram(aes(x=MTIndex,y=..density..),
-                 binwidth=1,fill="#5971C7",colour="#262F52",na.rm=T) +
-  stat_function(fun=dnorm,args=list(mean=mean(MPA.HHData$MTIndex),
-                                    sd=sd(MPA.HHData$MTIndex)),
-                colour="#262F52",size=1,na.rm=T) +
-  labs(x="Marine Tenure Score\n(per household)",
-       y="Density",
-       title=paste("Marine Tenure Score Distribution", unique(MPA.HHData$InterviewYear),sep=", ")) +
-  dist.plot.theme
-dist.MT
-
-qqnorm(MPA.HHData$MTIndex)
-qqline(MPA.HHData$MTIndex,col="green")
-
-
-# ---- 3.5 School enrollment rate distribution ----
-
-dist.SE <-
-  ggplot(MPA.HHData) +
-  geom_histogram(aes(x=SERate,y=..density..),
-                 bins=15,fill="#5971C7",colour="#262F52",na.rm=T) +
-  stat_function(fun=dnorm,args=list(mean=mean(MPA.HHData$SERate),
-                                    sd=sd(MPA.HHData$SERate)),
-                colour="#262F52",size=1,na.rm=T) +
-  labs(x="School Enrollment Rate\n(per household)",
-       y="Density",
-       title=paste("School Enrollment Rate Distribution", unique(MPA.HHData$InterviewYear),sep=", ")) +
-  dist.plot.theme
-dist.SE
-
-qqnorm(MPA.HHData$SERate)
-qqline(MPA.HHData$SERate,col="green")
-
-
-# ---- 3.6 Time to market distribution ----
-
-dist.TimeMarket <- 
-  ggplot(MPA.HHData) +
-  geom_histogram(aes(x=TimeMarket,y=..density..),
-                 bins=20,fill="#5971C7",colour="#262F52",na.rm=T) +
-  stat_function(fun=dnorm,args=list(mean=mean(MPA.HHData$TimeMarket),
-                                    sd=sd(MPA.HHData$TimeMarket)),
-                colour="#262F52",size=1,na.rm=T) +
-  labs(x="Average Time to Market\n(in hours)",
-       y="Density",
-       title=paste("Time to Market Distribution", unique(MPA.HHData$InterviewYear),sep=", ")) +
-  dist.plot.theme
-dist.TimeMarket
-
-qqnorm(MPA.HHData$TimeMarket)
-qqline(MPA.HHData$TimeMarket,col="green")
-
-
-# ---- 3.7 Days unwell distribution ----
-
-dist.DaysUnwell <- 
-  ggplot(MPA.HHData) +
-  geom_histogram(aes(x=DaysUnwell,y=..density..),
-                 bins=20,fill="#5971C7",colour="#262F52",na.rm=T) +
-  stat_function(fun=dnorm,args=list(mean=mean(MPA.HHData$DaysUnwell),
-                                    sd=sd(MPA.HHData$DaysUnwell)),
-                colour="#262F52",size=1,na.rm=T) +
-  labs(x="Days Unwell\n(per household)",
-       y="Density",
-       title=paste("HH Days Unwell Distribution", unique(MPA.HHData$InterviewYear),sep=", ")) +
-  dist.plot.theme
-dist.DaysUnwell
-
-qqnorm(MPA.HHData$DaysUnwell)
-qqline(MPA.HHData$DaysUnwell,col="green")
+# # ---- 3.1 Food security score distribution ----
+# 
+# dist.FS <- 
+#   ggplot(MPA.HHData) +
+#   geom_histogram(aes(x=FSIndex,y=..density..),
+#                  bins=5,fill="#5971C7",colour="#262F52",na.rm=T) +
+#   stat_function(fun=dnorm,args=list(mean=mean(MPA.HHData$FSIndex),
+#                                     sd=sd(MPA.HHData$FSIndex)),
+#                 colour="#262F52",size=1,na.rm=T) +
+#   labs(x="Food Security Scores\n(per household)",
+#        y="Density",
+#        title=paste("Food Security Score Distribution",unique(MPA.HHData$InterviewYear),sep=", ")) +
+#   dist.plot.theme
+# dist.FS
+# 
+# qqnorm(MPA.HHData$FSIndex)
+# qqline(MPA.HHData$FSIndex,col="green")
+# 
+# 
+# # ---- 3.2 Material assets score distribution ----
+# 
+# dist.MA <- 
+#   ggplot(MPA.HHData) +
+#   geom_histogram(aes(x=MAIndex,y=..density..),
+#                  bins=20,fill="#5971C7",colour="#262F52",na.rm=T) +
+#   stat_function(fun=dnorm,args=list(mean=mean(MPA.HHData$MAIndex),
+#                                     sd=sd(MPA.HHData$MAIndex)),
+#                 colour="#262F52",size=1,na.rm=T) +
+#   labs(x="Material Assets\n(per household)",
+#        y="Density",
+#        title=paste("HH Material Assets Distribution", unique(MPA.HHData$InterviewYear),sep=", ")) +
+#   dist.plot.theme
+# dist.MA
+# 
+# log.MA <- log(MPA.HHData$MAIndex[MPA.HHData$MAIndex!=0])
+# 
+# qqnorm(log.MA)
+# qqline(log.MA,col="green")
+# 
+# 
+# # ---- 3.3 Place attachment score distribution ----
+# 
+# dist.PA <- 
+#   ggplot(MPA.HHData) +
+#   geom_histogram(aes(x=PAIndex,y=..density..),
+#                  bins=20,fill="#5971C7",colour="#262F52",na.rm=T) +
+#   stat_function(fun=dnorm,args=list(mean=mean(MPA.HHData$PAIndex),
+#                                     sd=sd(MPA.HHData$PAIndex)),
+#                 colour="#262F52",size=1,na.rm=T) +
+#   labs(x="Place Attachment Score\nPer Household",
+#        y="Density",
+#        title=paste("Place Attachment Score Distribution", unique(MPA.HHData$InterviewYear),sep=", ")) +
+#   dist.plot.theme
+# dist.PA
+# 
+# qqnorm(MPA.HHData$PAIndex)
+# qqline(MPA.HHData$PAIndex,col="green")
+# 
+# 
+# # ---- 3.4 Marine tenure score distribution ----
+# dist.MT <- 
+#   ggplot(MPA.HHData) +
+#   geom_histogram(aes(x=MTIndex,y=..density..),
+#                  binwidth=1,fill="#5971C7",colour="#262F52",na.rm=T) +
+#   stat_function(fun=dnorm,args=list(mean=mean(MPA.HHData$MTIndex),
+#                                     sd=sd(MPA.HHData$MTIndex)),
+#                 colour="#262F52",size=1,na.rm=T) +
+#   labs(x="Marine Tenure Score\n(per household)",
+#        y="Density",
+#        title=paste("Marine Tenure Score Distribution", unique(MPA.HHData$InterviewYear),sep=", ")) +
+#   dist.plot.theme
+# dist.MT
+# 
+# qqnorm(MPA.HHData$MTIndex)
+# qqline(MPA.HHData$MTIndex,col="green")
+# 
+# 
+# # ---- 3.5 School enrollment rate distribution ----
+# 
+# dist.SE <-
+#   ggplot(MPA.HHData) +
+#   geom_histogram(aes(x=SERate,y=..density..),
+#                  bins=15,fill="#5971C7",colour="#262F52",na.rm=T) +
+#   stat_function(fun=dnorm,args=list(mean=mean(MPA.HHData$SERate),
+#                                     sd=sd(MPA.HHData$SERate)),
+#                 colour="#262F52",size=1,na.rm=T) +
+#   labs(x="School Enrollment Rate\n(per household)",
+#        y="Density",
+#        title=paste("School Enrollment Rate Distribution", unique(MPA.HHData$InterviewYear),sep=", ")) +
+#   dist.plot.theme
+# dist.SE
+# 
+# qqnorm(MPA.HHData$SERate)
+# qqline(MPA.HHData$SERate,col="green")
+# 
+# 
+# # ---- 3.6 Time to market distribution ----
+# 
+# dist.TimeMarket <- 
+#   ggplot(MPA.HHData) +
+#   geom_histogram(aes(x=TimeMarket,y=..density..),
+#                  bins=20,fill="#5971C7",colour="#262F52",na.rm=T) +
+#   stat_function(fun=dnorm,args=list(mean=mean(MPA.HHData$TimeMarket),
+#                                     sd=sd(MPA.HHData$TimeMarket)),
+#                 colour="#262F52",size=1,na.rm=T) +
+#   labs(x="Average Time to Market\n(in hours)",
+#        y="Density",
+#        title=paste("Time to Market Distribution", unique(MPA.HHData$InterviewYear),sep=", ")) +
+#   dist.plot.theme
+# dist.TimeMarket
+# 
+# qqnorm(MPA.HHData$TimeMarket)
+# qqline(MPA.HHData$TimeMarket,col="green")
+# 
+# 
+# # ---- 3.7 Days unwell distribution ----
+# 
+# dist.DaysUnwell <- 
+#   ggplot(MPA.HHData) +
+#   geom_histogram(aes(x=DaysUnwell,y=..density..),
+#                  bins=20,fill="#5971C7",colour="#262F52",na.rm=T) +
+#   stat_function(fun=dnorm,args=list(mean=mean(MPA.HHData$DaysUnwell),
+#                                     sd=sd(MPA.HHData$DaysUnwell)),
+#                 colour="#262F52",size=1,na.rm=T) +
+#   labs(x="Days Unwell\n(per household)",
+#        y="Density",
+#        title=paste("HH Days Unwell Distribution", unique(MPA.HHData$InterviewYear),sep=", ")) +
+#   dist.plot.theme
+# dist.DaysUnwell
+# 
+# qqnorm(MPA.HHData$DaysUnwell)
+# qqline(MPA.HHData$DaysUnwell,col="green")
 
 
 # 
@@ -366,8 +369,9 @@ qqline(MPA.HHData$DaysUnwell,col="green")
 # ---- 4.1 Create function that will output significance values for non-parametric variables, BY SETTLEMENT ----
 #          (for status plots)
 non.parametric.test.settlements <- 
-  data.frame(mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
-                    function(a){
+  data.frame(mapply(a=c("FSMean","MAMean","MTMean","PAMean","SEMean","TimeMarketMean","UnwellMean"),
+                    b=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
+                    function(a,b){
                       results <- 
                         list(cbind.data.frame(SettlementName=c(as.character(sett.names[which(sett.names!=median.setts[a])]),
                                                                as.character(median.setts[a])),
@@ -375,7 +379,7 @@ non.parametric.test.settlements <-
                                           rbind.data.frame(t(data.frame(mapply(i=sett.names[which(sett.names!=median.setts[a])],
                                                                                    function(i){
                                                                                      var <- 
-                                                                                       MPA.HHData[MPA.HHData$SettlementName==i | MPA.HHData$SettlementName==median.setts[a],a]
+                                                                                       MPA.HHData[MPA.HHData$SettlementName==i | MPA.HHData$SettlementName==median.setts[a],b]
                                                                                      
                                                                                      test <- 
                                                                                        wilcox.test(var~SettlementName,
@@ -388,29 +392,29 @@ non.parametric.test.settlements <-
 
 # - Alphabetize each column of settlement names.  Now all settlement names are in same order.
 sigvals.Sett  <- 
-  cbind.data.frame(non.parametric.test.settlements[order(non.parametric.test.settlements$"FSIndex.SettlementName"),
-                                                        c("FSIndex.SettlementName","FSIndex.p.value")],
-                   non.parametric.test.settlements[order(non.parametric.test.settlements$"MAIndex.SettlementName"),
-                                                        c("MAIndex.SettlementName","MAIndex.p.value")],
-                   non.parametric.test.settlements[order(non.parametric.test.settlements$"MTIndex.SettlementName"),
-                                                          c("MTIndex.SettlementName","MTIndex.p.value")],
-                   non.parametric.test.settlements[order(non.parametric.test.settlements$"PAIndex.SettlementName"),
-                                                          c("PAIndex.SettlementName","PAIndex.p.value")],
-                   non.parametric.test.settlements[order(non.parametric.test.settlements$"SERate.SettlementName"),
-                                                        c("SERate.SettlementName","SERate.p.value")],
-                   non.parametric.test.settlements[order(non.parametric.test.settlements$"TimeMarket.SettlementName"),
-                                                          c("TimeMarket.SettlementName","TimeMarket.p.value")],
-                   non.parametric.test.settlements[order(non.parametric.test.settlements$"DaysUnwell.SettlementName"),
-                                                        c("DaysUnwell.SettlementName","DaysUnwell.p.value")])
+  cbind.data.frame(non.parametric.test.settlements[order(non.parametric.test.settlements$"FSMean.SettlementName"),
+                                                        c("FSMean.SettlementName","FSMean.p.value")],
+                   non.parametric.test.settlements[order(non.parametric.test.settlements$"MAMean.SettlementName"),
+                                                        c("MAMean.SettlementName","MAMean.p.value")],
+                   non.parametric.test.settlements[order(non.parametric.test.settlements$"MTMean.SettlementName"),
+                                                          c("MTMean.SettlementName","MTMean.p.value")],
+                   non.parametric.test.settlements[order(non.parametric.test.settlements$"PAMean.SettlementName"),
+                                                          c("PAMean.SettlementName","PAMean.p.value")],
+                   non.parametric.test.settlements[order(non.parametric.test.settlements$"SEMean.SettlementName"),
+                                                        c("SEMean.SettlementName","SEMean.p.value")],
+                   non.parametric.test.settlements[order(non.parametric.test.settlements$"TimeMarketMean.SettlementName"),
+                                                          c("TimeMarketMean.SettlementName","TimeMarketMean.p.value")],
+                   non.parametric.test.settlements[order(non.parametric.test.settlements$"UnwellMean.SettlementName"),
+                                                        c("UnwellMean.SettlementName","UnwellMean.p.value")])
 
 # - Remove all settlement name columns except for one. 
 sigvals.Sett <- 
-  dplyr:: select(sigvals.Sett,"FSIndex.SettlementName", "FSIndex.p.value", "MAIndex.p.value",  
-  "PAIndex.p.value","MTIndex.p.value", "SERate.p.value", "TimeMarket.p.value",
-  "DaysUnwell.p.value")
-
-
-colnames(sigvals.Sett) <- c("SettlementName","FS.pval","MA.pval","PA.pval","MT.pval","SE.pval","TimeMarket.pval","Unwell.pval")
+  sigvals.Sett %>%
+  select(FSMean.SettlementName, FSMean.p.value, MAMean.p.value, MTMean.p.value, 
+         PAMean.p.value, SEMean.p.value, TimeMarketMean.p.value, UnwellMean.p.value) %>%
+  rename(SettlementName = FSMean.SettlementName, FS.pval = FSMean.p.value, MA.pval = MAMean.p.value, MT.pval = MTMean.p.value,
+         PA.pval = PAMean.p.value, SE.pval = SEMean.p.value, TimeMarket.pval = TimeMarketMean.p.value, Unwell.pval = UnwellMean.p.value) %>%
+  .[rev(order(.$SettlementName)),]
 
 
 # ---- 4.2 Create function that will output significance values for non-parametric variables, MPA VS. Control ----
@@ -425,7 +429,7 @@ non.parametric.test.MPAvControl  <-
                                   exact=F)}))["p.value",]
 
 sigvals.MPA  <- 
-  cbind.data.frame(MPA.name$MPAName,non.parametric.test.MPAvControl )
+  cbind.data.frame(MPA.name$MPAName,non.parametric.test.MPAvControl)
 
 colnames(sigvals.MPA) <- colnames(sigvals.Sett)
 
@@ -440,12 +444,10 @@ null.row.sigvals  <-
 # 
 #   (for MPA p-values, households in the MPA were compared to those in the control settlements (for the MPA),
 #   also using Mann-Whitney U test)
-sigvals.Sett <- sigvals.Sett %>%
-  arrange(rev(order(sigvals.Sett$SettlementName)))
 
 sigvals <- rbind.data.frame(sigvals.MPA,
-                   null.row.sigvals,
-                   sigvals.Sett)
+                            null.row.sigvals,
+                            sigvals.Sett)
 
 
 sigvals[,c("FS.pval", "MA.pval", "MT.pval" , "PA.pval", "SE.pval", "TimeMarket.pval", "Unwell.pval")] <- 
@@ -454,33 +456,36 @@ sigvals[,c("FS.pval", "MA.pval", "MT.pval" , "PA.pval", "SE.pval", "TimeMarket.p
 # ---- 4.3 Define function for trend data significance ---- 
 
 trend.non.parametric.test.byMPA  <- 
-  data.frame(mapply(i=HHData[,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
+  data.frame(mapply(i=HHData[HHData$Treatment==1,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
                     function(i){
                       MannKendall(c(i[HHData$InterviewYear==unique(HHData$InterviewYear)[1]],
                                     i[HHData$InterviewYear==unique(HHData$InterviewYear)[2]]))
-                    }))
+                    }))  %>%
+  rename(FS.pval = FSIndex, MA.pval = MAIndex, MT.pval = MTIndex, PA.pval = PAIndex, SE.pval = SERate, 
+         TimeMarket.pval = TimeMarket, Unwell.pval = DaysUnwell)
 
 trend.non.parametric.test.byControl  <- 
   data.frame(mapply(i=HHData[HHData$Treatment==0,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
                     function(i){
                       MannKendall(c(i[HHData$InterviewYear==unique(HHData$InterviewYear)[1]],
                                     i[HHData$InterviewYear==unique(HHData$InterviewYear)[2]]))
-                    }))
+                    }))  %>%
+  rename(FS.pval = FSIndex, MA.pval = MAIndex, MT.pval = MTIndex, PA.pval = PAIndex, SE.pval = SERate, 
+         TimeMarket.pval = TimeMarket, Unwell.pval = DaysUnwell)
 
 
-colnames(trend.non.parametric.test.byMPA ) <- colnames(sigvals[2:8])
-colnames(trend.non.parametric.test.byControl ) <- colnames(sigvals[2:8])
 
 
 trend.sigvals  <- 
-  cbind.data.frame(MonitoringYear="p.value",trend.non.parametric.test.byMPA ["sl",1],NA,trend.non.parametric.test.byMPA ["sl",2],
-                   NA,trend.non.parametric.test.byMPA ["sl",3],NA,trend.non.parametric.test.byMPA ["sl",4],NA,trend.non.parametric.test.byMPA ["sl",5],
-                   NA,trend.non.parametric.test.byMPA ["sl",6],NA,trend.non.parametric.test.byMPA ["sl",7],NA)
+  cbind.data.frame(trend.non.parametric.test.byMPA ["sl","FS.pval"],NA,trend.non.parametric.test.byMPA ["sl","MA.pval"],
+                   NA,trend.non.parametric.test.byMPA ["sl","MT.pval"],NA,trend.non.parametric.test.byMPA ["sl","PA.pval"],NA,
+                   trend.non.parametric.test.byMPA ["sl","SE.pval"],NA,trend.non.parametric.test.byMPA ["sl","TimeMarket.pval"],NA,
+                   trend.non.parametric.test.byMPA ["sl","Unwell.pval"],NA)
 
-colnames(trend.sigvals ) <- c("MonitoringYear","FSMean","FSErr","MAMean","MAErr","PAMean","PAErr","MTMean","MTErr","SEMean","SEErr",
-                                  "MarketMean","MarketErr","UnwellMean","UnwellErr")
+colnames(trend.sigvals ) <- c("FSMean","FSErr","MAMean","MAErr","MTMean","MTErr","PAMean","PAErr","SEMean","SEErr",
+                                  "TimeMarketMean","TimeMarketErr","UnwellMean","UnwellErr")
 
-trend.sigvals  <- unlist(trend.sigvals )
+trend.sigvals  <- cbind.data.frame(MonitoringYear="p.value", as.data.frame(t(unlist(trend.sigvals))))
 
 
 # ---- 4.4 Create function that will output TREND significance values for non-parametric variables, BY SETTLEMENT ----
@@ -496,11 +501,11 @@ trend.non.parametric.test.bySett  <-
                                                                                   HHData$InterviewYear==unique(HHData$InterviewYear)[1],a],
                                                                 HHData[HHData$SettlementName==i &
                                                                                   HHData$InterviewYear==unique(HHData$InterviewYear)[2],a]))
-                                                }))["sl",])}))
+                                                }))["sl",])})) %>%
+  rename(FS.pval = FSIndex, MA.pval = MAIndex, MT.pval = MTIndex, PA.pval = PAIndex, SE.pval = SERate, 
+         TimeMarket.pval = TimeMarket, Unwell.pval = DaysUnwell) %>%
+  .[rev(order(.$SettlementName)),]
 
-
-
-colnames(trend.non.parametric.test.bySett) <- colnames(sigvals[1:8])
 
 
 # - Define data frame with p-values for annex plots
@@ -510,10 +515,10 @@ colnames(trend.non.parametric.test.bySett) <- colnames(sigvals[1:8])
 annex.sigvals  <- 
   rbind.data.frame(cbind.data.frame(SettlementName=MPA.name$MPAName,trend.non.parametric.test.byMPA ["sl",]),
                    cbind.data.frame(SettlementName=c("Control\n Settlements"),trend.non.parametric.test.byControl ["sl",]),
-                   null.row.sigvals ,
-                   trend.non.parametric.test.bySett[rev(order(trend.non.parametric.test.bySett $SettlementName)),])
+                   null.row.sigvals,
+                   trend.non.parametric.test.bySett[rev(order(trend.non.parametric.test.bySett$SettlementName)),])
 
-annex.sigvals [2:8] <- unlist(annex.sigvals [2:8])
+annex.sigvals[2:8] <- unlist(annex.sigvals[2:8])
 
 
 # 

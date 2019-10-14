@@ -49,16 +49,6 @@ source('1_Data_wrangling/1_Social/2_Source_data/Source_social_data_flat_files.R'
 pacman::p_load(tidyverse)
 
 
-# Whichever option you chose above, you will still need to upload Ethnicity data from a flat file
-
-# HHEthnicity <- read.delim("x_Flat_data_files/1_Social/Inputs/BHS/eth_output_kc_2017_1217.txt",sep=",")
-# 
-# HHEthnicity$eth.iso <- ifelse(HHEthnicity$eth.iso=="raj","rja",
-#                               ifelse(HHEthnicity$eth.iso=="mal","mlk",
-#                                      ifelse(HHEthnicity$eth.iso=="kwi","kwh",
-#                                             as.character(HHEthnicity$eth.iso))))
-
-
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -103,9 +93,8 @@ HHData$FSIndex <- 6.06-as.numeric(HHData$FSIndex)
 
 HHData <- 
   IndDemos %>%
-           mutate(One=1) %>% 
-           group_by(HouseholdID) %>%
-           summarise(Household.Size=sum(One,na.rm=T),
+  group_by(HouseholdID) %>%
+           summarise(Household.Size=length(HouseholdID),
                      NumberChild=sum(SchoolAge,na.rm=T),
                      NumberEnrolled=sum(ChildEnrolled,na.rm=T),
                      PercentEnrolled=ifelse(NumberChild!=0 & !is.na(NumberEnrolled),
@@ -116,7 +105,7 @@ HHData <-
                                    round((NumberEnrolled/NumberChild),2),
                                    NA)) %>%
   left_join(HHData,.,by="HouseholdID")
-  
+
 
 # ---- 2.2 Define "Big Five" data frame - averaged by settlement, for each monitoring year ----
 

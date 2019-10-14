@@ -1,0 +1,294 @@
+# 
+# code:   Alor Technical Report Datasets
+# 
+# github: WWF-ConsEvidence/MPAMystery/2_Social/TechnicalReports/SBS
+# --- Duplicate all code from "2_Social" onward, to maintain file structure for sourced code
+# 
+# author: Kelly Claborn, clabornkelly@gmail.com
+# created: November 2016
+# modified: November 2017
+# modified: Amari Bauer, June 2019
+# 
+# 
+# ---- inputs ----
+#  1) Source Alor.TechReport.SigTest.2019.R 
+#     - Dependencies: Alor.Report.Calculations.R
+# 
+# ---- code sections ----
+#  1) Data Sourcing, Configuration, and Subsetting
+#  2) Define Datasets for Status, Trend, and Annex Plots for Export
+#  3) Export Data to Excel
+#  4) Synthesize other social data for interpretation/context
+# 
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 1: Data Sourcing, Configuration, and Subsetting ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+
+# ---- 1.1 Source or run statistical test results  ----
+
+
+
+# ---- 1.2 Subset Age/Gender data ----
+
+AgeGender <- 
+  data.frame(AgeCat=factor(c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
+                             "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+                           levels=c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49",
+                                    "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85-89","90-94","95-99"),
+                           ordered=T),
+             Male.Baseline=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MonitoringYear=="Baseline",
+                                                  seq(3,41,by=2)]),
+             Female.Baseline=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MonitoringYear=="Baseline",
+                                                    seq(4,42,by=2)]),
+             Male.RepeatOne=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MonitoringYear==levels(AgeGenderDemos.ByMPA$MonitoringYear)[2],
+                                               seq(3,41,by=2)]),
+             Female.RepeatOne=t(AgeGenderDemos.ByMPA[AgeGenderDemos.ByMPA$MonitoringYear==levels(AgeGenderDemos.ByMPA$MonitoringYear)[2],
+                                                 seq(4,42,by=2)]),
+             row.names=NULL)
+
+
+# ---- 1.3 MPA-level proportional data (row to be added to bottom of status and annex plots in tech report) ----
+
+MPA.level.PropData.status <- 
+  data.frame(SettlementName=c("Control Settlements", MPA.name$MPAName),
+             MPA.Level.Means %>% filter(MonitoringYear==levels(HHData$MonitoringYear)[2]) %>% ungroup() %>%
+               select(HHH.female, HHH.male, Percent.Rel.Christian, Percent.Rel.Muslim, Percent.Rel.Other, 
+                      Percent.PrimaryOcc.Fish, Percent.PrimaryOcc.Farm, Percent.PrimaryOcc.WageLabor, 
+                      Percent.PrimaryOcc.HarvestForest, Percent.PrimaryOcc.Tourism, 
+                      Percent.PrimaryOcc.Aquaculture, Percent.PrimaryOcc.Extraction,
+                      Percent.PrimaryOcc.Other, Prop.Fish.AlmostNever, Prop.Fish.FewTimesPer6Mo, 
+                      Prop.Fish.FewTimesPerMo, Prop.Fish.FewTimesPerWk, Prop.Fish.MoreFewTimesWk, 
+                      Prop.SellFish.AlmostNever, Prop.SellFish.FewTimesPer6Mo, 
+                      Prop.SellFish.FewTimesPerMo, Prop.SellFish.FewTimesPerWk, 
+                      Prop.SellFish.MoreFewTimesWk, Prop.IncFish.None, Prop.IncFish.Some,
+                      Prop.IncFish.Half, Prop.IncFish.Most, Prop.IncFish.All, 
+                      Prop.FishTech.ByHand, Prop.FishTech.StatNet, Prop.FishTech.MobileNet, 
+                      Prop.FishTech.StatLine, Prop.FishTech.MobileLine, Child.FS.no, 
+                      Child.FS.yes, ProteinFish.None, ProteinFish.Some, 
+                      ProteinFish.Half, ProteinFish.Most, ProteinFish.All,Percent.FoodInsecure.NoHunger,
+                      Percent.FoodInsecure.YesHunger,Percent.FoodSecure))
+
+
+# ---- 1.4 MPA-level continuous data (row to be added to bottom of status and annex plots in tech report) ----
+
+MPA.level.ContData.status <- 
+  data.frame(SettlementName=c("Control Settlements",MPA.name$MPAName),
+             MPA.Level.Means %>% filter(MonitoringYear==levels(MonitoringYear)[2]) %>% ungroup() %>%
+               select(FSMean, FSErr, MAMean, MAErr, MTMean, MTErr, PAMean, PAErr, 
+                      SEMean, SEErr, TimeMarketMean, TimeMarketErr, UnwellMean, UnwellErr))
+
+MPA.level.ContData.annex <- 
+  data.frame(MonitoringYear=MPA.Level.Means$MonitoringYear,
+             SettlementID=0,
+             SettlementName=c("Control Settlements",MPA.name$MPAName,
+                              "Control Settlements",MPA.name$MPAName),
+             MPA.Level.Means %>% ungroup() %>%
+               select(FSMean, FSErr, MAMean, MAErr, MTMean, MTErr, PAMean, PAErr, 
+                      SEMean, SEErr, TimeMarketMean, TimeMarketErr, UnwellMean, UnwellErr)) %>%
+  .[rev(order(.$SettlementName,.$MonitoringYear)),]
+
+
+# ---- 1.5 Define null rows to be added to plotting data frames for formatting purposes ----
+
+null.row.PropData <- 
+  matrix(rep(NA,44),ncol=44,dimnames=list(NULL,colnames(MPA.level.PropData.status)))
+
+null.row.ContData <- 
+  cbind.data.frame(matrix(rep(NA,15),ncol=15,dimnames=list(NULL,colnames(MPA.level.ContData.status))))
+
+null.row.ContData.annex <-
+  cbind.data.frame(matrix(rep(NA,17),ncol=17,dimnames=list(NULL,colnames(MPA.level.ContData.annex))))
+
+
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 2: Define Datasets for Status, Trend, and Annex Plots and for Export ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+
+# ---- 2.1 Status dataset for settlements, proportional data ----
+
+Sett.level.PropData.status <- 
+  Sett.Level.Means %>%
+  filter(Treatment==1 & MonitoringYear==levels(MonitoringYear)[2]) %>%
+  ungroup() %>%
+  select(SettlementName, HHH.female, HHH.male, 
+         Percent.Rel.Christian, Percent.Rel.Muslim, Percent.Rel.Other, 
+         Percent.PrimaryOcc.Fish, Percent.PrimaryOcc.Farm, Percent.PrimaryOcc.WageLabor, 
+         Percent.PrimaryOcc.HarvestForest, Percent.PrimaryOcc.Tourism, 
+         Percent.PrimaryOcc.Aquaculture, Percent.PrimaryOcc.Extraction,
+         Percent.PrimaryOcc.Other, Prop.Fish.AlmostNever, Prop.Fish.FewTimesPer6Mo, 
+         Prop.Fish.FewTimesPerMo, Prop.Fish.FewTimesPerWk, Prop.Fish.MoreFewTimesWk, 
+         Prop.SellFish.AlmostNever, Prop.SellFish.FewTimesPer6Mo, 
+         Prop.SellFish.FewTimesPerMo, Prop.SellFish.FewTimesPerWk, 
+         Prop.SellFish.MoreFewTimesWk, Prop.IncFish.None, Prop.IncFish.Some,
+         Prop.IncFish.Half, Prop.IncFish.Most, Prop.IncFish.All, 
+         Prop.FishTech.ByHand, Prop.FishTech.StatNet, Prop.FishTech.MobileNet, 
+         Prop.FishTech.StatLine, Prop.FishTech.MobileLine, Child.FS.no, 
+         Child.FS.yes, ProteinFish.None, ProteinFish.Some, 
+         ProteinFish.Half, ProteinFish.Most, ProteinFish.All,Percent.FoodInsecure.NoHunger,
+         Percent.FoodInsecure.YesHunger,Percent.FoodSecure) %>%
+  .[rev(order(.$SettlementName)),]
+
+# - PLOT FORMAT DATA FRAME
+Sett.level.PropData.status.PLOTFORMAT <- 
+  rbind.data.frame(MPA.level.PropData.status,
+                   null.row.PropData,
+                   Sett.level.PropData.status) %>%
+  mutate(SettlementName=ifelse(is.na(SettlementName), 
+                               "", 
+                               as.character(SettlementName)),
+         SettlementName=factor(SettlementName,levels=unique(SettlementName),ordered=T),
+         SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"))
+
+
+# ---- 2.2 Status dataset for settlements, continuous data (with p values) ----
+
+Sett.level.ContData.status  <- 
+  Sett.Level.Means %>%
+  filter(Treatment==1 & MonitoringYear==levels(MonitoringYear)[2]) %>%
+  ungroup() %>%
+  select(SettlementName, FSMean, FSErr, MAMean, MAErr, MTMean, MTErr, PAMean, PAErr, 
+         SEMean, SEErr, TimeMarketMean, TimeMarketErr, UnwellMean, UnwellErr) %>%
+  .[rev(order(.$SettlementName)),]
+
+# - PLOT FORMAT DATA FRAME
+Sett.level.ContData.status.PLOTFORMAT <- 
+ rbind.data.frame(MPA.level.ContData.status,
+                  null.row.ContData,
+                  Sett.level.ContData.status) %>%
+  left_join(sigvals,by="SettlementName") %>%
+  mutate(SettlementName=ifelse(is.na(SettlementName),"",SettlementName),
+         SettlementName=factor(SettlementName,levels=unique(SettlementName),ordered=T),
+         SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"))
+
+
+# ---- 2.3 Trend dataset for MPA-level proportional data ----
+
+MPA.level.PropData.trend.PLOTFORMAT <- 
+  data.frame(MPANameName=c("Control Settlements",MPA.name$MPAName,
+                           "Control Settlements",MPA.name$MPAName),
+             MPA.Level.Means %>% ungroup() %>%
+               select(MonitoringYear, HHH.female, HHH.male, Percent.Rel.Christian, Percent.Rel.Muslim, Percent.Rel.Other, 
+                      Percent.PrimaryOcc.Fish, Percent.PrimaryOcc.Farm, Percent.PrimaryOcc.WageLabor, 
+                      Percent.PrimaryOcc.HarvestForest, Percent.PrimaryOcc.Tourism, 
+                      Percent.PrimaryOcc.Aquaculture, Percent.PrimaryOcc.Extraction,
+                      Percent.PrimaryOcc.Other, Prop.Fish.AlmostNever, Prop.Fish.FewTimesPer6Mo, 
+                      Prop.Fish.FewTimesPerMo, Prop.Fish.FewTimesPerWk, Prop.Fish.MoreFewTimesWk, 
+                      Prop.SellFish.AlmostNever, Prop.SellFish.FewTimesPer6Mo, 
+                      Prop.SellFish.FewTimesPerMo, Prop.SellFish.FewTimesPerWk, 
+                      Prop.SellFish.MoreFewTimesWk, Prop.IncFish.None, Prop.IncFish.Some,
+                      Prop.IncFish.Half, Prop.IncFish.Most, Prop.IncFish.All, 
+                      Prop.FishTech.ByHand, Prop.FishTech.StatNet, Prop.FishTech.MobileNet, 
+                      Prop.FishTech.StatLine, Prop.FishTech.MobileLine, Child.FS.no, 
+                      Child.FS.yes, ProteinFish.None, ProteinFish.Some, 
+                      ProteinFish.Half, ProteinFish.Most, ProteinFish.All,Percent.FoodInsecure.NoHunger,
+                      Percent.FoodInsecure.YesHunger,Percent.FoodSecure))
+
+
+# ---- 2.4 Trend dataset for MPA-level continuous data (with p values) ----
+
+MPA.level.ContData.trend.PLOTFORMAT <- 
+ rbind.data.frame(MPA.level.ContData.annex %>% select(-c(SettlementName, SettlementID)),
+                  trend.sigvals) %>%
+  mutate(MonitoringYear=factor(MonitoringYear,
+                               levels=unique(MonitoringYear),
+                               ordered=T))
+
+
+
+# ---- 2.5 Annex dataset for Settlement-level continuous data ----
+
+Sett.level.ContData.annex <- 
+  Sett.Level.Means %>%
+  filter(Treatment==1) %>%
+  ungroup() %>%
+  select(MonitoringYear, SettlementID, SettlementName, FSMean, FSErr, MAMean, MAErr, MTMean, MTErr, 
+         PAMean, PAErr, SEMean, SEErr, TimeMarketMean, TimeMarketErr, UnwellMean, UnwellErr) %>%
+  mutate(MonitoringYear=factor(MonitoringYear,
+                               levels=unique(MonitoringYear),
+                               ordered=T)) %>%
+  .[rev(order(.$SettlementName, .$MonitoringYear)),]
+
+# - PLOT FORMAT DATA FRAME
+Sett.level.ContData.annex.PLOTFORMAT <- 
+ rbind.data.frame(MPA.level.ContData.annex,
+                  null.row.ContData.annex, 
+                  Sett.level.ContData.annex) %>%
+  mutate(SettlementName=ifelse(is.na(SettlementName),"",SettlementName),
+         SettlementName=factor(SettlementName,levels=unique(SettlementName),ordered=T),
+         SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"))
+
+
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+# ---- SECTION 3: Synthesize other social data for interpretation/context ----
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+# ---- 3.1 Tech report data synthesis aid ---- 
+#   years resident, categorical food security, changes in social conflict, 
+#   material assets gini coefficient, mean material assets, % fishers, 
+#   % wage labor, marine tenure manage and harvest components
+# 
+# 
+# Alor.level.synth <- data.frame(SettlementID=NA,
+#                               Synth.techreport.byMPA[Synth.techreport.byMPA$MPAID==15,c("MPAID","MonitoringYear")],
+#                               SettlementName="MPA",
+#                               Synth.techreport.byMPA[Synth.techreport.byMPA$MPAID==15,3:17],
+#                               AgeGender.AvgAge.byMPA[AgeGender.AvgAge.byMPA$MPAID==15,3])
+# 
+# Alor.level.synth <- left_join(Alor.level.synth,
+#                              Techreport.Trend.ByMPA[c("MPAID","MonitoringYear",
+#                                                       "Percent.PrimaryOcc.Fish",
+#                                                       "Percent.PrimaryOcc.WageLabor")],
+#                              by=c("MPAID","MonitoringYear"))
+# 
+# null.row.synth <- matrix(NA,ncol=length(colnames(Alor.level.synth)),
+#                         dimnames=list(NULL,colnames(Alor.level.synth)))
+# 
+# Alor.setts.synth <- 
+#  Synth.techreport.bySett[Synth.techreport.bySett$MPAID==15,1:18] %>%
+#  left_join(Techreport.Status.BySett[,c("SettlementID","MonitoringYear", "Treatment",
+#                                        "Percent.PrimaryOcc.Fish",
+#                                        "Percent.PrimaryOcc.WageLabor")],
+#            by=c("SettlementID","MonitoringYear")) %>%
+#  left_join(AgeGender.AvgAge.bySett[,c("SettlementName","MonitoringYear","AvgAge")])
+# 
+# # ---- 3.2 Output for data synthesis/interpretation ----
+# 
+# Alor.synth.techreport.extra.PLOTFORMAT <- rbind.data.frame(Alor.level.synth,
+#                                                           null.row.synth,
+#                                                           Alor.setts.synth)
+# 
+# # - make SettlementName an ordered factor for plotting
+# Alor.synth.techreport.extra.PLOTFORMAT$SettlementName <-
+#  ifelse(is.na(Alor.synth.techreport.extra.PLOTFORMAT$SettlementName),"",
+#         as.character(Alor.synth.techreport.extra.PLOTFORMAT$SettlementName))
+# 
+# Alor.synth.techreport.extra.PLOTFORMAT$SettlementName <-
+#  factor(Alor.synth.techreport.extra.PLOTFORMAT$SettlementName,
+#         levels=unique(Alor.synth.techreport.extra.PLOTFORMAT$SettlementName),
+#         ordered=T)
+# 
+# # - add row for plot fill colour formatting
+# Alor.synth.techreport.extra.PLOTFORMAT$Dummy <-
+#  ifelse(Alor.synth.techreport.extra.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
+
+
+
+
+rm(null.row.ContData,
+   null.row.PropData,
+   null.row.ContData.annex,
+   null.row.sigvals)

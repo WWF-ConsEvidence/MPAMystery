@@ -40,7 +40,7 @@
 
 # ---- 1.1 Load libraries & data ----
 
-pacman::p_load(rio,dplyr)
+pacman::p_load(rio, reldist, ggplot2, reshape2, Kendall, dplyr)
 
 # Sourcing most recent files
 

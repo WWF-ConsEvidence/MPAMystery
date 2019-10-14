@@ -5,11 +5,13 @@
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# ---- SECTION 3: Report Plot Themes, Legends, and Guides  ----
+# ---- SECTION 1: Report Plot Themes  ----
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
-# ---- 3.1 MPA Technical Report plot themes ----
+
+
+# ---- 1.1 MPA Comprehensive Technical Report plot themes ----
 
 plot.theme <- theme(axis.ticks=element_blank(),
                     panel.background=element_rect(fill="white",
@@ -80,11 +82,113 @@ plot.theme.impact <- theme(axis.ticks=element_blank(),
                     legend.box.spacing=unit(0.1,"cm"))
 
 
+# ---- 1.2 MPA Impact Summary plot themes ----
+
+snapshot.plot.theme.MPAimpact.summ <- theme(panel.background=element_blank(),
+                                            panel.grid.major.x=element_line(size=0.25,
+                                                                            colour="#D0D0D0D0"),
+                                            panel.grid.major.y=element_line(size=0.5,
+                                                                            colour="#D0D0D0D0"),
+                                            panel.grid.minor.x=element_blank(),
+                                            axis.ticks=element_blank(),
+                                            axis.text=element_text(size=11,
+                                                                   angle=0,
+                                                                   colour="#505050",
+                                                                   hjust=0.5),
+                                            axis.title=element_text(size=12,
+                                                                    angle=0,
+                                                                    face="bold",
+                                                                    colour="#505050"),
+                                            plot.title=element_text(colour="#505050",
+                                                                    face="bold",
+                                                                    size=14),
+                                            panel.border=element_rect(size=0.5,
+                                                                      colour="#D0D0D0",
+                                                                      linetype=3,
+                                                                      fill=NA))
+
+plot.theme.MPAimpact.summ <- theme(axis.ticks=element_blank(),
+                                   axis.text=element_text(vjust=0.5,
+                                                          size=rel(1),
+                                                          colour="#505050"),
+                                   axis.title.y=element_text(face="bold",
+                                                             size=rel(1),
+                                                             angle=90,
+                                                             colour="#505050"),
+                                   axis.title.x=element_blank(),
+                                   plot.title=element_blank(),
+                                   panel.background=element_rect(fill="white",
+                                                                 colour="#D0D0D0"),
+                                   panel.grid.major.x=element_blank(),
+                                   panel.grid.major.y=element_line(size=0.5,
+                                                                   colour="#808080",
+                                                                   linetype=3),
+                                   panel.grid.minor.y=element_blank(),
+                                   panel.border=element_rect(fill=NA,
+                                                             colour="#D0D0D0"))
+
+fs.st.plot.theme.MPAimpact.summ <- theme(axis.ticks.x=element_blank(),
+                                         axis.ticks.y=element_line(colour="#505050"),
+                                         axis.text=element_text(vjust=0.5,
+                                                                size=rel(1.1),
+                                                                colour="#505050"),
+                                         axis.title.y=element_text(face="bold",
+                                                                   size=rel(1.15),
+                                                                   angle=90,
+                                                                   colour="#505050"),
+                                         axis.title.x=element_blank(),
+                                         plot.title=element_blank(),
+                                         panel.background=element_rect(fill="white",
+                                                                       colour="#D0D0D0"),
+                                         panel.grid.major.x=element_blank(),
+                                         panel.grid.major.y=element_blank(),
+                                         panel.grid.minor.y=element_blank(),
+                                         panel.border=element_rect(fill=NA,
+                                                                   colour="#D0D0D0"))
+
+
+# ---- 1.3 MPA continuous variables distribution plot theme ----
+
+dist.plot.theme <- theme(axis.ticks=element_blank(),
+                         plot.title=element_text(face="bold",
+                                                 colour="#303030",
+                                                 hjust=0.5),
+                         panel.background=element_rect(fill="white",
+                                                       colour="#909090"),
+                         panel.border=element_rect(fill=NA,
+                                                   size=0.25,
+                                                   colour="#C0C0C0"),
+                         panel.grid.major.x=element_line(colour="#C0C0C0",
+                                                         size=0.25),
+                         panel.grid.major.y=element_line(colour="#C0C0C0",
+                                                         size=0.25,
+                                                         linetype=3),
+                         axis.title=element_text(size=11,
+                                                 angle=0,
+                                                 face="bold",
+                                                 colour="#303030"),
+                         axis.text=element_text(size=10,
+                                                angle=0,
+                                                colour="#303030"))
+
+
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 2: Plotting Color Schemes ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+
+# ---- 2.1 MPA Comprehensive Technical Report color schemes
+
 fillcols.status <- c("NotDummy"=alpha("#2C7FB8",0.95),"Dummy"=alpha("#FFFFFF",0))
 fillcols.trend <- c(alpha("#2C7FB8",0.95))
 
 errcols.status <- c("NotDummy"=alpha("#21577C",0.95),"Dummy"=alpha("#FFFFFF",0))
 errcols.trend <- c(alpha("#21577C",0.95))
+
 
 multianswer.fillcols.status <- list(Gender=c("HHH.male"=alpha("#253494",0.95),
                                              "HHH.female"=alpha("#7FCDBB",0.95)),
@@ -217,79 +321,99 @@ multianswer.fillcols.status <- list(Gender=c("HHH.male"=alpha("#253494",0.95),
                                               "ProteinFish.All"=alpha("#253494",0.95)))
 
 
-
-
-
-# ---- 3.2 MPA Impact Summary plot themes ----
+# ---- 2.2 MPA Impact Summary color schemes
 
 fill.cols.MPAimpact.summ <- c("MPA"=alpha("#1B448B",0.85),"Control"=alpha("#6B6B6B",0.4))
 err.cols.MPAimpact.summ <- c(alpha("#0A1D4E",0.5),alpha("#242424",0.25))
 
-snapshot.plot.theme.MPAimpact.summ <- theme(panel.background=element_blank(),
-                                            panel.grid.major.x=element_line(size=0.25,
-                                                                            colour="#D0D0D0D0"),
-                                            panel.grid.major.y=element_line(size=0.5,
-                                                                            colour="#D0D0D0D0"),
-                                            panel.grid.minor.x=element_blank(),
-                                            axis.ticks=element_blank(),
-                                            axis.text=element_text(size=11,
-                                                                   angle=0,
-                                                                   colour="#505050",
-                                                                   hjust=0.5),
-                                            axis.title=element_text(size=12,
-                                                                    angle=0,
-                                                                    face="bold",
-                                                                    colour="#505050"),
-                                            plot.title=element_text(colour="#505050",
-                                                                    face="bold",
-                                                                    size=14),
-                                            panel.border=element_rect(size=0.5,
-                                                                      colour="#D0D0D0",
-                                                                      linetype=3,
-                                                                      fill=NA))
 
-plot.theme.MPAimpact.summ <- theme(axis.ticks=element_blank(),
-                                   axis.text=element_text(vjust=0.5,
-                                                          size=rel(1),
-                                                          colour="#505050"),
-                                   axis.title.y=element_text(face="bold",
-                                                             size=rel(1),
-                                                             angle=90,
-                                                             colour="#505050"),
-                                   axis.title.x=element_blank(),
-                                   plot.title=element_blank(),
-                                   panel.background=element_rect(fill="white",
-                                                                 colour="#D0D0D0"),
-                                   panel.grid.major.x=element_blank(),
-                                   panel.grid.major.y=element_line(size=0.5,
-                                                                   colour="#808080",
-                                                                   linetype=3),
-                                   panel.grid.minor.y=element_blank(),
-                                   panel.border=element_rect(fill=NA,
-                                                             colour="#D0D0D0"))
-
-fs.st.plot.theme.MPAimpact.summ <- theme(axis.ticks.x=element_blank(),
-                                         axis.ticks.y=element_line(colour="#505050"),
-                                         axis.text=element_text(vjust=0.5,
-                                                                size=rel(1.1),
-                                                                colour="#505050"),
-                                         axis.title.y=element_text(face="bold",
-                                                                   size=rel(1.15),
-                                                                   angle=90,
-                                                                   colour="#505050"),
-                                         axis.title.x=element_blank(),
-                                         plot.title=element_blank(),
-                                         panel.background=element_rect(fill="white",
-                                                                       colour="#D0D0D0"),
-                                         panel.grid.major.x=element_blank(),
-                                         panel.grid.major.y=element_blank(),
-                                         panel.grid.minor.y=element_blank(),
-                                         panel.border=element_rect(fill=NA,
-                                                                   colour="#D0D0D0"))
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 3: Plotting Labels ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
 
 
-# ---- 3.3 MPA Technical Report plot legend guide ----
+# ---- 3.1 MPA Comprehensive Technical Report plot labels ----
 
+Statusplot.labs <- list(FS=labs(y="Mean household food security",x="Settlement"),
+                        MA=labs(y="Mean household assets",x="Settlement"),
+                        PA=labs(y="Mean place attachment",x="Settlement"),
+                        MT=labs(y="Mean household marine tenure",x="Settlement"),
+                        SE=labs(y="School enrollment (% children ages 5-18 years old)",x="Settlement"),
+                        Time=labs(y="Distance to market (hours)",x="Settlement"),
+                        Unwell=labs(y="Mean time suffering from illness or injury in past 4 weeks (days)",
+                                    x="Settlement"),
+                        Gender=labs(y="Gender (% head of household)",x="Settlement"),
+                        Religion=labs(y="Religion (% head of household)",x="Settlement"),
+                        PrimaryOcc=labs(y="Primary occupation (% households)",x="Settlement"),
+                        FreqFish=labs(y="Frequency of fishing (% households)",x="Settlement"),
+                        FreqSellFish=labs(y="Frequency of selling at least some catch (% households)",
+                                          x="Settlement"),
+                        FishProtein=labs(y="Dietary protein from fish in past 6 months (% households)",
+                                         x="Settlement"),
+                        IncFish=labs(y="Income from fishing in past 6 months (% households)",
+                                     x="Settlement"),
+                        FishTech=labs(y="Fishing technique most often used in past 6 months (% households)",
+                                      x="Settlement"),
+                        ChildFS=labs(y="Child hunger (% households)",x="Settlement"),
+                        Ethnicity=labs(y="Mean number of ethnicities (Settlement ethnicity frequency)",x="Settlement"),
+                        AdultEduc=labs(y="Education completed (% adults 18 years and older)",x="Settlement"),
+                        HHHEduc=labs(y="Education completed (% household heads)",x="Settlement"),
+                        EconStatus=labs(y="Change in economic status of fishing households (% households)",x="Settlement"),
+                        Conflict=labs(y="Perceive change in level of social conflict over marine resources in past 12 months (% households)",x="Settlement"),
+                        NumLocalThreats=labs(y="Percent of respondents identifying threats to marine environement",x="Settlement"),
+                        ThreatTypes=labs(y="Percent of local threats to marine environment identified",x="Settlement"),
+                        Member=labs(y="Households who are a member of an organization",x="Settlement"),
+                        Attendance=labs(y="Households who are a member of an organization and have attended a meeting",x="Settlement"),
+                        Contribution=labs(y="Mean household contribution (Indonesian Rupiah)",x="Settlement"),
+                        FSCategorical= labs(y="Food security by category (% households)",x="Settlement"),
+                        Rules= labs(y="Percent of important species or habitats subject to specific harvest rule",x="Settlement"),
+                        Ill = labs(y="Illness or Injury in the past 4 weeks (% individuals)", x="Settlement"),
+                        Participation= labs(y="Percent of important user groups participating in marine resource decisions",x="Settlement"))
+
+
+continuous.variables.plotlabs <- c("Mean household food security","Mean household assets",
+                                   "Mean place attachment","Mean household marine tenure",
+                                   "School enrollment (% children ages 5-18 years old)", "Distance to market (hours)",
+                                   "Mean time suffering from illness or injury in past 4 weeks (days)")
+
+
+# ---- 3.2 MPA Impact Summary "Big Five" plot labels ----
+
+plot.fs.labs.st <- labs(y="Household Food Security\n ",title="STATUS AND TREND")
+plot.ma.labs.st <- labs(y="Household Material Assets\n ",title="STATUS AND TREND")
+plot.pa.labs.st <- labs(y="Household Place Attachment\n ",title="STATUS AND TREND")
+plot.mt.labs.st <- labs(y="Household Marine Tenure\n ",title="STATUS AND TREND")
+plot.se.labs.st <- labs(y="Enrollment Rate\n ",title="STATUS AND TREND")
+
+plot.fs.labs.i <- labs(x="",y="Change in Household Food Security\nsince Baseline",title="")
+plot.ma.labs.i <- labs(x="",y="Change in Household Material Assets\nsince Baseline",title="")
+plot.pa.labs.i <- labs(x="",y="Change in Household Place Attachment\nsince Baseline",title="")
+plot.mt.labs.i <- labs(x="",y="Change in Household Marine Tenure\nsince Baseline",title="")
+plot.se.labs.i <- labs(x="",y="Change in Enrollment Rate\nsince Baseline",title="")
+
+plot.ma.hh.labs.i <- labs(x="",y="Change in Household Assets\nsince Baseline",title="Household assets sub-class")
+plot.ma.boatnomotor.labs.i <- labs(x="",y="Change in Motor-less Boat Assets\nsince Baseline",title="Motor-less boat assets sub-class")
+plot.ma.boatmotor.labs.i <- labs(x="",y="Change in Motorized Boat Assets\nsince Baseline",title="Motorized boat assets sub-class")
+plot.ma.vehicles.labs.i <- labs(x="",y="Change in Land Vehicle Assets\nsince Baseline",title="Land vehicle assets sub-class")
+
+impact.x.labs <- c("MPA\nHouseholds","Control\nHouseholds")
+
+
+
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 4: Plot Legend Guides ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+
+# ---- 4.1 MPA Comprehensive Technical Report plot legend guide ----
 
 plot.guides.techreport <- guides(alpha=guide_legend(title.hjust=1,
                                                     title.theme=element_text(face="bold",
@@ -340,14 +464,7 @@ plot.guides.techreport <- guides(alpha=guide_legend(title.hjust=1,
                                                                              colour="#505050"),
                                                     label.hjust=0.6))
 
-# - Function to create common legend between multiple ggplots
-g_legend<- function(a.gplot){
-  tmp <- ggplot_gtable(ggplot_build(a.gplot))
-  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
-  legend <- tmp$grobs[[leg]]
-  return(legend)}
-
-# ---- 3.4 MPA Impact Summary plot legend guide ----
+# ---- 4.2 MPA Impact Summary plot legend guides ----
 
 plot.guides.MPAimpact.summ <- guides(size=guide_legend(title=element_blank(),
                                                        label.theme=element_text(size=9,
@@ -414,94 +531,12 @@ snapshot.plot.guide.MPAimpact.summ <- guides(fill=guide_legend(order=1,
                                                                    label=F))
 
 
-# ---- 3.5 MPA continuous variables distribution plot theme ----
 
-dist.plot.theme <- theme(axis.ticks=element_blank(),
-                         plot.title=element_text(face="bold",
-                                                 colour="#303030",
-                                                 hjust=0.5),
-                         panel.background=element_rect(fill="white",
-                                                       colour="#909090"),
-                         panel.border=element_rect(fill=NA,
-                                                   size=0.25,
-                                                   colour="#C0C0C0"),
-                         panel.grid.major.x=element_line(colour="#C0C0C0",
-                                                         size=0.25),
-                         panel.grid.major.y=element_line(colour="#C0C0C0",
-                                                         size=0.25,
-                                                         linetype=3),
-                         axis.title=element_text(size=11,
-                                                 angle=0,
-                                                 face="bold",
-                                                 colour="#303030"),
-                         axis.text=element_text(size=10,
-                                                angle=0,
-                                                colour="#303030"))
-
-# ---- 3.6 MPA Technical Report plot labels ----
-
-Statusplot.labs <- list(FS=labs(y="Mean household food security",x="Settlement"),
-                        MA=labs(y="Mean household assets",x="Settlement"),
-                        PA=labs(y="Mean place attachment",x="Settlement"),
-                        MT=labs(y="Mean household marine tenure",x="Settlement"),
-                        SE=labs(y="School enrollment (% children ages 5-18 years old)",x="Settlement"),
-                        Time=labs(y="Distance to market (hours)",x="Settlement"),
-                        Unwell=labs(y="Mean time suffering from illness or injury in past 4 weeks (days)",
-                                    x="Settlement"),
-                        Gender=labs(y="Gender (% head of household)",x="Settlement"),
-                        Religion=labs(y="Religion (% head of household)",x="Settlement"),
-                        PrimaryOcc=labs(y="Primary occupation (% households)",x="Settlement"),
-                        FreqFish=labs(y="Frequency of fishing (% households)",x="Settlement"),
-                        FreqSellFish=labs(y="Frequency of selling at least some catch (% households)",
-                                          x="Settlement"),
-                        FishProtein=labs(y="Dietary protein from fish in past 6 months (% households)",
-                                         x="Settlement"),
-                        IncFish=labs(y="Income from fishing in past 6 months (% households)",
-                                     x="Settlement"),
-                        FishTech=labs(y="Fishing technique most often used in past 6 months (% households)",
-                                      x="Settlement"),
-                        ChildFS=labs(y="Child hunger (% households)",x="Settlement"),
-                        Ethnicity=labs(y="Mean number of ethnicities (Settlement ethnicity frequency)",x="Settlement"),
-                        AdultEduc=labs(y="Education completed (% adults 18 years and older)",x="Settlement"),
-                        HHHEduc=labs(y="Education completed (% household heads)",x="Settlement"),
-                        EconStatus=labs(y="Change in economic status of fishing households (% households)",x="Settlement"),
-                        Conflict=labs(y="Perceive change in level of social conflict over marine resources in past 12 months (% households)",x="Settlement"),
-                        NumLocalThreats=labs(y="Percent of respondents identifying threats to marine environement",x="Settlement"),
-                        ThreatTypes=labs(y="Percent of local threats to marine environment identified",x="Settlement"),
-                        Member=labs(y="Households who are a member of an organization",x="Settlement"),
-                        Attendance=labs(y="Households who are a member of an organization and have attended a meeting",x="Settlement"),
-                        Contribution=labs(y="Mean household contribution (Indonesian Rupiah)",x="Settlement"),
-                        FSCategorical= labs(y="Food security by category (% households)",x="Settlement"),
-                        Rules= labs(y="Percent of important species or habitats subject to specific harvest rule",x="Settlement"),
-                        Ill = labs(y="Illness or Injury in the past 4 weeks (% individuals)", x="Settlement"),
-                        Participation= labs(y="Percent of important user groups participating in marine resource decisions",x="Settlement"))
-
-
-continuous.variables.plotlabs <- c("Mean household food security","Mean household assets",
-                                   "Mean place attachment","Mean household marine tenure",
-                                   "School enrollment (% children ages 5-18 years old)", "Distance to market (hours)",
-                                   "Mean time suffering from illness or injury in past 4 weeks (days)")
-
-
-# ---- 3.7 MPA Impact Summary "Big Five" plot labels ----
-
-plot.fs.labs.st <- labs(y="Household Food Security\n ",title="STATUS AND TREND")
-plot.ma.labs.st <- labs(y="Household Material Assets\n ",title="STATUS AND TREND")
-plot.pa.labs.st <- labs(y="Household Place Attachment\n ",title="STATUS AND TREND")
-plot.mt.labs.st <- labs(y="Household Marine Tenure\n ",title="STATUS AND TREND")
-plot.se.labs.st <- labs(y="Enrollment Rate\n ",title="STATUS AND TREND")
-
-plot.fs.labs.i <- labs(x="",y="Change in Household Food Security\nsince Baseline",title="")
-plot.ma.labs.i <- labs(x="",y="Change in Household Material Assets\nsince Baseline",title="")
-plot.pa.labs.i <- labs(x="",y="Change in Household Place Attachment\nsince Baseline",title="")
-plot.mt.labs.i <- labs(x="",y="Change in Household Marine Tenure\nsince Baseline",title="")
-plot.se.labs.i <- labs(x="",y="Change in Enrollment Rate\nsince Baseline",title="")
-
-plot.ma.hh.labs.i <- labs(x="",y="Change in Household Assets\nsince Baseline",title="Household assets sub-class")
-plot.ma.boatnomotor.labs.i <- labs(x="",y="Change in Motor-less Boat Assets\nsince Baseline",title="Motor-less boat assets sub-class")
-plot.ma.boatmotor.labs.i <- labs(x="",y="Change in Motorized Boat Assets\nsince Baseline",title="Motorized boat assets sub-class")
-plot.ma.vehicles.labs.i <- labs(x="",y="Change in Land Vehicle Assets\nsince Baseline",title="Land vehicle assets sub-class")
-
-impact.x.labs <- c("MPA\nHouseholds","Control\nHouseholds")
+# - Function to create common legend between multiple ggplots
+g_legend<- function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)}
 
 
