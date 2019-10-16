@@ -43,7 +43,11 @@ Statusplot.sigpos <-
 
 # ---- 1.3 Define Alor-specific plot labels, with significance asterisks ----
 
-Trendplot.monitoryear.labs <- (define.year.monitoryear.column(Sett.level.ContData.annex.PLOTFORMAT))
+Trendplot.monitoryear.labs <- 
+  define.year.monitoryear.column(Sett.level.ContData.annex.PLOTFORMAT)
+
+Trendplot.monitoryear.labs <- rep(paste(Trendplot.monitoryear.labs[1],"\n\n\n\n",Trendplot.monitoryear.labs[2]),2)
+
 Annexplot.monitoryear.labs <- rev(define.year.monitoryear.column(Sett.level.ContData.annex.PLOTFORMAT))
 
 Conttrendplot.ylabs <- 
@@ -70,7 +74,11 @@ Trendplot.labs <- list(FS=labs(y=as.character(Conttrendplot.ylabs["FSMean"]),x="
                        IncFish=labs(y=as.character(Proptrendplot.ylabs["Income from fishing in past 6 months (% households)"]),x="Monitoring Year"),
                        FishTech=labs(y=as.character(Proptrendplot.ylabs["Fishing technique most often used in past 6 months (% households)"]),x="Monitoring Year"),
                        ChildFS=labs(y=as.character(Proptrendplot.ylabs["Child hunger (% households)"]),x="Monitoring Year"),
-                       Protein=labs(y=as.character(Proptrendplot.ylabs["Dietary protein from fish in past 6 months (% households)"]),x="Monitoring Year"))
+                       Protein=labs(y=as.character(Proptrendplot.ylabs["Dietary protein from fish in past 6 months (% households)"]),x="Monitoring Year"),
+                       EconStatus=labs(y=as.character(Proptrendplot.ylabs["Change in economic status of fishing households (% households)"])),
+                       NumLocalThreats=labs(y=as.character(Proptrendplot.ylabs["Number of identified local threats to marine environment (% households)"])),
+                       SecondaryOcc=labs(y=as.character(Proptrendplot.ylabs["Secondary occupation (% households)"])),
+                       OccDiverse=labs(y=as.character(Proptrendplot.ylabs["Occupational diversity (% households)"])))
 
 Annexplot.settnames <- 
   define.annexplot.settname.labels(annex.sigvals)
@@ -744,296 +752,140 @@ FSCategorical.statusplot <-
                     labels=c("Food insecure with hunger", "Food insecure without hunger","Food secure" )) +
   coord_flip() + plot.theme + Statusplot.labs["FSCategorical"] + plot.guides.techreport
 
-# # - ADULT EDUCATION
-# AdultEduc.statusplot <- 
-#   melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
-#        id.vars="SettlementName",measure.vars=c("AdultEducHigher", "AdultEducSec", "AdultEducMid",
-#                                                "AdultEducPrim", "AdultEducPre", "AdultEducNone")) %>%
-#   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
-#   geom_bar(stat="identity",
-#            position="fill",
-#            width=0.75,
-#            size=0.15,
-#            colour="#505050") +
-#   geom_vline(aes(xintercept=3),
-#              linetype=2,
-#              size=0.35,
-#              colour="#505050") +
-#   scale_y_continuous(expand=c(0,0),
-#                      labels=scales::percent_format()) +
-#   scale_fill_manual(name="",
-#                     values=multianswer.fillcols.status[["AdultEducation"]],
-#                     labels=c("Further or higher education","High school education","Middle school education","Primary school education","Pre-school education", "No formal education")) +
-#   coord_flip() + plot.theme + Statusplot.labs["AdultEduc"] + plot.guides.techreport
-# 
-# 
-# # - HOUSEHOLD HEAD EDUCATION
-# HHHEduc.statusplot <- 
-#   melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
-#        id.vars="SettlementName",measure.vars=c("HHHEducHigher", "HHHEducSec", "HHHEducMid",
-#                                                "HHHEducPrim", "HHHEducPre", "HHHEducNone")) %>%
-#   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
-#   geom_bar(stat="identity",
-#            position="fill",
-#            width=0.75,
-#            size=0.15,
-#            colour="#505050") +
-#   geom_vline(aes(xintercept=3),
-#              linetype=2,
-#              size=0.35,
-#              colour="#505050") +
-#   scale_y_continuous(expand=c(0,0),
-#                      labels=scales::percent_format()) +
-#   scale_fill_manual(name="",
-#                     values=multianswer.fillcols.status[["HHHEducation"]],
-#                     labels=c("Further or higher education","High school education","Middle school education","Primary school education","Pre-school education", "No formal education")) +
-#   coord_flip() + plot.theme + Statusplot.labs["HHHEduc"] + plot.guides.techreport
-# 
-# 
-# # - ECONOMIC STATUS
-# EconStatus.statusplot <- 
-#   melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
-#        id.vars="SettlementName",measure.vars=c("Econ.Status.Much.Better","Econ.Status.Slightly.Better",
-#                                                "Econ.Status.Neutral","Econ.Status.Slighly.Worse",
-#                                                "Econ.Status.Much.Worse")) %>%
-#   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
-#   geom_bar(stat="identity",
-#            position="fill",
-#            width=0.75,
-#            size=0.15,
-#            colour="#505050") +
-#   geom_vline(aes(xintercept=3),
-#              linetype=2,
-#              size=0.35,
-#              colour="#505050") +
-#   scale_y_continuous(expand=c(0,0),
-#                      labels=scales::percent_format()) +
-#   scale_fill_manual(name="",
-#                     values=multianswer.fillcols.status[["EconStatus"]],
-#                     labels=c("Much better","Slightly better","Neither better or worse","Slightly worse","Much worse")) +
-#   coord_flip() + plot.theme + Statusplot.labs["EconStatus"] + plot.guides.techreport
-# 
-# # - RULES
-# Rules.statusplot <- 
-#   melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
-#        id.vars="SettlementName",measure.vars=c("PropRuleHab", "PropRuleSpp")) %>%
-#   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
-#   geom_bar(stat="identity",
-#            position="dodge",
-#            width=0.75,
-#            size=0.15,
-#            colour="#505050") +
-#   geom_vline(aes(xintercept=3),
-#              linetype=2,
-#              size=0.35,
-#              colour="#505050") +
-#   scale_y_continuous(expand = c(0, 0), limits=c(0,100)) +
-#   scale_fill_manual(name="",
-#                     values=multianswer.fillcols.status[["PropRules"]],
-#                     labels=c("Important species","Important habitats")) +
-#   coord_flip() + plot.theme + Statusplot.labs["Rules"] + plot.guides.techreport
-# 
-# # - PARTICIPATION IN DECISION-MAKING
-# Participation.statusplot <- 
-#   melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
-#        id.vars="SettlementName",measure.vars=c("ParticipateRules","ParticipateBnd","ParticipateOrg", "ParticipateEstablish")) %>%
-#   filter(., SettlementName!= "Control\nSettlements") %>%
-#   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
-#   geom_bar(stat="identity",
-#            position="dodge",
-#            width=0.75,
-#            size=0.15,
-#            colour="#505050") +
-#   geom_vline(aes(xintercept=2),
-#              linetype=2,
-#              size=0.35,
-#              colour="#505050") +
-#   scale_y_continuous(expand = c(0, 0), limits=c(0,100)) +
-#   scale_fill_manual(name="",
-#                     values=multianswer.fillcols.status[["Participate"]],
-#                     labels=c("Setting appropriation rules", "MPA boundary delineation", "Design of MPA management body", "Design of MPA-managing organization")) +
-#   coord_flip() + plot.theme + Statusplot.labs["Participation"] + plot.guides.techreport
-# 
-# # - MEMBER OF MARINE RESOURCE ORGANIZATION
-# Member.statusplot <- 
-#   melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
-#        id.vars="SettlementName",measure.vars=c("Member.No","Member.Yes")) %>%
-#   ggplot(aes(x=SettlementName,
-#              y=value)) +
-#   geom_bar(aes(fill=variable),
-#            stat="identity",
-#            position="fill",
-#            width=0.75,
-#            size=0.15,
-#            colour="#505050") +
-#   geom_vline(aes(xintercept=3),
-#              linetype=2,
-#              size=0.35,
-#              colour="#505050") +
-#   scale_y_continuous(expand=c(0,0),
-#                      labels=scales::percent_format()) +
-#   scale_fill_manual(name="",
-#                     values=multianswer.fillcols.status[["Member"]],
-#                     labels=c("Non-member","Member")) +
-#   coord_flip() + plot.theme + Statusplot.labs["Member"] + plot.guides.techreport
-# 
-# 
-# # - MEETING ATTENDANCE
-# Meeting.statusplot <- 
-#   melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
-#        id.vars="SettlementName",measure.vars=c("Prop.Member.Yes.Meeting.No", "Prop.Member.Yes.Meeting.Yes")) %>%
-#   ggplot(aes(x=SettlementName,
-#              y=value)) +
-#   geom_bar(aes(fill=variable),
-#            stat="identity",
-#            position="fill",
-#            width=0.75,
-#            size=0.15,
-#            colour="#505050") +
-#   geom_vline(aes(xintercept=3),
-#              linetype=2,
-#              size=0.35,
-#              colour="#505050") +
-#   scale_y_continuous(expand=c(0,0),
-#                      labels=scales::percent_format()) +
-#   scale_fill_manual(name="",
-#                     values=multianswer.fillcols.status[["Attendance"]],
-#                     labels=c("Have not attended a meeting","Attended a meeting")) +
-#   coord_flip() + plot.theme + Statusplot.labs["Attendance"] + plot.guides.techreport
-# 
-# # - ILLNESS
-# Illness.statusplot <- 
-#   melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
-#        id.vars="SettlementName",measure.vars=c("Percent.Not.Ill", "Percent.Ill")) %>%
-#   ggplot(aes(x=SettlementName,
-#              y=value)) +
-#   geom_bar(aes(fill=variable),
-#            stat="identity",
-#            position="fill",
-#            width=0.75,
-#            size=0.15,
-#            colour="#505050") +
-#   geom_vline(aes(xintercept=3),
-#              linetype=2,
-#              size=0.35,
-#              colour="#505050") +
-#   scale_y_continuous(expand=c(0,0),
-#                      labels=scales::percent_format()) +
-#   scale_fill_manual(name="",
-#                     values=multianswer.fillcols.status[["Illness"]],
-#                     labels=c("Ill or injured ","Not Ill or injured")) +
-#   coord_flip() + plot.theme + Statusplot.labs["Ill"] + plot.guides.techreport
-# 
-# # - MARINE RESOUCE CONFLICT
-# Conflict.statusplot <- 
-#   melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
-#        id.vars="SettlementName",measure.vars=c("Percent.GreatlyDecreased.SocConflict","Percent.Decreased.SocConflict",
-#                                                "Percent.Same.SocConflict","Percent.Increased.SocConflict",
-#                                                "Percent.GreatlyIncreased.SocConflict")) %>%
-#   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
-#   geom_bar(stat="identity",
-#            position="fill",
-#            width=0.75,
-#            size=0.15,
-#            colour="#505050") +
-#   geom_vline(aes(xintercept=3),
-#              linetype=2,
-#              size=0.35,
-#              colour="#505050") +
-#   scale_y_continuous(expand=c(0,0),
-#                      labels=scales::percent_format()) +
-#   scale_fill_manual(name="",
-#                     values=multianswer.fillcols.status[["SocialConflict"]],
-#                     labels=c("Greatly decreased","Decreased","Neither increased or decreased","Increased","Greatly Increased")) +
-#   coord_flip() + plot.theme + Statusplot.labs["Conflict"] + plot.guides.techreport
-# 
-# # - NUMBER OF LOCAL THREATS
-# NumThreat.statusplot <- 
-#   melt(Alor.SBSPropData.Techreport.status.PLOTFORMAT,
-#        id.vars="SettlementName",measure.vars=c("Threat.Minimum.Five","Threat.Four", "Threat.Three",
-#                                                "Threat.Two","Threat.One","Threat.None")) %>%
-#   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
-#   geom_bar(stat="identity",
-#            position="fill",
-#            width=0.75,
-#            size=0.15,
-#            colour="#505050") +
-#   geom_vline(aes(xintercept=3),
-#              linetype=2,
-#              size=0.35,
-#              colour="#505050") +
-#   scale_y_continuous(expand=c(0,0),
-#                      labels=scales::percent_format()) +
-#   scale_fill_manual(name="",
-#                     values=multianswer.fillcols.status[["NumThreats"]],
-#                     labels=c("More than five threats","Four threats","Three threats","Two threats","One threat", "No threats")) +
-#   coord_flip() + plot.theme + Statusplot.labs["NumLocalThreats"] + plot.guides.techreport
-# 
-# 
-# # - THREAT TYPES
-# ThreatType.statusplot <- 
-#   melt(Alor.Threat.Types.PLOTFORMAT,
-#        id.vars="SettlementName",measure.vars=c("Other", "OtherMarineUses", "NaturalProcesses", "HabitatLoss", 
-#                                                "ClimateChange", "IllegalFishing", "DestructiveFishing", "Pollution")) %>%
-#   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
-#   geom_bar(stat="identity",
-#            position="fill",
-#            width=0.75,
-#            size=0.15,
-#            colour="#505050") +
-#   geom_vline(aes(xintercept=3),
-#              linetype=2,
-#              size=0.35,
-#              colour="#505050") +
-#   scale_y_continuous(expand=c(0,0),
-#                      labels=scales::percent_format()) +
-#   scale_fill_manual(name="",
-#                     values=multianswer.fillcols.status[["ThreatType"]],
-#                     labels=c("Other", "Other marine resource uses", "Natural processes", "Habitat loss", 
-#                              "Climate change", "Illegal fishing", "Destructive fishing", "Pollution")) +
-#   coord_flip() + plot.theme + Statusplot.labs["ThreatTypes"] + plot.guides.techreport
-# 
-# 
-# # - NUMBER ETHNICITIES
-# Ethnicity.statusplot <- ggplot(data=Alor.SBSPropData.Techreport.status.PLOTFORMAT,
-#                                     aes(x=SettlementName)) +
-#   geom_bar(aes(y=Num.EthnicGroups,
-#                fill="NotDummy"),
-#            stat="identity",
-#            position="dodge",
-#            width=0.75,
-#            show.legend=F) +
-#   geom_vline(aes(xintercept=3),
-#              linetype=2,
-#              size=0.35,
-#              colour="#505050") +
-#   scale_y_continuous(expand=c(0,0),
-#                      limits=c(0,max(Alor.SBSPropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T) + 
-#                                 0.03*max(Alor.SBSPropData.Techreport.status.PLOTFORMAT$Num.EthnicGroups,na.rm=T))) +
-#   scale_fill_manual(values=fillcols.status) +
-#   scale_colour_manual(values=errcols.status) +
-#   coord_flip() + Statusplot.labs["Ethnicity"] + plot.theme
-# 
-# 
-# # - MARINE GROUP CONTRIBUTION
-# Contribution.statusplot <- ggplot(data=Alor.SBSPropData.Techreport.status.PLOTFORMAT,
-#                                        aes(x=SettlementName)) +
-#   geom_bar(aes(y=Contribution,
-#                fill="NotDummy"),
-#            stat="identity",
-#            position="dodge",
-#            width=0.75,
-#            show.legend=F) +
-#   geom_vline(aes(xintercept=3),
-#              linetype=2,
-#              size=0.35,
-#              colour="#505050") +
-#   scale_y_continuous(expand=c(0,0),
-#                      limits=c(0,max(Alor.SBSPropData.Techreport.status.PLOTFORMAT$Contribution,na.rm=T) + 
-#                                 1.5* max(Alor.SBSPropData.Techreport.status.PLOTFORMAT$Contribution,na.rm=T)), labels = scales::comma) +
-#   scale_fill_manual(values=fillcols.status) +
-#   scale_colour_manual(values=errcols.status) +
-#   coord_flip() + Statusplot.labs["Contribution"] + plot.theme
+# - ECONOMIC STATUS
+EconStatus.statusplot <-
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName",measure.vars=c("Econ.Status.Much.Better","Econ.Status.Slightly.Better",
+                                               "Econ.Status.Neutral","Econ.Status.Slighly.Worse",
+                                               "Econ.Status.Much.Worse")) %>%
+  ggplot(aes(x=SettlementName,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["EconStatus"]],
+                    labels=c("Much better","Slightly better","Neither better nor worse","Slightly worse","Much worse")) +
+  coord_flip() + plot.theme + Statusplot.labs["EconStatus"] + plot.guides.techreport
+
+# - MEMBER OF MARINE RESOURCE ORGANIZATION
+MarineMember.statusplot <-
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName",measure.vars=c("MarineMember.No","MarineMember.Yes")) %>%
+  ggplot(aes(x=SettlementName,
+             y=value)) +
+  geom_bar(aes(fill=variable),
+           stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["MarineMember"]],
+                    labels=c("Non-member","Member")) +
+  coord_flip() + plot.theme + Statusplot.labs["MarineMember"] + plot.guides.techreport
+
+# - MEETING ATTENDANCE
+MarineMeeting.statusplot <-
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName",measure.vars=c("MarineMeeting.No", "MarineMeeting.Yes")) %>%
+  ggplot(aes(x=SettlementName,
+             y=value)) +
+  geom_bar(aes(fill=variable),
+           stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["MarineAttendance"]],
+                    labels=c("Have not attended a meeting","Attended a meeting")) +
+  coord_flip() + plot.theme + Statusplot.labs["MarineAttendance"] + plot.guides.techreport
+
+# - MARINE RESOUCE CONFLICT
+SocialConflict.statusplot <-
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName",measure.vars=c("Percent.GreatlyDecreased.SocConflict","Percent.Decreased.SocConflict",
+                                               "Percent.Same.SocConflict","Percent.Increased.SocConflict",
+                                               "Percent.GreatlyIncreased.SocConflict")) %>%
+  ggplot(aes(x=SettlementName,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["SocialConflict"]],
+                    labels=c("Greatly decreased","Decreased","Neither increased nor decreased","Increased","Greatly Increased")) +
+  coord_flip() + plot.theme + Statusplot.labs["SocialConflict"] + plot.guides.techreport
+
+# - NUMBER OF LOCAL THREATS
+NumThreat.statusplot <-
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName",measure.vars=c("Threat.Minimum.Five","Threat.Four", "Threat.Three",
+                                               "Threat.Two","Threat.One","Threat.None")) %>%
+  ggplot(aes(x=SettlementName,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["NumLocalThreats"]],
+                    labels=c("More than four threats","Four threats","Three threats","Two threats","One threat", "No threats")) +
+  coord_flip() + plot.theme + Statusplot.labs["NumLocalThreats"] + plot.guides.techreport
+
+# - MARINE GROUP CONTRIBUTION
+MarineContribution.statusplot <- 
+  ggplot(data=Sett.level.PropData.status.PLOTFORMAT,
+         aes(x=SettlementName)) +
+  geom_bar(aes(y=MarineContribution,
+               fill="NotDummy"),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(Sett.level.PropData.status.PLOTFORMAT$Contribution,na.rm=T) +
+                                1.5* max(Sett.level.PropData.status.PLOTFORMAT$Contribution,na.rm=T)), labels = scales::comma) +
+  scale_fill_manual(values=fillcols.status) +
+  scale_colour_manual(values=errcols.status) +
+  coord_flip() + Statusplot.labs["MarineContribution"] + plot.theme
 
 
 # 
@@ -1049,32 +901,41 @@ FSCategorical.statusplot <-
 
 # - FOOD SECURITY 
 FS.trendplot <- 
-  ggplot(MPA.level.ContData.trend.PLOTFORMAT
-         [!is.na(MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear),]) +
+  ggplot(MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
+         aes(x=SettlementName)) +
   geom_hline(aes(yintercept=1.56),size=0.25,colour="#505050") +
   geom_hline(aes(yintercept=4.02),size=0.25,colour="#505050") +
-  geom_bar(aes(x=MonitoringYear,
-               y=FSMean),
-           fill=fillcols.trend,
+  geom_bar(aes(y=FSMean,
+               group=MonitoringYear,
+               fill=Treatment),
            stat="identity",
-           position="dodge",
-           width=0.65) +
+           position=position_dodge(width=0.75),
+           width=0.65,
+           show.legend=F) +
   geom_errorbar(aes(ymin=FSMean-FSErr,
                     ymax=FSMean+FSErr,
-                    x=MonitoringYear),
-                colour=errcols.trend,
+                    group=MonitoringYear,
+                    colour=Treatment),
                 width=0.15,
                 size=0.5,
-                position=position_dodge(width=1)) +
-  geom_text(aes(x=length(MonitoringYear)+0.46,y=(0.5*(6.06-4.02))+4.02,label="Food secure"),
+                position=position_dodge(width=0.75),
+                show.legend=F) +
+  geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=(0.5*(6.06-4.02))+4.02,label="Food secure"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_text(aes(x=length(MonitoringYear)+0.46,y=(0.5*(4.02-1.56))+1.56,label="Food insecure\nwithout hunger"),
+  geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=(0.5*(4.02-1.56))+1.56,label="Food insecure\nwithout hunger"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_text(aes(x=length(MonitoringYear)+0.46,y=0.5*1.56,label="Food insecure\nwith hunger"),
+  geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=0.5*1.56,label="Food insecure\nwith hunger"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
+  geom_text(aes(x=1.6,y=max(FSMean)+1.5,label="Treatment",fontface=2),
+            size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
+  geom_text(aes(x=1.47,y=max(FSMean)+1.5,label="Control",fontface=2),
+            size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,6.06)) +
   scale_x_discrete(labels=Trendplot.monitoryear.labs) +
+  scale_fill_manual(values=fillcols.cont.trend) +
+  scale_colour_manual(values=errcols.cont.trend) +
   coord_flip() + Trendplot.labs["FS"] + theme(axis.ticks=element_blank(),
                                                    panel.background=element_rect(fill="white",
                                                                                  colour="#909090"),
@@ -1422,6 +1283,70 @@ Proteinfish.trendplot <-
                     values=multianswer.fillcols.status[["Protein"]],
                     labels=c("All","Most","About half","Some","None")) +
   coord_flip() + plot.theme + Trendplot.labs["Protein"] + plot.guides.techreport
+
+# - ECONOMIC STATUS 
+EconStatus.trendplot <- 
+  melt(MPA.level.PropData.trend.PLOTFORMAT,
+       id.vars="MonitoringYear",measure.vars=c("Econ.Status.Much.Better","Econ.Status.Slightly.Better",
+                                               "Econ.Status.Neutral","Econ.Status.Slighly.Worse",
+                                               "Econ.Status.Much.Worse")) %>%
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.65,
+           size=0.15,
+           colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_x_discrete(labels=Trendplot.monitoryear.labs) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["EconStatus"]],
+                    labels=c("Much better","Slightly better","Neither better nor worse","Slightly worse","Much worse")) +
+  coord_flip() + plot.theme + Trendplot.labs["EconStatus"] + plot.guides.techreport
+
+# - NUMBER OF LOCAL THREATS
+NumThreat.trendplot <- 
+  melt(MPA.level.PropData.trend.PLOTFORMAT,
+       id.vars="MonitoringYear",measure.vars=c("Threat.Minimum.Five","Threat.Four", "Threat.Three",
+                                               "Threat.Two","Threat.One","Threat.None")) %>%
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.65,
+           size=0.15,
+           colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_x_discrete(labels=Trendplot.monitoryear.labs) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["NumLocalThreats"]],
+                    labels=c("More than four threats","Four threats","Three threats","Two threats","One threat", "No threats")) +
+  coord_flip() + plot.theme + Trendplot.labs["Protein"] + plot.guides.techreport
+
+# - SECONDARY OCCUPATION
+
+# - OCCUPATIONAL DIVERSITY
+OccDiverse.trendplot <-
+  melt(MPA.level.PropData.trend.PLOTFORMAT,
+       id.vars=c("MonitoringYear"),measure.vars=c("Percent.MultipleOcc.Diverse","Percent.OneOcc.Diverse")) %>%
+  ggplot(aes(x=rev(MonitoringYear),y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.8,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
+  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+            size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
+  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+            size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_x_discrete(labels=trendplot.x.labs) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["OccDiverse"]],
+                    labels=c("Multiple Occupations","One Occupation")) +
+  coord_flip() + plot.theme + labs(y="Occupational diversity (% households)", x="Monitoring Year",title="") + plot.guides.techreport 
 
 
 # 

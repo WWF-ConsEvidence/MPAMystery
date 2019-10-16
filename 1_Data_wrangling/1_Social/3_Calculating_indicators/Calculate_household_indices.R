@@ -94,3 +94,11 @@ HHData <-
             DaysUnwell=sum(DaysUnwell,na.rm=T)/length(HouseholdID)) %>%
   left_join(HHData,.,by="HouseholdID")
 
+
+HHData <- 
+  Organization %>% 
+  group_by(HouseholdID) %>%
+  summarise(NumMarineGroup=length(HouseholdID),
+            MarineMeetingSum=ifelse(length(MarineMeeting[is.na(MarineMeeting)==T])==NumMarineGroup,NA,sum(MarineMeeting,na.rm=T)),
+            MarineContribution=ifelse(length(MarineContribution[is.na(MarineContribution)==T])==NumMarineGroup,NA,sum(MarineContribution,na.rm=T))) %>%
+  left_join(HHData,.,by="HouseholdID")

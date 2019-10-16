@@ -106,12 +106,6 @@ Sett.Level.Means <-
             UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)),
             TimeMarketMean=mean(TimeMarket,na.rm=T),
             TimeMarketErr=sd(TimeMarket,na.rm=T)/sqrt(length(TimeMarket)),
-            Percent.Increased.SocConflict=(length(SocialConflict[(SocialConflict==1 | SocialConflict==2) &
-                                                                   !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
-            Percent.Decreased.SocConflict=(length(SocialConflict[(SocialConflict==4 | SocialConflict==5) &
-                                                                   !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
-            Percent.NoChange.SocConflict=(length(SocialConflict[SocialConflict==3 &
-                                                                  !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
             MTManage=mean(RightsManage,na.rm=T),
             MTHarvest=mean(RightsHarvest,na.rm=T),
             MTAccess=mean(RightsAccess,na.rm=T),
@@ -122,23 +116,60 @@ Sett.Level.Means <-
             Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex>=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
             Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
             Percent.SecondaryOcc.Fish=(length(SecondaryLivelihood[SecondaryLivelihood==3 &
-                                                                !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+                                                                    !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
             Percent.SecondaryOcc.Farm=(length(SecondaryLivelihood[SecondaryLivelihood==1 &
-                                                                !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+                                                                    !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
             Percent.SecondaryOcc.WageLabor=(length(SecondaryLivelihood[SecondaryLivelihood==7 &
-                                                                     !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
-            Percent.SecondaryOcc.HarvestForest=(length(SecondaryLivelihood[SecondaryLivelihood==2 &
                                                                          !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.HarvestForest=(length(SecondaryLivelihood[SecondaryLivelihood==2 &
+                                                                             !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
             Percent.SecondaryOcc.Tourism=(length(SecondaryLivelihood[SecondaryLivelihood==6 &
-                                                                   !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
-            Percent.SecondaryOcc.Aquaculture=(length(SecondaryLivelihood[SecondaryLivelihood==4 &
                                                                        !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+            Percent.SecondaryOcc.Aquaculture=(length(SecondaryLivelihood[SecondaryLivelihood==4 &
+                                                                           !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
             Percent.SecondaryOcc.Extraction=(length(SecondaryLivelihood[SecondaryLivelihood==5 &
-                                                                      !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
+                                                                          !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
             Percent.SecondaryOcc.Other=(length(SecondaryLivelihood[SecondaryLivelihood==996 & !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
-            Percent.OneOcc=(length(HouseholdID[!is.na(PrimaryLivelihood) & is.na(SecondaryLivelihood) & is.na(TertiaryLivelihood)])/length(HouseholdID[!is.na(PrimaryLivelihood)]))*100,
-            Percent.MultipleOcc=(length(HouseholdID[!is.na(PrimaryLivelihood) & (!is.na(SecondaryLivelihood) | !is.na(TertiaryLivelihood))])/length(HouseholdID[!is.na(PrimaryLivelihood)]))*100)
-
+            Percent.OneOcc.Diverse=(length(HouseholdID[!is.na(PrimaryLivelihood) & is.na(SecondaryLivelihood) & is.na(TertiaryLivelihood)])/length(HouseholdID[!is.na(PrimaryLivelihood)]))*100,
+            Percent.MultipleOcc.Diverse=(length(HouseholdID[!is.na(PrimaryLivelihood) & (!is.na(SecondaryLivelihood) | !is.na(TertiaryLivelihood))])/length(HouseholdID[!is.na(PrimaryLivelihood)]))*100,
+            Econ.Status.Much.Worse=(length(EconStatusTrend[EconStatusTrend==1 & !is.na(EconStatusTrend)])/length(EconStatusTrend[!is.na(EconStatusTrend)]))*100,
+            Econ.Status.Slighly.Worse=(length(EconStatusTrend[EconStatusTrend==2 & !is.na(EconStatusTrend)])/length(EconStatusTrend[!is.na(EconStatusTrend)]))*100,
+            Econ.Status.Neutral=(length(EconStatusTrend[EconStatusTrend==3 & !is.na(EconStatusTrend)])/length(EconStatusTrend[!is.na(EconStatusTrend)]))*100,
+            Econ.Status.Slightly.Better=(length(EconStatusTrend[EconStatusTrend==4 & !is.na(EconStatusTrend)])/length(EconStatusTrend[!is.na(EconStatusTrend)]))*100,
+            Econ.Status.Much.Better=(length(EconStatusTrend[EconStatusTrend==5 & !is.na(EconStatusTrend)])/length(EconStatusTrend[!is.na(EconStatusTrend)]))*100,
+            Threat.Mean=mean(NumLocalThreat, na.rm = T),
+            Threat.None=(length(NumLocalThreat[NumLocalThreat==0 & !is.na(NumLocalThreat)])/length(NumLocalThreat[!is.na(NumLocalThreat)]))*100,
+            Threat.One=(length(NumLocalThreat[NumLocalThreat==1 & !is.na(NumLocalThreat)])/length(NumLocalThreat[!is.na(NumLocalThreat)]))*100,
+            Threat.Two=(length(NumLocalThreat[NumLocalThreat==2 & !is.na(NumLocalThreat)])/length(NumLocalThreat[!is.na(NumLocalThreat)]))*100,
+            Threat.Three=(length(NumLocalThreat[NumLocalThreat==3 & !is.na(NumLocalThreat)])/length(NumLocalThreat[!is.na(NumLocalThreat)]))*100,
+            Threat.Four=(length(NumLocalThreat[NumLocalThreat==4 & !is.na(NumLocalThreat)])/length(NumLocalThreat[!is.na(NumLocalThreat)]))*100,
+            Threat.Minimum.Five =(length(NumLocalThreat[NumLocalThreat>=5 & !is.na(NumLocalThreat)])/length(NumLocalThreat[!is.na(NumLocalThreat)]))*100,
+            MarineMember.No=(length(MarineGroup[MarineGroup==0 & !is.na(MarineGroup)])/
+                               length(MarineGroup[!is.na(MarineGroup)]))*100,
+            MarineMember.Yes=(length(MarineGroup[MarineGroup==1 &
+                                                   !is.na(MarineGroup)])/
+                                length(MarineGroup[!is.na(MarineGroup)]))*100,
+            Num.MarineMember.Yes=length(MarineGroup[MarineGroup>0 & !is.na(MarineGroup)]),
+            Num.MarineMember.No=length(MarineGroup[MarineGroup==0 & !is.na(MarineGroup)]),
+            MarineMeeting.No=(length(MarineMeetingSum[MarineMeetingSum==0 &
+                                                        !is.na(MarineMeetingSum)])/
+                                length(MarineMeetingSum[!is.na(MarineMeetingSum)]))*100,
+            MarineMeeting.Yes=(length(MarineMeetingSum[MarineMeetingSum>0 &
+                                                         !is.na(MarineMeetingSum)])/
+                                 length(MarineMeetingSum[!is.na(MarineMeetingSum)]))*100,
+            Num.MarineMeeting.Yes=length(MarineMeetingSum[MarineMeetingSum>0 & !is.na(MarineMeetingSum)]),
+            Num.MarineMeeting.No=length(MarineMeetingSum[MarineMeetingSum==0 & !is.na(MarineMeetingSum)]),
+            MarineContribution=mean(MarineContribution, na.rm = T),
+            Percent.GreatlyIncreased.SocConflict=(length(SocialConflict[(SocialConflict==1) &
+                                                                          !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            Percent.Increased.SocConflict=(length(SocialConflict[(SocialConflict==2) &
+                                                                   !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            Percent.Same.SocConflict=(length(SocialConflict[(SocialConflict==3) &
+                                                              !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            Percent.Decreased.SocConflict=(length(SocialConflict[(SocialConflict==4) &
+                                                                   !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            Percent.GreatlyDecreased.SocConflict=(length(SocialConflict[SocialConflict==5 &
+                                                                          !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100)
 # Sett.Level.Means <- Sett.Level.Means[!is.na(Sett.Level.Means$SettlementID),]
 
 
@@ -232,12 +263,6 @@ MPA.Level.Means <-
             UnwellErr=sd(DaysUnwell,na.rm=T)/sqrt(length(DaysUnwell)),
             TimeMarketMean=mean(TimeMarket,na.rm=T),
             TimeMarketErr=sd(TimeMarket,na.rm=T)/sqrt(length(TimeMarket)),
-            Percent.Increased.SocConflict=(length(SocialConflict[(SocialConflict==1 | SocialConflict==2) &
-                                                                   !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
-            Percent.Decreased.SocConflict=(length(SocialConflict[(SocialConflict==4 | SocialConflict==5) &
-                                                                   !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
-            Percent.NoChange.SocConflict=(length(SocialConflict[SocialConflict==3 &
-                                                                  !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
             MTManage=mean(RightsManage,na.rm=T),
             MTHarvest=mean(RightsHarvest,na.rm=T),
             MTAccess=mean(RightsAccess,na.rm=T),
@@ -262,8 +287,47 @@ MPA.Level.Means <-
             Percent.SecondaryOcc.Extraction=(length(SecondaryLivelihood[SecondaryLivelihood==5 &
                                                                           !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
             Percent.SecondaryOcc.Other=(length(SecondaryLivelihood[SecondaryLivelihood==996 & !is.na(SecondaryLivelihood)])/length(SecondaryLivelihood[!is.na(SecondaryLivelihood)]))*100,
-            Percent.OneOcc=(length(HouseholdID[!is.na(PrimaryLivelihood) & is.na(SecondaryLivelihood) & is.na(TertiaryLivelihood)])/length(HouseholdID[!is.na(PrimaryLivelihood)]))*100,
-            Percent.MultipleOcc=(length(HouseholdID[!is.na(PrimaryLivelihood) & (!is.na(SecondaryLivelihood) | !is.na(TertiaryLivelihood))])/length(HouseholdID[!is.na(PrimaryLivelihood)]))*100)
+            Percent.OneOcc.Diverse=(length(HouseholdID[!is.na(PrimaryLivelihood) & is.na(SecondaryLivelihood) & is.na(TertiaryLivelihood)])/length(HouseholdID[!is.na(PrimaryLivelihood)]))*100,
+            Percent.MultipleOcc.Diverse=(length(HouseholdID[!is.na(PrimaryLivelihood) & (!is.na(SecondaryLivelihood) | !is.na(TertiaryLivelihood))])/length(HouseholdID[!is.na(PrimaryLivelihood)]))*100,
+            Econ.Status.Much.Worse=(length(EconStatusTrend[EconStatusTrend==1 & !is.na(EconStatusTrend)])/length(EconStatusTrend[!is.na(EconStatusTrend)]))*100,
+            Econ.Status.Slighly.Worse=(length(EconStatusTrend[EconStatusTrend==2 & !is.na(EconStatusTrend)])/length(EconStatusTrend[!is.na(EconStatusTrend)]))*100,
+            Econ.Status.Neutral=(length(EconStatusTrend[EconStatusTrend==3 & !is.na(EconStatusTrend)])/length(EconStatusTrend[!is.na(EconStatusTrend)]))*100,
+            Econ.Status.Slightly.Better=(length(EconStatusTrend[EconStatusTrend==4 & !is.na(EconStatusTrend)])/length(EconStatusTrend[!is.na(EconStatusTrend)]))*100,
+            Econ.Status.Much.Better=(length(EconStatusTrend[EconStatusTrend==5 & !is.na(EconStatusTrend)])/length(EconStatusTrend[!is.na(EconStatusTrend)]))*100,
+            Threat.Mean=mean(NumLocalThreat, na.rm = T),
+            Threat.None=(length(NumLocalThreat[NumLocalThreat==0 & !is.na(NumLocalThreat)])/length(NumLocalThreat[!is.na(NumLocalThreat)]))*100,
+            Threat.One=(length(NumLocalThreat[NumLocalThreat==1 & !is.na(NumLocalThreat)])/length(NumLocalThreat[!is.na(NumLocalThreat)]))*100,
+            Threat.Two=(length(NumLocalThreat[NumLocalThreat==2 & !is.na(NumLocalThreat)])/length(NumLocalThreat[!is.na(NumLocalThreat)]))*100,
+            Threat.Three=(length(NumLocalThreat[NumLocalThreat==3 & !is.na(NumLocalThreat)])/length(NumLocalThreat[!is.na(NumLocalThreat)]))*100,
+            Threat.Four=(length(NumLocalThreat[NumLocalThreat==4 & !is.na(NumLocalThreat)])/length(NumLocalThreat[!is.na(NumLocalThreat)]))*100,
+            Threat.Minimum.Five =(length(NumLocalThreat[NumLocalThreat>=5 & !is.na(NumLocalThreat)])/length(NumLocalThreat[!is.na(NumLocalThreat)]))*100,
+            MarineMember.No=(length(MarineGroup[MarineGroup==0 & !is.na(MarineGroup)])/
+                         length(MarineGroup[!is.na(MarineGroup)]))*100,
+            MarineMember.Yes=(length(MarineGroup[MarineGroup==1 &
+                                              !is.na(MarineGroup)])/
+                          length(MarineGroup[!is.na(MarineGroup)]))*100,
+            Num.MarineMember.Yes=length(MarineGroup[MarineGroup>0 & !is.na(MarineGroup)]),
+            Num.MarineMember.No=length(MarineGroup[MarineGroup==0 & !is.na(MarineGroup)]),
+            MarineMeeting.No=(length(MarineMeetingSum[MarineMeetingSum==0 &
+                                                  !is.na(MarineMeetingSum)])/
+                          length(MarineMeetingSum[!is.na(MarineMeetingSum)]))*100,
+            MarineMeeting.Yes=(length(MarineMeetingSum[MarineMeetingSum>0 &
+                                                   !is.na(MarineMeetingSum)])/
+                           length(MarineMeetingSum[!is.na(MarineMeetingSum)]))*100,
+            Num.MarineMeeting.Yes=length(MarineMeetingSum[MarineMeetingSum>0 & !is.na(MarineMeetingSum)]),
+            Num.MarineMeeting.No=length(MarineMeetingSum[MarineMeetingSum==0 & !is.na(MarineMeetingSum)]),
+            MarineContributionErr=sd(MarineContribution,na.rm=T)/sqrt(length(MarineContribution)),
+            MarineContribution=mean(MarineContribution, na.rm = T),
+            Percent.GreatlyIncreased.SocConflict=(length(SocialConflict[(SocialConflict==1) &
+                                                                          !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            Percent.Increased.SocConflict=(length(SocialConflict[(SocialConflict==2) &
+                                                                   !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            Percent.Same.SocConflict=(length(SocialConflict[(SocialConflict==3) &
+                                                              !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            Percent.Decreased.SocConflict=(length(SocialConflict[(SocialConflict==4) &
+                                                                   !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
+            Percent.GreatlyDecreased.SocConflict=(length(SocialConflict[SocialConflict==5 &
+                                                                          !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100)
 
 MPA.Level.Means <- MPA.Level.Means[!is.na(MPA.Level.Means$MPAID),]
 

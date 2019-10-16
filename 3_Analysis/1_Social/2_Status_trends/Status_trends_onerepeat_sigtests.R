@@ -50,20 +50,14 @@ MPA.Sett.Means <-
 # - Frequency tables for chi-square tests
 
 FreqTables <- 
-  HHData %>%
+  HHData[HHData$Treatment==1,] %>%
   group_by(MonitoringYear) %>%
-  summarise(PrimaryOcc.Fish=length(PrimaryLivelihood[PrimaryLivelihood==3 &
-                                                       !is.na(PrimaryLivelihood)]),
-            PrimaryOcc.Farm=length(PrimaryLivelihood[PrimaryLivelihood==1 &
-                                                       !is.na(PrimaryLivelihood)]),
-            PrimaryOcc.WageLabor=length(PrimaryLivelihood[PrimaryLivelihood==7 &
-                                                            !is.na(PrimaryLivelihood)]),
-            PrimaryOcc.HarvestForest=length(PrimaryLivelihood[PrimaryLivelihood==2 &
-                                                                !is.na(PrimaryLivelihood)]),
-            PrimaryOcc.Tourism=length(PrimaryLivelihood[PrimaryLivelihood==6 &
-                                                          !is.na(PrimaryLivelihood)]),
-            PrimaryOcc.Other=length(PrimaryLivelihood[(PrimaryLivelihood==996 | PrimaryLivelihood==4 | 
-                                                         PrimaryLivelihood==5) & !is.na(PrimaryLivelihood)]),
+  summarise(PrimaryOcc.Fish=length(PrimaryLivelihood[PrimaryLivelihood==3 &  !is.na(PrimaryLivelihood)]),
+            PrimaryOcc.Farm=length(PrimaryLivelihood[PrimaryLivelihood==1 & !is.na(PrimaryLivelihood)]),
+            PrimaryOcc.WageLabor=length(PrimaryLivelihood[PrimaryLivelihood==7 & !is.na(PrimaryLivelihood)]),
+            PrimaryOcc.HarvestForest=length(PrimaryLivelihood[PrimaryLivelihood==2 & !is.na(PrimaryLivelihood)]),
+            PrimaryOcc.Tourism=length(PrimaryLivelihood[PrimaryLivelihood==6 & !is.na(PrimaryLivelihood)]),
+            PrimaryOcc.Other=length(PrimaryLivelihood[(PrimaryLivelihood==996 | PrimaryLivelihood==4 |  PrimaryLivelihood==5) & !is.na(PrimaryLivelihood)]),
             FreqFish.AlmostNever=length(FreqFish[FreqFish==1 & !is.na(FreqFish)]),
             FreqFish.FewTimesPer6Mo=length(FreqFish[FreqFish==2 & !is.na(FreqFish)]),
             FreqFish.FewTimesPerMo=length(FreqFish[FreqFish==3 & !is.na(FreqFish)]),
@@ -90,7 +84,28 @@ FreqTables <-
             ProteinFish.Some=length(PercentProteinFish[PercentProteinFish==2 & !is.na(PercentProteinFish)]),
             ProteinFish.Half=length(PercentProteinFish[PercentProteinFish==3 & !is.na(PercentProteinFish)]),
             ProteinFish.Most=length(PercentProteinFish[PercentProteinFish==4 & !is.na(PercentProteinFish)]),
-            ProteinFish.All=length(PercentProteinFish[PercentProteinFish==5 &  !is.na(PercentProteinFish)]))
+            ProteinFish.All=length(PercentProteinFish[PercentProteinFish==5 &  !is.na(PercentProteinFish)]),
+            Econ.Status.Much.Worse=length(EconStatusTrend[EconStatusTrend==1 & !is.na(EconStatusTrend)]),
+            Econ.Status.Slighly.Worse=length(EconStatusTrend[EconStatusTrend==2 & !is.na(EconStatusTrend)]),
+            Econ.Status.Neutral=length(EconStatusTrend[EconStatusTrend==3 & !is.na(EconStatusTrend)]),
+            Econ.Status.Slightly.Better=length(EconStatusTrend[EconStatusTrend==4 & !is.na(EconStatusTrend)]),
+            Econ.Status.Much.Better=length(EconStatusTrend[EconStatusTrend==5 & !is.na(EconStatusTrend)]),
+            Threat.None=length(NumLocalThreat[NumLocalThreat==0 & !is.na(NumLocalThreat)]),
+            Threat.One=length(NumLocalThreat[NumLocalThreat==1 & !is.na(NumLocalThreat)]),
+            Threat.Two=length(NumLocalThreat[NumLocalThreat==2 & !is.na(NumLocalThreat)]),
+            Threat.Three=length(NumLocalThreat[NumLocalThreat==3 & !is.na(NumLocalThreat)]),
+            Threat.Four=length(NumLocalThreat[NumLocalThreat==4 & !is.na(NumLocalThreat)]),
+            Threat.Minimum.Five =length(NumLocalThreat[NumLocalThreat>=5 & !is.na(NumLocalThreat)]),
+            Percent.SecondaryOcc.Fish=length(SecondaryLivelihood[SecondaryLivelihood==3 & !is.na(SecondaryLivelihood)]),
+            Percent.SecondaryOcc.Farm=length(SecondaryLivelihood[SecondaryLivelihood==1 & !is.na(SecondaryLivelihood)]),
+            Percent.SecondaryOcc.WageLabor=length(SecondaryLivelihood[SecondaryLivelihood==7 & !is.na(SecondaryLivelihood)]),
+            Percent.SecondaryOcc.HarvestForest=length(SecondaryLivelihood[SecondaryLivelihood==2 & !is.na(SecondaryLivelihood)]),
+            Percent.SecondaryOcc.Tourism=length(SecondaryLivelihood[SecondaryLivelihood==6 & !is.na(SecondaryLivelihood)]),
+            Percent.SecondaryOcc.Aquaculture=length(SecondaryLivelihood[SecondaryLivelihood==4 & !is.na(SecondaryLivelihood)]),
+            Percent.SecondaryOcc.Extraction=length(SecondaryLivelihood[SecondaryLivelihood==5 & !is.na(SecondaryLivelihood)]),
+            Percent.SecondaryOcc.Other=length(SecondaryLivelihood[SecondaryLivelihood==996 & !is.na(SecondaryLivelihood)]),
+            Percent.OneOcc.Diverse=length(HouseholdID[!is.na(PrimaryLivelihood) & is.na(SecondaryLivelihood) & is.na(TertiaryLivelihood)]),
+            Percent.MultipleOcc.Diverse=length(HouseholdID[!is.na(PrimaryLivelihood) & (!is.na(SecondaryLivelihood) | !is.na(TertiaryLivelihood))]))
 
 FreqTables <- 
   as.data.frame(t(FreqTables[,-1]))
@@ -99,12 +114,16 @@ colnames(FreqTables) <- c("t0","repeat1")
 
 FreqTables$Category <- rownames(FreqTables)
 FreqTables$Variable <- ifelse(grepl("PrimaryOcc",FreqTables$Category)==T,"PrimaryOcc",
-                                   ifelse(grepl("SellFish",FreqTables$Category)==T,"SellFish",
-                                          ifelse(grepl("IncFish",FreqTables$Category)==T,"IncFish",
-                                                 ifelse(grepl("FishTech",FreqTables$Category)==T,"FishTech",
-                                                        ifelse(grepl("FreqFish",FreqTables$Category)==T,"FreqFish",
-                                                               ifelse(grepl("child",FreqTables$Category)==T,"child",
-                                                                      ifelse(grepl("Protein",FreqTables$Category)==T,"Protein",NA)))))))
+                              ifelse(grepl("SellFish",FreqTables$Category)==T,"SellFish",
+                                     ifelse(grepl("IncFish",FreqTables$Category)==T,"IncFish",
+                                            ifelse(grepl("FishTech",FreqTables$Category)==T,"FishTech",
+                                                   ifelse(grepl("FreqFish",FreqTables$Category)==T,"FreqFish",
+                                                          ifelse(grepl("child",FreqTables$Category)==T,"child",
+                                                                 ifelse(grepl("Protein",FreqTables$Category)==T,"Protein",
+                                                                        ifelse(grepl("Econ.Status",FreqTables$Category)==T,"EconStatus",
+                                                                               ifelse(grepl("Threat",FreqTables$Category)==T,"NumLocalThreats",
+                                                                                      ifelse(grepl("SecondaryOcc",FreqTables$Category)==T,"SecondaryOcc",
+                                                                                             ifelse(grepl("Occ.Diverse",FreqTables$Category)==T,"OccDiverse",NA)))))))))))
                                    
 
 # ---- 1.2 Define list of settlement names in MPA ----
@@ -485,7 +504,7 @@ trend.sigvals  <-
 colnames(trend.sigvals ) <- c("FSMean","FSErr","MAMean","MAErr","MTMean","MTErr","PAMean","PAErr","SEMean","SEErr",
                                   "TimeMarketMean","TimeMarketErr","UnwellMean","UnwellErr")
 
-trend.sigvals  <- cbind.data.frame(MonitoringYear="p.value", as.data.frame(t(unlist(trend.sigvals))))
+trend.sigvals  <- cbind.data.frame(MonitoringYear="p.value", SettlementName=NA, as.data.frame(t(unlist(trend.sigvals))))
 
 
 # ---- 4.4 Create function that will output TREND significance values for non-parametric variables, BY SETTLEMENT ----
@@ -544,7 +563,7 @@ data.for.function <- NA
 
 
 propdata.trend.test  <- 
-  as.data.frame(mapply(a=c("PrimaryOcc","FreqFish","SellFish","IncFish","FishTech","child","Protein"),
+  as.data.frame(mapply(a=c("PrimaryOcc","FreqFish","SellFish","IncFish","FishTech","child","Protein","EconStatus","NumLocalThreats","SecondaryOcc","OccDiverse"),
                        function(a) {
                          p.for.function <- 
                            if(sum(FreqTables$t0[FreqTables$Variable==a])==0) {
@@ -564,6 +583,9 @@ propdata.trend.test  <-
                                                                NA)
                          propdata.trend.test [a] <- ifelse(is.na(propdata.trend.test [a]),100,propdata.trend.test [a])
                        }))
+
 colnames(propdata.trend.test ) <- c("Primary occupation (% households)","Frequency of fishing (% households)","Frequency of selling at least some catch (% households)",
-                                          "Income from fishing in past 6 months (% households)","Fishing technique most often used in past 6 months (% households)","Child hunger (% households)","Dietary protein from fish in past 6 months (% households)")
+                                    "Income from fishing in past 6 months (% households)","Fishing technique most often used in past 6 months (% households)","Child hunger (% households)",
+                                    "Dietary protein from fish in past 6 months (% households)","Change in economic status of fishing households (% households)",
+                                    "Number of identified local threats to marine environment (% households)","Secondary occupation (% households)","Occupational diversity (% households)")
 

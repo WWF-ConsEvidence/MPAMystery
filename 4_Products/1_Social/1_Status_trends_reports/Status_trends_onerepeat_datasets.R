@@ -71,13 +71,21 @@ MPA.level.PropData.status <-
                       Prop.FishTech.StatLine, Prop.FishTech.MobileLine, Child.FS.no, 
                       Child.FS.yes, ProteinFish.None, ProteinFish.Some, 
                       ProteinFish.Half, ProteinFish.Most, ProteinFish.All,Percent.FoodInsecure.NoHunger,
-                      Percent.FoodInsecure.YesHunger,Percent.FoodSecure))
+                      Percent.FoodInsecure.YesHunger,Percent.FoodSecure, Percent.SecondaryOcc.Fish, 
+                      Percent.SecondaryOcc.Farm, Percent.SecondaryOcc.WageLabor, Percent.SecondaryOcc.HarvestForest,
+                      Percent.SecondaryOcc.Tourism, Percent.SecondaryOcc.Aquaculture, Percent.SecondaryOcc.Extraction,
+                      Percent.SecondaryOcc.Other, Percent.OneOcc.Diverse, Percent.MultipleOcc.Diverse, Econ.Status.Much.Worse,
+                      Econ.Status.Slighly.Worse, Econ.Status.Neutral, Econ.Status.Slightly.Better, Econ.Status.Much.Better,
+                      Threat.None, Threat.One, Threat.Two, Threat.Three, Threat.Four, Threat.Minimum.Five,
+                      MarineMember.No, MarineMember.Yes, MarineMeeting.No, MarineMeeting.Yes, MarineContribution, Percent.GreatlyIncreased.SocConflict,
+                      Percent.Increased.SocConflict, Percent.Same.SocConflict, Percent.Decreased.SocConflict, 
+                      Percent.GreatlyDecreased.SocConflict))
 
 
 # ---- 1.4 MPA-level continuous data (row to be added to bottom of status and annex plots in tech report) ----
 
 MPA.level.ContData.status <- 
-  data.frame(SettlementName=c("Control Settlements",MPA.name$MPAName),
+  data.frame(SettlementName=c("Control Settlements",as.character(MPA.name$MPAName)),
              MPA.Level.Means %>% filter(MonitoringYear==levels(MonitoringYear)[2]) %>% ungroup() %>%
                select(FSMean, FSErr, MAMean, MAErr, MTMean, MTErr, PAMean, PAErr, 
                       SEMean, SEErr, TimeMarketMean, TimeMarketErr, UnwellMean, UnwellErr))
@@ -85,8 +93,8 @@ MPA.level.ContData.status <-
 MPA.level.ContData.annex <- 
   data.frame(MonitoringYear=MPA.Level.Means$MonitoringYear,
              SettlementID=0,
-             SettlementName=c("Control Settlements",MPA.name$MPAName,
-                              "Control Settlements",MPA.name$MPAName),
+             SettlementName=c("Control Settlements",as.character(MPA.name$MPAName),
+                              "Control Settlements",as.character(MPA.name$MPAName)),
              MPA.Level.Means %>% ungroup() %>%
                select(FSMean, FSErr, MAMean, MAErr, MTMean, MTErr, PAMean, PAErr, 
                       SEMean, SEErr, TimeMarketMean, TimeMarketErr, UnwellMean, UnwellErr)) %>%
@@ -96,13 +104,19 @@ MPA.level.ContData.annex <-
 # ---- 1.5 Define null rows to be added to plotting data frames for formatting purposes ----
 
 null.row.PropData <- 
-  matrix(rep(NA,44),ncol=44,dimnames=list(NULL,colnames(MPA.level.PropData.status)))
+  data.frame(matrix(rep(NA,length(colnames(MPA.level.PropData.status))),
+                    ncol=length(colnames(MPA.level.PropData.status)),
+                    dimnames=list(NULL,colnames(MPA.level.PropData.status))))
 
 null.row.ContData <- 
-  cbind.data.frame(matrix(rep(NA,15),ncol=15,dimnames=list(NULL,colnames(MPA.level.ContData.status))))
+  cbind.data.frame(matrix(rep(NA,length(colnames(MPA.level.ContData.status))),
+                          ncol=length(colnames(MPA.level.ContData.status)),
+                          dimnames=list(NULL,colnames(MPA.level.ContData.status))))
 
 null.row.ContData.annex <-
-  cbind.data.frame(matrix(rep(NA,17),ncol=17,dimnames=list(NULL,colnames(MPA.level.ContData.annex))))
+  cbind.data.frame(matrix(rep(NA,length(colnames(MPA.level.ContData.annex))),
+                          ncol=length(colnames(MPA.level.ContData.annex)),
+                          dimnames=list(NULL,colnames(MPA.level.ContData.annex))))
 
 
 # 
@@ -135,7 +149,15 @@ Sett.level.PropData.status <-
          Prop.FishTech.StatLine, Prop.FishTech.MobileLine, Child.FS.no, 
          Child.FS.yes, ProteinFish.None, ProteinFish.Some, 
          ProteinFish.Half, ProteinFish.Most, ProteinFish.All,Percent.FoodInsecure.NoHunger,
-         Percent.FoodInsecure.YesHunger,Percent.FoodSecure) %>%
+         Percent.FoodInsecure.YesHunger,Percent.FoodSecure, Percent.SecondaryOcc.Fish, 
+         Percent.SecondaryOcc.Farm, Percent.SecondaryOcc.WageLabor, Percent.SecondaryOcc.HarvestForest,
+         Percent.SecondaryOcc.Tourism, Percent.SecondaryOcc.Aquaculture, Percent.SecondaryOcc.Extraction,
+         Percent.SecondaryOcc.Other, Percent.OneOcc.Diverse, Percent.MultipleOcc.Diverse, Econ.Status.Much.Worse,
+         Econ.Status.Slighly.Worse, Econ.Status.Neutral, Econ.Status.Slightly.Better, Econ.Status.Much.Better,
+         Threat.None, Threat.One, Threat.Two, Threat.Three, Threat.Four, Threat.Minimum.Five,
+         MarineMember.No, MarineMember.Yes, MarineMeeting.No, MarineMeeting.Yes, MarineContribution, Percent.GreatlyIncreased.SocConflict,
+         Percent.Increased.SocConflict, Percent.Same.SocConflict, Percent.Decreased.SocConflict, 
+         Percent.GreatlyDecreased.SocConflict) %>%
   .[rev(order(.$SettlementName)),]
 
 # - PLOT FORMAT DATA FRAME
@@ -174,10 +196,11 @@ Sett.level.ContData.status.PLOTFORMAT <-
 # ---- 2.3 Trend dataset for MPA-level proportional data ----
 
 MPA.level.PropData.trend.PLOTFORMAT <- 
-  data.frame(MPANameName=c("Control Settlements",MPA.name$MPAName,
-                           "Control Settlements",MPA.name$MPAName),
+  rbind.data.frame(data.frame(MPAName=c("Control Settlements",as.character(MPA.name$MPAName),
+                           "Control Settlements",as.character(MPA.name$MPAName)),
              MPA.Level.Means %>% ungroup() %>%
-               select(MonitoringYear, HHH.female, HHH.male, Percent.Rel.Christian, Percent.Rel.Muslim, Percent.Rel.Other, 
+               select(MonitoringYear, HHH.female, HHH.male, 
+                      Percent.Rel.Christian, Percent.Rel.Muslim, Percent.Rel.Other, 
                       Percent.PrimaryOcc.Fish, Percent.PrimaryOcc.Farm, Percent.PrimaryOcc.WageLabor, 
                       Percent.PrimaryOcc.HarvestForest, Percent.PrimaryOcc.Tourism, 
                       Percent.PrimaryOcc.Aquaculture, Percent.PrimaryOcc.Extraction,
@@ -191,17 +214,29 @@ MPA.level.PropData.trend.PLOTFORMAT <-
                       Prop.FishTech.StatLine, Prop.FishTech.MobileLine, Child.FS.no, 
                       Child.FS.yes, ProteinFish.None, ProteinFish.Some, 
                       ProteinFish.Half, ProteinFish.Most, ProteinFish.All,Percent.FoodInsecure.NoHunger,
-                      Percent.FoodInsecure.YesHunger,Percent.FoodSecure))
+                      Percent.FoodInsecure.YesHunger,Percent.FoodSecure, Percent.SecondaryOcc.Fish, 
+                      Percent.SecondaryOcc.Farm, Percent.SecondaryOcc.WageLabor, Percent.SecondaryOcc.HarvestForest,
+                      Percent.SecondaryOcc.Tourism, Percent.SecondaryOcc.Aquaculture, Percent.SecondaryOcc.Extraction,
+                      Percent.SecondaryOcc.Other, Percent.OneOcc.Diverse, Percent.MultipleOcc.Diverse, Econ.Status.Much.Worse,
+                      Econ.Status.Slighly.Worse, Econ.Status.Neutral, Econ.Status.Slightly.Better, Econ.Status.Much.Better,
+                      Threat.None, Threat.One, Threat.Two, Threat.Three, Threat.Four, Threat.Minimum.Five,
+                      MarineMember.No, MarineMember.Yes, MarineMeeting.No, MarineMeeting.Yes, MarineContribution, Percent.GreatlyIncreased.SocConflict,
+                      Percent.Increased.SocConflict, Percent.Same.SocConflict, Percent.Decreased.SocConflict, 
+                      Percent.GreatlyDecreased.SocConflict)),
+             data.frame(MPAName=NA,MonitoringYear=NA,null.row.PropData%>%select(-SettlementName))) %>%
+  mutate(order=c(1,4,2,5,3))
 
 
 # ---- 2.4 Trend dataset for MPA-level continuous data (with p values) ----
 
 MPA.level.ContData.trend.PLOTFORMAT <- 
- rbind.data.frame(MPA.level.ContData.annex %>% select(-c(SettlementName, SettlementID)),
+ rbind.data.frame(MPA.level.ContData.annex %>% select(-SettlementID),
                   trend.sigvals) %>%
   mutate(MonitoringYear=factor(MonitoringYear,
-                               levels=unique(MonitoringYear),
-                               ordered=T))
+                               levels=rev(unique(MonitoringYear)),
+                               ordered=T),
+         order=c(4,3,2,1,NA),
+         Treatment=ifelse(SettlementName=="Control Settlements","Control","MPA"))
 
 
 
