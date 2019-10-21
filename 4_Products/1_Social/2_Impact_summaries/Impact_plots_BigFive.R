@@ -35,31 +35,31 @@ source('2_Functions/3_Plotting/Function_plotthemes.R')
 
 # ---- 1.2 Call in MPA-specific impact outputs from DiD regression ----
 
-macp.flotim.impacts <- 
-  import('x_Flat_data_files/1_Social/Outputs/impact_analysis/Flores Timur/macp_plots_output.csv') %>%
-  filter(MPAID==16 & !(grepl("_z",Response))) %>%
+macp.alor.impacts <- 
+  import('x_Flat_data_files/1_Social/Outputs/impact_analysis/Alor/macp_plots_output.csv') %>%
+  filter(MPAID==15 & !(grepl("_z",Response))) %>%
   mutate(p.val=2*pnorm(-abs(z.score)),
          sig.labs=ifelse(p.val<=0.01,"*\n*\n*",
                          ifelse(p.val<=0.05 & p.val>0.01, "*\n*",
                                 ifelse(p.val<=0.1 & p.val>0.05, "*", ""))),
-         term=factor(term,ordered=T,levels=c("Impact","Treatment_Trend","Control_Trend"))) 
+         Group=factor(Group,ordered=T,levels=c("Impact","Treatment","Control"))) 
 
-macp.flotim.impacts.subclass <- 
-  import('x_Flat_data_files/1_Social/Outputs/impact_analysis/Flores Timur/macp_plots_output_Asset_subClasses.csv') %>%
-  subset(Response=="Household_asset" | Response=="BoatNoMotor" | Response=="Boats_motorized" | Response=="Vehicles") %>%
+macp.alor.impacts.subclass <- 
+  import('x_Flat_data_files/1_Social/Outputs/impact_analysis/Alor/macp_plots_output_Asset_subClasses.csv') %>%
+  subset(Response=="Household_asset" | Response=="BoatNoMotor" | Response=="Boats_motor" | Response=="Vehicles") %>%
   mutate(p.val=2*pnorm(-abs(z.score)),
          sig.labs=ifelse(p.val<=0.01,"*\n*\n*",
                          ifelse(p.val<=0.05 & p.val>0.01, "*\n*",
                                 ifelse(p.val<=0.1 & p.val>0.05, "*", ""))),
-         term=factor(term,ordered=T,levels=c("Impact","Treatment_Trend","Control_Trend"))) 
+         Group=factor(Group,ordered=T,levels=c("Impact","Treatment","Control"))) 
 
-macp.flotim.allimpacts <- 
-  rbind.data.frame(macp.flotim.impacts,macp.flotim.impacts.subclass)
+macp.alor.allimpacts <- 
+  rbind.data.frame(macp.alor.impacts,macp.alor.impacts.subclass)
 
 # ---- 1.3 Calculate plot-specific variables for Big Five & Assets sub-classes ----
 
-impact.arrows <- data.frame(mapply(i=t(macp.flotim.allimpacts%>%filter(term=="Treatment_Trend")%>%select(estimate)),
-                                            j=t(macp.flotim.allimpacts%>%filter(term=="Control_Trend")%>%select(estimate)),
+impact.arrows <- data.frame(mapply(i=t(macp.alor.allimpacts%>%filter(Group=="Treatment")%>%select(estimate)),
+                                            j=t(macp.alor.allimpacts%>%filter(Group=="Control")%>%select(estimate)),
                                             function(i,j){
                                               if(i>0 & j>0 & i>j) {seq(i-(0.1*(i-j)),j+(0.1*(i-j)),length.out=4)} else
                                                 if(i>0 & j>0 & i<j) {seq(i+(0.1*(j-i)),j-(0.1*(j-i)),length.out=4)} else
@@ -69,13 +69,13 @@ impact.arrows <- data.frame(mapply(i=t(macp.flotim.allimpacts%>%filter(term=="Tr
                                                         if(i>0 & j<0) {seq(i-(0.1*(abs(j-i))),j+(0.1*(abs(j-i))),length.out=4)} else {NA}
                                             }),
                                      x=rep(0.3,4)) %>%
-  rename(FS=X1,MA=X2,MT=X3,PA=X4,SE=X5,HHAsset=X6,BoatNoMotor=X7,BoatMotor=X8,Vehicle=X9)
+  rename(FS=X1,MA=X2,MT=X3,PA=X4,SE=X5,HHAsset=X6,BoatMotor=X7,BoatNoMotor=X8,Vehicle=X9)
 
 
-plotrange <- mapply(imin=t(macp.flotim.allimpacts%>%filter(term=="Treatment_Trend")%>%select(estimate)),
-                         imax=t(macp.flotim.allimpacts%>%filter(term=="Treatment_Trend")%>%select(estimate)),
-                         jmin=t(macp.flotim.allimpacts%>%filter(term=="Control_Trend")%>%select(estimate)),
-                         jmax=t(macp.flotim.allimpacts%>%filter(term=="Control_Trend")%>%select(estimate)),
+plotrange <- mapply(imin=t(macp.alor.allimpacts%>%filter(Group=="Treatment")%>%select(estimate)),
+                         imax=t(macp.alor.allimpacts%>%filter(Group=="Treatment")%>%select(estimate)),
+                         jmin=t(macp.alor.allimpacts%>%filter(Group=="Control")%>%select(estimate)),
+                         jmax=t(macp.alor.allimpacts%>%filter(Group=="Control")%>%select(estimate)),
                          function(imin,imax,jmin,jmax){
                            max <- ifelse((imax>0 & jmax<=0) | (imax>0 & jmax>0 & imax>jmax),imax,
                                              ifelse((imax<=0 & jmax>0) | (imax>0 & jmax>0 & imax<jmax),jmax,0))
@@ -84,9 +84,9 @@ plotrange <- mapply(imin=t(macp.flotim.allimpacts%>%filter(term=="Treatment_Tren
                            abs(max)+abs(min)
                          })
 
-sig.pos <- data.frame(TwoYr=mapply(i=t(macp.flotim.allimpacts%>%filter(term=="Treatment_Trend")%>%select(estimate)),
-                                        j=t(macp.flotim.allimpacts%>%filter(term=="Control_Trend")%>%select(estimate)),
-                                        k=t(macp.flotim.allimpacts%>%filter(term=="Impact")%>%select(sig.labs)),
+sig.pos <- data.frame(TwoYr=mapply(i=t(macp.alor.allimpacts%>%filter(Group=="Treatment")%>%select(estimate)),
+                                        j=t(macp.alor.allimpacts%>%filter(Group=="Control")%>%select(estimate)),
+                                        k=t(macp.alor.allimpacts%>%filter(Group=="Impact")%>%select(sig.labs)),
                                         range=plotrange+plotrange*0.6,
                                         function(i,j,k,range){
                                           if(k=="*\n*\n*" & i<j) {i-0.03*range} else
@@ -97,21 +97,21 @@ sig.pos <- data.frame(TwoYr=mapply(i=t(macp.flotim.allimpacts%>%filter(term=="Tr
                                                     if(k=="*" & i>j) {i+0.01*range} else {0}
                                         }))
 
-rownames(sig.pos) <- c("FS","MA","MT","PA","SE","HHAsset","BoatNoMotor","BoatMotor","Vehicle")
+rownames(sig.pos) <- c("FS","MA","MT","PA","SE","HHAsset","BoatMotor","BoatNoMotor","Vehicle")
 
 
 
-fill.cols.MPAimpacts <- c("Treatment_Trend"=alpha("#2C7FB8",0.95),"Control_Trend"=alpha("#9B9B9B",0.95))
-
+fill.cols.MPAimpacts <- c("Treatment"=alpha("#2C7FB8",0.95),"Control"=alpha("#9B9B9B",0.95))
+err.cols.MPAimpacts <- c("Treatment"=alpha("#1B4D6F",0.7),"Control"=alpha("#242424",0.7))
 
 # -- EXAMPLE IMPACT PLOT FOR INTERPRETATION GUIDE --
 
 
 MPAimpact.summ.example.i <- ggplot(data=data.frame(Response=rep("Indicator",2),
-                                                   term=factor(c("Treatment_Trend","Control_Trend"),ordered=T, levels=c("Treatment_Trend","Control_Trend")),
+                                                   Group=factor(c("Treatment","Control"),ordered=T, levels=c("Treatment","Control")),
                                                    estimate=c(1,-0.8)),
-                              aes(x=term,y=estimate)) +
-  geom_bar(aes(fill=term),
+                              aes(x=Group,y=estimate)) +
+  geom_bar(aes(fill=Group),
            stat="identity",
            position="dodge",
            width=0.9,
@@ -120,16 +120,16 @@ MPAimpact.summ.example.i <- ggplot(data=data.frame(Response=rep("Indicator",2),
              linetype="longdash",
              colour="#303030",
              show.legend=F) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Control_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Control"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Treatment_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Treatment"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.3,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.3,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
   geom_point(data=data.frame(x=rep(0.3,4),Indicator=c(0.7,0.3,-0.1,-0.5)),
@@ -165,28 +165,36 @@ MPAimpact.summ.example.i <- ggplot(data=data.frame(Response=rep("Indicator",2),
 
 # ---- 2.1 Food Security ----
 
-MPAimpact.summ.fs.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flotim.impacts$term) & 
-                                                              macp.flotim.impacts$Response=="FSIndex",],
-                                   aes(x=term,y=estimate)) +
-  geom_bar(aes(fill=term),
+MPAimpact.summ.fs.i <- ggplot(data=macp.alor.impacts[!grepl("Impact",macp.alor.impacts$Group) & 
+                                                              macp.alor.impacts$Response=="FSIndex",],
+                                   aes(x=Group,y=estimate)) +
+  geom_bar(aes(fill=Group),
            stat="identity",
            position="dodge",
            width=0.9,
            show.legend=F) +
+  geom_errorbar(aes(ymin=estimate-std.error,
+                    ymax=estimate+std.error,
+                    colour=Group),
+                stat="identity",
+                position="dodge",
+                width=0.055,
+                size=0.65,
+                show.legend=F) +
   geom_hline(aes(yintercept=0,size="Baseline Score"),
              linetype="longdash",
              colour="#303030",
              show.legend=F) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Control_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Control"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Treatment_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Treatment"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.3,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.3,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
   geom_point(data=impact.arrows,
@@ -195,17 +203,18 @@ MPAimpact.summ.fs.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flot
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["FS","TwoYr"],x=0.35,
-           label=macp.flotim.impacts%>%filter(term=="Impact" & Response=="FSIndex")%>%select(sig.labs),
+           label=macp.alor.impacts%>%filter(Group=="Impact" & Response=="FSIndex")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
   scale_fill_manual(labels=c("MPA","Control"),
                     values=fill.cols.MPAimpacts,
                     name="Group") +
+  scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.flotim.impacts%>%filter(term=="Treatment_Trend" & Response=="FSIndex")%>%select(estimate)>
-                                             macp.flotim.impacts%>%filter(term=="Control_Trend" & Response=="FSIndex")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(macp.alor.impacts%>%filter(Group=="Treatment" & Response=="FSIndex")%>%select(estimate)>
+                                             macp.alor.impacts%>%filter(Group=="Control" & Response=="FSIndex")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.fs.labs.i + plot.guides.MPAimpact.summ
@@ -213,28 +222,36 @@ MPAimpact.summ.fs.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flot
 
 # ---- 2.2 Material Assets ----
 
-MPAimpact.summ.ma.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flotim.impacts$term) & 
-                                                              macp.flotim.impacts$Response=="MAIndex",],
-                                   aes(x=term,y=estimate)) +
-  geom_bar(aes(fill=term),
+MPAimpact.summ.ma.i <- ggplot(data=macp.alor.impacts[!grepl("Impact",macp.alor.impacts$Group) & 
+                                                              macp.alor.impacts$Response=="MAIndex",],
+                                   aes(x=Group,y=estimate)) +
+  geom_bar(aes(fill=Group),
            stat="identity",
            position="dodge",
            width=0.9,
            show.legend=F) +
+  geom_errorbar(aes(ymin=estimate-std.error,
+                    ymax=estimate+std.error,
+                    colour=Group),
+                stat="identity",
+                position="dodge",
+                width=0.055,
+                size=0.65,
+                show.legend=F) +
   geom_hline(aes(yintercept=0,size="Baseline Score"),
              linetype="longdash",
              colour="#303030",
              show.legend=F) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Control_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Control"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Treatment_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Treatment"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.3,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.3,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
   geom_point(data=impact.arrows,
@@ -243,16 +260,17 @@ MPAimpact.summ.ma.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flot
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["MA","TwoYr"],x=0.35,
-           label=macp.flotim.impacts%>%filter(term=="Impact" & Response=="MAIndex")%>%select(sig.labs),
+           label=macp.alor.impacts%>%filter(Group=="Impact" & Response=="MAIndex")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
-  scale_fill_manual(labels=c("Treatment_Trend","Control_Trend"),
+  scale_fill_manual(labels=c("Treatment","Control"),
                     values=fill.cols.MPAimpacts) +
+  scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.flotim.impacts%>%filter(term=="Treatment_Trend" & Response=="MAIndex")%>%select(estimate)>
-                                             macp.flotim.impacts%>%filter(term=="Control_Trend" & Response=="MAIndex")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(macp.alor.impacts%>%filter(Group=="Treatment" & Response=="MAIndex")%>%select(estimate)>
+                                             macp.alor.impacts%>%filter(Group=="Control" & Response=="MAIndex")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.ma.labs.i + plot.guides.MPAimpact.summ
@@ -261,28 +279,36 @@ MPAimpact.summ.ma.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flot
 # -- Material assets sub-classes --
 # - Household items
 
-MPAimpact.summ.ma.hh.i <- ggplot(data=macp.flotim.allimpacts[!grepl("Impact",macp.flotim.allimpacts$term) & 
-                                                               macp.flotim.allimpacts$Response=="Household_asset",],
-                              aes(x=term,y=estimate)) +
-  geom_bar(aes(fill=term),
+MPAimpact.summ.ma.hh.i <- ggplot(data=macp.alor.allimpacts[!grepl("Impact",macp.alor.allimpacts$Group) & 
+                                                               macp.alor.allimpacts$Response=="Household_asset",],
+                              aes(x=Group,y=estimate)) +
+  geom_bar(aes(fill=Group),
            stat="identity",
            position="dodge",
            width=0.9,
            show.legend=F) +
+  geom_errorbar(aes(ymin=estimate-std.error,
+                    ymax=estimate+std.error,
+                    colour=Group),
+                stat="identity",
+                position="dodge",
+                width=0.055,
+                size=0.65,
+                show.legend=F) +
   geom_hline(aes(yintercept=0,size="Baseline Score"),
              linetype="longdash",
              colour="#303030",
              show.legend=F) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Control_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Control"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Treatment_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Treatment"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.3,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.3,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
   geom_point(data=impact.arrows,
@@ -291,16 +317,17 @@ MPAimpact.summ.ma.hh.i <- ggplot(data=macp.flotim.allimpacts[!grepl("Impact",mac
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["HHAsset","TwoYr"],x=0.35,
-           label=macp.flotim.allimpacts%>%filter(term=="Impact" & Response=="Household_asset")%>%select(sig.labs),
+           label=macp.alor.allimpacts%>%filter(Group=="Impact" & Response=="Household_asset")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
-  scale_fill_manual(labels=c("Treatment_Trend","Control_Trend"),
+  scale_fill_manual(labels=c("Treatment","Control"),
                     values=fill.cols.MPAimpacts) +
+  scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.flotim.allimpacts%>%filter(term=="Treatment_Trend" & Response=="Household_asset")%>%select(estimate)>
-                                             macp.flotim.allimpacts%>%filter(term=="Control_Trend" & Response=="Household_asset")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(macp.alor.allimpacts%>%filter(Group=="Treatment" & Response=="Household_asset")%>%select(estimate)>
+                                             macp.alor.allimpacts%>%filter(Group=="Control" & Response=="Household_asset")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.ma.hh.labs.i + plot.guides.MPAimpact.summ
@@ -308,28 +335,36 @@ MPAimpact.summ.ma.hh.i <- ggplot(data=macp.flotim.allimpacts[!grepl("Impact",mac
 
 # - Boats no motor
 
-MPAimpact.summ.ma.boatnomotor.i <- ggplot(data=macp.flotim.allimpacts[!grepl("Impact",macp.flotim.allimpacts$term) & 
-                                                               macp.flotim.allimpacts$Response=="BoatNoMotor",],
-                                 aes(x=term,y=estimate)) +
-  geom_bar(aes(fill=term),
+MPAimpact.summ.ma.boatnomotor.i <- ggplot(data=macp.alor.allimpacts[!grepl("Impact",macp.alor.allimpacts$Group) & 
+                                                               macp.alor.allimpacts$Response=="BoatNoMotor",],
+                                 aes(x=Group,y=estimate)) +
+  geom_bar(aes(fill=Group),
            stat="identity",
            position="dodge",
            width=0.9,
            show.legend=F) +
+  geom_errorbar(aes(ymin=estimate-std.error,
+                    ymax=estimate+std.error,
+                    colour=Group),
+                stat="identity",
+                position="dodge",
+                width=0.055,
+                size=0.65,
+                show.legend=F) +
   geom_hline(aes(yintercept=0,size="Baseline Score"),
              linetype="longdash",
              colour="#303030",
              show.legend=F) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Control_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Control"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Treatment_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Treatment"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.3,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.3,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
   geom_point(data=impact.arrows,
@@ -338,16 +373,17 @@ MPAimpact.summ.ma.boatnomotor.i <- ggplot(data=macp.flotim.allimpacts[!grepl("Im
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["BoatNoMotor","TwoYr"],x=0.35,
-           label=macp.flotim.allimpacts%>%filter(term=="Impact" & Response=="BoatNoMotor")%>%select(sig.labs),
+           label=macp.alor.allimpacts%>%filter(Group=="Impact" & Response=="BoatNoMotor")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
-  scale_fill_manual(labels=c("Treatment_Trend","Control_Trend"),
+  scale_fill_manual(labels=c("Treatment","Control"),
                     values=fill.cols.MPAimpacts) +
+  scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.flotim.allimpacts%>%filter(term=="Treatment_Trend" & Response=="Household_asset")%>%select(estimate)>
-                                             macp.flotim.allimpacts%>%filter(term=="Control_Trend" & Response=="Household_asset")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(macp.alor.allimpacts%>%filter(Group=="Treatment" & Response=="Household_asset")%>%select(estimate)>
+                                             macp.alor.allimpacts%>%filter(Group=="Control" & Response=="Household_asset")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.ma.boatnomotor.labs.i + plot.guides.MPAimpact.summ
@@ -355,28 +391,36 @@ MPAimpact.summ.ma.boatnomotor.i <- ggplot(data=macp.flotim.allimpacts[!grepl("Im
 
 # - Motorized boats
 
-MPAimpact.summ.ma.boatmotor.i <- ggplot(data=macp.flotim.allimpacts[!grepl("Impact",macp.flotim.allimpacts$term) & 
-                                                                        macp.flotim.allimpacts$Response=="Boats_motorized",],
-                                          aes(x=term,y=estimate)) +
-  geom_bar(aes(fill=term),
+MPAimpact.summ.ma.boatmotor.i <- ggplot(data=macp.alor.allimpacts[!grepl("Impact",macp.alor.allimpacts$Group) & 
+                                                                        macp.alor.allimpacts$Response=="Boats_motor",],
+                                          aes(x=Group,y=estimate)) +
+  geom_bar(aes(fill=Group),
            stat="identity",
            position="dodge",
            width=0.9,
            show.legend=F) +
+  geom_errorbar(aes(ymin=estimate-std.error,
+                    ymax=estimate+std.error,
+                    colour=Group),
+                stat="identity",
+                position="dodge",
+                width=0.055,
+                size=0.65,
+                show.legend=F) +
   geom_hline(aes(yintercept=0,size="Baseline Score"),
              linetype="longdash",
              colour="#303030",
              show.legend=F) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Control_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Control"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Treatment_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Treatment"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.3,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.3,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
   geom_point(data=impact.arrows,
@@ -385,16 +429,17 @@ MPAimpact.summ.ma.boatmotor.i <- ggplot(data=macp.flotim.allimpacts[!grepl("Impa
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["BoatMotor","TwoYr"],x=0.35,
-           label=macp.flotim.allimpacts%>%filter(term=="Impact" & Response=="Boats_motorized")%>%select(sig.labs),
+           label=macp.alor.allimpacts%>%filter(Group=="Impact" & Response=="Boats_motor")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
-  scale_fill_manual(labels=c("Treatment_Trend","Control_Trend"),
+  scale_fill_manual(labels=c("Treatment","Control"),
                     values=fill.cols.MPAimpacts) +
+  scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.flotim.allimpacts%>%filter(term=="Treatment_Trend" & Response=="Household_asset")%>%select(estimate)>
-                                             macp.flotim.allimpacts%>%filter(term=="Control_Trend" & Response=="Household_asset")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(macp.alor.allimpacts%>%filter(Group=="Treatment" & Response=="Household_asset")%>%select(estimate)>
+                                             macp.alor.allimpacts%>%filter(Group=="Control" & Response=="Household_asset")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.ma.boatmotor.labs.i + plot.guides.MPAimpact.summ
@@ -402,28 +447,36 @@ MPAimpact.summ.ma.boatmotor.i <- ggplot(data=macp.flotim.allimpacts[!grepl("Impa
 
 # - Land vehicles
 
-MPAimpact.summ.ma.vehicle.i <- ggplot(data=macp.flotim.allimpacts[!grepl("Impact",macp.flotim.allimpacts$term) & 
-                                                                        macp.flotim.allimpacts$Response=="Vehicles",],
-                                          aes(x=term,y=estimate)) +
-  geom_bar(aes(fill=term),
+MPAimpact.summ.ma.vehicle.i <- ggplot(data=macp.alor.allimpacts[!grepl("Impact",macp.alor.allimpacts$Group) & 
+                                                                        macp.alor.allimpacts$Response=="Vehicles",],
+                                          aes(x=Group,y=estimate)) +
+  geom_bar(aes(fill=Group),
            stat="identity",
            position="dodge",
            width=0.9,
            show.legend=F) +
+  geom_errorbar(aes(ymin=estimate-std.error,
+                    ymax=estimate+std.error,
+                    colour=Group),
+                stat="identity",
+                position="dodge",
+                width=0.055,
+                size=0.65,
+                show.legend=F) +
   geom_hline(aes(yintercept=0,size="Baseline Score"),
              linetype="longdash",
              colour="#303030",
              show.legend=F) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Control_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Control"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Treatment_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Treatment"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.3,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.3,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
   geom_point(data=impact.arrows,
@@ -432,16 +485,17 @@ MPAimpact.summ.ma.vehicle.i <- ggplot(data=macp.flotim.allimpacts[!grepl("Impact
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["Vehicle","TwoYr"],x=0.35,
-           label=macp.flotim.allimpacts%>%filter(term=="Impact" & Response=="Vehicles")%>%select(sig.labs),
+           label=macp.alor.allimpacts%>%filter(Group=="Impact" & Response=="Vehicles")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
-  scale_fill_manual(labels=c("Treatment_Trend","Control_Trend"),
+  scale_fill_manual(labels=c("Treatment","Control"),
                     values=fill.cols.MPAimpacts) +
+  scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.flotim.allimpacts%>%filter(term=="Treatment_Trend" & Response=="Household_asset")%>%select(estimate)>
-                                             macp.flotim.allimpacts%>%filter(term=="Control_Trend" & Response=="Household_asset")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(macp.alor.allimpacts%>%filter(Group=="Treatment" & Response=="Household_asset")%>%select(estimate)>
+                                             macp.alor.allimpacts%>%filter(Group=="Control" & Response=="Household_asset")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.ma.vehicles.labs.i + plot.guides.MPAimpact.summ
@@ -450,28 +504,36 @@ MPAimpact.summ.ma.vehicle.i <- ggplot(data=macp.flotim.allimpacts[!grepl("Impact
 
 # ---- 2.3 Place Attachment ----
 
-MPAimpact.summ.pa.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flotim.impacts$term) & 
-                                                         macp.flotim.impacts$Response=="PAIndex",],
-                              aes(x=term,y=estimate)) +
-  geom_bar(aes(fill=term),
+MPAimpact.summ.pa.i <- ggplot(data=macp.alor.impacts[!grepl("Impact",macp.alor.impacts$Group) & 
+                                                         macp.alor.impacts$Response=="PAIndex",],
+                              aes(x=Group,y=estimate)) +
+  geom_bar(aes(fill=Group),
            stat="identity",
            position="dodge",
            width=0.9,
            show.legend=F) +
+  geom_errorbar(aes(ymin=estimate-std.error,
+                    ymax=estimate+std.error,
+                    colour=Group),
+                stat="identity",
+                position="dodge",
+                width=0.055,
+                size=0.65,
+                show.legend=F) +
   geom_hline(aes(yintercept=0,size="Baseline Score"),
              linetype="longdash",
              colour="#303030",
              show.legend=F) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Control_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Control"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Treatment_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Treatment"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.3,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.3,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
   geom_point(data=impact.arrows,
@@ -480,16 +542,17 @@ MPAimpact.summ.pa.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flot
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["PA","TwoYr"],x=0.35,
-           label=macp.flotim.impacts%>%filter(term=="Impact" & Response=="PAIndex")%>%select(sig.labs),
+           label=macp.alor.impacts%>%filter(Group=="Impact" & Response=="PAIndex")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
-  scale_fill_manual(labels=c("Treatment_Trend","Control_Trend"),
+  scale_fill_manual(labels=c("Treatment","Control"),
                     values=fill.cols.MPAimpacts) +
+  scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.flotim.impacts%>%filter(term=="Treatment_Trend" & Response=="PAIndex")%>%select(estimate)>
-                                             macp.flotim.impacts%>%filter(term=="Control_Trend" & Response=="PAIndex")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(macp.alor.impacts%>%filter(Group=="Treatment" & Response=="PAIndex")%>%select(estimate)>
+                                             macp.alor.impacts%>%filter(Group=="Control" & Response=="PAIndex")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.pa.labs.i + plot.guides.MPAimpact.summ
@@ -497,28 +560,36 @@ MPAimpact.summ.pa.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flot
 
 # ---- 2.4 Marine Tenure ----
 
-MPAimpact.summ.mt.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flotim.impacts$term) & 
-                                                         macp.flotim.impacts$Response=="MTIndex",],
-                              aes(x=term,y=estimate)) +
-  geom_bar(aes(fill=term),
+MPAimpact.summ.mt.i <- ggplot(data=macp.alor.impacts[!grepl("Impact",macp.alor.impacts$Group) & 
+                                                         macp.alor.impacts$Response=="MTIndex",],
+                              aes(x=Group,y=estimate)) +
+  geom_bar(aes(fill=Group),
            stat="identity",
            position="dodge",
            width=0.9,
            show.legend=F) +
+  geom_errorbar(aes(ymin=estimate-std.error,
+                    ymax=estimate+std.error,
+                    colour=Group),
+                stat="identity",
+                position="dodge",
+                width=0.055,
+                size=0.65,
+                show.legend=F) +
   geom_hline(aes(yintercept=0,size="Baseline Score"),
              linetype="longdash",
              colour="#303030",
              show.legend=F) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Control_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Control"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Treatment_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Treatment"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.3,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.3,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
   geom_point(data=impact.arrows,
@@ -527,16 +598,17 @@ MPAimpact.summ.mt.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flot
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["MT","TwoYr"],x=0.35,
-           label=macp.flotim.impacts%>%filter(term=="Impact" & Response=="MTIndex")%>%select(sig.labs),
+           label=macp.alor.impacts%>%filter(Group=="Impact" & Response=="MTIndex")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
-  scale_fill_manual(labels=c("Treatment_Trend","Control_Trend"),
+  scale_fill_manual(labels=c("Treatment","Control"),
                     values=fill.cols.MPAimpacts) +
+  scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.flotim.impacts%>%filter(term=="Treatment_Trend" & Response=="MTIndex")%>%select(estimate)>
-                                             macp.flotim.impacts%>%filter(term=="Control_Trend" & Response=="MTIndex")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(macp.alor.impacts%>%filter(Group=="Treatment" & Response=="MTIndex")%>%select(estimate)>
+                                             macp.alor.impacts%>%filter(Group=="Control" & Response=="MTIndex")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.mt.labs.i + plot.guides.MPAimpact.summ
@@ -544,28 +616,36 @@ MPAimpact.summ.mt.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flot
 
 # ---- 2.5 School Enrollment ----
 
-MPAimpact.summ.se.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flotim.impacts$term) & 
-                                                         macp.flotim.impacts$Response=="SERate",],
-                              aes(x=term,y=estimate)) +
-  geom_bar(aes(fill=term),
+MPAimpact.summ.se.i <- ggplot(data=macp.alor.impacts[!grepl("Impact",macp.alor.impacts$Group) & 
+                                                         macp.alor.impacts$Response=="SERate",],
+                              aes(x=Group,y=estimate)) +
+  geom_bar(aes(fill=Group),
            stat="identity",
            position="dodge",
            width=0.9,
            show.legend=F) +
+  geom_errorbar(aes(ymin=estimate-std.error,
+                    ymax=estimate+std.error,
+                    colour=Group),
+                stat="identity",
+                position="dodge",
+                width=0.055,
+                size=0.65,
+                show.legend=F) +
   geom_hline(aes(yintercept=0,size="Baseline Score"),
              linetype="longdash",
              colour="#303030",
              show.legend=F) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Control_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Control"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Treatment_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Treatment"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.3,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.3,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
   geom_point(data=impact.arrows,
@@ -573,17 +653,18 @@ MPAimpact.summ.se.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flot
              fill="black",
              size=2.75,
              show.legend=F) +
-  annotate("text",y=sig.pos["SE","TwoYr"],x=0.35,
-           label=macp.flotim.impacts%>%filter(term=="Impact" & Response=="SERate")%>%select(sig.labs),
+  annotate("text",y=sig.pos["SE","TwoYr"]-0.004,x=0.35,
+           label=macp.alor.impacts%>%filter(Group=="Impact" & Response=="SERate")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
-  scale_fill_manual(labels=c("Treatment_Trend","Control_Trend"),
+  scale_fill_manual(labels=c("Treatment","Control"),
                     values=fill.cols.MPAimpacts) +
+  scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.flotim.impacts%>%filter(term=="Treatment_Trend" & Response=="SERate")%>%select(estimate)>
-                                             macp.flotim.impacts%>%filter(term=="Control_Trend" & Response=="SERate")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(macp.alor.impacts%>%filter(Group=="Treatment" & Response=="SERate")%>%select(estimate)>
+                                             macp.alor.impacts%>%filter(Group=="Control" & Response=="SERate")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.se.labs.i + plot.guides.MPAimpact.summ
@@ -592,26 +673,26 @@ MPAimpact.summ.se.i <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flot
 
 # ---- LEGEND ----
 
-MPAimpact.summ.legend <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.flotim.impacts$term) & 
-                                                         macp.flotim.impacts$Response=="FSIndex",],
-                              aes(x=term,y=estimate)) +
-  geom_bar(aes(fill=term),
+MPAimpact.summ.legend <- ggplot(data=macp.alor.impacts[!grepl("Impact",macp.alor.impacts$Group) & 
+                                                         macp.alor.impacts$Response=="FSIndex",],
+                              aes(x=Group,y=estimate)) +
+  geom_bar(aes(fill=Group),
            stat="identity",
            position="dodge",
            width=0.9) +
   geom_hline(aes(yintercept=0,size="Baseline Score"),
              linetype="longdash",
              colour="#303030") +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Control_Trend"], colour="black"),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Control"], colour="black"),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.4,y=estimate[term=="Treatment_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.4,y=estimate[Group=="Treatment"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
-  geom_segment(aes(x=0.3,xend=0.3,y=estimate[term=="Control_Trend"],
-                   yend=estimate[term=="Treatment_Trend"]),
+  geom_segment(aes(x=0.3,xend=0.3,y=estimate[Group=="Control"],
+                   yend=estimate[Group=="Treatment"]),
                lineend="square",
                size=1) +
   geom_point(data=impact.arrows,
@@ -619,7 +700,7 @@ MPAimpact.summ.legend <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.fl
              fill="black",
              size=2.75) +
   annotate("text",y=sig.pos["FS","TwoYr"],x=0.35,
-           label=macp.flotim.impacts%>%filter(term=="Impact" & Response=="FSIndex")%>%select(sig.labs),
+           label=macp.alor.impacts%>%filter(Group=="Impact" & Response=="FSIndex")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
@@ -630,8 +711,8 @@ MPAimpact.summ.legend <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.fl
                       values="black") +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.flotim.impacts%>%filter(term=="Treatment_Trend" & Response=="FSIndex")%>%select(estimate)>
-                                             macp.flotim.impacts%>%filter(term=="Control_Trend" & Response=="FSIndex")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(macp.alor.impacts%>%filter(Group=="Treatment" & Response=="FSIndex")%>%select(estimate)>
+                                             macp.alor.impacts%>%filter(Group=="Control" & Response=="FSIndex")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.fs.labs.i + plot.guides.MPAimpact.summ
@@ -645,26 +726,22 @@ MPAimpact.summ.legend <- ggplot(data=macp.flotim.impacts[!grepl("Impact",macp.fl
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-macp.flotim.std.impacts <- 
-  import('x_Flat_data_files/1_Social/Outputs/impact_analysis/Flores Timur/macp_plots_output.csv') %>%
-  filter(MPAID==16 & grepl("_z",Response) & term=="Impact") %>%
+macp.alor.std.impacts <- 
+  import('x_Flat_data_files/1_Social/Outputs/impact_analysis/Alor/macp_plots_output.csv') %>%
+  filter(MPAID==15 & grepl("_z",Response) & Group=="Impact") %>%
   mutate(p.val=2*pnorm(-abs(z.score)),
-         impact.direction=ifelse(estimate<0,"Negative",ifelse(estimate>0,"Positive","Zero"))) 
+         impact.direction=ifelse(estimate<0,"Negative",ifelse(estimate>0,"Positive","Zero")),
+         Response=factor(Response,ordered=T,levels=c("PAIndex_z","MTIndex_z","SERate_z","FSIndex_z","MAIndex_z")))
 
 
-snapshot.sig.labs <- mapply(i=t(macp.flotim.std.impacts%>%select(p.val)),
-                            j=c("Food Security","Material\nAssets","Marine\nTenure","Place\nAttachment","School\nEnrollment"),
-                            function(i,j){
-                              c(ifelse(i<0.01,paste("***",j,sep=""),
-                                       ifelse(i<0.05 & i>=0.01,paste("**",j,sep=""),
-                                              ifelse(i<0.1 & i>=0.05,paste("*",j,sep=""),paste(j)))))
-                            })
+snapshot.sig.labs <- c("Culture\n(Place Attachment)","Empowerment\n(Marine Tenure)","Education\n(School Enrollment)",
+                       "Health\n(Food Security)","Economic Well-Being\n(Material Assets)")
 
 
 # ---- 4.1 Snapshot plot, all Big Five standardized impacts on one plot ----
 
 # - 2 year impacts
-snapshot.MPAimpact.summ.2yr <- ggplot(data=macp.flotim.std.impacts,
+snapshot.MPAimpact.summ.2yr <- ggplot(data=macp.alor.std.impacts,
                                        aes(x=Response,
                                            y=estimate)) +
   geom_bar(aes(fill=impact.direction),
@@ -684,8 +761,8 @@ snapshot.MPAimpact.summ.2yr <- ggplot(data=macp.flotim.std.impacts,
              colour="#505050",
              show.legend=F) +
   scale_x_discrete(labels=snapshot.sig.labs) +
-  scale_y_continuous(limits=c(-0.6,0.6),
-                     breaks=c(seq(-0.5,0.5,by=0.2))) +
+  scale_y_continuous(limits=c(-1.5,1.5),
+                     breaks=c(seq(-1.5,1.5,by=0.5))) +
   scale_fill_manual(values=c(alpha("#65B65E",0.95),alpha("#2C7FB8",0.95)),
                     name="Direction of\nImpact",
                     labels=c("Negative","Positive")) +
@@ -737,12 +814,19 @@ snapshot.MPAimpact.summ.2yr <- ggplot(data=macp.flotim.std.impacts,
 # 
 
 
-dir.create(paste("x_Flat_data_files/1_Social/Outputs/impact_analysis/Flores Timur/Figures--produced",
+dir.create(paste("x_Flat_data_files/1_Social/Outputs/impact_analysis/Alor/Figures--produced",
                  format(Sys.Date(),format="%Y_%m_%d"),sep="_"))
 
-FigureFileName <- paste("x_Flat_data_files/1_Social/Outputs/impact_analysis/Flores Timur/Figures--produced",
+FigureFileName <- paste("x_Flat_data_files/1_Social/Outputs/impact_analysis/Alor/Figures--produced",
                         format(Sys.Date(),format="%Y_%m_%d"),sep="_")
 
+
+# ---- LEGEND PLOT ----
+
+png(paste(FigureFileName,"legend.impact.png",sep="/"),
+    units="in",height=6,width=7,res=600)
+plot(MPAimpact.summ.legend) 
+dev.off()
 
 # ---- EXAMPLE PLOT FOR INTERPRETATION GUIDE ----
 

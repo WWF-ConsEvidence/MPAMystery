@@ -56,7 +56,7 @@ AgeGender <-
 
 MPA.level.PropData.status <- 
   data.frame(SettlementName=c("Control Settlements", MPA.name$MPAName),
-             MPA.Level.Means %>% filter(MonitoringYear==levels(HHData$MonitoringYear)[2]) %>% ungroup() %>%
+             MPA.Level.Means %>% filter(MonitoringYear==levels(HHData$MonitoringYear)[2]) %>% 
                select(HHH.female, HHH.male, Percent.Rel.Christian, Percent.Rel.Muslim, Percent.Rel.Other, 
                       Percent.PrimaryOcc.Fish, Percent.PrimaryOcc.Farm, Percent.PrimaryOcc.WageLabor, 
                       Percent.PrimaryOcc.HarvestForest, Percent.PrimaryOcc.Tourism, 
@@ -86,7 +86,7 @@ MPA.level.PropData.status <-
 
 MPA.level.ContData.status <- 
   data.frame(SettlementName=c("Control Settlements",as.character(MPA.name$MPAName)),
-             MPA.Level.Means %>% filter(MonitoringYear==levels(MonitoringYear)[2]) %>% ungroup() %>%
+             MPA.Level.Means %>% filter(MonitoringYear==levels(MonitoringYear)[2]) %>% 
                select(FSMean, FSErr, MAMean, MAErr, MTMean, MTErr, PAMean, PAErr, 
                       SEMean, SEErr, TimeMarketMean, TimeMarketErr, UnwellMean, UnwellErr))
 
@@ -95,10 +95,16 @@ MPA.level.ContData.annex <-
              SettlementID=0,
              SettlementName=c("Control Settlements",as.character(MPA.name$MPAName),
                               "Control Settlements",as.character(MPA.name$MPAName)),
-             MPA.Level.Means %>% ungroup() %>%
+             MPA.Level.Means %>% 
                select(FSMean, FSErr, MAMean, MAErr, MTMean, MTErr, PAMean, PAErr, 
                       SEMean, SEErr, TimeMarketMean, TimeMarketErr, UnwellMean, UnwellErr)) %>%
-  .[rev(order(.$SettlementName,.$MonitoringYear)),]
+  mutate(SettlementName=factor(SettlementName,
+                               levels=unique(SettlementName),
+                               ordered=T),
+         MonitoringYear=factor(MonitoringYear,
+                               levels=unique(MonitoringYear),
+                               ordered=T)) %>%
+  .[order(.$SettlementName,.$MonitoringYear),]
 
 
 # ---- 1.5 Define null rows to be added to plotting data frames for formatting purposes ----
@@ -169,7 +175,10 @@ Sett.level.PropData.status.PLOTFORMAT <-
                                "", 
                                as.character(SettlementName)),
          SettlementName=factor(SettlementName,levels=unique(SettlementName),ordered=T),
-         SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"))
+         SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"),
+         SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Desa Kontrol",
+                                      ifelse(grepl("MPA",SettlementName,ignore.case=F),gsub("MPA","KKP",SettlementName),as.character(SettlementName))),
+         SettlementName.bahasa=factor(SettlementName.bahasa,levels=unique(SettlementName.bahasa),ordered=T))
 
 
 # ---- 2.2 Status dataset for settlements, continuous data (with p values) ----
@@ -190,7 +199,10 @@ Sett.level.ContData.status.PLOTFORMAT <-
   left_join(sigvals,by="SettlementName") %>%
   mutate(SettlementName=ifelse(is.na(SettlementName),"",SettlementName),
          SettlementName=factor(SettlementName,levels=unique(SettlementName),ordered=T),
-         SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"))
+         SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"),
+         SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Desa Kontrol",
+                                      ifelse(grepl("MPA",SettlementName,ignore.case=F),gsub("MPA","KKP",SettlementName),as.character(SettlementName))),
+         SettlementName.bahasa=factor(SettlementName.bahasa,levels=unique(SettlementName.bahasa),ordered=T))
 
 
 # ---- 2.3 Trend dataset for MPA-level proportional data ----
@@ -198,7 +210,7 @@ Sett.level.ContData.status.PLOTFORMAT <-
 MPA.level.PropData.trend.PLOTFORMAT <- 
   rbind.data.frame(data.frame(MPAName=c("Control Settlements",as.character(MPA.name$MPAName),
                            "Control Settlements",as.character(MPA.name$MPAName)),
-             MPA.Level.Means %>% ungroup() %>%
+             MPA.Level.Means %>% 
                select(MonitoringYear, HHH.female, HHH.male, 
                       Percent.Rel.Christian, Percent.Rel.Muslim, Percent.Rel.Other, 
                       Percent.PrimaryOcc.Fish, Percent.PrimaryOcc.Farm, Percent.PrimaryOcc.WageLabor, 
@@ -224,7 +236,11 @@ MPA.level.PropData.trend.PLOTFORMAT <-
                       Percent.Increased.SocConflict, Percent.Same.SocConflict, Percent.Decreased.SocConflict, 
                       Percent.GreatlyDecreased.SocConflict)),
              data.frame(MPAName=NA,MonitoringYear=NA,null.row.PropData%>%select(-SettlementName))) %>%
-  mutate(order=c(1,4,2,5,3))
+  left_join(.,define.year.monitoryear.column(MPA.Level.Means),by="MonitoringYear") %>%
+  left_join(.,define.year.monitoryear.column.bahasa(MPA.Level.Means),by="MonitoringYear") %>%
+  mutate(order=c(1,4,2,5,3),
+         Label=ifelse(is.na(Label),"",as.character(Label)),
+         Label.bahasa=ifelse(is.na(Label.bahasa),"",as.character(Label.bahasa)))
 
 
 # ---- 2.4 Trend dataset for MPA-level continuous data (with p values) ----
@@ -235,6 +251,8 @@ MPA.level.ContData.trend.PLOTFORMAT <-
   mutate(MonitoringYear=factor(MonitoringYear,
                                levels=rev(unique(MonitoringYear)),
                                ordered=T),
+         SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Desa Kontrol",
+                                      ifelse(grepl("MPA",SettlementName,ignore.case=F),gsub("MPA","KKP",SettlementName),as.character(SettlementName))),
          order=c(4,3,2,1,NA),
          Treatment=ifelse(SettlementName=="Control Settlements","Control","MPA"))
 
@@ -249,19 +267,21 @@ Sett.level.ContData.annex <-
   select(MonitoringYear, SettlementID, SettlementName, FSMean, FSErr, MAMean, MAErr, MTMean, MTErr, 
          PAMean, PAErr, SEMean, SEErr, TimeMarketMean, TimeMarketErr, UnwellMean, UnwellErr) %>%
   mutate(MonitoringYear=factor(MonitoringYear,
-                               levels=unique(MonitoringYear),
+                               levels=rev(unique(MonitoringYear)),
                                ordered=T)) %>%
-  .[rev(order(.$SettlementName, .$MonitoringYear)),]
+  .[rev(order(.$SettlementName,.$MonitoringYear)),]
 
 # - PLOT FORMAT DATA FRAME
 Sett.level.ContData.annex.PLOTFORMAT <- 
  rbind.data.frame(MPA.level.ContData.annex,
                   null.row.ContData.annex, 
                   Sett.level.ContData.annex) %>%
-  mutate(SettlementName=ifelse(is.na(SettlementName),"",SettlementName),
+  mutate(SettlementName=ifelse(is.na(SettlementName),"",as.character(SettlementName)),
          SettlementName=factor(SettlementName,levels=unique(SettlementName),ordered=T),
-         SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"))
-
+         SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"),
+         SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Desa Kontrol",
+                                      ifelse(grepl("MPA",SettlementName,ignore.case=F),gsub("MPA","KKP",SettlementName),as.character(SettlementName))),
+         SettlementName.bahasa=factor(SettlementName.bahasa,levels=unique(SettlementName.bahasa),ordered=T))
 
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -320,10 +340,10 @@ Sett.level.ContData.annex.PLOTFORMAT <-
 # Alor.synth.techreport.extra.PLOTFORMAT$Dummy <-
 #  ifelse(Alor.synth.techreport.extra.PLOTFORMAT$SettlementName=="","Dummy","NotDummy")
 
-
-
-
-rm(null.row.ContData,
-   null.row.PropData,
-   null.row.ContData.annex,
-   null.row.sigvals)
+# 
+# 
+# 
+# rm(null.row.ContData,
+#    null.row.PropData,
+#    null.row.ContData.annex,
+#    null.row.sigvals)

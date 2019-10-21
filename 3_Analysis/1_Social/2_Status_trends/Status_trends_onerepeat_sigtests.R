@@ -532,12 +532,21 @@ trend.non.parametric.test.bySett  <-
 #   variable, using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
 #   there [is/is not] a significant difference in this variable across the settlement)
 annex.sigvals  <- 
-  rbind.data.frame(cbind.data.frame(SettlementName=MPA.name$MPAName,trend.non.parametric.test.byMPA ["sl",]),
-                   cbind.data.frame(SettlementName=c("Control\n Settlements"),trend.non.parametric.test.byControl ["sl",]),
+  rbind.data.frame(cbind.data.frame(SettlementName=c("Control Settlements"),trend.non.parametric.test.byControl ["sl",]),
+                   cbind.data.frame(SettlementName=MPA.name$MPAName,trend.non.parametric.test.byMPA ["sl",]),
                    null.row.sigvals,
                    trend.non.parametric.test.bySett[rev(order(trend.non.parametric.test.bySett$SettlementName)),])
 
 annex.sigvals[2:8] <- unlist(annex.sigvals[2:8])
+
+annex.sigvals.bahasa  <- 
+  rbind.data.frame(cbind.data.frame(SettlementName=c("Desa Kontrol"),trend.non.parametric.test.byControl ["sl",]),
+                   cbind.data.frame(SettlementName=gsub("MPA","KKP",MPA.name$MPAName),trend.non.parametric.test.byMPA ["sl",]),
+                   null.row.sigvals,
+                   trend.non.parametric.test.bySett[rev(order(trend.non.parametric.test.bySett$SettlementName)),])
+
+annex.sigvals.bahasa[2:8] <- unlist(annex.sigvals.bahasa[2:8])
+
 
 
 # 
@@ -584,8 +593,13 @@ propdata.trend.test  <-
                          propdata.trend.test [a] <- ifelse(is.na(propdata.trend.test [a]),100,propdata.trend.test [a])
                        }))
 
-colnames(propdata.trend.test ) <- c("Primary occupation (% households)","Frequency of fishing (% households)","Frequency of selling at least some catch (% households)",
-                                    "Income from fishing in past 6 months (% households)","Fishing technique most often used in past 6 months (% households)","Child hunger (% households)",
-                                    "Dietary protein from fish in past 6 months (% households)","Change in economic status of fishing households (% households)",
-                                    "Number of identified local threats to marine environment (% households)","Secondary occupation (% households)","Occupational diversity (% households)")
-
+propdata.trend.test <-
+  rbind(propdata.trend.test, 
+        c("Primary occupation (% households)","Frequency of fishing (% households)","Frequency of selling at least some catch (% households)",
+          "Income from fishing in past 6 months (% households)","Fishing technique most often used in past 6 months (% households)","Child hunger (% households)",
+          "Dietary protein from fish in past 6 months (% households)","Change in economic status of fishing households (% households)",
+          "Number of identified local threats to marine environment (% households)","Secondary occupation (% households)","Occupational diversity (% households)"),
+        c("Pekerjaan utama (% rumah tangga)","Frekuensi penangkapan ikan (% rumah tangga)","Frekuensi penjualan setidaknya pada beberapa hasil tangkapan (% rumah tangga)",
+          "Penghasilan dari penangkapan ikan dalam 6 bulan terakhir (% rumah tangga)","Teknik penangkapan ikan yang paling sering digunakan dalam 6 bulan terakhir (% rumah tangga)",
+          "Kelaparan pada anak (% rumah tangga)","Protein makanan dari ikan dalam 6 bulan terakhir (% rumah tangga)","Perubahan status ekonomi rumah tangga nelayan (% rumah tangga)",
+          "Jumlah ancaman lokal yang teridentifikasi terhadap lingkungan laut (% rumah tangga)","Pekerjaan sekunder (% rumah tangga)","Keberagaman pekerjaan (% rumah tangga)"))

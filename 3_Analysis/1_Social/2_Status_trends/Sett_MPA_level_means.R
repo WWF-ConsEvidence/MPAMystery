@@ -327,7 +327,11 @@ MPA.Level.Means <-
             Percent.Decreased.SocConflict=(length(SocialConflict[(SocialConflict==4) &
                                                                    !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100,
             Percent.GreatlyDecreased.SocConflict=(length(SocialConflict[SocialConflict==5 &
-                                                                          !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100)
+                                                                          !is.na(SocialConflict)])/length(SocialConflict[!is.na(SocialConflict)]))*100) %>%
+  ungroup() %>%
+  mutate(MonitoringYearBahasa=ifelse(!grepl("Baseline",MonitoringYear),
+                                     paste(substr(MonitoringYear,1,1),"Tahun Setelah",sep=" "),
+                                     as.character(MonitoringYear)))
 
 MPA.Level.Means <- MPA.Level.Means[!is.na(MPA.Level.Means$MPAID),]
 

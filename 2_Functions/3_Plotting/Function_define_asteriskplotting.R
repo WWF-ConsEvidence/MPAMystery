@@ -27,16 +27,17 @@ define.statusplot.asterisks <- function(x) {
 
 # Define (x,y) position of asterisks & reference settlement "R" -- status plots
 define.statusplot.asterisk.pos <- function(x,asterisks) {
-  result <- asterisks %>% select(names(.[!grepl(".ref",names(.))]))
-  ref <- asterisks %>% select(SettlementName, names(.[grepl(".ref",names(.))]))
+  rename.cols <- names(x[grep("Mean",colnames(x))]) %>% gsub("Mean","",.)
+  result <- asterisks %>% select(SettlementName, rename.cols)
+  ref <- asterisks %>% select(SettlementName, paste(rename.cols,".ref",sep=""))
   scale <- x[1,grep("Mean",colnames(x))]
   for(i in colnames(scale)) {
     scale[1,i] <- max(x[,i],na.rm=T)
   }
   result[,-1] <- mapply(a=x[,grep("Mean",colnames(x))],
                          b=x[,grep("Err",colnames(x))],
-                         c=asterisks %>% select(names(.[!grepl(".ref",names(.)) & !grepl("Settlement",names(.))])),
-                         d=c(1:length(names(asterisks[!grepl(".ref",names(asterisks)) & !grepl("Settlement",names(asterisks))]))),
+                         c=asterisks %>% select(rename.cols),
+                         d=c(1:length(rename.cols)),
                          function(a,b,c,d){
                            ifelse(c=="***",a+b+(0.05*scale[,d]),
                                   ifelse(c=="**",a+b+(0.04*scale[,d]),
@@ -44,12 +45,60 @@ define.statusplot.asterisk.pos <- function(x,asterisks) {
                          })
   ref[,-1] <- mapply(a=x[,grep("Mean",colnames(x))],
                       b=x[,grep("Err",colnames(x))],
-                      c=asterisks %>% select(names(.[grepl(".ref",names(.))])),
-                      d=c(1:length(names(asterisks[grepl(".ref",names(asterisks))]))),
+                      c=asterisks %>% select(paste(rename.cols,".ref",sep="")),
+                      d=c(1:length(rename.cols)),
                       function(a,b,c,d){
                         ifelse(c=="R",a+b+(0.03*scale[,d]),1)
                       })
   result <- left_join(result,ref,by="SettlementName")
+  result
+}
+
+# Define number of asterisks & reference settlement -- status plots - BAHASA
+define.statusplot.asterisks.bahasa <- function(x) {
+  result <- x
+  reference <- x
+  suppressWarnings(
+    for(a in colnames(x[-1])){
+      for(i in 1:length(x$SettlementName.bahasa)){
+        result[i,a] <- ifelse(as.numeric(x[i,a])<0.01,"***",
+                              ifelse(as.numeric(x[i,a])<0.05 & as.numeric(x[i,a])>=0.01,"**",
+                                     ifelse(as.numeric(x[i,a])<0.1 & as.numeric(x[i,a])>=0.05,"*","")))
+        reference[i,a] <- ifelse(as.character(x[i,a])=="median","R","")
+      }
+    })
+  colnames(result) <- gsub(pattern = ".pval", replacement = "", colnames(result))
+  colnames(reference) <- gsub(pattern = ".pval", replacement = ".ref", colnames(reference))
+  result <- left_join(result,reference,by="SettlementName.bahasa")
+  result
+}
+
+# Define (x,y) position of asterisks & reference settlement "R" -- status plots - BAHASA
+define.statusplot.asterisk.pos.bahasa <- function(x,asterisks) {
+  rename.cols <- names(x[grep("Mean",colnames(x))]) %>% gsub("Mean","",.)
+  result <- asterisks %>% select(SettlementName.bahasa, rename.cols)
+  ref <- asterisks %>% select(SettlementName.bahasa, paste(rename.cols,".ref",sep=""))
+  scale <- x[1,grep("Mean",colnames(x))]
+  for(i in colnames(scale)) {
+    scale[1,i] <- max(x[,i],na.rm=T)
+  }
+  result[,-1] <- mapply(a=x[,grep("Mean",colnames(x))],
+                        b=x[,grep("Err",colnames(x))],
+                        c=asterisks %>% select(rename.cols),
+                        d=c(1:length(rename.cols)),
+                        function(a,b,c,d){
+                          ifelse(c=="***",a+b+(0.05*scale[,d]),
+                                 ifelse(c=="**",a+b+(0.04*scale[,d]),
+                                        ifelse(c=="*",a+b+(0.03*scale[,d]),1)))
+                        })
+  ref[,-1] <- mapply(a=x[,grep("Mean",colnames(x))],
+                     b=x[,grep("Err",colnames(x))],
+                     c=asterisks %>% select(paste(rename.cols,".ref",sep="")),
+                     d=c(1:length(rename.cols)),
+                     function(a,b,c,d){
+                       ifelse(c=="R",a+b+(0.03*scale[,d]),1)
+                     })
+  result <- left_join(result,ref,by="SettlementName.bahasa")
   result
 }
 
@@ -67,14 +116,40 @@ define.conttrendplot.ylabels.withasterisks <- function(x) {
   result
 }
 
-# Define y labels, with asterisks -- proportional variables trend plots
-define.proptrendplot.ylabels.withasterisks <- function(x) {
+# Define y labels, with asterisks -- continuous variables trend plots - BAHASA
+define.conttrendplot.ylabels.withasterisks.bahasa <- function(x) {
   result <- x
-  labs <- names(x)
+  labs <- continuous.variables.plotlabs.bahasa
   for(a in 1:length(names(x))) {
     result[a] <- ifelse(as.numeric(x[a])<0.01,paste(labs[a],"***",sep=" "),
                         ifelse(as.numeric(x[a])<0.05 & as.numeric(x[a])>=0.01,paste(labs[a],"**",sep=" "),
                                ifelse(as.numeric(x[a])<0.1 & as.numeric(x[a])>=0.05,paste(labs[a],"*",sep=" "),
+                                      labs[a])))
+  }
+  result
+}
+
+# Define y labels, with asterisks -- proportional variables trend plots
+define.proptrendplot.ylabels.withasterisks <- function(x) {
+  result <- x[1,]
+  labs <- x[2,]
+  for(a in 1:length(names(x))) {
+    result[a] <- ifelse(as.numeric(x[1,a])<0.01,paste(labs[a],"***",sep=" "),
+                        ifelse(as.numeric(x[1,a])<0.05 & as.numeric(x[1,a])>=0.01,paste(labs[a],"**",sep=" "),
+                               ifelse(as.numeric(x[1,a])<0.1 & as.numeric(x[1,a])>=0.05,paste(labs[a],"*",sep=" "),
+                                      labs[a])))
+  }
+  result
+}
+
+# Define y labels, with asterisks -- proportional variables trend plots - BAHASA
+define.proptrendplot.ylabels.withasterisks.bahasa <- function(x) {
+  result <- x[1,]
+  labs <- x[3,]
+  for(a in 1:length(names(x))) {
+    result[a] <- ifelse(as.numeric(x[1,a])<0.01,paste(labs[a],"***",sep=" "),
+                        ifelse(as.numeric(x[1,a])<0.05 & as.numeric(x[1,a])>=0.01,paste(labs[a],"**",sep=" "),
+                               ifelse(as.numeric(x[1,a])<0.1 & as.numeric(x[1,a])>=0.05,paste(labs[a],"*",sep=" "),
                                       labs[a])))
   }
   result
@@ -100,22 +175,46 @@ define.annexplot.settname.labels <- function(x) {
 }
 
 
-
 # Define Year/Monitoring Year column for axis & legend labels
-define.year.monitoryear.column <- function(annex.data) {
-  result <- annex.data[,c("SettlementID","MonitoringYear")] %>%
-    left_join(HHData[,c("SettlementID","InterviewYear","MonitoringYear")],
-                    by=c("SettlementID","MonitoringYear")) %>%
-    filter(!is.na(MonitoringYear) & !is.na(InterviewYear)) %>%
+define.year.monitoryear.column <- function(mpa.trend.data) {
+  result <- mpa.trend.data[,c("MPAID","MonitoringYear")] %>%
+    left_join(HHData[,c("MPAID","InterviewYear","MonitoringYear")],
+              by=c("MPAID","MonitoringYear")) %>%
+    filter(!is.na(MonitoringYear) & !is.na(InterviewYear))
+  
+  result.1 <- 
+    result %>%
     mutate(MonitoringYear=ifelse(!grepl("Baseline",MonitoringYear), 
-                                        paste(MonitoringYear, "\nBaseline", sep=""),
-                                        as.character(MonitoringYear)),
+                                 paste(MonitoringYear, "\nBaseline", sep=""),
+                                 as.character(MonitoringYear)),
            Monitoryear.year=paste(MonitoringYear,"\n","(",InterviewYear,")",sep=""))
-
-  result.final <- c(unique(result$Monitoryear.year))
+  
+  result.final <- 
+    data.frame(Label=c(unique(result.1$Monitoryear.year)),
+               MonitoringYear=c(as.character(unique(result$MonitoringYear))))
   result.final
 }
 
+
+# Define Year/Monitoring Year column for axis & legend labels - BAHASA
+define.year.monitoryear.column.bahasa <- function(mpa.trend.data) {
+  result <- mpa.trend.data[,c("MPAID","MonitoringYear","MonitoringYearBahasa")] %>%
+    left_join(HHData[,c("MPAID","InterviewYear","MonitoringYear")],
+              by=c("MPAID","MonitoringYear")) %>%
+    filter(!is.na(MonitoringYear) & !is.na(InterviewYear))
+  
+  result.1 <- 
+    result %>%
+    mutate(MonitoringYear=ifelse(!grepl("Baseline",MonitoringYearBahasa), 
+                                 paste(MonitoringYearBahasa, "\nBaseline", sep=""),
+                                 as.character(MonitoringYearBahasa)),
+           Monitoryear.year=paste(MonitoringYearBahasa,"\n","(",InterviewYear,")",sep=""))
+  
+  result.final <- 
+    data.frame(Label.bahasa=c(unique(result.1$Monitoryear.year)),
+               MonitoringYear=c(as.character(unique(result$MonitoringYear))))
+  result.final
+}
 
 
 # +++++++++++++++++++++++++++++++++++++++++
