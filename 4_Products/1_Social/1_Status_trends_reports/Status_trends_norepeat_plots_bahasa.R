@@ -1,0 +1,877 @@
+# 
+# code:  Status Plots, for data with no repeat - BAHASA
+# 
+# 
+# author: Kelly Claborn, clabornkelly@gmail.com
+# created: November 2017
+# modified: October 2019
+# 
+# 
+# ---- inputs ----
+#  1) Dependencies: Function_define_asteriskplotting.R; Function_plotthemes.R
+#  2) Source Status_trends_onerepeat_datasets.R 
+# 
+# ---- code sections ----
+#  1) DEFINE MPA-SPECIFIC PLOTTING DATA FRAMES
+#  2) AGE/GENDER PLOT 
+#  3) STATUS PLOTS
+# 
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 1: DEFINE MPA-SPECIFIC PLOTTING DATA FRAMES ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+
+# ---- 1.1 Define significance labels and (x,y) coordinates for plots ----
+
+Statusplot.asterisks.bahasa <- 
+  define.statusplot.asterisks.bahasa(Sett.level.ContData.status.PLOTFORMAT %>% 
+                                select(SettlementName.bahasa, FS.pval, MA.pval, PA.pval, MT.pval, 
+                                       SE.pval, TimeMarket.pval, Unwell.pval))
+
+Statusplot.sigpos.bahasa <- 
+  define.statusplot.asterisk.pos.bahasa(Sett.level.ContData.status.PLOTFORMAT,
+                                 Statusplot.asterisks.bahasa)  
+
+
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 2: AGE/GENDER PLOTS ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+
+# ---- 2.1 Baseline ----
+
+Age.gender.Baseline.bahasa <- 
+  melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.Baseline","Male.Baseline")) %>%
+  ggplot() +
+  geom_bar(aes(x=AgeCat,
+               y=value,
+               fill=variable),
+           stat="identity",
+           width=0.75,
+           colour="#505050",
+           size=0.15,
+           show.legend=F) +
+  geom_text(aes(x=19,y=-7,label=Monitoryear.labs.bahasa$Label[1]),
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(-10,10),
+                     labels=abs(seq(-10,10,5))) +
+  scale_fill_manual(name="",
+                    labels=c("Perempuan","Laki-laki"),
+                    values=c("Female.Baseline"=alpha("#7FCDBB",0.95),
+                             "Male.Baseline"=alpha("#253494",0.95)))+ 
+  coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Usia",y="Distribusi populasi (% individu berdasarkan jenis kelamin)")
+
+
+# ---- 2.3 Create legend ----
+
+Age.gender.legend.plot.bahasa <-
+  melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.Baseline","Male.Baseline")) %>%
+  ggplot() +
+  geom_bar(aes(x=AgeCat,
+               y=value,
+               fill=variable),
+           stat="identity",
+           width=0.75,
+           colour="#505050",
+           size=0.15) +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(-10,10),
+                     name="",
+                     labels=abs(seq(-10,10,5))) +
+  scale_fill_manual(name="",
+                    values=c("Female.Baseline"=alpha("#7FCDBB",0.95),
+                             "Male.Baseline"=alpha("#253494",0.95)),
+                    labels=c("Perempuan","Laki-laki")) +
+  coord_flip() + plot.guides.techreport + theme(legend.justification="right")
+
+Age.gender.legend.bahasa <- g_legend(Age.gender.legend.plot.bahasa)
+
+
+# ---- 2.4 Arrange grob ----
+
+Age.gender.plot.bahasa <- 
+  grid.arrange(Age.gender.legend.bahasa,
+               arrangeGrob(Age.gender.Baseline.bahasa,ncol=1),nrow=2,heights=c(0.35,10))
+
+
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 3: STATUS PLOTS ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+
+# ---- 3.1 Continuous data plots ----
+
+# - FOOD SECURITY
+FS.statusplot.bahasa <- 
+  rbind.data.frame(Sett.level.ContData.status.PLOTFORMAT[,c("SettlementName.bahasa","FSMean","FSErr","SettLevel")],
+                   data.frame(SettlementName.bahasa="  ",
+                              FSMean=NA,
+                              FSErr=NA,
+                              SettLevel="Dummy")) %>%
+  ggplot(aes(x=SettlementName.bahasa)) +
+  geom_hline(aes(yintercept=1.56),size=0.25,colour="#505050") +
+  geom_hline(aes(yintercept=4.02),size=0.25,colour="#505050") +
+  geom_bar(aes(y=FSMean,
+               fill=SettLevel),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_errorbar(aes(ymin=FSMean-FSErr,
+                    ymax=FSMean+FSErr,
+                    colour=SettLevel),
+                width=0.25,
+                size=0.5,
+                show.legend=F) +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  geom_text(data=Statusplot.sigpos.bahasa,
+            aes(x=SettlementName.bahasa,
+                y=FS),
+            label=Statusplot.asterisks.bahasa$FS,
+            nudge_x=-0.07,
+            size=rel(4),
+            colour=errcols.status["NotDummy"]) +
+  geom_text(data=Statusplot.sigpos.bahasa,
+            aes(x=SettlementName.bahasa,y=FS.ref),
+            label=Statusplot.asterisks.bahasa$FS.ref,
+            size=rel(3),
+            nudge_x=0.02,
+            fontface="bold.italic",
+            colour=errcols.status["NotDummy"]) +
+  geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(6.06-4.02))+4.02,label="Pangan tersedia"),
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+  geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(4.02-1.56))+1.56,label="Rawan Pangan\ntanpa kelaparan"),
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+  geom_text(aes(x=length(SettlementName.bahasa),y=0.5*1.56,label="Rawan Pangan\ndengan kelaparan"),
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,6.06)) +
+  scale_fill_manual(values=fillcols.status) +
+  scale_colour_manual(values=errcols.status) +
+  coord_flip() + Statusplot.labs.bahasa["FS"] + theme(axis.ticks=element_blank(),
+                                               panel.background=element_rect(fill="white",
+                                                                             colour="#909090"),
+                                               panel.border=element_rect(fill=NA,
+                                                                         size=0.25,
+                                                                         colour="#C0C0C0"),
+                                               panel.grid.major.x=element_blank(),
+                                               panel.grid.major.y=element_blank(),
+                                               axis.title=element_text(size=10,
+                                                                       angle=0,
+                                                                       face="bold",
+                                                                       colour="#303030"),
+                                               axis.text=element_text(size=8,
+                                                                      angle=0,
+                                                                      colour="#303030"))
+
+
+# - MATERIAL ASSETS
+MA.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
+                        aes(x=SettlementName.bahasa)) +
+  geom_bar(aes(y=MAMean,
+               fill=SettLevel),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_errorbar(aes(ymin=MAMean-MAErr,
+                    ymax=MAMean+MAErr,
+                    colour=SettLevel),
+                width=0.25,
+                size=0.5,
+                show.legend=F) +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") + 
+  geom_text(data=Statusplot.sigpos.bahasa,
+            aes(x=SettlementName.bahasa,
+                y=MA),
+            label=Statusplot.asterisks.bahasa$MA,
+            nudge_x=-0.07,
+            size=rel(4),
+            colour=errcols.status["NotDummy"]) +
+  geom_text(data=Statusplot.sigpos.bahasa,
+            aes(x=SettlementName.bahasa,y=MA.ref),
+            label=Statusplot.asterisks.bahasa$MA.ref,
+            size=rel(3),
+            nudge_x=0.02,
+            fontface="bold.italic",
+            colour=errcols.status["NotDummy"]) +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(Sett.level.ContData.status.PLOTFORMAT$MAMean,na.rm=T)+
+                                max(Sett.level.ContData.status.PLOTFORMAT$MAErr,na.rm=T)+
+                                0.03*max(Sett.level.ContData.status.PLOTFORMAT$MAMean,na.rm=T))) +
+  scale_fill_manual(values=fillcols.status) +
+  scale_colour_manual(values=errcols.status) +
+  coord_flip() + Statusplot.labs.bahasa["MA"] + plot.theme
+
+
+# - PLACE ATTACHMENT
+PA.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
+                        aes(x=SettlementName.bahasa)) +
+  geom_bar(aes(y=PAMean,
+               fill=SettLevel),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_errorbar(aes(ymin=PAMean-PAErr,
+                    ymax=PAMean+PAErr,
+                    colour=SettLevel),
+                width=0.25,
+                size=0.5,
+                show.legend=F) +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  geom_text(data=Statusplot.sigpos.bahasa,
+            aes(x=SettlementName.bahasa,
+                y=PA),
+            label=Statusplot.asterisks.bahasa$PA,
+            nudge_x=-0.07,
+            nudge_y=0.07,
+            size=rel(4),
+            colour=errcols.status["NotDummy"]) +
+  geom_text(data=Statusplot.sigpos.bahasa,
+            aes(x=SettlementName.bahasa,y=PA.ref),
+            label=Statusplot.asterisks.bahasa$PA.ref,
+            size=rel(3),
+            nudge_x=0.02,
+            fontface="bold.italic",
+            colour=errcols.status["NotDummy"]) +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,5)) +
+  scale_fill_manual(values=fillcols.status) +
+  scale_colour_manual(values=errcols.status) +
+  coord_flip() + Statusplot.labs.bahasa["PA"] + plot.theme
+
+
+# - MARINE TENURE
+MT.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
+                        aes(x=SettlementName.bahasa)) +
+  geom_bar(aes(y=MTMean,
+               fill=SettLevel),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_errorbar(aes(ymin=MTMean-MTErr,
+                    ymax=MTMean+MTErr,
+                    colour=SettLevel),
+                width=0.25,
+                size=0.5,
+                show.legend=F) +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  geom_text(data=Statusplot.sigpos.bahasa,
+            aes(x=SettlementName.bahasa,
+                y=MT+(0.05*MT)),
+            label=Statusplot.asterisks.bahasa$MT,
+            nudge_x=-0.07,
+            size=rel(4),
+            colour=errcols.status["NotDummy"]) +
+  geom_text(data=Statusplot.sigpos.bahasa,
+            aes(x=SettlementName.bahasa,y=MT.ref),
+            label=Statusplot.asterisks.bahasa$MT.ref,
+            size=rel(3),
+            nudge_x=0.02,
+            fontface="bold.italic",
+            colour=errcols.status["NotDummy"]) +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,5)) +
+  scale_fill_manual(values=fillcols.status) +
+  scale_colour_manual(values=errcols.status) +
+  coord_flip() + Statusplot.labs.bahasa["MT"] + plot.theme
+
+# - SCHOOL ENROLLMENT
+SE.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
+                        aes(x=SettlementName.bahasa)) +
+  geom_bar(aes(y=SEMean,
+               fill=SettLevel),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_errorbar(aes(ymin=SEMean-SEErr,
+                    ymax=SEMean+SEErr,
+                    colour=SettLevel),
+                width=0.25,
+                size=0.5,
+                show.legend=F) +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  geom_text(data=Statusplot.sigpos.bahasa,
+            aes(x=SettlementName.bahasa,
+                y=SE),
+            label=Statusplot.asterisks.bahasa$SE,
+            nudge_x=-0.07,
+            size=rel(4),
+            colour=errcols.status["NotDummy"]) +
+  geom_text(data=Statusplot.sigpos.bahasa,
+            aes(x=SettlementName.bahasa,y=SE.ref),
+            label=Statusplot.asterisks.bahasa$SE.ref,
+            size=rel(3),
+            nudge_x=0.02,
+            fontface="bold.italic",
+            colour=errcols.status["NotDummy"]) +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format(),
+                     limits=c(0,1.1)) +
+  scale_fill_manual(values=fillcols.status) +
+  scale_colour_manual(values=errcols.status) +
+  coord_flip() + Statusplot.labs.bahasa["SE"] + plot.theme
+
+
+# - TIME TO MARKET
+Time.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
+                          aes(x=SettlementName.bahasa)) +
+  geom_bar(aes(y=TimeMarketMean,
+               fill=SettLevel),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_errorbar(aes(ymin=TimeMarketMean-TimeMarketErr,
+                    ymax=TimeMarketMean+TimeMarketErr,
+                    colour=SettLevel),
+                width=0.25,
+                size=0.5,
+                show.legend=F) +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  geom_text(data=Statusplot.sigpos.bahasa,
+            aes(x=SettlementName.bahasa,
+                y=TimeMarket),
+            label=Statusplot.asterisks.bahasa$TimeMarket,
+            nudge_x=-0.07,
+            size=rel(4),
+            colour=errcols.status["NotDummy"]) +
+  geom_text(data=Statusplot.sigpos.bahasa,
+            aes(x=SettlementName.bahasa,y=TimeMarket.ref),
+            label=Statusplot.asterisks.bahasa$TimeMarket.ref,
+            size=rel(3),
+            nudge_x=0.02,
+            fontface="bold.italic",
+            colour=errcols.status["NotDummy"]) +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(Sett.level.ContData.status.PLOTFORMAT$TimeMarketMean,na.rm=T)+
+                                max(Sett.level.ContData.status.PLOTFORMAT$TimeMarketErr,na.rm=T)+
+                                0.03*max(Sett.level.ContData.status.PLOTFORMAT$TimeMarketMean,na.rm=T))) +
+  scale_fill_manual(values=fillcols.status) +
+  scale_colour_manual(values=errcols.status) +
+  coord_flip() + Statusplot.labs.bahasa["Time"] + plot.theme
+
+
+# - DAYS UNWELL
+Unwell.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
+                            aes(x=SettlementName.bahasa)) +
+  geom_bar(aes(y=UnwellMean,
+               fill=SettLevel),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_errorbar(aes(ymin=UnwellMean-UnwellErr,
+                    ymax=UnwellMean+UnwellErr,
+                    colour=SettLevel),
+                width=0.25,
+                size=0.5,
+                show.legend=F) +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  geom_text(data=Statusplot.sigpos.bahasa,
+            aes(x=SettlementName.bahasa,
+                y=Unwell),
+            label=Statusplot.asterisks.bahasa$Unwell,
+            nudge_x=-0.07,
+            size=rel(4),
+            colour=errcols.status["NotDummy"]) +
+  geom_text(data=Statusplot.sigpos.bahasa,
+            aes(x=SettlementName.bahasa,y=Unwell.ref),
+            label=Statusplot.asterisks.bahasa$Unwell.ref,
+            size=rel(3),
+            nudge_x=0.02,
+            fontface="bold.italic",
+            colour=errcols.status["NotDummy"]) +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(Sett.level.ContData.status.PLOTFORMAT$UnwellMean,na.rm=T)+
+                                max(Sett.level.ContData.status.PLOTFORMAT$UnwellErr,na.rm=T)+
+                                0.03*max(Sett.level.ContData.status.PLOTFORMAT$UnwellMean,na.rm=T))) +
+  scale_fill_manual(values=fillcols.status) +
+  scale_colour_manual(values=errcols.status) +
+  coord_flip() + Statusplot.labs.bahasa["Unwell"] + plot.theme
+
+
+# ---- 3.2 Proportional data plots ----
+
+# - GENDER OF HEAD OF HOUSEHOLD
+Gender.statusplot.bahasa <- 
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("HHH.female","HHH.male")) %>%
+  ggplot(aes(x=SettlementName.bahasa,
+             y=value)) +
+  geom_bar(aes(fill=variable),
+           stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Gender"]],
+                    labels=c("Perempuan","Laki-laki")) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["Gender"] +
+  guides(fill=guide_legend(label.vjust=0.5,
+                           label.theme=element_text(size=rel(9),
+                                                    angle=0,
+                                                    colour="#505050",
+                                                    lineheight=0.75),
+                           direction="horizontal",
+                           nrow=1,
+                           title.position="left",
+                           label.position="right",
+                           keywidth=unit(0.75,"cm"),
+                           keyheight=unit(0.5,"cm"),
+                           reverse=T))
+
+# - RELIGION
+Religion.statusplot.bahasa <- 
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("Percent.Rel.Other","Percent.Rel.Muslim","Percent.Rel.Christian")) %>%
+  ggplot(aes(x=SettlementName.bahasa,
+             y=value)) +
+  geom_bar(aes(fill=variable),
+           stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Religion"]],
+                    labels=c("Lainnya","Muslim","Kristen")) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["Religion"] +
+  guides(fill=guide_legend(label.vjust=0.5,
+                           label.theme=element_text(size=rel(9),
+                                                    angle=0,
+                                                    colour="#505050",
+                                                    lineheight=0.75),
+                           direction="horizontal",
+                           ncol=3,
+                           title.position="left",
+                           label.position="right",
+                           keywidth=unit(0.75,"cm"),
+                           keyheight=unit(0.5,"cm"),
+                           reverse=T))
+
+# - PRIMARY OCCUPATION
+Primaryocc.statusplot.bahasa <- 
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("Percent.PrimaryOcc.Other",  
+                                               "Percent.PrimaryOcc.Aquaculture","Percent.PrimaryOcc.Tourism",
+                                               "Percent.PrimaryOcc.Extraction","Percent.PrimaryOcc.WageLabor",
+                                               "Percent.PrimaryOcc.HarvestForest", 
+                                               "Percent.PrimaryOcc.Fish","Percent.PrimaryOcc.Farm")) %>%
+  ggplot(aes(x=SettlementName.bahasa,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["PrimaryOcc"]],
+                    labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut yang tidak terbarukan",  "Jenis pekerjaan lainnya",
+                             "Hasil Hutan","Penangkapan ikan", "Pertanian")) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["PrimaryOcc"] + plot.guides.techreport
+
+# - FISHING FREQUENCY
+Freqfish.statusplot.bahasa <- 
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("Prop.Fish.MoreFewTimesWk","Prop.Fish.FewTimesPerWk",
+                                               "Prop.Fish.FewTimesPerMo","Prop.Fish.FewTimesPer6Mo",
+                                               "Prop.Fish.AlmostNever")) %>%
+  ggplot(aes(x=SettlementName.bahasa,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["FreqFish"]],
+                    labels=c("Lebih dari beberapa kali perminggu","Beberapa kali perminggu",
+                             "Beberapa kali perbulan","Beberapa kali dalam enam bulan",
+                             "Setiap enam bulan sekali")) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["FreqFish"] + plot.guides.techreport
+
+# - SELL FISH FREQUENCY
+Freqsellfish.statusplot.bahasa <- 
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("Prop.SellFish.MoreFewTimesWk","Prop.SellFish.FewTimesPerWk",
+                                               "Prop.SellFish.FewTimesPerMo","Prop.SellFish.FewTimesPer6Mo",
+                                               "Prop.SellFish.AlmostNever")) %>%
+  ggplot(aes(x=SettlementName.bahasa,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["FreqSellFish"]],
+                    labels=c("Lebih dari beberapa kali perminggu","Beberapa kali perminggu",
+                             "Beberapa kali perbulan","Beberapa kali dalam enam bulan",
+                             "Setiap enam bulan sekali")) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["FreqSellFish"] + plot.guides.techreport
+
+# - INCOME FROM FISHING
+Incfish.statusplot.bahasa <- 
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("Prop.IncFish.All","Prop.IncFish.Most",
+                                               "Prop.IncFish.Half","Prop.IncFish.Some",
+                                               "Prop.IncFish.None")) %>%
+  ggplot(aes(x=SettlementName.bahasa,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["IncFish"]],
+                    labels=c("Semua","Paling","Sekitar setengah","Beberapa","Tidak ada")) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["IncFish"] + plot.guides.techreport
+
+# - FISHING TECHNIQUE
+Fishtech.statusplot.bahasa <- 
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("Prop.FishTech.MobileLine","Prop.FishTech.StatLine",
+                                               "Prop.FishTech.MobileNet","Prop.FishTech.StatNet",
+                                               "Prop.FishTech.ByHand")) %>%
+  ggplot(aes(x=SettlementName.bahasa,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["FishTech"]],
+                    labels=c("Tali pancing bergerak","Tali pancing tetap",
+                             "Jaring bergerak","Jaring tetap","Memancing dengan tangan")) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["FishTech"] + plot.guides.techreport
+
+# - CHILDHOOD FOOD SECURITY
+Childfs.statusplot.bahasa <- 
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("Child.FS.yes","Child.FS.no")) %>%
+  ggplot(aes(x=SettlementName.bahasa,
+             y=value)) +
+  geom_bar(aes(fill=variable),
+           stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["ChildFS"]],
+                    labels=c("Kejadian kelaparan\npada anak","Tidak ada kejadian\nkelaparan pada anak")) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["ChildFS"] +
+  guides(fill=guide_legend(label.vjust=0.5,
+                           label.theme=element_text(size=rel(9),
+                                                    angle=0,
+                                                    colour="#505050",
+                                                    lineheight=0.75),
+                           direction="horizontal",
+                           nrow=1,
+                           title.position="left",
+                           label.position="right",
+                           keywidth=unit(0.75,"cm"),
+                           keyheight=unit(0.5,"cm"),
+                           reverse=T))
+
+# - PROTEIN FROM FISH
+Proteinfish.statusplot.bahasa <- 
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("ProteinFish.All","ProteinFish.Most",
+                                               "ProteinFish.Half","ProteinFish.Some",
+                                               "ProteinFish.None")) %>%
+  ggplot(aes(x=SettlementName.bahasa,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["Protein"]],
+                    labels=c("Semua","Paling","Sekitar setengah","Beberapa","Tidak ada")) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["FishProtein"] + plot.guides.techreport
+
+# - CATEGORICAL FOOD SECURITY
+FSCategorical.statusplot.bahasa <-
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("Percent.FoodInsecure.YesHunger", "Percent.FoodInsecure.NoHunger", "Percent.FoodSecure")) %>%
+  ggplot(aes(x=SettlementName.bahasa,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["FSCategorical"]],
+                    labels=c("Rawan Pangan dengan kelaparan", "Rawan Pangan tanpa kelaparan","Pangan tersedia" )) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["FSCategorical"] + 
+  guides(fill=guide_legend(label.vjust=0.5,
+                           label.theme=element_text(size=rel(9),
+                                                    angle=0,
+                                                    colour="#505050",
+                                                    lineheight=0.75),
+                           direction="horizontal",
+                           ncol=3,
+                           title.position="left",
+                           label.position="right",
+                           keywidth=unit(0.75,"cm"),
+                           keyheight=unit(0.5,"cm"),
+                           reverse=T))
+
+# - ECONOMIC STATUS
+EconStatus.statusplot.bahasa <-
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("Econ.Status.Much.Better","Econ.Status.Slightly.Better",
+                                               "Econ.Status.Neutral","Econ.Status.Slighly.Worse",
+                                               "Econ.Status.Much.Worse")) %>%
+  ggplot(aes(x=SettlementName.bahasa,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["EconStatus"]],
+                    labels=c("Jauh lebih baik","Sedikit lebih baik","Tidak lebih baik maupun lebih buruk",
+                             "Sedikit lebih buruk","Jauh lebih buruk")) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["EconStatus"] + plot.guides.techreport
+
+# - MEMBER OF MARINE RESOURCE ORGANIZATION
+MarineMember.statusplot.bahasa <-
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("MarineMember.No","MarineMember.Yes")) %>%
+  ggplot(aes(x=SettlementName.bahasa,
+             y=value)) +
+  geom_bar(aes(fill=variable),
+           stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["MarineMember"]],
+                    labels=c("Bukan anggota","Anggota")) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["MarineMember"] + 
+  guides(fill=guide_legend(label.vjust=0.5,
+                           label.theme=element_text(size=rel(9),
+                                                    angle=0,
+                                                    colour="#505050",
+                                                    lineheight=0.75),
+                           direction="horizontal",
+                           nrow=1,
+                           title.position="left",
+                           label.position="right",
+                           keywidth=unit(0.75,"cm"),
+                           keyheight=unit(0.5,"cm"),
+                           reverse=T))
+
+# - MEETING ATTENDANCE
+MarineMeeting.statusplot.bahasa <-
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("MarineMeeting.No", "MarineMeeting.Yes")) %>%
+  ggplot(aes(x=SettlementName.bahasa,
+             y=value)) +
+  geom_bar(aes(fill=variable),
+           stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["MarineAttendance"]],
+                    labels=c("Tidak menghadiri pertemuan","Menghadiri pertemuan")) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["MarineAttendance"] + 
+  guides(fill=guide_legend(label.vjust=0.5,
+                           label.theme=element_text(size=rel(9),
+                                                    angle=0,
+                                                    colour="#505050",
+                                                    lineheight=0.75),
+                           direction="horizontal",
+                           nrow=1,
+                           title.position="left",
+                           label.position="right",
+                           keywidth=unit(0.75,"cm"),
+                           keyheight=unit(0.5,"cm"),
+                           reverse=T))
+
+# - MARINE RESOUCE CONFLICT
+SocialConflict.statusplot.bahasa <-
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("Percent.GreatlyDecreased.SocConflict","Percent.Decreased.SocConflict",
+                                               "Percent.Same.SocConflict","Percent.Increased.SocConflict",
+                                               "Percent.GreatlyIncreased.SocConflict")) %>%
+  ggplot(aes(x=SettlementName.bahasa,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["SocialConflict"]],
+                    labels=c("Sangat menurun","Menurun","Tidak meningkat maupun menurun","Meningkat","Sangat meningkat")) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["SocialConflict"] + plot.guides.techreport
+
+# - NUMBER OF LOCAL THREATS
+NumThreat.statusplot.bahasa <-
+  melt(Sett.level.PropData.status.PLOTFORMAT,
+       id.vars="SettlementName.bahasa",measure.vars=c("Threat.Minimum.Five","Threat.Four", "Threat.Three",
+                                               "Threat.Two","Threat.One","Threat.None")) %>%
+  ggplot(aes(x=SettlementName.bahasa,y=value,fill=variable)) +
+  geom_bar(stat="identity",
+           position="fill",
+           width=0.75,
+           size=0.15,
+           colour="#505050") +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     labels=scales::percent_format()) +
+  scale_fill_manual(name="",
+                    values=multianswer.fillcols.status[["NumLocalThreats"]],
+                    labels=c("Lebih dari empat ancaman","Empat ancaman","Tiga ancaman","Dua ancaman","Satu ancaman", "Tidak ada ancaman")) +
+  coord_flip() + plot.theme + Statusplot.labs.bahasa["NumLocalThreats"] + plot.guides.techreport
+
+# - MARINE GROUP CONTRIBUTION
+MarineContribution.statusplot.bahasa <- 
+  ggplot(data=Sett.level.PropData.status.PLOTFORMAT,
+         aes(x=SettlementName.bahasa)) +
+  geom_bar(aes(y=MarineContribution,
+               fill="NotDummy"),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_vline(aes(xintercept=3),
+             linetype=2,
+             size=0.35,
+             colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(Sett.level.PropData.status.PLOTFORMAT$MarineContribution,na.rm=T) +
+                                1.5* max(Sett.level.PropData.status.PLOTFORMAT$MarineContribution,na.rm=T)), 
+                     labels = scales::comma) +
+  scale_fill_manual(values=fillcols.status) +
+  scale_colour_manual(values=errcols.status) +
+  coord_flip() + Statusplot.labs.bahasa["MarineContribution"] + plot.theme
+

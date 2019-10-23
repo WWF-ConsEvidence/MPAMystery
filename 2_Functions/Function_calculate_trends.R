@@ -117,7 +117,8 @@ mpa.trends <- function(MPA=NULL) {
          paste(paste(OutputFileName,MPA.name$MPAName.final,sep="/"),"MPA_Level_Data_forplotting.xlsx",sep="_"))
   
   # output plots
-  source('4_Products/1_Social/1_Status_trends_reports/Export_status_trends_plots.R', local=T)
+  ifelse(num.years==1, source('4_Products/1_Social/1_Status_trends_reports/Export_status_plots.R', local=T),
+         source('4_Products/1_Social/1_Status_trends_reports/Export_status_trends_plots.R', local=T))
   
 }
 

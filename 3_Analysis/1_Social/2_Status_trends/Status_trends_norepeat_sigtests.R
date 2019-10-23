@@ -1,9 +1,9 @@
 # 
-# code:  Status & Trends Significance Tests, for data with one repeat
+# code:  Status Significance Tests, for data with no repeat
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2016
-# modified: July 2019
+# modified: October 2019
 # 
 # 
 # ---- code sections ----
@@ -22,109 +22,29 @@
 # 
 
 
-# ---- 1.1 Subset datasets to only include status year ----
+# ---- 1.1 Subset datasets ----
 
-# - "MPA Household Data" dataset -- includes household level data for only treatment households from most recent year
+# - "MPA Household Data" dataset -- includes household level data for only treatment households
 MPA.HHData <- 
   HHData %>%
-  filter(Treatment==1 & InterviewYear==status) %>% 
+  filter(Treatment==1) %>% 
   mutate(SettlementName=factor(SettlementName))
 
 
-# - "MPA versus Control" dataset -- includes household level data for treatment and control, for most recent year only
+# - "MPA versus Control" dataset -- includes household level data for treatment and control
 MPA.v.Control <- 
-  HHData %>%
-  filter(InterviewYear==status)
+  HHData
 
 
-# - "MPA Settlement Means" dataset -- includes settlement level data for only treatment settlements from most recent year
+# - "MPA Settlement Means" dataset -- includes settlement level data for only treatment settlements
 MPA.Sett.Means<-
   Sett.Level.Means %>%
-  filter(Treatment==1 & InterviewYear==status)
+  filter(Treatment==1)
 
 # Removing the settlement with an NA in order for function to run
 MPA.Sett.Means <- 
   MPA.Sett.Means[!is.na(MPA.Sett.Means$SettlementName),]
 
-
-# - Frequency tables for chi-square tests
-
-FreqTables <- 
-  HHData[HHData$Treatment==1,] %>%
-  group_by(MonitoringYear) %>%
-  summarise(PrimaryOcc.Fish=length(PrimaryLivelihood[PrimaryLivelihood==3 &  !is.na(PrimaryLivelihood)]),
-            PrimaryOcc.Farm=length(PrimaryLivelihood[PrimaryLivelihood==1 & !is.na(PrimaryLivelihood)]),
-            PrimaryOcc.WageLabor=length(PrimaryLivelihood[PrimaryLivelihood==7 & !is.na(PrimaryLivelihood)]),
-            PrimaryOcc.HarvestForest=length(PrimaryLivelihood[PrimaryLivelihood==2 & !is.na(PrimaryLivelihood)]),
-            PrimaryOcc.Tourism=length(PrimaryLivelihood[PrimaryLivelihood==6 & !is.na(PrimaryLivelihood)]),
-            PrimaryOcc.Other=length(PrimaryLivelihood[(PrimaryLivelihood==996 | PrimaryLivelihood==4 |  PrimaryLivelihood==5) & !is.na(PrimaryLivelihood)]),
-            FreqFish.AlmostNever=length(FreqFish[FreqFish==1 & !is.na(FreqFish)]),
-            FreqFish.FewTimesPer6Mo=length(FreqFish[FreqFish==2 & !is.na(FreqFish)]),
-            FreqFish.FewTimesPerMo=length(FreqFish[FreqFish==3 & !is.na(FreqFish)]),
-            FreqFish.FewTimesPerWk=length(FreqFish[FreqFish==4 & !is.na(FreqFish)]),
-            FreqFish.MoreFewTimesWk=length(FreqFish[FreqFish==5 & !is.na(FreqFish)]),
-            SellFish.AlmostNever=length(FreqSaleFish[FreqSaleFish==1 & !is.na(FreqSaleFish)]),
-            SellFish.FewTimesPer6Mo=length(FreqSaleFish[FreqSaleFish==2 & !is.na(FreqSaleFish)]),
-            SellFish.FewTimesPerMo=length(FreqSaleFish[FreqSaleFish==3 & !is.na(FreqSaleFish)]),
-            SellFish.FewTimesPerWk=length(FreqSaleFish[FreqSaleFish==4 & !is.na(FreqSaleFish)]),
-            SellFish.MoreFewTimesWk=length(FreqSaleFish[FreqSaleFish==5 & !is.na(FreqSaleFish)]),
-            IncFish.None=length(PercentIncFish[PercentIncFish==1 & !is.na(PercentIncFish)]),
-            IncFish.Some=length(PercentIncFish[PercentIncFish==2 & !is.na(PercentIncFish)]),
-            IncFish.Half=length(PercentIncFish[PercentIncFish==3 & !is.na(PercentIncFish)]),
-            IncFish.Most=length(PercentIncFish[PercentIncFish==4 & !is.na(PercentIncFish)]),
-            IncFish.All=length(PercentIncFish[PercentIncFish==5 & !is.na(PercentIncFish)]),
-            FishTech.ByHand=length(MajFishTechnique[MajFishTechnique==1 & !is.na(MajFishTechnique)]),
-            FishTech.StatNet=length(MajFishTechnique[MajFishTechnique==2 & !is.na(MajFishTechnique)]),
-            FishTech.MobileNet=length(MajFishTechnique[MajFishTechnique==3 & !is.na(MajFishTechnique)]),
-            FishTech.StatLine=length(MajFishTechnique[MajFishTechnique==4 & !is.na(MajFishTechnique)]),
-            FishTech.MobileLine=length(MajFishTechnique[MajFishTechnique==5 & !is.na(MajFishTechnique)]),
-            child.FS.no=length(cat.cFS[cat.cFS=="No or insufficient evidence" & !is.na(cat.cFS)]),
-            child.FS.yes=length(cat.cFS[cat.cFS=="Evidence" & !is.na(cat.cFS)]),
-            ProteinFish.None=length(PercentProteinFish[PercentProteinFish==1 & !is.na(PercentProteinFish)]),
-            ProteinFish.Some=length(PercentProteinFish[PercentProteinFish==2 & !is.na(PercentProteinFish)]),
-            ProteinFish.Half=length(PercentProteinFish[PercentProteinFish==3 & !is.na(PercentProteinFish)]),
-            ProteinFish.Most=length(PercentProteinFish[PercentProteinFish==4 & !is.na(PercentProteinFish)]),
-            ProteinFish.All=length(PercentProteinFish[PercentProteinFish==5 &  !is.na(PercentProteinFish)]),
-            Econ.Status.Much.Worse=length(EconStatusTrend[EconStatusTrend==1 & !is.na(EconStatusTrend)]),
-            Econ.Status.Slighly.Worse=length(EconStatusTrend[EconStatusTrend==2 & !is.na(EconStatusTrend)]),
-            Econ.Status.Neutral=length(EconStatusTrend[EconStatusTrend==3 & !is.na(EconStatusTrend)]),
-            Econ.Status.Slightly.Better=length(EconStatusTrend[EconStatusTrend==4 & !is.na(EconStatusTrend)]),
-            Econ.Status.Much.Better=length(EconStatusTrend[EconStatusTrend==5 & !is.na(EconStatusTrend)]),
-            Threat.None=length(NumLocalThreat[NumLocalThreat==0 & !is.na(NumLocalThreat)]),
-            Threat.One=length(NumLocalThreat[NumLocalThreat==1 & !is.na(NumLocalThreat)]),
-            Threat.Two=length(NumLocalThreat[NumLocalThreat==2 & !is.na(NumLocalThreat)]),
-            Threat.Three=length(NumLocalThreat[NumLocalThreat==3 & !is.na(NumLocalThreat)]),
-            Threat.Four=length(NumLocalThreat[NumLocalThreat==4 & !is.na(NumLocalThreat)]),
-            Threat.Minimum.Five =length(NumLocalThreat[NumLocalThreat>=5 & !is.na(NumLocalThreat)]),
-            Percent.SecondaryOcc.Fish=length(SecondaryLivelihood[SecondaryLivelihood==3 & !is.na(SecondaryLivelihood)]),
-            Percent.SecondaryOcc.Farm=length(SecondaryLivelihood[SecondaryLivelihood==1 & !is.na(SecondaryLivelihood)]),
-            Percent.SecondaryOcc.WageLabor=length(SecondaryLivelihood[SecondaryLivelihood==7 & !is.na(SecondaryLivelihood)]),
-            Percent.SecondaryOcc.HarvestForest=length(SecondaryLivelihood[SecondaryLivelihood==2 & !is.na(SecondaryLivelihood)]),
-            Percent.SecondaryOcc.Tourism=length(SecondaryLivelihood[SecondaryLivelihood==6 & !is.na(SecondaryLivelihood)]),
-            Percent.SecondaryOcc.Aquaculture=length(SecondaryLivelihood[SecondaryLivelihood==4 & !is.na(SecondaryLivelihood)]),
-            Percent.SecondaryOcc.Extraction=length(SecondaryLivelihood[SecondaryLivelihood==5 & !is.na(SecondaryLivelihood)]),
-            Percent.SecondaryOcc.Other=length(SecondaryLivelihood[SecondaryLivelihood==996 & !is.na(SecondaryLivelihood)]),
-            Percent.OneOcc.Diverse=length(HouseholdID[!is.na(PrimaryLivelihood) & is.na(SecondaryLivelihood) & is.na(TertiaryLivelihood)]),
-            Percent.MultipleOcc.Diverse=length(HouseholdID[!is.na(PrimaryLivelihood) & (!is.na(SecondaryLivelihood) | !is.na(TertiaryLivelihood))]))
-
-FreqTables <- 
-  as.data.frame(t(FreqTables[,-1]))
-
-colnames(FreqTables) <- c("t0","repeat1")
-
-FreqTables$Category <- rownames(FreqTables)
-FreqTables$Variable <- ifelse(grepl("PrimaryOcc",FreqTables$Category)==T,"PrimaryOcc",
-                              ifelse(grepl("SellFish",FreqTables$Category)==T,"SellFish",
-                                     ifelse(grepl("IncFish",FreqTables$Category)==T,"IncFish",
-                                            ifelse(grepl("FishTech",FreqTables$Category)==T,"FishTech",
-                                                   ifelse(grepl("FreqFish",FreqTables$Category)==T,"FreqFish",
-                                                          ifelse(grepl("child",FreqTables$Category)==T,"child",
-                                                                 ifelse(grepl("Protein",FreqTables$Category)==T,"Protein",
-                                                                        ifelse(grepl("Econ.Status",FreqTables$Category)==T,"EconStatus",
-                                                                               ifelse(grepl("Threat",FreqTables$Category)==T,"NumLocalThreats",
-                                                                                      ifelse(grepl("SecondaryOcc",FreqTables$Category)==T,"SecondaryOcc",
-                                                                                             ifelse(grepl("Occ.Diverse",FreqTables$Category)==T,"OccDiverse",NA)))))))))))
-                                   
 
 # ---- 1.2 Define list of settlement names in MPA ----
 
@@ -212,8 +132,8 @@ even.number.setts.function <-
                                                   ifelse(is.na(sett.equal.med),
                                                          NA,
                                                          as.character(sett.equal.med)))))
-    
-        
+           
+           
            median.sett <- ifelse(!is.na(sett.equal.med),
                                  as.character(sett.equal.med),
                                  ifelse((sd(b[MPA.HHData$SettlementName==upper.sett],na.rm=T)/sqrt(length(b[MPA.HHData$SettlementName==upper.sett & !is.na(b)])))<
@@ -231,6 +151,8 @@ median.setts <-
                                       as.character(MPA.Sett.Means$SettlementName[which(i==med)]),
                                       as.character(even.number.setts.function[j])),
                                levels=levels(sett.names))})
+
+
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -394,8 +316,8 @@ non.parametric.test.settlements <-
                       results <- 
                         list(cbind.data.frame(SettlementName=c(as.character(sett.names[which(sett.names!=median.setts[a])]),
                                                                as.character(median.setts[a])),
-                                    
-                                          rbind.data.frame(t(data.frame(mapply(i=sett.names[which(sett.names!=median.setts[a])],
+                                              
+                                              rbind.data.frame(t(data.frame(mapply(i=sett.names[which(sett.names!=median.setts[a])],
                                                                                    function(i){
                                                                                      var <- 
                                                                                        MPA.HHData[MPA.HHData$SettlementName==i | MPA.HHData$SettlementName==median.setts[a],b]
@@ -406,25 +328,25 @@ non.parametric.test.settlements <-
                                                                                                    exact=F)
                                                                                    }))["p.value",]),
                                                                "median"))
-                    )}))
+                        )}))
 
 
 # - Alphabetize each column of settlement names.  Now all settlement names are in same order.
 sigvals.Sett  <- 
   cbind.data.frame(non.parametric.test.settlements[order(non.parametric.test.settlements$"FSMean.SettlementName"),
-                                                        c("FSMean.SettlementName","FSMean.p.value")],
+                                                   c("FSMean.SettlementName","FSMean.p.value")],
                    non.parametric.test.settlements[order(non.parametric.test.settlements$"MAMean.SettlementName"),
-                                                        c("MAMean.SettlementName","MAMean.p.value")],
+                                                   c("MAMean.SettlementName","MAMean.p.value")],
                    non.parametric.test.settlements[order(non.parametric.test.settlements$"MTMean.SettlementName"),
-                                                          c("MTMean.SettlementName","MTMean.p.value")],
+                                                   c("MTMean.SettlementName","MTMean.p.value")],
                    non.parametric.test.settlements[order(non.parametric.test.settlements$"PAMean.SettlementName"),
-                                                          c("PAMean.SettlementName","PAMean.p.value")],
+                                                   c("PAMean.SettlementName","PAMean.p.value")],
                    non.parametric.test.settlements[order(non.parametric.test.settlements$"SEMean.SettlementName"),
-                                                        c("SEMean.SettlementName","SEMean.p.value")],
+                                                   c("SEMean.SettlementName","SEMean.p.value")],
                    non.parametric.test.settlements[order(non.parametric.test.settlements$"TimeMarketMean.SettlementName"),
-                                                          c("TimeMarketMean.SettlementName","TimeMarketMean.p.value")],
+                                                   c("TimeMarketMean.SettlementName","TimeMarketMean.p.value")],
                    non.parametric.test.settlements[order(non.parametric.test.settlements$"UnwellMean.SettlementName"),
-                                                        c("UnwellMean.SettlementName","UnwellMean.p.value")])
+                                                   c("UnwellMean.SettlementName","UnwellMean.p.value")])
 
 # - Remove all settlement name columns except for one. 
 sigvals.Sett <- 
@@ -471,135 +393,3 @@ sigvals <- rbind.data.frame(sigvals.MPA,
 
 sigvals[,c("FS.pval", "MA.pval", "MT.pval" , "PA.pval", "SE.pval", "TimeMarket.pval", "Unwell.pval")] <- 
   unlist(sigvals[,c("FS.pval", "MA.pval", "MT.pval", "PA.pval","SE.pval","TimeMarket.pval","Unwell.pval")])
-
-# ---- 4.3 Define function for trend data significance ---- 
-
-trend.non.parametric.test.byMPA  <- 
-  data.frame(mapply(i=HHData[HHData$Treatment==1,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
-                    function(i){
-                      MannKendall(c(i[HHData$InterviewYear==unique(HHData$InterviewYear)[1]],
-                                    i[HHData$InterviewYear==unique(HHData$InterviewYear)[2]]))
-                    }))  %>%
-  rename(FS.pval = FSIndex, MA.pval = MAIndex, MT.pval = MTIndex, PA.pval = PAIndex, SE.pval = SERate, 
-         TimeMarket.pval = TimeMarket, Unwell.pval = DaysUnwell)
-
-trend.non.parametric.test.byControl  <- 
-  data.frame(mapply(i=HHData[HHData$Treatment==0,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
-                    function(i){
-                      MannKendall(c(i[HHData$InterviewYear==unique(HHData$InterviewYear)[1]],
-                                    i[HHData$InterviewYear==unique(HHData$InterviewYear)[2]]))
-                    }))  %>%
-  rename(FS.pval = FSIndex, MA.pval = MAIndex, MT.pval = MTIndex, PA.pval = PAIndex, SE.pval = SERate, 
-         TimeMarket.pval = TimeMarket, Unwell.pval = DaysUnwell)
-
-
-
-
-trend.sigvals  <- 
-  cbind.data.frame(trend.non.parametric.test.byMPA ["sl","FS.pval"],NA,trend.non.parametric.test.byMPA ["sl","MA.pval"],
-                   NA,trend.non.parametric.test.byMPA ["sl","MT.pval"],NA,trend.non.parametric.test.byMPA ["sl","PA.pval"],NA,
-                   trend.non.parametric.test.byMPA ["sl","SE.pval"],NA,trend.non.parametric.test.byMPA ["sl","TimeMarket.pval"],NA,
-                   trend.non.parametric.test.byMPA ["sl","Unwell.pval"],NA)
-
-colnames(trend.sigvals ) <- c("FSMean","FSErr","MAMean","MAErr","MTMean","MTErr","PAMean","PAErr","SEMean","SEErr",
-                                  "TimeMarketMean","TimeMarketErr","UnwellMean","UnwellErr")
-
-trend.sigvals  <- cbind.data.frame(MonitoringYear="p.value", SettlementName=NA, as.data.frame(t(unlist(trend.sigvals))))
-
-
-# ---- 4.4 Create function that will output TREND significance values for non-parametric variables, BY SETTLEMENT ----
-#          (for annex plots)
-
-trend.non.parametric.test.bySett  <- 
-  cbind.data.frame(SettlementName=as.character(sett.names),
-                   mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
-                          function(a){
-                            t(data.frame(mapply(i=as.character(sett.names),
-                                                function(i){
-                                                  MannKendall(c(HHData[HHData$SettlementName==i &
-                                                                                  HHData$InterviewYear==unique(HHData$InterviewYear)[1],a],
-                                                                HHData[HHData$SettlementName==i &
-                                                                                  HHData$InterviewYear==unique(HHData$InterviewYear)[2],a]))
-                                                }))["sl",])})) %>%
-  rename(FS.pval = FSIndex, MA.pval = MAIndex, MT.pval = MTIndex, PA.pval = PAIndex, SE.pval = SERate, 
-         TimeMarket.pval = TimeMarket, Unwell.pval = DaysUnwell) %>%
-  .[rev(order(.$SettlementName)),]
-
-
-
-# - Define data frame with p-values for annex plots
-#   (households within each settlement from each year of sampling are compared across time for the given 
-#   variable, using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
-#   there [is/is not] a significant difference in this variable across the settlement)
-annex.sigvals  <- 
-  rbind.data.frame(cbind.data.frame(SettlementName=c("Control Settlements"),trend.non.parametric.test.byControl ["sl",]),
-                   cbind.data.frame(SettlementName=MPA.name$MPAName,trend.non.parametric.test.byMPA ["sl",]),
-                   null.row.sigvals,
-                   trend.non.parametric.test.bySett[rev(order(trend.non.parametric.test.bySett$SettlementName)),])
-
-annex.sigvals[2:8] <- unlist(annex.sigvals[2:8])
-
-annex.sigvals.bahasa  <- 
-  rbind.data.frame(cbind.data.frame(SettlementName=c("Desa Kontrol"),trend.non.parametric.test.byControl ["sl",]),
-                   cbind.data.frame(SettlementName=gsub("MPA","KKP",MPA.name$MPAName),trend.non.parametric.test.byMPA ["sl",]),
-                   null.row.sigvals,
-                   trend.non.parametric.test.bySett[rev(order(trend.non.parametric.test.bySett$SettlementName)),])
-
-annex.sigvals.bahasa[2:8] <- unlist(annex.sigvals.bahasa[2:8])
-
-
-
-# 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#
-# ---- SECTION 5: Chi-square Tests for Categorical Variables ----
-#
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# 
-# ---- 5.1 Status plot, settlement-level chi-square tests ----
-#          (with MPA-level proportions serving as expected values/probabilities)
-
-# !!! Have not figured out a viable statistical test for settlement-level variation from MPA-level proportions
-#     BECAUSE, sample sizes are too small (and many times zero) per category, at the settlement level
-
-
-# ---- 5.2 Trend plot, chi-square tests on most recent monitoring year ----
-#          (with baseline proportions serving as expected values/probabilities)
-
-propdata.trend.test  <- data.frame(PrimaryOcc=NA,FreqFish=NA,SellFish=NA,IncFish=NA,FishTech=NA,ChildFS=NA,Protein=NA)
-p.for.function <- NA
-data.for.function <- NA
-
-
-propdata.trend.test  <- 
-  as.data.frame(mapply(a=c("PrimaryOcc","FreqFish","SellFish","IncFish","FishTech","child","Protein","EconStatus","NumLocalThreats","SecondaryOcc","OccDiverse"),
-                       function(a) {
-                         p.for.function <- 
-                           if(sum(FreqTables$t0[FreqTables$Variable==a])==0) {
-                             FreqTables$repeat1[FreqTables$Variable==a &
-                                                  FreqTables$repeat1!=0] 
-                           } else {FreqTables$t0[FreqTables$Variable==a &
-                                                        FreqTables$t0!=0] }
-                         data.for.function <- 
-                           if(sum(FreqTables$t0[FreqTables$Variable==a])==0) {
-                             FreqTables$repeat1[FreqTables$Variable==a]
-                           } else {FreqTables$repeat1[FreqTables$Variable==a &
-                                                        FreqTables$t0!=0]}
-                         propdata.trend.test [a] <- ifelse(length(data.for.function)>1,
-                                                               chisq.test(data.for.function,
-                                                                          p=p.for.function,
-                                                                          rescale.p=TRUE,correct=TRUE)["p.value"],
-                                                               NA)
-                         propdata.trend.test [a] <- ifelse(is.na(propdata.trend.test [a]),100,propdata.trend.test [a])
-                       }))
-
-propdata.trend.test <-
-  rbind(propdata.trend.test, 
-        c("Primary occupation (% households)","Frequency of fishing (% households)","Frequency of selling at least some catch (% households)",
-          "Income from fishing in past 6 months (% households)","Fishing technique most often used in past 6 months (% households)","Child hunger (% households)",
-          "Dietary protein from fish in past 6 months (% households)","Change in economic status of fishing households (% households)",
-          "Number of identified local threats to marine environment (% households)","Secondary occupation (% households)","Occupational diversity (% households)"),
-        c("Pekerjaan utama (% rumah tangga)","Frekuensi penangkapan ikan (% rumah tangga)","Frekuensi penjualan setidaknya pada beberapa hasil tangkapan (% rumah tangga)",
-          "Penghasilan dari penangkapan ikan dalam 6 bulan terakhir (% rumah tangga)","Teknik penangkapan ikan yang paling sering digunakan dalam 6 bulan terakhir (% rumah tangga)",
-          "Kelaparan pada anak (% rumah tangga)","Protein makanan dari ikan dalam 6 bulan terakhir (% rumah tangga)","Perubahan status ekonomi rumah tangga nelayan (% rumah tangga)",
-          "Jumlah ancaman lokal yang teridentifikasi terhadap lingkungan laut (% rumah tangga)","Pekerjaan sekunder (% rumah tangga)","Keberagaman pekerjaan (% rumah tangga)"))

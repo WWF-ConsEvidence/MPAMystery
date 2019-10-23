@@ -1,24 +1,19 @@
 # 
-# code:   Alor Technical Report Datasets
+# code:   Status & Trends Datasets, for data with one repeat
 # 
-# github: WWF-ConsEvidence/MPAMystery/2_Social/TechnicalReports/SBS
-# --- Duplicate all code from "2_Social" onward, to maintain file structure for sourced code
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2016
-# modified: November 2017
-# modified: Amari Bauer, June 2019
+# modified: October 2019
 # 
 # 
 # ---- inputs ----
-#  1) Source Alor.TechReport.SigTest.2019.R 
-#     - Dependencies: Alor.Report.Calculations.R
+#  1) Source Status_trends_onerepeat_sigtests.R
 # 
 # ---- code sections ----
 #  1) Data Sourcing, Configuration, and Subsetting
 #  2) Define Datasets for Status, Trend, and Annex Plots for Export
-#  3) Export Data to Excel
-#  4) Synthesize other social data for interpretation/context
+#  3) Synthesize other social data for interpretation/context
 # 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

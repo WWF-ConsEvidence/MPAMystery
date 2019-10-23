@@ -1,11 +1,11 @@
 # 
-# code:  MPA Comprehensive Technical Report Plots
+# code:  Status & Trends Plots, for data with one repeat
 # 
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2017
 # modified: Amari Bauer, June 2019
-# modified: Kelly Claborm, October 2019
+# modified: Kelly Claborn, October 2019
 # 
 # 
 # ---- inputs ----

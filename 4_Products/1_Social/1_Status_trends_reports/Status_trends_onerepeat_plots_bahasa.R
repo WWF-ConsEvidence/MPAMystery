@@ -1,16 +1,15 @@
 # 
-# code:  MPA Comprehensive Technical Report Plots
+# code:  Status & Trend Plots, for data with one repeat - BAHASA
 # 
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2017
-# modified: Amari Bauer, June 2019
-# modified: Kelly Claborm, October 2019
+# modified: October 2019
 # 
 # 
 # ---- inputs ----
-#  1) Dependencies: Function_define_asteriskplotting.R
-#  2) Source Status_trends_onerepeat_plots.R 
+#  1) Dependencies: Function_define_asteriskplotting.R; Function_plotthemes.R
+#  2) Source Status_trends_onerepeat_datasets.R 
 # 
 # ---- code sections ----
 #  1) DEFINE MPA-SPECIFIC PLOTTING DATA FRAMES
