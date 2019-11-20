@@ -706,7 +706,7 @@ FSCategorical.statusplot <-
                                                     colour="#505050",
                                                     lineheight=0.75),
                            direction="horizontal",
-                           ncol=3,
+                           ncol=2,
                            title.position="left",
                            label.position="right",
                            keywidth=unit(0.75,"cm"),
@@ -809,9 +809,9 @@ MarineMeeting.statusplot <-
 # - MARINE RESOUCE CONFLICT
 SocialConflict.statusplot <-
   melt(Sett.level.PropData.status.PLOTFORMAT,
-       id.vars="SettlementName",measure.vars=c("Percent.GreatlyDecreased.SocConflict","Percent.Decreased.SocConflict",
-                                               "Percent.Same.SocConflict","Percent.Increased.SocConflict",
-                                               "Percent.GreatlyIncreased.SocConflict")) %>%
+       id.vars="SettlementName",measure.vars=c("Percent.GreatlyIncreased.SocConflict","Percent.Increased.SocConflict",
+                                               "Percent.Same.SocConflict","Percent.Decreased.SocConflict",
+                                               "Percent.GreatlyDecreased.SocConflict")) %>%
   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -826,7 +826,7 @@ SocialConflict.statusplot <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["SocialConflict"]],
-                    labels=c("Greatly decreased","Decreased","Neither increased nor decreased","Increased","Greatly Increased")) +
+                    labels=c("Greatly increased","Increased","Neither increased nor decreased","Decreased","Greatly decreased")) +
   coord_flip() + plot.theme + Statusplot.labs["SocialConflict"] + plot.guides.techreport
 
 # - NUMBER OF LOCAL THREATS

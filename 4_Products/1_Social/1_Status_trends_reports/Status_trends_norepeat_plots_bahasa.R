@@ -596,7 +596,7 @@ Incfish.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["IncFish"]],
-                    labels=c("Semua","Paling","Sekitar setengah","Beberapa","Tidak ada")) +
+                    labels=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada")) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["IncFish"] + plot.guides.techreport
 
 # - FISHING TECHNIQUE
@@ -619,8 +619,8 @@ Fishtech.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FishTech"]],
-                    labels=c("Tali pancing bergerak","Tali pancing tetap",
-                             "Jaring bergerak","Jaring tetap","Memancing dengan tangan")) +
+                    labels=c("Mobile line","Stationary line",
+                             "Mobile net","Stationary net","Penangkapan dengan tangan")) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FishTech"] + plot.guides.techreport
 
 # - CHILDHOOD FOOD SECURITY
@@ -678,7 +678,7 @@ Proteinfish.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Protein"]],
-                    labels=c("Semua","Paling","Sekitar setengah","Beberapa","Tidak ada")) +
+                    labels=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada")) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FishProtein"] + plot.guides.techreport
 
 # - CATEGORICAL FOOD SECURITY
@@ -707,7 +707,7 @@ FSCategorical.statusplot.bahasa <-
                                                     colour="#505050",
                                                     lineheight=0.75),
                            direction="horizontal",
-                           ncol=3,
+                           ncol=2,
                            title.position="left",
                            label.position="right",
                            keywidth=unit(0.75,"cm"),
@@ -811,9 +811,9 @@ MarineMeeting.statusplot.bahasa <-
 # - MARINE RESOUCE CONFLICT
 SocialConflict.statusplot.bahasa <-
   melt(Sett.level.PropData.status.PLOTFORMAT,
-       id.vars="SettlementName.bahasa",measure.vars=c("Percent.GreatlyDecreased.SocConflict","Percent.Decreased.SocConflict",
-                                               "Percent.Same.SocConflict","Percent.Increased.SocConflict",
-                                               "Percent.GreatlyIncreased.SocConflict")) %>%
+       id.vars="SettlementName.bahasa",measure.vars=c("Percent.GreatlyIncreased.SocConflict","Percent.Increased.SocConflict",
+                                                      "Percent.Same.SocConflict","Percent.Decreased.SocConflict",
+                                                      "Percent.GreatlyDecreased.SocConflict")) %>%
   ggplot(aes(x=SettlementName.bahasa,y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -828,7 +828,7 @@ SocialConflict.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["SocialConflict"]],
-                    labels=c("Sangat menurun","Menurun","Tidak meningkat maupun menurun","Meningkat","Sangat meningkat")) +
+                    labels=c("Sangat meningkat","Meningkat","Tidak meningkat maupun menurun","Menurun","Sangat menurun")) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["SocialConflict"] + plot.guides.techreport
 
 # - NUMBER OF LOCAL THREATS

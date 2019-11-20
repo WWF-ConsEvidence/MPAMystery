@@ -599,7 +599,7 @@ propdata.trend.test <-
           "Income from fishing in past 6 months (% households)","Fishing technique most often used in past 6 months (% households)","Child hunger (% households)",
           "Dietary protein from fish in past 6 months (% households)","Change in economic status of fishing households (% households)",
           "Number of identified local threats to marine environment (% households)","Secondary occupation (% households)","Occupational diversity (% households)"),
-        c("Pekerjaan utama (% rumah tangga)","Frekuensi penangkapan ikan (% rumah tangga)","Frekuensi penjualan setidaknya pada beberapa hasil tangkapan (% rumah tangga)",
-          "Penghasilan dari penangkapan ikan dalam 6 bulan terakhir (% rumah tangga)","Teknik penangkapan ikan yang paling sering digunakan dalam 6 bulan terakhir (% rumah tangga)",
+        c("Pekerjaan utama (% rumah tangga)","Frekuensi penangkapan ikan (% rumah tangga)","Frekuensi penjualan setidaknya pada beberapa hasil tangkapan\n(% rumah tangga)",
+          "Penghasilan dari penangkapan ikan dalam 6 bulan terakhir\n(% rumah tangga)","Teknik penangkapan ikan yang paling sering digunakan\ndalam 6 bulan terakhir (% rumah tangga)",
           "Kelaparan pada anak (% rumah tangga)","Protein makanan dari ikan dalam 6 bulan terakhir (% rumah tangga)","Perubahan status ekonomi rumah tangga nelayan (% rumah tangga)",
-          "Jumlah ancaman lokal yang teridentifikasi terhadap lingkungan laut (% rumah tangga)","Pekerjaan sekunder (% rumah tangga)","Keberagaman pekerjaan (% rumah tangga)"))
+          "Jumlah ancaman lokal yang teridentifikasi terhadap lingkungan laut\n(% rumah tangga)","Pekerjaan sekunder (% rumah tangga)","Keberagaman pekerjaan (% rumah tangga)"))

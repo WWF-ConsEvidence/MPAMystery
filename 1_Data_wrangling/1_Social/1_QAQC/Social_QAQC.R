@@ -24,14 +24,12 @@
 
 # ---- 1.1 load libraries ----
 
-pacman::p_load(dplyr, foreach, reshape2, stringdist, rio)
+pacman::p_load(foreach, reshape2, stringdist, rio, dplyr)
 
 # ---- 1.2 import data ----
 
-DEMOGRAPHIC <- import('C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2017_SULAWESI_TENGGARA/3_QAQC/1_HWB/SULTRA_2017_mid-QAQC_KC.xlsx',
-                        which="HH_tbl_DEMOGRAPHIC")
-WELLBEING <-  import('C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2017_SULAWESI_TENGGARA/3_QAQC/1_HWB/SULTRA_2017_mid-QAQC_KC.xlsx',
-                     which="HH_tbl_WELLBEING")
+DEMOGRAPHIC.QAQC <- import('C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2019_KEI/3_QAQC/1_HWB/1_Pre-QAQC_imports_for_R/KEI_2019_pre-QAQC_DEMOGRAPHIC.csv')
+WELLBEING.QAQC <-  import('C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2019_KEI/3_QAQC/1_HWB/1_Pre-QAQC_imports_for_R/KEI_2019_pre-QAQC_WELLBEING.csv')
 
 # GTHREAT <- read.csv('2_Social/FlatDataFiles/SBS/SelatPantar_2017_QAQC/HH_tbl_GTHREAT_SelatPantar_2017_Pre-QAQC.csv')
 # GSTEPS <- read.csv('2_Social/FlatDataFiles/SBS/SelatPantar_2017_QAQC/HH_tbl_GSTEPS_SelatPantar_2017_Pre-QAQC.csv')
@@ -64,7 +62,7 @@ WELLBEING <-  import('C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_da
 # HH LEVEL
 # ---- empty rows ----
 empty_rows <-
-  WELLBEING[,-which(names(WELLBEING) %in% 
+  WELLBEING.QAQC[,-which(names(WELLBEING.QAQC) %in% 
                       c("PoorFishUnits","GoodFishUnits",
                         "DataEntryComplete","DataCheckComplete"))] %>%
   dplyr::transmute(HouseholdID=HouseholdID,
@@ -81,15 +79,15 @@ empty_rows <-
 
 # remove all empty rows, outputting number of removed rows and household pairs that need to be checked from duplicated analysis
 WELLBEING_appended <-
-  left_join(WELLBEING,empty_rows[,c("HouseholdID","RemoveEmpty")],by="HouseholdID") %>%
+  left_join(WELLBEING.QAQC,empty_rows[,c("HouseholdID","RemoveEmpty")],by="HouseholdID") %>%
   dplyr::filter(.,is.na(RemoveEmpty)) %>%
   .[,-which(names(.) %in% "RemoveEmpty")]
 
 
 # ---- duplicate rows ----
 duplicated_rows <- 
-  WELLBEING %>% 
-  left_join(.,DEMOGRAPHIC %>%
+  WELLBEING.QAQC %>% 
+  left_join(.,DEMOGRAPHIC.QAQC %>%
               dplyr::group_by(HouseholdID) %>%
               dplyr::summarise(NumInd=length(DemographicID),
                                IndividualName.1=IndividualName[1],
@@ -246,7 +244,7 @@ ambiguous_rows <-
 # remove duplicated households before checking for more duplicated rows in demos data
 
 DEMOGRAPHIC_appended <-
-  left_join(DEMOGRAPHIC,WELLBEING[,c("HouseholdID","SettlementID","KK.Code",
+  left_join(DEMOGRAPHIC.QAQC,WELLBEING.QAQC[,c("HouseholdID","SettlementID","KK.Code",
                                       "Respondent","SecondaryRespondent",
                                       "PrimaryInterviewer","SecondaryInterviewer")], by="HouseholdID") %>%
   left_join(.,empty_rows[,c("HouseholdID","RemoveEmpty")], by="HouseholdID") %>%
@@ -254,7 +252,7 @@ DEMOGRAPHIC_appended <-
   dplyr::filter(.,is.na(RemoveEmpty) & (RemoveDuplicate=="CHECK" | is.na(RemoveDuplicate)))
 
 DEMOGRAPHIC_joined <-
-  left_join(DEMOGRAPHIC, WELLBEING[,c("HouseholdID","SettlementID","KK.Code","Respondent")],by="HouseholdID")
+  left_join(DEMOGRAPHIC.QAQC, WELLBEING.QAQC[,c("HouseholdID","SettlementID","KK.Code","Respondent")],by="HouseholdID")
 
 duplicated_demos_rows <-
   DEMOGRAPHIC_joined %>%
@@ -331,16 +329,29 @@ duplicates <-
             duplicated_demos_rows,by=c("HouseholdID","CheckAgainst"))
 
 DEMOGRAPHIC_appended <-
-  left_join(DEMOGRAPHIC,duplicates,by="HouseholdID") %>%
+  left_join(DEMOGRAPHIC.QAQC,duplicates,by="HouseholdID") %>%
   filter(.,RemoveDuplicate=="CHECK" | RemoveDuplicateDemos=="CHECK" | (is.na(RemoveDuplicate) & is.na(RemoveDuplicateDemos)))
 
   # this provides info on intra-HH non-unique combos of HHID and DemographicCode (coding errors)
-  DEMOGRAPHIC %>%
+  DEMOGRAPHIC.QAQC %>%
   group_by(HouseholdID,DemographicCode) %>%
   summarise(NumInd=length(DemographicID)) %>%
   filter(.,NumInd>1)
 
+  
+  
+repeat.names.wellbeing <-
+  WELLBEING.QAQC %>%
+  group_by(Respondent) %>%
+  summarise(NumHH=length(HouseholdID)) %>%
+  filter(NumHH>1)
 
+repeat.names.demographic <-
+  DEMOGRAPHIC.QAQC %>%
+  group_by(IndividualName) %>%
+  summarise(NumInd=length(DemographicID)) %>%
+  filter(NumInd>1)
+  
 # will need to remove all duplicated households, but note which householdIDs were removed in an output Excel file
 # for those households that need to be checked, will output to the same Excel file that they must be manually checked.  
 # then, will manually enter what action was taken for the manually checked ones
@@ -399,26 +410,26 @@ DEMOGRAPHIC_appended <-
 # - Calculate NumLocalThreat
 
   logic_errors <-
-    DEMOGRAPHIC %>%
+    DEMOGRAPHIC.QAQC %>%
     group_by(HouseholdID) %>%
     summarise(NumHeadHH=length(DemographicID[RelationHHH==0])) %>%
     filter(NumHeadHH!=1)
   
 num.HH.per.sett <-
-  WELLBEING %>%
+  WELLBEING.QAQC %>%
   group_by(SettlementID) %>%
   summarise(NumHH=length(HouseholdID))
 
   
   logic_errors <-
-    DEMOGRAPHIC %>%
+    DEMOGRAPHIC.QAQC %>%
     group_by(HouseholdID) %>%
     summarise(OldestHHMember=max(IndividualAge, na.rm=T),
               NumberOldHHMember=length(DemographicID[IndividualAge==OldestHHMember]),
               DemographicID.OldestHHMember=DemographicID[IndividualAge==OldestHHMember][1],
               IndividualAge=IndividualAge[DemographicID==DemographicID.OldestHHMember],
               NumHeadHH=length(DemographicID[RelationHHH==0])) %>%
-    left_join(WELLBEING, ., by="HouseholdID") %>%
+    left_join(WELLBEING.QAQC, ., by="HouseholdID") %>%
     transmute(HouseholdID=HouseholdID,
               OldestHHMember=IndividualAge,
               YearsResident=YearsResident,

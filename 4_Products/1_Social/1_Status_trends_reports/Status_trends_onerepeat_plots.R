@@ -63,6 +63,7 @@ Trendplot.labs <- list(FS=labs(y=as.character(Conttrendplot.ylabs["FSMean"]),x="
                        PA=labs(y=as.character(Conttrendplot.ylabs["PAMean"]),x="Monitoring Year"),
                        MT=labs(y=as.character(Conttrendplot.ylabs["MTMean"]),x="Monitoring Year"),
                        SE=labs(y=as.character(Conttrendplot.ylabs["SEMean"]),x="Monitoring Year"),
+                       Time=labs(y=as.character(Conttrendplot.ylabs["TimeMarketMean"]),x="Monitoring Year"),
                        Unwell=labs(y=as.character(Conttrendplot.ylabs["UnwellMean"]),
                                    x="Monitoring Year"),
                        Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
@@ -779,7 +780,7 @@ FSCategorical.statusplot <-
                                                     colour="#505050",
                                                     lineheight=0.75),
                            direction="horizontal",
-                           ncol=3,
+                           ncol=2,
                            title.position="left",
                            label.position="right",
                            keywidth=unit(0.75,"cm"),
@@ -882,9 +883,9 @@ MarineMeeting.statusplot <-
 # - MARINE RESOUCE CONFLICT
 SocialConflict.statusplot <-
   melt(Sett.level.PropData.status.PLOTFORMAT,
-       id.vars="SettlementName",measure.vars=c("Percent.GreatlyDecreased.SocConflict","Percent.Decreased.SocConflict",
-                                               "Percent.Same.SocConflict","Percent.Increased.SocConflict",
-                                               "Percent.GreatlyIncreased.SocConflict")) %>%
+       id.vars="SettlementName",measure.vars=c("Percent.GreatlyIncreased.SocConflict","Percent.Increased.SocConflict",
+                                               "Percent.Same.SocConflict","Percent.Decreased.SocConflict",
+                                               "Percent.GreatlyDecreased.SocConflict")) %>%
   ggplot(aes(x=SettlementName,y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -899,7 +900,7 @@ SocialConflict.statusplot <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["SocialConflict"]],
-                    labels=c("Greatly decreased","Decreased","Neither increased nor decreased","Increased","Greatly Increased")) +
+                    labels=c("Greatly increased","Increased","Neither increased nor decreased","Decreased","Greatly decreased")) +
   coord_flip() + plot.theme + Statusplot.labs["SocialConflict"] + plot.guides.techreport
 
 # - NUMBER OF LOCAL THREATS
@@ -1517,7 +1518,7 @@ NumThreat.trendplot <-
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["NumLocalThreats"]],
                     labels=c("More than four threats","Four threats","Three threats","Two threats","One threat", "No threats")) +
-  coord_flip() + plot.theme + Trendplot.labs["Protein"] + plot.guides.techreport
+  coord_flip() + plot.theme + Trendplot.labs["NumLocalThreats"] + plot.guides.techreport
 
 # - SECONDARY OCCUPATION
 Secondaryocc.trendplot <-
@@ -1581,6 +1582,30 @@ OccDiverse.trendplot <-
                            keywidth=unit(0.75,"cm"),
                            keyheight=unit(0.5,"cm"),
                            reverse=T))
+
+# - MARINE GROUP CONTRIBUTION
+MarineContribution.trendplot <- 
+  ggplot(data=MPA.level.PropData.trend.PLOTFORMAT%>%mutate(Treatment=ifelse(grepl("MPA",MPAName),"MPA",ifelse(grepl("Control",MPAName),"Control",NA)))) +
+  geom_bar(aes(x=as.factor(order),
+               y=MarineContribution,
+               group=MonitoringYear,
+               fill=Treatment),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
+  geom_text(aes(x=1.6,y=max(MarineContribution)+-0.06*max(MarineContribution),label="Treatment",fontface=2),
+            size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
+  geom_text(aes(x=1.47,y=max(MarineContribution)-0.06*max(MarineContribution),label="Control",fontface=2),
+            size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(MPA.level.PropData.trend.PLOTFORMAT$MarineContribution,na.rm=T) +
+                                0.5*max(MPA.level.PropData.trend.PLOTFORMAT$MarineContribution,na.rm=T)), 
+                     labels = scales::comma) +
+  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
+  scale_fill_manual(values=fillcols.cont.trend) +
+  coord_flip() + Statusplot.labs["MarineContribution"] + plot.theme
 
 
 # 

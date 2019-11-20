@@ -292,6 +292,10 @@ png(paste(FigureFileName,"EconStatus.status.png",sep="/"),
 plot(EconStatus.statusplot)
 dev.off()
 
+png(paste(FigureFileName,"EconStatus.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(EconStatus.trendplot)
+dev.off()
 
 # ---- Member marine organization ---- 
 
@@ -314,6 +318,11 @@ dev.off()
 png(paste(FigureFileName,"MarineContribution.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
 plot(MarineContribution.statusplot)
+dev.off()
+
+png(paste(FigureFileName,"MarineContribution.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(MarineContribution.trendplot)
 dev.off()
 
 
@@ -639,6 +648,10 @@ png(paste(FigureFileName,"EconStatus.status.png",sep="/"),
 plot(EconStatus.statusplot.bahasa)
 dev.off()
 
+png(paste(FigureFileName,"EconStatus.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(EconStatus.trendplot.bahasa)
+dev.off()
 
 # ---- Member marine organization ---- 
 
@@ -661,6 +674,11 @@ dev.off()
 png(paste(FigureFileName,"MarineContribution.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
 plot(MarineContribution.statusplot.bahasa)
+dev.off()
+
+png(paste(FigureFileName,"MarineContribution.trend.png",sep="/"),
+    units="in",height=4,width=6,res=400)
+plot(MarineContribution.trendplot.bahasa)
 dev.off()
 
 

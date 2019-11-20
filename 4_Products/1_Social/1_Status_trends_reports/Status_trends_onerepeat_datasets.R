@@ -244,7 +244,7 @@ MPA.level.ContData.trend.PLOTFORMAT <-
  rbind.data.frame(MPA.level.ContData.annex %>% select(-SettlementID),
                   trend.sigvals) %>%
   mutate(MonitoringYear=factor(MonitoringYear,
-                               levels=rev(unique(MonitoringYear)),
+                               levels=unique(MonitoringYear),
                                ordered=T),
          SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Desa Kontrol",
                                       ifelse(grepl("MPA",SettlementName,ignore.case=F),gsub("MPA","KKP",SettlementName),as.character(SettlementName))),

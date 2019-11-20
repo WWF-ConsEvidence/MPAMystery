@@ -62,6 +62,7 @@ Trendplot.labs.bahasa <- list(FS=labs(y=as.character(Conttrendplot.ylabs.bahasa[
                        PA=labs(y=as.character(Conttrendplot.ylabs.bahasa["PAMean"]),x="Tahun Pemantauan"),
                        MT=labs(y=as.character(Conttrendplot.ylabs.bahasa["MTMean"]),x="Tahun Pemantauan"),
                        SE=labs(y=as.character(Conttrendplot.ylabs.bahasa["SEMean"]),x="Tahun Pemantauan"),
+                       Time=labs(y=as.character(Conttrendplot.ylabs.bahasa["TimeMarketMean"]),x="Tahun Pemantauan"),
                        Unwell=labs(y=as.character(Conttrendplot.ylabs.bahasa["UnwellMean"]),
                                    x="Tahun Pemantauan"),
                        Gender=labs(y="Jenis kelamin (% kepala rumah tangga)",x="Tahun Pemantauan"),
@@ -594,8 +595,8 @@ Primaryocc.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["PrimaryOcc"]],
-                    labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut yang tidak terbarukan",  "Jenis pekerjaan lainnya",
-                             "Hasil Hutan","Penangkapan ikan", "Pertanian")) +
+                    labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut\nyang tidak terbarukan",  
+                             "Jenis pekerjaan berupah/\nburuh lainnya", "Hasil hutan", "Penangkapan ikan", "Pertanian")) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["PrimaryOcc"] + plot.guides.techreport
 
 # - FISHING FREQUENCY
@@ -668,7 +669,7 @@ Incfish.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["IncFish"]],
-                    labels=c("Semua","Paling","Sekitar setengah","Beberapa","Tidak ada")) +
+                    labels=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada")) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["IncFish"] + plot.guides.techreport
 
 # - FISHING TECHNIQUE
@@ -691,8 +692,8 @@ Fishtech.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FishTech"]],
-                    labels=c("Tali pancing bergerak","Tali pancing tetap",
-                             "Jaring bergerak","Jaring tetap","Memancing dengan tangan")) +
+                    labels=c("Mobile line","Stationary line",
+                             "Mobile net","Stationary net","Penangkapan dengan tangan")) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FishTech"] + plot.guides.techreport
 
 # - CHILDHOOD FOOD SECURITY
@@ -750,7 +751,7 @@ Proteinfish.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Protein"]],
-                    labels=c("Semua","Paling","Sekitar setengah","Beberapa","Tidak ada")) +
+                    labels=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada")) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FishProtein"] + plot.guides.techreport
 
 # - CATEGORICAL FOOD SECURITY
@@ -779,7 +780,7 @@ FSCategorical.statusplot.bahasa <-
                                                     colour="#505050",
                                                     lineheight=0.75),
                            direction="horizontal",
-                           ncol=3,
+                           ncol=2,
                            title.position="left",
                            label.position="right",
                            keywidth=unit(0.75,"cm"),
@@ -883,9 +884,9 @@ MarineMeeting.statusplot.bahasa <-
 # - MARINE RESOUCE CONFLICT
 SocialConflict.statusplot.bahasa <-
   melt(Sett.level.PropData.status.PLOTFORMAT,
-       id.vars="SettlementName.bahasa",measure.vars=c("Percent.GreatlyDecreased.SocConflict","Percent.Decreased.SocConflict",
-                                               "Percent.Same.SocConflict","Percent.Increased.SocConflict",
-                                               "Percent.GreatlyIncreased.SocConflict")) %>%
+       id.vars="SettlementName.bahasa",measure.vars=c("Percent.GreatlyIncreased.SocConflict","Percent.Increased.SocConflict",
+                                               "Percent.Same.SocConflict","Percent.Decreased.SocConflict",
+                                               "Percent.GreatlyDecreased.SocConflict")) %>%
   ggplot(aes(x=SettlementName.bahasa,y=value,fill=variable)) +
   geom_bar(stat="identity",
            position="fill",
@@ -900,7 +901,7 @@ SocialConflict.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["SocialConflict"]],
-                    labels=c("Sangat menurun","Menurun","Tidak meningkat maupun menurun","Meningkat","Sangat meningkat")) +
+                    labels=c("Sangat meningkat","Meningkat","Tidak meningkat maupun menurun","Menurun","Sangat menurun")) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["SocialConflict"] + plot.guides.techreport
 
 # - NUMBER OF LOCAL THREATS
@@ -987,9 +988,9 @@ FS.trendplot.bahasa <-
   geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=0.5*1.56,label="Rawan Pangan\ndengan kelaparan"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=5.56,label="Treatment",fontface=2),
+  geom_text(aes(x=1.6,y=5.56,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=5.56,label="Control",fontface=2),
+  geom_text(aes(x=1.47,y=5.56,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,6.06)) +
@@ -1032,9 +1033,9 @@ MA.trendplot.bahasa <-
                 position=position_dodge(width=0.75),
                 show.legend=F) +
   geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(MAMean,na.rm=T),label="Treatment",fontface=2),
+  geom_text(aes(x=1.6,y=max(MAMean,na.rm=T),label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(MAMean,na.rm=T),label="Control",fontface=2),
+  geom_text(aes(x=1.47,y=max(MAMean,na.rm=T),label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1065,9 +1066,9 @@ PA.trendplot.bahasa <-
                 position=position_dodge(width=0.75),
                 show.legend=F) +
   geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=4.6,label="Treatment",fontface=2),
+  geom_text(aes(x=1.6,y=4.6,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=4.6,label="Control",fontface=2),
+  geom_text(aes(x=1.47,y=4.6,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1096,9 +1097,9 @@ MT.trendplot.bahasa <-
                 position=position_dodge(width=0.75),
                 show.legend=F) +
   geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=4.6,label="Treatment",fontface=2),
+  geom_text(aes(x=1.6,y=4.6,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=4.6,label="Control",fontface=2),
+  geom_text(aes(x=1.47,y=4.6,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +  
@@ -1127,9 +1128,9 @@ SE.trendplot.bahasa <-
                 position=position_dodge(width=0.75),
                 show.legend=F) +
   geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=0.91,label="Treatment",fontface=2),
+  geom_text(aes(x=1.6,y=0.91,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=0.91,label="Control",fontface=2),
+  geom_text(aes(x=1.47,y=0.91,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1159,9 +1160,9 @@ Time.trendplot.bahasa <-
                 position=position_dodge(width=0.75),
                 show.legend=F) +
   geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label="Treatment",fontface=2),
+  geom_text(aes(x=1.6,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label="Control",fontface=2),
+  geom_text(aes(x=1.47,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1192,9 +1193,9 @@ Unwell.trendplot.bahasa <-
                 position=position_dodge(width=0.75),
                 show.legend=F) +
   geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label="Treatment",fontface=2),
+  geom_text(aes(x=1.6,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label="Control",fontface=2),
+  geom_text(aes(x=1.47,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1219,9 +1220,9 @@ Gender.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1254,9 +1255,9 @@ Religion.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1293,17 +1294,17 @@ Primaryocc.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["PrimaryOcc"]],
-                    labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut yang tidak terbarukan",  "Jenis pekerjaan lainnya",
-                             "Hasil Hutan","Penangkapan ikan", "Pertanian")) +
+                    labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut\nyang tidak terbarukan",  
+                             "Jenis pekerjaan berupah/\nburuh lainnya", "Hasil hutan", "Penangkapan ikan", "Pertanian")) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["PrimaryOcc"] + plot.guides.techreport 
 
 # - FISHING FREQUENCY
@@ -1319,9 +1320,9 @@ Freqfish.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1346,9 +1347,9 @@ Freqsellfish.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1373,16 +1374,16 @@ Incfish.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["IncFish"]],
-                    labels=c("Semua","Paling","Sekitar setengah","Beberapa","Tidak ada")) +
+                    labels=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada")) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["IncFish"] + plot.guides.techreport
 
 # - FISHING TECHNIQUE
@@ -1398,17 +1399,17 @@ Fishtech.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FishTech"]],
-                    labels=c("Tali pancing bergerak","Tali pancing tetap",
-                             "Jaring bergerak","Jaring tetap","Memancing dengan tangan")) +
+                    labels=c("Mobile line","Stationary line",
+                             "Mobile net","Stationary net","Penangkapan dengan tangan")) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["FishTech"] + plot.guides.techreport
 
 # - CHILDHOOD FOOD SECURITY
@@ -1422,9 +1423,9 @@ Childfs.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1459,16 +1460,16 @@ Proteinfish.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Protein"]],
-                    labels=c("Semua","Paling","Sekitar setengah","Beberapa","Tidak ada")) +
+                    labels=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada")) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["Protein"] + plot.guides.techreport
 
 # - ECONOMIC STATUS 
@@ -1484,9 +1485,9 @@ EconStatus.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1509,9 +1510,9 @@ NumThreat.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1519,7 +1520,7 @@ NumThreat.trendplot.bahasa <-
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["NumLocalThreats"]],
                     labels=c("Lebih dari empat ancaman","Empat ancaman","Tiga ancaman","Dua ancaman","Satu ancaman", "Tidak ada ancaman")) +
-  coord_flip() + plot.theme + Trendplot.labs.bahasa["Protein"] + plot.guides.techreport
+  coord_flip() + plot.theme + Trendplot.labs.bahasa["NumLocalThreats"] + plot.guides.techreport
 
 # - SECONDARY OCCUPATION
 Secondaryocc.trendplot.bahasa <-
@@ -1536,17 +1537,17 @@ Secondaryocc.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["SecondaryOcc"]],
-                    labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut yang tidak terbarukan",  "Jenis pekerjaan lainnya",
-                             "Hasil Hutan","Penangkapan ikan", "Pertanian")) +
+                    labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut\nyang tidak terbarukan",  
+                             "Jenis pekerjaan berupah/\nburuh lainnya", "Hasil hutan", "Penangkapan ikan", "Pertanian")) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["SecondaryOcc"] + plot.guides.techreport 
 
 # - OCCUPATIONAL DIVERSITY
@@ -1560,9 +1561,9 @@ OccDiverse.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1583,6 +1584,30 @@ OccDiverse.trendplot.bahasa <-
                            keywidth=unit(0.75,"cm"),
                            keyheight=unit(0.5,"cm"),
                            reverse=T))
+
+# - MARINE GROUP CONTRIBUTION
+MarineContribution.trendplot.bahasa <- 
+  ggplot(data=MPA.level.PropData.trend.PLOTFORMAT%>%mutate(Treatment=ifelse(grepl("MPA",MPAName),"MPA",ifelse(grepl("Control",MPAName),"Control",NA)))) +
+  geom_bar(aes(x=as.factor(order),
+               y=MarineContribution,
+               group=MonitoringYear,
+               fill=Treatment),
+           stat="identity",
+           position="dodge",
+           width=0.75,
+           show.legend=F) +
+  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
+  geom_text(aes(x=1.6,y=max(MarineContribution)+-0.06*max(MarineContribution),label="Perlakuan",fontface=2),
+            size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
+  geom_text(aes(x=1.47,y=max(MarineContribution)-0.06*max(MarineContribution),label="Kontrol",fontface=2),
+            size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,max(MPA.level.PropData.trend.PLOTFORMAT$MarineContribution,na.rm=T) +
+                                0.5*max(MPA.level.PropData.trend.PLOTFORMAT$MarineContribution,na.rm=T)), 
+                     labels = scales::comma) +
+  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
+  scale_fill_manual(values=fillcols.cont.trend) +
+  coord_flip() + Statusplot.labs.bahasa["MarineContribution"] + plot.theme
 
 
 # 

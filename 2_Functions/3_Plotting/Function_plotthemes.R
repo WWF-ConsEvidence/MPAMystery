@@ -88,27 +88,29 @@ errcols.status <- c("NotDummy"=alpha("#21577C",0.95),"Dummy"=alpha("#FFFFFF",0))
 errcols.trend <- c(alpha("#21577C",0.95))
 errcols.cont.trend <- c("MPA"=alpha("#21577C",0.95),"Control"=alpha("#202020",0.95))
 
+
+
 multianswer.fillcols.status <- list(Gender=c("HHH.male"=alpha("#253494",0.95),
                                              "HHH.female"=alpha("#7FCDBB",0.95)),
                                     Religion=c("Percent.Rel.Christian"=alpha("#253494",0.95),
                                                "Percent.Rel.Muslim"=alpha("#7FCDBB",0.95),
-                                               "Percent.Rel.Other"=alpha("#FDC086",0.95)),
-                                    PrimaryOcc=c("Percent.PrimaryOcc.Farm"=alpha("#A6CEE3",0.95), # light blue 
-                                                 "Percent.PrimaryOcc.HarvestForest"=alpha("#7FC97F",0.95), # light green
-                                                 "Percent.PrimaryOcc.Fish"=alpha("#1F78B4",0.95), # blue                                        
-                                                 "Percent.PrimaryOcc.WageLabor"=alpha("#33A02C",0.95), # green 
-                                                 "Percent.PrimaryOcc.Tourism"=alpha("#E31A1C",0.95), # red 
-                                                 "Percent.PrimaryOcc.Aquaculture"=alpha("#FDBF6F",0.95), # blue 
-                                                 "Percent.PrimaryOcc.Extraction"=alpha("#FB9A99",0.95), # light red
-                                                 "Percent.PrimaryOcc.Other"=alpha("#FF7F00",0.95)), # orange 
-                                    SecondaryOcc=c("Percent.SecondaryOcc.Farm"=alpha("#A6CEE3",0.95), # light blue 
-                                                 "Percent.SecondaryOcc.HarvestForest"=alpha("#7FC97F",0.95), # light green
-                                                 "Percent.SecondaryOcc.Fish"=alpha("#1F78B4",0.95), # blue                                        
-                                                 "Percent.SecondaryOcc.WageLabor"=alpha("#33A02C",0.95), # green 
-                                                 "Percent.SecondaryOcc.Tourism"=alpha("#E31A1C",0.95), # red 
-                                                 "Percent.SecondaryOcc.Aquaculture"=alpha("#FDBF6F",0.95), # blue
-                                                 "Percent.SecondaryOcc.Extraction"=alpha("#FB9A99",0.95), # light red
-                                                 "Percent.SecondaryOcc.Other"=alpha("#FF7F00",0.95)), # orange 
+                                               "Percent.Rel.Other"=alpha("#E1E198",0.95)),
+                                    PrimaryOcc=c("Percent.PrimaryOcc.Farm"=alpha("#253494",0.95), 
+                                                 "Percent.PrimaryOcc.HarvestForest"=alpha("#7FCDBB",0.95), 
+                                                 "Percent.PrimaryOcc.Fish"=alpha("#2C7FB8",0.95),                                         
+                                                 "Percent.PrimaryOcc.WageLabor"=alpha("#E1E198",0.95), 
+                                                 "Percent.PrimaryOcc.Tourism"=alpha("#E31A1C",0.95), 
+                                                 "Percent.PrimaryOcc.Aquaculture"=alpha("#FDBF6F",0.95), 
+                                                 "Percent.PrimaryOcc.Extraction"=alpha("#FB9A99",0.95),
+                                                 "Percent.PrimaryOcc.Other"=alpha("#FF7F00",0.95)), 
+                                    SecondaryOcc=c("Percent.SecondaryOcc.Farm"=alpha("#7FCDBB",0.95),  
+                                                 "Percent.SecondaryOcc.HarvestForest"=alpha("#253494",0.95), 
+                                                 "Percent.SecondaryOcc.Fish"=alpha("#2C7FB8",0.95),                                      
+                                                 "Percent.SecondaryOcc.WageLabor"=alpha("#E1E198",0.95),  
+                                                 "Percent.SecondaryOcc.Tourism"=alpha("#E31A1C",0.95),  
+                                                 "Percent.SecondaryOcc.Aquaculture"=alpha("#FDBF6F",0.95), 
+                                                 "Percent.SecondaryOcc.Extraction"=alpha("#FB9A99",0.95), 
+                                                 "Percent.SecondaryOcc.Other"=alpha("#FF7F00",0.95)), 
                                     FreqFish=c("Prop.Fish.AlmostNever"=alpha("#E1E198",0.95),
                                                "Prop.Fish.FewTimesPer6Mo"=alpha("#7FCDBB",0.95),
                                                "Prop.Fish.FewTimesPerMo"=alpha("#2CA9B8",0.95),
@@ -124,11 +126,11 @@ multianswer.fillcols.status <- list(Gender=c("HHH.male"=alpha("#253494",0.95),
                                               "Prop.IncFish.Half"=alpha("#2CA9B8",0.95),
                                               "Prop.IncFish.Most"=alpha("#2C7FB8",0.95),
                                               "Prop.IncFish.All"=alpha("#253494",0.95)),
-                                    FishTech=c("Prop.FishTech.ByHand"=alpha("#7FC97F",0.95),
-                                               "Prop.FishTech.StatNet"=alpha("#BEAED4",0.95),
-                                               "Prop.FishTech.MobileNet"=alpha("#FDC086",0.95),
-                                               "Prop.FishTech.StatLine"=alpha("#E1E198",0.95),
-                                               "Prop.FishTech.MobileLine"=alpha("#386CB0",0.95)),
+                                    FishTech=c("Prop.FishTech.ByHand"=alpha("#E1E198",0.95),
+                                               "Prop.FishTech.StatNet"=alpha("#7FCDBB",0.95),
+                                               "Prop.FishTech.MobileNet"=alpha("#2CA9B8",0.95),
+                                               "Prop.FishTech.StatLine"=alpha("#2C7FB8",0.95),
+                                               "Prop.FishTech.MobileLine"=alpha("#253494",0.95)),
                                     ChildFS=c("Child.FS.no"=alpha("#253494",0.95),
                                               "Child.FS.yes"=alpha("#7FCDBB",0.95)),
                                     OccDiverse=c("Percent.OneOcc.Diverse"=alpha("#253494",0.95),
@@ -157,46 +159,43 @@ multianswer.fillcols.status <- list(Gender=c("HHH.male"=alpha("#253494",0.95),
                                                      "Percent.Same.SocConflict"=alpha("#2CA9B8",0.95),
                                                      "Percent.Increased.SocConflict"=alpha("#2C7FB8",0.95),
                                                      "Percent.GreatlyIncreased.SocConflict"=alpha("#253494",0.95)),
-                                    NumLocalThreats=c("Threat.None"=alpha("#7FC97F",0.95),
-                                                 "Threat.One"=alpha("#BEAED4",0.95),
-                                                 "Threat.Two"=alpha("#FDC086",0.95),
-                                                 "Threat.Three"=alpha("#FB9A99",0.95),
-                                                 "Threat.Four"=alpha("#E1E198",0.95),
-                                                 "Threat.Minimum.Five"=alpha("#E31A1C", 0.95)),
-                                    ThreatType=c("Pollution"=alpha("#A6CEE3",0.95), # light blue 
-                                                 "DestructiveFishing"=alpha("#1F78B4",0.95), # blue
-                                                 "IllegalFishing"=alpha("#7FC97F",0.95), # light green
-                                                 "ClimateChange"=alpha("#33A02C",0.95), # green
-                                                 "HabitatLoss"=alpha("#FB9A99",0.95), # light red
-                                                 "NaturalProcesses"=alpha("#E31A1C",0.95), # red 
-                                                 "OtherMarineUses"=alpha("#FDBF6F",0.95), # light orange
-                                                 "Other"=alpha("#FF7F00",0.95)), # orange 
+                                    NumLocalThreats=c("Threat.None"=alpha("#E1E198",0.95),
+                                                 "Threat.One"=alpha("#7FCDBB",0.95),
+                                                 "Threat.Two"=alpha("#2CA9B8",0.95),
+                                                 "Threat.Three"=alpha("#2C7FB8",0.95),
+                                                 "Threat.Four"=alpha("#253494",0.95),
+                                                 "Threat.Minimum.Five"=alpha("#101324", 0.95)),
+                                    ThreatType=c("Pollution"=alpha("#253494",0.95), 
+                                                 "DestructiveFishing"=alpha("#2C7FB8",0.95), 
+                                                 "IllegalFishing"=alpha("#7FCDBB",0.95), 
+                                                 "ClimateChange"=alpha("#E1E198",0.95),
+                                                 "HabitatLoss"=alpha("#FB9A99",0.95),
+                                                 "NaturalProcesses"=alpha("#E31A1C",0.95),
+                                                 "OtherMarineUses"=alpha("#FDBF6F",0.95),
+                                                 "Other"=alpha("#FF7F00",0.95)),
                                     ThreatType.SBS=c("NoThreat"=alpha("#FF7F00",0.95),
-                                                     "Aquaculture"=alpha("#FDBF6F",0.95), 
-                                                     "InadequateProc"=alpha("#E31A1C",0.95),
-                                                     "Tourism"=alpha("#FB9A99",0.95),
-                                                     "NaturalPhenomenon"=alpha("#33A02C",0.95), 
-                                                     "Pollution"=alpha("#7FC97F",0.95),
-                                                     "UnsustainableFish"=alpha("#1F78B4",0.95)),
+                                                     "Aquaculture"=alpha("#E31A1C",0.95), 
+                                                     "InadequateProc"=alpha("#FB9A99",0.95),
+                                                     "Tourism"=alpha("#E1E198",0.95),
+                                                     "NaturalPhenomenon"=alpha("#7FCDBB",0.95), 
+                                                     "Pollution"=alpha("#2C7FB8",0.95),
+                                                     "UnsustainableFish"=alpha("#253494",0.95)),
                                     Participate=c("ParticipateOrg"=alpha("#7FC97F",0.95),
                                                   "ParticipateEstablish"=alpha("#FFFFB3",0.95),
                                                   "ParticipateBnd"=alpha("#2C7FB8",0.95),
                                                   "ParticipateRules"=alpha("#253494",0.95)),
-                                    HHHEducation=c("HHHEducNone"=alpha("#7FC97F",0.95),
-                                                   "HHHEducPre"=alpha("#FFFFB3",0.95),
-                                                   "HHHEducPrim"=alpha("#BEBADA",0.95),
+                                    HHHEducation=c("HHHEducNone"=alpha("#E1E198",0.95),
+                                                   "HHHEducPre"=alpha("#7FCDBB",0.95),
+                                                   "HHHEducPrim"=alpha("#2CA9B8",0.95),
                                                    "HHHEducMid"=alpha("#2C7FB8",0.95),
                                                    "HHHEducSec"=alpha("#253494",0.95),
-                                                   "HHHEducHigher"=alpha("#FDB462", 0.95)),
-                                    AdultEducation=c("AdultEducNone"=alpha("#7FC97F",0.95),
-                                                     "AdultEducPre"=alpha("#FFFFB3",0.95),
-                                                     "AdultEducPrim"=alpha("#BEBADA",0.95),
+                                                   "HHHEducHigher"=alpha("#101324", 0.95)),
+                                    AdultEducation=c("AdultEducNone"=alpha("#E1E198",0.95),
+                                                     "AdultEducPre"=alpha("#7FCDBB",0.95),
+                                                     "AdultEducPrim"=alpha("#2CA9B8",0.95),
                                                      "AdultEducMid"=alpha("#2C7FB8",0.95),
                                                      "AdultEducSec"=alpha("#253494",0.95),
-                                                     "AdultEducHigher"=alpha("#FDB462", 0.95)))
-
-
-
+                                                     "AdultEducHigher"=alpha("#101324", 0.95)))
 
 
 # ---- 3.2 MPA Impact Summary plot themes ----
@@ -444,7 +443,7 @@ Statusplot.labs <- list(FS=labs(y="Mean household food security",x="Settlement")
                         AdultEduc=labs(y="Education completed (% adults 18 years and older)",x="Settlement"),
                         HHHEduc=labs(y="Education completed (% household heads)",x="Settlement"),
                         EconStatus=labs(y="Change in economic status of fishing households (% households)",x="Settlement"),
-                        SocialConflict=labs(y="Change in social conflict over marine resources in past 12 months (% households)",x="Settlement"),
+                        SocialConflict=labs(y="Change in social conflict over marine resources in past 12 months\n(% households)",x="Settlement"),
                         NumLocalThreats=labs(y="Number of identified local threats to marine environment (% households)",x="Settlement"),
                         ThreatTypes=labs(y="Types of local threats to marine environment (% threats identified)",x="Settlement"),
                         MarineMember=labs(y="Households who are a member of a marine organization",x="Settlement"),
@@ -467,37 +466,37 @@ Statusplot.labs.bahasa <- list(FS=labs(y="Rata-rata ketahanan pangan rumah tangg
                                MT=labs(y="Rata-rata hak kepemilikan laut oleh rumah tangga",x="Desa"),
                                SE=labs(y="Tingkat Pendidikan (% anak usia 5-18 tahun)",x="Desa"),
                                Time=labs(y="Jarak menuju pasar (jam)",x="Desa"),
-                               Unwell=labs(y="Rata-rata waktu menderita sakit atau cedera dalam 4 minggu terakhir (hari)",
+                               Unwell=labs(y="Rata-rata waktu menderita sakit atau cedera\ndalam 4 minggu terakhir (hari)",
                                            x="Desa"),
                                Gender=labs(y="Jenis kelamin (% kepala rumah tangga)",x="Desa"),
                                Religion=labs(y="Agama (% kepala rumah tangga)",x="Desa"),
                                PrimaryOcc=labs(y="Pekerjaan utama (% rumah tangga)",x="Desa"),
                                FreqFish=labs(y="Frekuensi penangkapan ikan (% rumah tangga)",x="Desa"),
-                               FreqSellFish=labs(y="Frekuensi penjualan setidaknya pada beberapa hasil tangkapan (% rumah tangga)",
+                               FreqSellFish=labs(y="Frekuensi penjualan setidaknya pada beberapa hasil tangkapan\n(% rumah tangga)",
                                                  x="Desa"),
                                FishProtein=labs(y="Protein makanan dari ikan dalam 6 bulan terakhir (% rumah tangga)",
                                                 x="Desa"),
-                               IncFish=labs(y="Penghasilan dari penangkapan ikan dalam 6 bulan terakhir (% rumah tangga)",
+                               IncFish=labs(y="Penghasilan dari penangkapan ikan dalam 6 bulan terakhir\n(% rumah tangga)",
                                             x="Desa"),
-                               FishTech=labs(y="Teknik penangkapan ikan yang paling sering digunakan dalam 6 bulan terakhir (% rumah tangga)",
+                               FishTech=labs(y="Teknik penangkapan ikan yang paling sering digunakan\ndalam 6 bulan terakhir (% rumah tangga)",
                                              x="Desa"),
                                ChildFS=labs(y="Kelaparan pada anak (% rumah tangga)",x="Desa"),
                                AdultEduc=labs(y="Pendidikan Terakhir (% usia 18 tahun ke atas)",x="Desa"),
                                HHHEduc=labs(y="Tamat Pendidikan terakhir (% kepala rumah tangga)",x="Desa"),
                                EconStatus=labs(y="Perubahan status ekonomi rumah tangga nelayan (% rumah tangga)",x="Desa"),
-                               SocialConflict=labs(y="Perubahan dalam konflik sosial atas sumber daya laut dalam 12 bulan terakhir (% rumah tangga)",x="Desa"),
-                               NumLocalThreats=labs(y="Jumlah ancaman lokal yang teridentifikasi terhadap lingkungan laut (% rumah tangga)",x="Desa"),
-                               ThreatTypes=labs(y="Jenis ancaman lokal terhadap lingkungan laut (% ancaman teridentifikasi)",x="Desa"),
-                               MarineMember=labs(y="Rumah tangga yang merupakan anggota organisasi kelautan (% rumah tangga)",x="Desa"),
-                               MarineAttendance=labs(y="Rumah tangga menghadiri pertemuan organisasi dalam bidang kelautan",x="Desa"),
-                               MarineContribution=labs(y="Rata-rata kontribusi rumah tangga dalam organisasi bidang kaluatan (Rupiah)",x="Desa"),
+                               SocialConflict=labs(y="Perubahan dalam konflik sosial atas sumber daya laut\ndalam 12 bulan terakhir(% rumah tangga)",x="Desa"),
+                               NumLocalThreats=labs(y="Jumlah ancaman lokal yang teridentifikasi terhadap lingkungan laut\n(% rumah tangga)",x="Desa"),
+                               ThreatTypes=labs(y="Jenis ancaman lokal terhadap lingkungan laut\n(% ancaman teridentifikasi)",x="Desa"),
+                               MarineMember=labs(y="Rumah tangga yang merupakan anggota organisasi kelautan\n(% rumah tangga)",x="Desa"),
+                               MarineAttendance=labs(y="Rumah tangga menghadiri pertemuan organisasi\ndalam bidang kelautan",x="Desa"),
+                               MarineContribution=labs(y="Rata-rata kontribusi rumah tangga dalam organisasi bidang kaluatan\n(Rupiah)",x="Desa"),
                                FSCategorical= labs(y="Ketahanan pangan berdasarkan kategori (% rumah tangga)",x="Desa"))
 
 
 continuous.variables.plotlabs.bahasa <- c("Rata-rata ketahanan pangan rumah tangga","Rata-rata aset rumah tangga",
                                           "Rata-rata ikatan/keterkaitan terhadap tempat","Rata-rata hak kepemilikan laut oleh rumah tangga",
                                           "Tingkat Pendidikan (% anak usia 5-18 tahun)", "Jarak menuju pasar (jam)",
-                                          "Rata-rata waktu menderita sakit atau cedera dalam 4 minggu terakhir (hari)")
+                                          "Rata-rata waktu menderita sakit atau cedera\ndalam 4 minggu terakhir (hari)")
 
 
 # ---- 3.7 MPA Impact Summary "Big Five" plot labels ----
