@@ -34,27 +34,27 @@ age.bin<-c(0,20,30,40,50,60,70,990)
 # duplicates created because of multiple HH heads in a household (in IndDemos)
 HH.age <- IndDemos %>%
   filter(RelationHHH==0) %>%
-  select(HouseholdID,IndividualAge) %>%
-  left_join(select(HHData,HouseholdID,yearsPost),by="HouseholdID") %>%
+  dplyr::select(HouseholdID,IndividualAge) %>%
+  left_join(dplyr::select(HHData,HouseholdID,yearsPost),by="HouseholdID") %>%
   mutate(IndividualAge=.bincode(IndividualAge-yearsPost,age.bin,TRUE,TRUE)) %>% 
-  select(HouseholdID,IndividualAge)%>% 
+  dplyr::select(HouseholdID,IndividualAge)%>% 
   distinct(HouseholdID,.keep_all = T)
 
 # Gender of Household Head (temp fix using distinct)
 gender.HHH <- IndDemos %>% 
   filter(RelationHHH==0) %>% 
-  select("HouseholdID","IndividualGender") %>% 
+  dplyr::select("HouseholdID","IndividualGender") %>% 
   distinct(HouseholdID,.keep_all = T)
 
 # Residency
 resident.bin<-c(0,10,20,30,40,50,60,990)
 
 HH.residency <- HHData %>%
-  select(HouseholdID,YrResident,MonitoringYear,yearsPost) %>%
+  dplyr::select(HouseholdID,YrResident,MonitoringYear,yearsPost) %>%
   mutate(YearsResident=ifelse(MonitoringYear=="Baseline",.bincode(YrResident,resident.bin,TRUE,TRUE),
                               ifelse(YrResident>yearsPost,.bincode(YrResident-yearsPost,resident.bin,TRUE,TRUE),
                                      1))) %>% 
-  select(HouseholdID,YearsResident) %>% 
+  dplyr::select(HouseholdID,YearsResident) %>% 
   na.omit()
 
 # Dominant ethnicity
@@ -65,7 +65,7 @@ ethnic.lkp1 <- ethnic.lkp %>%
 # filter(!ethnic.id%in%c(2734,2813,5422,5425,5643)) # select out the specific five duplicates
 
 HH.eth <- HHData %>% 
-  select(HouseholdID,PaternalEthnicity, MonitoringYear, SettlementID) %>% 
+  dplyr::select(HouseholdID,PaternalEthnicity, MonitoringYear, SettlementID) %>% 
   mutate(PaternalEthnicity=str_clean(PaternalEthnicity)) %>% 
   left_join(ethnic.lkp1, by=c("PaternalEthnicity"="std.eth.str")) %>% 
   mutate(SettlYear=paste0(MonitoringYear,"_",SettlementID))
@@ -82,7 +82,7 @@ for (i in unique(HH.eth$SettlYear)){
   max.eth.dom<-  max.eth$eth.iso[max.eth$SettlYear==i]
   HH.eth$dom.eth[HH.eth$SettlYear==i] <- ifelse(HH.eth$eth.iso[HH.eth$SettlYear==i]%in%max.eth.dom,1,0)
 }
-HH.eth <- select(HH.eth,HouseholdID,eth.iso,dom.eth)
+HH.eth <- dplyr::select(HH.eth,HouseholdID,eth.iso,dom.eth)
 
 # Education level of household head
 # some duplicates in education table (NAs, perhaps white spaces), filtering out these here
@@ -95,9 +95,9 @@ education.lkp1 <- education.lkp %>%
 # duplicates created because of multiple HH heads in a household (in IndDemos)
 HH.ed <- IndDemos %>% 
   filter(RelationHHH==0) %>% 
-  select(HouseholdID,IndividualEducation) %>% 
+  dplyr::select(HouseholdID,IndividualEducation) %>% 
   left_join(education.lkp1, by=c("IndividualEducation")) %>%
-  select(-IndividualEducation) %>%
+  dplyr::select(-IndividualEducation) %>%
   mutate(ed.level=ifelse(is.na(ed.level) | ed.level>=989, NA, as.numeric(ed.level))) %>%
   distinct(HouseholdID,.keep_all = T)
 
@@ -124,12 +124,12 @@ market.mean.sett <-HHData %>%
   summarise (TimeMean.sett=mean(TimeMarket, trim = 0.9,na.rm = T)) 
 
 market.distance <- HHData %>% 
-  select(HouseholdID,TimeMarket,MonitoringYear,SettlementID) %>% 
+  dplyr::select(HouseholdID,TimeMarket,MonitoringYear,SettlementID) %>% 
   left_join(market.mean.sett.yr,by=c("SettlementID" = "SettlementID", "MonitoringYear"="MonitoringYear")) %>% 
   left_join(market.mean.sett,by=c("SettlementID" = "SettlementID")) %>% 
   mutate(TimeMarket=ifelse(is.na(TimeMarket),TimeMean.sett.yr,TimeMarket),
          TimeMarket=ifelse(is.na(TimeMarket),TimeMean.sett,TimeMarket)) %>% 
-  select(HouseholdID,TimeMarket)
+  dplyr::select(HouseholdID,TimeMarket)
 
 head(market.distance)
 # market.distance<-subset(HHData,select=c("HouseholdID","TimeMarket", "MonitoringYear","SettlementID"))
@@ -151,7 +151,7 @@ head(market.distance)
 
 # Compile match covariate
 match.covariate <-HHData %>% 
-  select(HouseholdID,MPAID,SettlementID,MonitoringYear,yearsPost, Treatment) %>% 
+  dplyr::select(HouseholdID,MPAID,SettlementID,MonitoringYear,yearsPost, Treatment) %>% 
   left_join(market.distance[,c("HouseholdID","TimeMarket")],by="HouseholdID") %>%
   left_join(N.Child,by="HouseholdID") %>%
   left_join(HH.ed,by="HouseholdID") %>%
