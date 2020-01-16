@@ -520,8 +520,8 @@ Primaryocc.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["PrimaryOcc"]],
-                    labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut yang tidak terbarukan",  "Jenis pekerjaan lainnya",
-                             "Hasil Hutan","Penangkapan ikan", "Pertanian")) +
+                    labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut\nyang tidak terbarukan",  
+                             "Jenis pekerjaan berupah/\nburuh lainnya", "Hasil hutan", "Penangkapan ikan", "Pertanian")) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["PrimaryOcc"] + plot.guides.techreport
 
 # - FISHING FREQUENCY
