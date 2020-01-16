@@ -1226,7 +1226,7 @@ Gender.trendplot.bahasa <-
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
+  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Gender"]],
                     labels=c("Perempuan","Laki-laki")) +
@@ -1261,7 +1261,7 @@ Religion.trendplot.bahasa <-
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
+  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Religion"]],
                     labels=c("Lainnya","Muslim","Kristen")) +
@@ -1300,7 +1300,7 @@ Primaryocc.trendplot.bahasa <-
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
+  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["PrimaryOcc"]],
                     labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut\nyang tidak terbarukan",  
@@ -1326,7 +1326,7 @@ Freqfish.trendplot.bahasa <-
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
+  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FreqFish"]],
                     labels=c("Lebih dari beberapa kali perminggu","Beberapa kali perminggu",
@@ -1353,7 +1353,7 @@ Freqsellfish.trendplot.bahasa <-
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
+  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FreqSellFish"]],
                     labels=c("Lebih dari beberapa kali perminggu","Beberapa kali perminggu",
@@ -1380,7 +1380,7 @@ Incfish.trendplot.bahasa <-
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
+  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["IncFish"]],
                     labels=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada")) +
@@ -1405,7 +1405,7 @@ Fishtech.trendplot.bahasa <-
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
+  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FishTech"]],
                     labels=c("Mobile line","Stationary line",
@@ -1466,7 +1466,7 @@ Proteinfish.trendplot.bahasa <-
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
+  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Protein"]],
                     labels=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada")) +
@@ -1491,7 +1491,7 @@ EconStatus.trendplot.bahasa <-
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
+  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["EconStatus"]],
                     labels=c("Jauh lebih baik","Sedikit lebih baik","Tidak lebih baik maupun lebih buruk",
@@ -1516,7 +1516,7 @@ NumThreat.trendplot.bahasa <-
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
+  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["NumLocalThreats"]],
                     labels=c("Lebih dari empat ancaman","Empat ancaman","Tiga ancaman","Dua ancaman","Satu ancaman", "Tidak ada ancaman")) +
@@ -1543,7 +1543,7 @@ Secondaryocc.trendplot.bahasa <-
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
+  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["SecondaryOcc"]],
                     labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut\nyang tidak terbarukan",  
@@ -1567,7 +1567,7 @@ OccDiverse.trendplot.bahasa <-
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
-  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
+  scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["OccDiverse"]],
                     labels=c("Banyak Pekerjaan","Satu Pekerjaan")) +

@@ -59,8 +59,6 @@ Age.gender.Baseline.bahasa <-
            colour="#505050",
            size=0.15,
            show.legend=F) +
-  geom_text(aes(x=19,y=-7,label=Monitoryear.labs.bahasa$Label[1]),
-            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(-10,10),
                      labels=abs(seq(-10,10,5))) +

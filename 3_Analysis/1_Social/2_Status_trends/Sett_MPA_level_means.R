@@ -23,8 +23,8 @@
 
 Sett.Level.Means <- 
   HHData %>%
-  group_by(SettlementID,SettlementName,MPAID,MonitoringYear,InterviewYear,Treatment) %>%
-  summarise(FSMean=round(mean(FSIndex,na.rm=T),2),
+  dplyr::group_by(SettlementID,SettlementName,MPAID,MonitoringYear,InterviewYear,Treatment) %>%
+  dplyr::summarise(FSMean=round(mean(FSIndex,na.rm=T),2),
             FSErr=round(sd(FSIndex,na.rm=T)/sqrt(length(FSIndex)),2),
             MAMean=round(mean(MAIndex,na.rm=T),2),
             MAErr=round(sd(MAIndex,na.rm=T)/sqrt(length(MAIndex)),2),
@@ -180,8 +180,8 @@ Sett.Level.Means <-
 
 MPA.Level.Means <- 
   HHData %>%
-  group_by(MPAID,MonitoringYear,InterviewYear,Treatment) %>%
-  summarise(FSMean=round(mean(FSIndex,na.rm=T),2),
+  dplyr::group_by(MPAID,MonitoringYear,InterviewYear,Treatment) %>%
+  dplyr::summarise(FSMean=round(mean(FSIndex,na.rm=T),2),
             FSErr=round(sd(FSIndex,na.rm=T)/sqrt(length(FSIndex)),2),
             MAMean=round(mean(MAIndex,na.rm=T),2),
             MAErr=round(sd(MAIndex,na.rm=T)/sqrt(length(MAIndex)),2),

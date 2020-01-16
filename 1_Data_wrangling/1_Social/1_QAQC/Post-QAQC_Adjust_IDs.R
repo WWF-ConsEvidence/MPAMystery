@@ -379,7 +379,7 @@ Kei_WELLBEING <-
 Kei_DEMOGRAPHIC <- 
   Kei_DEMOGRAPHIC %>% 
   plyr::rename(c("HouseholdID"="EntryHouseholdID")) %>%
-  left_join(.,Koon_WELLBEING[,c("EntryHouseholdID","HouseholdID")],by="EntryHouseholdID") %>%
+  left_join(.,Kei_WELLBEING[,c("EntryHouseholdID","HouseholdID")],by="EntryHouseholdID") %>%
   .[order(.$HouseholdID,.$DemographicID),] %>%
   dplyr::group_by(HouseholdID) %>%
   dplyr::mutate(DemographicCode=1:n()) %>%
@@ -475,6 +475,6 @@ writeData(wb,"HH_tbl_GTHREAT",rbind.data.frame(Sultra_GTHREAT,Koon_GTHREAT,Kei_G
 writeData(wb,"HH_tbl_GSTEPS",rbind.data.frame(Sultra_GSTEPS,Koon_GSTEPS,Kei_GSTEPS))
 
 
-saveWorkbook(wb,'C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2017_SULAWESI_TENGGARA/4_PUSH_MASTER/1_HWB/SULTRA_KOON_KEI_post-QAQC_2019_1111.xlsx')
+saveWorkbook(wb,'C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2017_SULAWESI_TENGGARA/4_PUSH_MASTER/1_HWB/SULTRA_KOON_KEI_post-QAQC_2019_1120.xlsx')
 saveWorkbook(wb,'C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2018_KOON/4_PUSH_MASTER/1_HWB/SULTRA_KOON_KEI_post-QAQC_2019_1111.xlsx')
 saveWorkbook(wb,'C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2019_KEI_KECIL/4_PUSH_MASTER/1_HWB/SULTRA_KOON_KEI_post-QAQC_2019_1111.xlsx')

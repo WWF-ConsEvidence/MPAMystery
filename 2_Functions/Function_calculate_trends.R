@@ -105,16 +105,22 @@ mpa.trends <- function(MPA=NULL) {
   export(Sett.Level.Means, paste(paste(OutputFileName,MPA.name$MPAName.final,sep="/"),"Sett_Level_Means.xlsx",sep="_"))
   
   # output plot-formatted datasets, with pvalues
-  export(list(Continuous_status=Sett.level.ContData.status.PLOTFORMAT,
-              Proportional_status=Sett.level.PropData.status.PLOTFORMAT,
-              Continuous_trend=Sett.level.ContData.annex.PLOTFORMAT,
-              Continuous_trend_pvalues=annex.sigvals), 
-         paste(paste(OutputFileName,MPA.name$MPAName.final,sep="/"),"Sett_Level_Data_forplotting.xlsx",sep="_"))
+  ifelse(num.years==1,
+         export(list(Continuous_status=Sett.level.ContData.status.PLOTFORMAT,
+                     Proportional_status=Sett.level.PropData.status.PLOTFORMAT),
+                paste(paste(OutputFileName,MPA.name$MPAName.final,sep="/"),"Sett_Level_Data_forplotting.xlsx",sep="_")),
+         export(list(Continuous_status=Sett.level.ContData.status.PLOTFORMAT,
+                     Proportional_status=Sett.level.PropData.status.PLOTFORMAT,
+                     Continuous_trend=Sett.level.ContData.annex.PLOTFORMAT,
+                     Continuous_trend_pvalues=annex.sigvals), 
+                paste(paste(OutputFileName,MPA.name$MPAName.final,sep="/"),"Sett_Level_Data_forplotting.xlsx",sep="_")))
   
-  export(list(Continuous_trend=MPA.level.ContData.trend.PLOTFORMAT,
+  if(num.years>1){
+         export(list(Continuous_trend=MPA.level.ContData.trend.PLOTFORMAT,
               Proportional_trend=MPA.level.PropData.trend.PLOTFORMAT,
               Proportional_trend_pvalues=propdata.trend.test),
          paste(paste(OutputFileName,MPA.name$MPAName.final,sep="/"),"MPA_Level_Data_forplotting.xlsx",sep="_"))
+  }
   
   # output plots
   ifelse(num.years==1, source('4_Products/1_Social/1_Status_trends_reports/Export_status_plots.R', local=T),

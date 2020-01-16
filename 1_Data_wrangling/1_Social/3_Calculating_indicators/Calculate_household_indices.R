@@ -24,11 +24,15 @@
 
 HHData <-
   HHData %>%
-  mutate(MAIndex = ifelse(RemoveMA=="No",
-                        rowSums(select(., "CarTruck", "Bicycle", "Motorcycle", "BoatNoMotor", "BoatOutboard",
-                                       "BoatInboard", "PhoneCombined", "TV", "Entertain", "Satellite", "Generator"),
-                                na.rm = TRUE),
-                        NA),
+  mutate(MAIndex = ifelse(RemoveMA=="No" & MPAID==17, # Kei Kecil (MPAID==17 cannot use TV in MAIndex score because question was missing from t3 repeat)
+                          rowSums(select(., "CarTruck", "Bicycle", "Motorcycle", "BoatNoMotor", "BoatOutboard",
+                                         "BoatInboard", "PhoneCombined", "Entertain", "Satellite", "Generator"),
+                                  na.rm = TRUE),
+                          ifelse(RemoveMA=="No" & MPAID!=17,
+                                 rowSums(select(.,"CarTruck", "Bicycle", "Motorcycle", "BoatNoMotor", "BoatOutboard",
+                                                "BoatInboard", "PhoneCombined", "TV", "Entertain", "Satellite", "Generator"),
+                                         na.rm = TRUE),
+                                 NA)),
          
          PAIndex = ifelse(RemovePA=="No",
                         round(rowMeans(select(.,"PlaceHappy", "PlaceFavourite", "PlaceMiss", "PlaceBest", 
@@ -71,8 +75,8 @@ HHData <-
 
 HHData <- 
   IndDemos %>%
-  group_by(HouseholdID) %>%
-  summarise(Household.Size=length(HouseholdID),
+  dplyr::group_by(HouseholdID) %>%
+  dplyr::summarise(Household.Size=length(HouseholdID),
             NumberChild=sum(SchoolAge,na.rm=T),
             NumberEnrolled=sum(ChildEnrolled,na.rm=T),
             PercentEnrolled=ifelse(NumberChild!=0 & !is.na(NumberEnrolled),
@@ -97,8 +101,8 @@ HHData <-
 
 HHData <- 
   Organization %>% 
-  group_by(HouseholdID) %>%
-  summarise(NumMarineGroup=length(HouseholdID),
+  dplyr::group_by(HouseholdID) %>%
+  dplyr::summarise(NumMarineGroup=length(HouseholdID),
             MarineMeetingSum=ifelse(length(MarineMeeting[is.na(MarineMeeting)==T])==NumMarineGroup,NA,sum(MarineMeeting,na.rm=T)),
             MarineContribution=ifelse(length(MarineContribution[is.na(MarineContribution)==T])==NumMarineGroup,NA,sum(MarineContribution,na.rm=T))) %>%
   left_join(HHData,.,by="HouseholdID")

@@ -566,13 +566,37 @@ annex.sigvals.bahasa[2:8] <- unlist(annex.sigvals.bahasa[2:8])
 # ---- 5.2 Trend plot, chi-square tests on most recent monitoring year ----
 #          (with baseline proportions serving as expected values/probabilities)
 
-propdata.trend.test  <- data.frame(PrimaryOcc=NA,FreqFish=NA,SellFish=NA,IncFish=NA,FishTech=NA,ChildFS=NA,Protein=NA)
+propdata.trend.test  <- data.frame(PrimaryOcc=NA,FreqFish=NA,SellFish=NA,IncFish=NA,FishTech=NA,ChildFS=NA,Protein=NA,
+                                   EconStatus=NA,NumLocalThreats=NA,SecondaryOcc=NA,OccDiverse=NA)
 p.for.function <- NA
 data.for.function <- NA
 
 
 propdata.trend.test  <- 
-  as.data.frame(mapply(a=c("PrimaryOcc","FreqFish","SellFish","IncFish","FishTech","child","Protein","EconStatus","NumLocalThreats","SecondaryOcc","OccDiverse"),
+  if(sum(FreqTables$repeat1[FreqTables$Variable=="IncFish"])==0){
+         as.data.frame(mapply(a=c("PrimaryOcc","FreqFish","SellFish","FishTech","child","Protein","EconStatus","NumLocalThreats","SecondaryOcc","OccDiverse"),
+                              function(a) {
+                                p.for.function <- 
+                                  if(sum(FreqTables$t0[FreqTables$Variable==a])==0) {
+                                    FreqTables$repeat1[FreqTables$Variable==a &
+                                                         FreqTables$repeat1!=0] 
+                                  } else {FreqTables$t0[FreqTables$Variable==a &
+                                                          FreqTables$t0!=0] }
+                                data.for.function <- 
+                                  if(sum(FreqTables$t0[FreqTables$Variable==a])==0) {
+                                    FreqTables$repeat1[FreqTables$Variable==a]
+                                  } else {FreqTables$repeat1[FreqTables$Variable==a &
+                                                               FreqTables$t0!=0]}
+                                propdata.trend.test [a] <- ifelse(length(data.for.function)>1,
+                                                                  chisq.test(data.for.function,
+                                                                             p=p.for.function,
+                                                                             rescale.p=TRUE,correct=TRUE)["p.value"],
+                                                                  NA)
+                                propdata.trend.test [a] <- ifelse(is.na(propdata.trend.test [a]),100,propdata.trend.test [a])
+                              })) %>%
+      mutate(IncFish=1) %>%
+      select(PrimaryOcc,FreqFish,SellFish,IncFish,FishTech,child,Protein,EconStatus,NumLocalThreats,SecondaryOcc,OccDiverse)
+    } else{as.data.frame(mapply(a=c("PrimaryOcc","FreqFish","SellFish","IncFish","FishTech","child","Protein","EconStatus","NumLocalThreats","SecondaryOcc","OccDiverse"),
                        function(a) {
                          p.for.function <- 
                            if(sum(FreqTables$t0[FreqTables$Variable==a])==0) {
@@ -591,7 +615,7 @@ propdata.trend.test  <-
                                                                           rescale.p=TRUE,correct=TRUE)["p.value"],
                                                                NA)
                          propdata.trend.test [a] <- ifelse(is.na(propdata.trend.test [a]),100,propdata.trend.test [a])
-                       }))
+                       }))}
 
 propdata.trend.test <-
   rbind(propdata.trend.test, 

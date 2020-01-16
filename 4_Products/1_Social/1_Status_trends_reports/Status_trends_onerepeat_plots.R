@@ -68,6 +68,7 @@ Trendplot.labs <- list(FS=labs(y=as.character(Conttrendplot.ylabs["FSMean"]),x="
                                    x="Monitoring Year"),
                        Gender=labs(y="Gender (% head of household)",x="Monitoring Year"),
                        Religion=labs(y="Religion (% households)",x="Monitoring Year"),
+                       PrimaryOcc=labs(y=as.character(Proptrendplot.ylabs["PrimaryOcc"]),x="Monitoring Year"),
                        FreqFish=labs(y=as.character(Proptrendplot.ylabs["FreqFish"]),x="Monitoring Year"),
                        FreqSellFish=labs(y=as.character(Proptrendplot.ylabs["SellFish"]),x="Monitoring Year"),
                        IncFish=labs(y=as.character(Proptrendplot.ylabs["IncFish"]),x="Monitoring Year"),
