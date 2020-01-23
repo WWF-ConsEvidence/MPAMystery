@@ -774,6 +774,36 @@ snapshot.MPAimpact.summ.2yr.bahasa <- ggplot(data=macp.koon.std.impacts,
   coord_flip() + snapshot.plot.theme.MPAimpact.summ + 
   snapshot.plot.guide.MPAimpact.summ 
 
+# - 2 year impacts for factsheet
+snapshot.MPAimpact.factsheet.2yr.bahasa <- ggplot(data=macp.koon.std.impacts,
+                                             aes(x=Response,
+                                                 y=estimate)) +
+  geom_bar(aes(fill=impact.direction),
+           stat="identity",
+           position="dodge",
+           width=1) +
+  geom_errorbar(aes(x=Response,
+                    ymin=estimate-std.error,
+                    ymax=estimate+std.error,
+                    colour=impact.direction),
+                width=0.1,
+                size=0.5,
+                show.legend=F) +
+  geom_hline(aes(yintercept=0),
+             linetype="solid",
+             size=1,
+             colour="#505050",
+             show.legend=F) +
+  scale_x_discrete(labels=snapshot.sig.labs) +
+  scale_y_continuous(limits=c(-1.5,1.5),
+                     breaks=c(seq(-1.5,1.5,by=0.5))) +
+  scale_fill_manual(values=c(alpha("#65B65E",0.95),alpha("#2C7FB8",0.95)),
+                    name="Arah Dampak",
+                    labels=c("Negatif","Positif")) +
+  scale_colour_manual(values=c(alpha("#2B5027",0.95),alpha("#1B4D6F",0.95))) +
+  labs(x="",y="\n Dampak KKP",title="") +
+  coord_flip() + snapshot.plot.theme.MPAimpact.factsheet + 
+  snapshot.plot.guide.MPAimpact.factsheet
 
 # # ---- 4.2 Arrange grob ----
 # 
@@ -912,3 +942,12 @@ png(paste(FigureFileName,"standardized.impacts.png",sep="/"),
     units="in",height=8,width=12,res=400)
 plot(snapshot.MPAimpact.summ.2yr.bahasa)
 dev.off()
+
+
+# ---- 5.6 SNAPSHOT PLOT FOR FACTSHEET ----
+
+png(paste(FigureFileName,"standardized.impacts.factsheet.png",sep="/"),
+    units="in",height=6,width=12,res=400)
+plot(snapshot.MPAimpact.factsheet.2yr.bahasa)
+dev.off()
+
