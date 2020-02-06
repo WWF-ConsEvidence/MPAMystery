@@ -728,7 +728,7 @@ MPAimpact.summ.legend <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-macp.Koon.std.impacts <- 
+macp.koon.std.impacts <- 
   import('x_Flat_data_files/1_Social/Outputs/impact_analysis/Koon/macp_plots_output.csv') %>%
   filter(MPAID==18 & grepl("_z",Response) & Group=="Impact") %>%
   mutate(p.val=2*pnorm(-abs(z.score)),
@@ -775,7 +775,7 @@ snapshot.MPAimpact.summ.2yr <- ggplot(data=macp.koon.std.impacts,
 
 
 # - 2 year impacts for factsheet
-snapshot.MPAimpact.factsheet.2yr <- ggplot(data=macp.koon.std.impacts,
+snapshot.MPAimpact.factsheet.2yr <- ggplot(data=macp.flotim.std.impacts,
                                       aes(x=Response,
                                           y=estimate)) +
   geom_bar(aes(fill=impact.direction),
@@ -796,9 +796,9 @@ snapshot.MPAimpact.factsheet.2yr <- ggplot(data=macp.koon.std.impacts,
              show.legend=F) +
   scale_x_discrete(labels=snapshot.sig.labs) +
   scale_y_continuous(limits=c(-1,1),
-                     breaks=c(seq(-1,1,by=0.25))) +
+                     breaks=c(seq(-1,1,by=0.5))) +
   scale_fill_manual(values=c(alpha("#65B65E",0.95),alpha("#2C7FB8",0.95)),
-                    name="Direction of\nImpact",
+                    name="Direction of Impact",
                     labels=c("Negative","Positive")) +
   scale_colour_manual(values=c(alpha("#2B5027",0.95),alpha("#1B4D6F",0.95))) +
   labs(x="",y="\n MPA Impact",title="") +
@@ -947,7 +947,7 @@ dev.off()
 # ---- 5.6 SNAPSHOT PLOT FOR FACTSHEET ----
 
 png(paste(FigureFileName,"standardized.impacts.factsheet.png",sep="/"),
-    units="in",height=6,width=12,res=400)
+    units="in",height=6,width=8,res=400)
 plot(snapshot.MPAimpact.factsheet.2yr)
 dev.off()
 
