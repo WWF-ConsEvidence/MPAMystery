@@ -42,9 +42,19 @@ DiD.data <- match.covariate %>%
          yearsPostF=as.factor(yearsPost),
          MPAID=as.factor(MPAID),
          InterviewYear=as.factor(InterviewYear), 
-         Fisher=ifelse(PrimaryLivelihood==1,1,0), 
-         Male = IndividualGender) %>% 
+         Fisher=ifelse(PrimaryLivelihood==3,1,0), 
+         Male = IndividualGender, 
+         PrimaryLivelihood.bin = as.factor(ifelse(PrimaryLivelihood==1,1,
+                                        ifelse(PrimaryLivelihood==2,2,
+                                               ifelse(PrimaryLivelihood==3|PrimaryLivelihood==4,3,
+                                                      ifelse(PrimaryLivelihood==6|PrimaryLivelihood==7,4,5)))))) %>%
   filter(!is.na(IndividualGender))
+# PrimaryLivelihood.bin:
+# 1.Farming
+# 2.Harvesting forest products
+# 3.Fishing + Aquaculture
+# 4.Marine tourism + wage labor
+# 5.Extractives + other
 
 # --- Filter to look at 6 BHS and 4 SBS MPAs (with t2 and/or t4 data) --- Jan 2020
 DiD.data <- DiD.data %>% 
@@ -199,11 +209,6 @@ DiD.data <- DiD.data %>%
 # sd2 <- function(x){ sd(x,na.rm=T)}
 
 
-# calculate p scores
-pscore <- glm(Treatment ~ TimeMarket + n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge,
-              data=DiD.data)$fitted.values
-
-DiD.data <- cbind(DiD.data,pscore)  
 
 ##---END---##
 ##---END---##
@@ -782,8 +787,7 @@ summary(m_mahanobis)
 
 # Compute match balance statistics (don't need stats on exact-matched variables)
 m_balance_2<-Matching::MatchBalance(Tr~ TimeMarket + Fisher + eth.polarize + customary.gov.pct,
-                                    data=DiD.data.matchingCov, match.out=m_mahanobis, ks=TRUE, nboots=200, digits=3)
-# Note: The above exercise do not match on customary.gov.pct (i.e., see m_mahanobis), but we do report pre/post match balance for customary.gov.pct (i.e., see m_balance_2)
+                                    data=DiD.data.matchingCov, match.out=m_mahanobis, ks=TRUE, nboots=1000, digits=3)
 # 
 # ##-------------------------------------------------------------------------------------------##
 # ##---pscore matching
@@ -819,37 +823,61 @@ DiD.data.SettlMatch <- as.data.frame(DiD.data.SettlMatch)
 
 ##---BEGIN---##
 # Export data frame to Excel for exploratory Stata analysis
-# 
-#Export to txt file
+
+# #Export to txt file
 # library(foreign)
 # #install.packages("writexl")
 # library(writexl)
 # write.table(DiD.data.SettlMatch, "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/matched_DID_BHS_data.txt", sep="\t")
- write_xlsx(DiD.data.SettlMatch, path = "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/matched_DID_BHS_data", col_names = TRUE, format_headers = TRUE)
-# 
+# write_xlsx(DiD.data.SettlMatch, path = "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/matched_DID_BHS_data", col_names = TRUE, format_headers = TRUE)
 
-# ##--histogram plots of the matching covariate (baseline)
-DiD.data.density <- DiD.data.matchingCov %>% 
+
+# ##--histogram plots of the matching covariate (baseline -- before matching)
+DiD.data.density.before <- DiD.data.matchingCov %>% 
   mutate(Treat=as.factor(Treatment), 
          Group=ifelse(Treatment==1, " MPA", "Control"))
 
-density.TimeMarket <- ggplot(DiD.data.density, aes(x = TimeMarket)) + labs(x="Time to Market", y="Density") +
+density.TimeMarket <- ggplot(DiD.data.density.before, aes(x = TimeMarket)) + labs(x="Time to Market", y="Density") +
   stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.3, color="black") + theme_classic() +
   theme(legend.position=c(0.85,0.85)) + theme(legend.background = element_rect(fill="white", size=0.5, linetype="solid",colour ="black")) +
   theme(legend.title = element_text(colour="black", size=14, face="bold")) + theme(legend.text = element_text(colour="black", size=11))
                                                                           
 
-density.eth.polarize <- ggplot(DiD.data.density, aes(x = eth.polarize)) + labs(x="Ethnic Polarization Index", y="Density") +  
+density.eth.polarize <- ggplot(DiD.data.density.before, aes(x = eth.polarize)) + labs(x="Ethnic Polarization Index", y="Density") +  
   stat_density(aes(group = Treat, linetype = Group),position="identity", geom="line", size=1.2, color="black") + theme_classic() + theme(legend.position="none")
 
-density.Fisher <- ggplot(DiD.data.density, aes(x = Fisher)) + labs(x="Fishery Livelihood (%)", y="Density") +
+density.Fisher <- ggplot(DiD.data.density.before, aes(x = Fisher)) + labs(x="Fishery Livelihood (%)", y="Density") +
   stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.2, color="black") + theme_classic() + theme(legend.position="none")
 
-density.customary <- ggplot(DiD.data.density, aes(x = customary.gov.pct)) + labs(x="Customary Governance (%)", y="Density") +
+density.customary <- ggplot(DiD.data.density.before, aes(x = customary.gov.pct)) + labs(x="Customary Governance (%)", y="Density") +
   stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.3, color="black") + theme_classic() + theme(legend.position="none")
 
 plot_grid(density.TimeMarket,density.Fisher,density.eth.polarize,density.customary,ncol=2)
-ggsave(paste0(resultPath,"Settlement_matching/plots/histograms_matchingCovs.jpg"),width = 11, height = 9)
+ggsave(paste0(resultPath,"Settlement_matching/plots/histograms_matchingCovs_before.jpg"),width = 11, height = 9)
+
+# ##--histogram plots of the matching covariate (baseline -- after matching)
+DiD.data.density.after <- DiD.data.SettlMatch %>% 
+  filter(yearsPost==0) %>% 
+  mutate(Treat=as.factor(Treatment), 
+         Group=ifelse(Treatment==1, " MPA", "Control"))
+
+density.TimeMarket <- ggplot(DiD.data.density.after, aes(x = TimeMarket)) + labs(x="Time to Market", y="Density") +
+  stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.3, color="black") + theme_classic() +
+  theme(legend.position=c(0.85,0.85)) + theme(legend.background = element_rect(fill="white", size=0.5, linetype="solid",colour ="black")) +
+  theme(legend.title = element_text(colour="black", size=14, face="bold")) + theme(legend.text = element_text(colour="black", size=11))
+
+
+density.eth.polarize <- ggplot(DiD.data.density.after, aes(x = eth.polarize)) + labs(x="Ethnic Polarization Index", y="Density") +  
+  stat_density(aes(group = Treat, linetype = Group),position="identity", geom="line", size=1.2, color="black") + theme_classic() + theme(legend.position="none")
+
+density.Fisher <- ggplot(DiD.data.density.after, aes(x = Fisher)) + labs(x="Fishery Livelihood (%)", y="Density") +
+  stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.2, color="black") + theme_classic() + theme(legend.position="none")
+
+density.customary <- ggplot(DiD.data.density.after, aes(x = customary.gov.pct)) + labs(x="Customary Governance (%)", y="Density") +
+  stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.3, color="black") + theme_classic() + theme(legend.position="none")
+
+plot_grid(density.TimeMarket,density.Fisher,density.eth.polarize,density.customary,ncol=2)
+ggsave(paste0(resultPath,"Settlement_matching/plots/histograms_matchingCovs_after.jpg"),width = 11, height = 9)
 
 ##---END---##
 ##---END---##
@@ -868,31 +896,123 @@ DiD.data.SettlMatch <- data.frame()
 ##---6.1. DiD Model to generate aggregate impacts (Seasape-level) 
 ##-------------------------------------------------------------------------------##
 varNames <- c("FSIndex_z","MAIndex_z","MTIndex_z","PAIndex_z","SERate_z")
+#varNames <- c("FSIndex_z")
 
-##DiD Regression model
+##DiD Regression model (presenting 6 alternative models)
 model.out <- data.frame()
 for (i in varNames) {
   print(i)
   Y <- DiD.data[,i]
-  regValue <- felm(Y  ~  n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge + Treatment + Post + Treatment:Post
-                   | SettlementID + InterviewYear + MPAID:InterviewYear + pair.id + pair.id | 0 | SettlementID + pair.id,
-                   data=DiD.data,exactDOF = TRUE)
+  ## 1. with strictest yearFE-by-pairID specification
+  regValue <- felm(Y  ~  Treatment + Post + Treatment:Post + 
+                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                   | SettlementID  + pair.id:InterviewYear  | 0 | SettlementID + pair.id, data=DiD.data,exactDOF = TRUE)
   summary(regValue)
-  reg.broom <- tidy(regValue) %>% 
-    mutate(Response=i)
+  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha2 + alpha3))
+  vcov.matrix<-vcov(regValue) 
+  vcov <- vcov.matrix["Treatment:Post1","Post1"] 
   
-  model.out <- rbind(model.out,reg.broom)
+  reg.broom.1 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov,  spec=1, spec_label="strict")
+  
+  
+  ## 2. with year FEs + pairID (split)
+  regValue <- felm(Y  ~  Treatment + Post + Treatment:Post + 
+                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                   | SettlementID  + pair.id + InterviewYear  | 0 |  SettlementID + pair.id, data=DiD.data,exactDOF = TRUE)
+  summary(regValue)
+  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha2 + alpha3))
+  vcov.matrix<-vcov(regValue) 
+  vcov <- vcov.matrix["Treatment:Post1","Post1"] 
+  
+  reg.broom.2 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov, spec=2, spec_label="pairid & InterviewYear split")
+  
+  ## 3. with year FEs + pairID (split) + lose SettlementID cluster
+  regValue <- felm(Y  ~  Treatment + Post + Treatment:Post + 
+                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                   | SettlementID  + pair.id + InterviewYear  | 0 |  pair.id, data=DiD.data,exactDOF = TRUE)
+  summary(regValue)
+  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha2 + alpha3))
+  vcov.matrix<-vcov(regValue) 
+  vcov <- vcov.matrix["Treatment:Post1","Post1"] 
+  
+  reg.broom.3 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov, spec=3, spec_label="pairid & InterviewYear split + no SettlementID cluster")
+  
+  #####################
+  ## 4. no yearFE 
+  regValue <- felm(Y  ~  Treatment + Post + Treatment:Post + 
+                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                   | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data,exactDOF = TRUE)
+  summary(regValue)
+  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha2 + alpha3))
+  vcov.matrix<-vcov(regValue) 
+  vcov <- vcov.matrix["Treatment:Post1","Post1"] 
+  
+  reg.broom.4 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov, spec=4, spec_label="no yearFE")
+  
+  
+  ## no year FEs + no SettlementID cluster
+  regValue <- felm(Y  ~  Treatment + Post + Treatment:Post + 
+                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                   | SettlementID  + pair.id   | 0 | pair.id, data=DiD.data,exactDOF = TRUE)
+  summary(regValue)
+  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha2 + alpha3))
+  vcov.matrix<-vcov(regValue) 
+  vcov <- vcov.matrix["Treatment:Post1","Post1"] 
+  
+  reg.broom.5 <- tidy(regValue) %>% mutate(Response=i,vcov_impact_control=vcov, spec=5, spec_label="no yearFE & no settlID cluster")
+  
+  
+  ## 5. no year FEs + no SettlementID cluster + 
+  regValue <- felm(Y  ~  Treatment + Post + Treatment:Post 
+                   | SettlementID  + pair.id   | 0 | pair.id, data=DiD.data,exactDOF = TRUE)
+  summary(regValue)
+  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha2 + alpha3))
+  vcov.matrix<-vcov(regValue) 
+  vcov <- vcov.matrix["Treatment:Post1","Post1"] 
+  
+  reg.broom.6 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov, spec=6, spec_label="no yearFE & no settlID cluster & no covHH")
+  
+  model.out <- rbind(model.out,reg.broom.1,reg.broom.2,reg.broom.3,reg.broom.4,reg.broom.5,reg.broom.6)
 }
+
 
 ##keeping only 2 terms yearsPostF2, yearsPostF4 (i.e. time trend) and Treatment:yearsPostF2 &  Treatment:yearsPostF4 (i.e. DiD impacts)
 model.out1 <- model.out %>% 
-  filter(term%in%c("Treatment:Post1")) %>% 
+  filter(term%in%c("Treatment:Post1", "Post1")) %>% 
   mutate(term=gsub("Treatment:Post1","Impact",term),
+         term=gsub("Post1","Control",term),
          domain=ifelse(Response=="FSIndex_z"," Health (Food Security)",
                        ifelse(Response=="MAIndex_z","Economic Wellbeing (Material Assets)",
                               ifelse(Response=="MTIndex_z"," Empowerment (Marine Tenure)",
                                      ifelse(Response=="PAIndex_z"," Culture (Place Attachment)", "  Education (School Enrollment)")))),
          domain=gsub(" \\(", "\n \\(", domain)) #this line break the labels into 2 lines whenever it finds the symbol "(" in the string
+
+
+## spead dataframe to compute treatment trend's estimates (=control trend + Impact)
+model.out1.rearrange.estimate<-model.out1 %>% 
+  select(Response, spec, spec_label, domain, term, estimate, vcov_impact_control) %>% 
+  spread(term,estimate) %>% 
+  mutate(estimate = Control + Impact) %>% 
+  select(Response, spec, spec_label, domain, estimate) %>% 
+  mutate(term="Treat", statistic=0, p.value=0, vcov_impact_control=0)
+
+## spead dataframe to compute treatment trend's std.error (=squareRoot(var(alpha2) + var(alpha3) + 2cov(alpha2,3)Xstderr2Xstderr3)
+model.out1.rearrange.stderr<-model.out1 %>% 
+  select(Response, spec, spec_label, domain, term, std.error, vcov_impact_control) %>% 
+  spread(term,std.error) %>% 
+  mutate(std.error = sqrt(abs(Control^2 + Impact^2 + 2*Control*Impact*vcov_impact_control))) %>% ##getting std.error for treatment trend here
+  select(std.error) 
+
+model.out1.rearrange.estimate<-cbind(model.out1.rearrange.estimate,model.out1.rearrange.stderr) 
+
+model.out1<-rbind(model.out1, model.out1.rearrange.estimate)
+
+model.out1 <-model.out1[order(model.out1$Response, model.out1$spec),]
+
+
+##Export 
+#export(model.out1,  "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/Settlement_matching/plots/no pairXyearFEs/BHS_impact_output.csv")
+
 
 ##PLOTS
 pd <- position_dodge(width=.3) # move them .05 to the left and right
