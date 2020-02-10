@@ -769,7 +769,7 @@ DiD.data.matchingCov <- DiD.data %>%
   mutate(MPAID=as.integer(MPAID))
 
 DiD.data.matchingCov.final <- DiD.data.matchingCov %>% 
-  select(SettlementID,Treatment, TimeMarket, Fisher, eth.polarize, customary.gov.pct, MPAID) 
+  select(SettlementID,Treatment, TimeMarket, Fisher, eth.polarize, MPAID) 
   
 ## -- Mathcing settlements
 Tr<-as.vector(DiD.data.matchingCov.final$Treatment)  
@@ -781,8 +781,8 @@ Tr<-as.vector(DiD.data.matchingCov.final$Treatment)
 # summary(m1)
 
 # Exact matching on MPAID (i.e., control and treatment settlements have to come from the same MPA; that's why the last item is "1")
-Xexact<-c(0,0,0,0,1)
-m_mahanobis<-Matching::Match(Y=NULL, Tr, X=DiD.data.matchingCov.final, M=1, exact=Xexact, replace=TRUE, ties=T)
+Xexact<-c(0,0,0,1)
+m_mahanobis<-Matching::Match(Y=NULL, Tr, X=DiD.data.matchingCov.final, M=3, exact=Xexact, replace=TRUE, ties=T)
 summary(m_mahanobis)
 
 # Compute match balance statistics (don't need stats on exact-matched variables)
@@ -849,10 +849,10 @@ density.eth.polarize <- ggplot(DiD.data.density.before, aes(x = eth.polarize)) +
 density.Fisher <- ggplot(DiD.data.density.before, aes(x = Fisher)) + labs(x="Fishery Livelihood (%)", y="Density") +
   stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.2, color="black") + theme_classic() + theme(legend.position="none")
 
-density.customary <- ggplot(DiD.data.density.before, aes(x = customary.gov.pct)) + labs(x="Customary Governance (%)", y="Density") +
-  stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.3, color="black") + theme_classic() + theme(legend.position="none")
+# density.customary <- ggplot(DiD.data.density.before, aes(x = customary.gov.pct)) + labs(x="Customary Governance (%)", y="Density") +
+#   stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.3, color="black") + theme_classic() + theme(legend.position="none")
 
-plot_grid(density.TimeMarket,density.Fisher,density.eth.polarize,density.customary,ncol=2)
+plot_grid(density.TimeMarket,density.Fisher,density.eth.polarize,ncol=2)
 ggsave(paste0(resultPath,"Settlement_matching/plots/histograms_matchingCovs_before.jpg"),width = 11, height = 9)
 
 # ##--histogram plots of the matching covariate (baseline -- after matching)
@@ -873,22 +873,24 @@ density.eth.polarize <- ggplot(DiD.data.density.after, aes(x = eth.polarize)) + 
 density.Fisher <- ggplot(DiD.data.density.after, aes(x = Fisher)) + labs(x="Fishery Livelihood (%)", y="Density") +
   stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.2, color="black") + theme_classic() + theme(legend.position="none")
 
-density.customary <- ggplot(DiD.data.density.after, aes(x = customary.gov.pct)) + labs(x="Customary Governance (%)", y="Density") +
-  stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.3, color="black") + theme_classic() + theme(legend.position="none")
+# density.customary <- ggplot(DiD.data.density.after, aes(x = customary.gov.pct)) + labs(x="Customary Governance (%)", y="Density") +
+#   stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.3, color="black") + theme_classic() + theme(legend.position="none")
 
-plot_grid(density.TimeMarket,density.Fisher,density.eth.polarize,density.customary,ncol=2)
+plot_grid(density.TimeMarket,density.Fisher,density.eth.polarize,ncol=2)
 ggsave(paste0(resultPath,"Settlement_matching/plots/histograms_matchingCovs_after.jpg"),width = 11, height = 9)
 
 ##---END---##
 ##---END---##
 ##---END---##
 
-##--Important: Now deleting dataframe "DiD.data", replacing it with "DiD.data.SettlMatch" for Sections 6.1 to 6.4
-##--Also, the subsequent DiD models now account for settlement-pair FEs and clustering
-DiD.data <- data.frame()
+##--Important: Now changing "DiD.data" into "DiD.data" dataframe "DiD.data.coarseMatch", and renaming "DiD.data.SettlMatch" "DiD.data" for Sections 6.1 to 6.4
+DiD.data.coarseMatch <- DiD.data
+DiD.data.coarseMatch <- as.data.frame(DiD.data.coarseMatch)
+
 DiD.data <- DiD.data.SettlMatch
 
 DiD.data.SettlMatch <- data.frame()
+
 ##---BEGIN---##
 ##---BEGIN---##
 ##---BEGIN---##
@@ -896,87 +898,100 @@ DiD.data.SettlMatch <- data.frame()
 ##---6.1. DiD Model to generate aggregate impacts (Seasape-level) 
 ##-------------------------------------------------------------------------------##
 varNames <- c("FSIndex_z","MAIndex_z","MTIndex_z","PAIndex_z","SERate_z")
-#varNames <- c("FSIndex_z")
 
 ##DiD Regression model (presenting 6 alternative models)
 model.out <- data.frame()
 for (i in varNames) {
   print(i)
   Y <- DiD.data[,i]
-  ## 1. with strictest yearFE-by-pairID specification
+  ## 1. Specification 1 (main spec):  (a) + (b) + (c) + (two-way clustering s.e.)
   regValue <- felm(Y  ~  Treatment + Post + Treatment:Post + 
                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                   | SettlementID  + pair.id:InterviewYear  | 0 | SettlementID + pair.id, data=DiD.data,exactDOF = TRUE)
+                   | SettlementID  + pair.id + InterviewYear  | 0 | SettlementID + pair.id, data=DiD.data,exactDOF = TRUE)
   summary(regValue)
-  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha2 + alpha3))
+  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha1 + alpha2))
   vcov.matrix<-vcov(regValue) 
   vcov <- vcov.matrix["Treatment:Post1","Post1"] 
   
-  reg.broom.1 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov,  spec=1, spec_label="strict")
+  reg.broom.1 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov,  spec=1, spec_label="main")
   
-  
-  ## 2. with year FEs + pairID (split)
-  regValue <- felm(Y  ~  Treatment + Post + Treatment:Post + 
-                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                   | SettlementID  + pair.id + InterviewYear  | 0 |  SettlementID + pair.id, data=DiD.data,exactDOF = TRUE)
-  summary(regValue)
-  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha2 + alpha3))
-  vcov.matrix<-vcov(regValue) 
-  vcov <- vcov.matrix["Treatment:Post1","Post1"] 
-  
-  reg.broom.2 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov, spec=2, spec_label="pairid & InterviewYear split")
-  
-  ## 3. with year FEs + pairID (split) + lose SettlementID cluster
+  ##----------------------------------------------------------------------------##
+  ## Specification 2 (relaxed version of spec 1):  (a) + (b) + (c) + (only cluster s.e. by pair)
   regValue <- felm(Y  ~  Treatment + Post + Treatment:Post + 
                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
                    | SettlementID  + pair.id + InterviewYear  | 0 |  pair.id, data=DiD.data,exactDOF = TRUE)
   summary(regValue)
-  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha2 + alpha3))
+  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha1 + alpha2))
   vcov.matrix<-vcov(regValue) 
   vcov <- vcov.matrix["Treatment:Post1","Post1"] 
   
-  reg.broom.3 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov, spec=3, spec_label="pairid & InterviewYear split + no SettlementID cluster")
+  reg.broom.2 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov,  spec=2, spec_label="main & relaxed SE cluster")
   
-  #####################
-  ## 4. no yearFE 
+  
+  ##----------------------------------------------------------------------------##
+  ## [SI] Specification 3 (Spec 1 + controlling addtionally for µ_kt): (a) + (b) + (c) + (d)
   regValue <- felm(Y  ~  Treatment + Post + Treatment:Post + 
                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                   | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data,exactDOF = TRUE)
+                   | SettlementID  + pair.id + MPAID:InterviewYear  | 0 | SettlementID + pair.id, data=DiD.data,exactDOF = TRUE)
   summary(regValue)
-  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha2 + alpha3))
+  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha1 + alpha2))
   vcov.matrix<-vcov(regValue) 
   vcov <- vcov.matrix["Treatment:Post1","Post1"] 
   
-  reg.broom.4 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov, spec=4, spec_label="no yearFE")
+  reg.broom.3 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov,  spec=3, spec_label="main + µ_kt")  
   
-  
-  ## no year FEs + no SettlementID cluster
-  regValue <- felm(Y  ~  Treatment + Post + Treatment:Post + 
-                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                   | SettlementID  + pair.id   | 0 | pair.id, data=DiD.data,exactDOF = TRUE)
-  summary(regValue)
-  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha2 + alpha3))
-  vcov.matrix<-vcov(regValue) 
-  vcov <- vcov.matrix["Treatment:Post1","Post1"] 
-  
-  reg.broom.5 <- tidy(regValue) %>% mutate(Response=i,vcov_impact_control=vcov, spec=5, spec_label="no yearFE & no settlID cluster")
-  
-  
-  ## 5. no year FEs + no SettlementID cluster + 
-  regValue <- felm(Y  ~  Treatment + Post + Treatment:Post 
-                   | SettlementID  + pair.id   | 0 | pair.id, data=DiD.data,exactDOF = TRUE)
-  summary(regValue)
-  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha2 + alpha3))
-  vcov.matrix<-vcov(regValue) 
-  vcov <- vcov.matrix["Treatment:Post1","Post1"] 
-  
-  reg.broom.6 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov, spec=6, spec_label="no yearFE & no settlID cluster & no covHH")
-  
-  model.out <- rbind(model.out,reg.broom.1,reg.broom.2,reg.broom.3,reg.broom.4,reg.broom.5,reg.broom.6)
+  model.out <- rbind(model.out,reg.broom.1,reg.broom.2,reg.broom.3)
 }
 
 
-##keeping only 2 terms yearsPostF2, yearsPostF4 (i.e. time trend) and Treatment:yearsPostF2 &  Treatment:yearsPostF4 (i.e. DiD impacts)
+##---Spec 4-6 corespond with coarse DiD regressions-##
+for (i in varNames) {
+  print(i)
+  Y <- DiD.data.coarseMatch[,i]  
+  ## [SI] Specification 4 (coarse-matching DiD model (no matched pair) version of Spec 1)
+  regValue <- felm(Y  ~  Treatment + Post + Treatment:Post + 
+                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                   | SettlementID  + InterviewYear  | 0 | SettlementID, data=DiD.data.coarseMatch,exactDOF = TRUE)
+  summary(regValue)
+  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha1 + alpha2))
+  vcov.matrix<-vcov(regValue) 
+  vcov <- vcov.matrix["Treatment:Post1","Post1"] 
+  
+  reg.broom.4 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov,  spec=4, spec_label="coarse-DiD ver. of Spec 1")  
+  
+
+  
+  ##----------------------------------------------------------------------------##
+  ## [SI] Specification 5 (coarse-matching DiD model (no matched pair) version of Spec 2)
+  regValue <- felm(Y  ~  Treatment + Post + Treatment:Post + 
+                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                   | SettlementID  + InterviewYear  | 0 | 0, data=DiD.data.coarseMatch,exactDOF = TRUE)
+  summary(regValue)
+  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha1 + alpha2))
+  vcov.matrix<-vcov(regValue) 
+  vcov <- vcov.matrix["Treatment:Post1","Post1"] 
+  
+  reg.broom.5 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov,  spec=5, spec_label="coarse-DiD ver. of Spec 2")  
+  
+  
+  ##----------------------------------------------------------------------------##
+  ## [SI] Specification 6 (coarse-matching DiD model (no matched pair) version of Spec 3)
+  regValue <- felm(Y  ~  Treatment + Post + Treatment:Post + 
+                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                   | SettlementID  + MPAID:InterviewYear  | 0 | SettlementID, data=DiD.data.coarseMatch,exactDOF = TRUE)
+  summary(regValue)
+  ## Get covariance value between Post and Treatment:Post (need this for calculating S.E. of treatment trend later (alpha1 + alpha2))
+  vcov.matrix<-vcov(regValue) 
+  vcov <- vcov.matrix["Treatment:Post1","Post1"] 
+  
+  reg.broom.6 <- tidy(regValue) %>% mutate(Response=i, vcov_impact_control=vcov,  spec=6, spec_label="coarse-DiD ver. of Spec 3") 
+  
+  
+  model.out <- rbind(model.out,reg.broom.4,reg.broom.5,reg.broom.6)
+}
+
+
+##keeping only 2 relevant terms "Treatment:Post1" and "Post1" 
 model.out1 <- model.out %>% 
   filter(term%in%c("Treatment:Post1", "Post1")) %>% 
   mutate(term=gsub("Treatment:Post1","Impact",term),
@@ -1013,12 +1028,11 @@ model.out1 <-model.out1[order(model.out1$Response, model.out1$spec),]
 ##Export 
 #export(model.out1,  "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/Settlement_matching/plots/no pairXyearFEs/BHS_impact_output.csv")
 
-
 ##PLOTS
 pd <- position_dodge(width=.3) # move them .05 to the left and right
 
 
-Big5.plot <- ggplot(model.out1, aes(x=domain,y=estimate)) + 
+Big5.plot <- ggplot(filter(model.out1, spec==1, term=="Impact"), aes(x=domain,y=estimate)) + 
   geom_line( position = pd) + coord_flip() +
   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
@@ -1027,7 +1041,7 @@ Big5.plot <- ggplot(model.out1, aes(x=domain,y=estimate)) +
   labs(x="",y="Impact estimates", title="MPA Aggregate Impacts across Social Wellbeing Domains")  
 
 
-ggsave(paste0(resultPath,"Settlement_matching/plots/1-big5--seascape-z.jpg"),width = 12, height = 6)
+ggsave(paste0(resultPath,"Settlement_matching/plots/1-big5-seascape-z.jpg"),width = 12, height = 6)
 
 ##---END---##
 ##---END---##
@@ -1040,16 +1054,16 @@ ggsave(paste0(resultPath,"Settlement_matching/plots/1-big5--seascape-z.jpg"),wid
 ##-------------------------------------------------------------------------------##
 ##---6.2. DiD Model for heterogeneous impact over time (t2 vs t4)
 ##-------------------------------------------------------------------------------##
-varNames <- c("FSIndex","MAIndex","MTIndex","PAIndex","SERate", "FSIndex_z","MAIndex_z","MTIndex_z","PAIndex_z","SERate_z")
+varNames <- c("FSIndex_z","MAIndex_z","MTIndex_z","PAIndex_z","SERate_z")
 
 ##DiD Regression model
 model.out <- data.frame()
 for (i in varNames) {
   print(i)
   Y <- DiD.data[,i]
-  regValue <- felm(Y  ~  n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge + Treatment + yearsPostF + Treatment:yearsPostF
-                   | SettlementID + InterviewYear + MPAID:InterviewYear + pair.id | 0 | SettlementID + pair.id,
-                   data=DiD.data,exactDOF = TRUE)
+  regValue <- felm(Y  ~  Treatment + yearsPostF + Treatment:yearsPostF + 
+                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                   | SettlementID + pair.id + InterviewYear | 0 | SettlementID + pair.id, data=DiD.data,exactDOF = TRUE)
   summary(regValue)
   reg.broom <- tidy(regValue) %>% 
     mutate(Response=i)
@@ -1064,58 +1078,58 @@ model.out1 <- model.out %>%
 
 ##PLOTS
 pd <- position_dodge(width=.3) # move them .05 to the left and right
-
-
-FS.plot <- ggplot(filter(model.out1,Response=="FSIndex"),aes(x=term,y=estimate)) + 
-  geom_line( position = pd) + 
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="Food Security")  
-#+ facet_grid(.~Response)
-
-MT.plot <- ggplot(filter(model.out1,Response=="MTIndex"),aes(x=term,y=estimate)) +  theme(legend.position="none") +
-  geom_line( position = pd) + 
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="Marine Tenure")  
-
-
-MA.plot <- ggplot(filter(model.out1,Response=="MAIndex"),aes(x=term,y=estimate)) + 
-  geom_line( position = pd) + 
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="Material Assets")  
-
-
-PA.plot <- ggplot(filter(model.out1,Response=="PAIndex"),aes(x=term,y=estimate)) + 
-  geom_line( position = pd) + 
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="Place Attachment")  
-
-
-SE.plot <- ggplot(filter(model.out1,Response=="SERate"),aes(x=term,y=estimate)) + 
-  geom_line( position = pd) + 
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="School Enrollment")  
-
-
-#library(cowplot)
-#Combine "regular BigFive"
-plot_grid(MA.plot,FS.plot,MT.plot,PA.plot,SE.plot,ncol=3)
-ggsave(paste0(resultPath,"Settlement_matching/plots/2-big5-seascape-time.jpg"),width = 12, height = 6)
-
+# 
+# 
+# FS.plot <- ggplot(filter(model.out1,Response=="FSIndex"),aes(x=term,y=estimate)) + 
+#   geom_line( position = pd) + 
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   labs(x="",y="", title="Food Security")  
+# #+ facet_grid(.~Response)
+# 
+# MT.plot <- ggplot(filter(model.out1,Response=="MTIndex"),aes(x=term,y=estimate)) +  theme(legend.position="none") +
+#   geom_line( position = pd) + 
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   labs(x="",y="", title="Marine Tenure")  
+# 
+# 
+# MA.plot <- ggplot(filter(model.out1,Response=="MAIndex"),aes(x=term,y=estimate)) + 
+#   geom_line( position = pd) + 
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   labs(x="",y="", title="Material Assets")  
+# 
+# 
+# PA.plot <- ggplot(filter(model.out1,Response=="PAIndex"),aes(x=term,y=estimate)) + 
+#   geom_line( position = pd) + 
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   labs(x="",y="", title="Place Attachment")  
+# 
+# 
+# SE.plot <- ggplot(filter(model.out1,Response=="SERate"),aes(x=term,y=estimate)) + 
+#   geom_line( position = pd) + 
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   labs(x="",y="", title="School Enrollment")  
+# 
+# 
+# #library(cowplot)
+# #Combine "regular BigFive"
+# plot_grid(MA.plot,FS.plot,MT.plot,PA.plot,SE.plot,ncol=3)
+# ggsave(paste0(resultPath,"Settlement_matching/plots/2-big5-seascape-time.jpg"),width = 12, height = 6)
+# 
 
 
 #####################Repeat the 5 plots, now using standardized scores
@@ -1206,15 +1220,16 @@ for (i in varNames) {
       filter(MPAID==mpaid)
     Y <- DiD.data.mpalevel[,i]
     
-    regValue <- felm(Y  ~  n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge + Treatment + Post + Treatment:Post
-                     | SettlementID + InterviewYear + MPAID:InterviewYear + pair.id | 0 | SettlementID + pair.id,
-                     data=DiD.data.mpalevel,exactDOF = TRUE)
+    regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
+                       n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                     | SettlementID + pair.id + InterviewYear  | 0 | SettlementID + pair.id, data=DiD.data.mpalevel,exactDOF = TRUE)
     
     reg.broom <- tidy(regValue) %>%
       mutate(Response=i, MPAID=mpaid)
     model.out.mpalevel <- rbind(model.out.mpalevel,reg.broom)
   }
 }
+
 
 ##PLOTs
 model.out.mpalevel1 <- model.out.mpalevel %>% 
@@ -1235,69 +1250,69 @@ model.out.mpalevel1 <- model.out.mpalevel1 %>%
 model.out.mpalevel1 <- rbind(model.out.mpalevel1,model.out1)
 
 ##PLOT: "regular" index
-pd <- position_dodge(width=.3) # move them .05 to the left and right
-
-FS.plot <- ggplot(filter(model.out.mpalevel1,Response=="FSIndex"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
-  geom_line( position = pd) + 
-  theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="Food Security")  +
-  scale_colour_manual(values = c("black", "blue"))
-
-MT.plot <- ggplot(filter(model.out.mpalevel1,Response=="MTIndex"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
-  geom_line( position = pd) + 
-  theme(legend.position = "none") +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  #geom_vline(xintercept = 1.5, linetype = "dotdash") +
-  labs(x="",y="", title="Marine Tenure")  +
-  scale_colour_manual(values = c("black", "blue")) 
-
-
-PA.plot <- ggplot(filter(model.out.mpalevel1,Response=="PAIndex"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
-  geom_line( position = pd) + 
-  theme(legend.position = "none") +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  #geom_vline(xintercept = 1.5, linetype = "dotdash") +
-  labs(x="",y="", title="Place Attachment")  +
-  scale_colour_manual(values = c("black", "blue"))
-
-
-MA.plot <- ggplot(filter(model.out.mpalevel1,Response=="MAIndex"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
-  geom_line( position = pd) + 
-  theme(legend.position = "none") +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  #geom_vline(xintercept = 1.5, linetype = "dotdash") +
-  labs(x="",y="", title="Material Assets")  +
-  scale_colour_manual(values = c("black", "blue"))
-
-
-SE.plot <- ggplot(filter(model.out.mpalevel1,Response=="SERate"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
-  geom_line( position = pd) + 
-  theme(legend.position = "none") +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  #geom_vline(xintercept = 1.5, linetype = "dotdash") +
-  labs(x="",y="", title="School Enrollment")  +
-  scale_colour_manual(values = c("black", "blue"))
-
-##Combine PLOTS
-plot_grid(MA.plot,FS.plot,MT.plot,PA.plot,SE.plot,ncol=3)
-ggsave(paste0(resultPath,"Settlement_matching/plots/3-big5-mpa.jpg"),width = 12, height = 6)
-
+# pd <- position_dodge(width=.3) # move them .05 to the left and right
+# 
+# FS.plot <- ggplot(filter(model.out.mpalevel1,Response=="FSIndex"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
+#   geom_line( position = pd) + 
+#   theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   labs(x="",y="", title="Food Security")  +
+#   scale_colour_manual(values = c("black", "blue"))
+# 
+# MT.plot <- ggplot(filter(model.out.mpalevel1,Response=="MTIndex"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
+#   geom_line( position = pd) + 
+#   theme(legend.position = "none") +
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   #geom_vline(xintercept = 1.5, linetype = "dotdash") +
+#   labs(x="",y="", title="Marine Tenure")  +
+#   scale_colour_manual(values = c("black", "blue")) 
+# 
+# 
+# PA.plot <- ggplot(filter(model.out.mpalevel1,Response=="PAIndex"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
+#   geom_line( position = pd) + 
+#   theme(legend.position = "none") +
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   #geom_vline(xintercept = 1.5, linetype = "dotdash") +
+#   labs(x="",y="", title="Place Attachment")  +
+#   scale_colour_manual(values = c("black", "blue"))
+# 
+# 
+# MA.plot <- ggplot(filter(model.out.mpalevel1,Response=="MAIndex"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
+#   geom_line( position = pd) + 
+#   theme(legend.position = "none") +
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   #geom_vline(xintercept = 1.5, linetype = "dotdash") +
+#   labs(x="",y="", title="Material Assets")  +
+#   scale_colour_manual(values = c("black", "blue"))
+# 
+# 
+# SE.plot <- ggplot(filter(model.out.mpalevel1,Response=="SERate"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
+#   geom_line( position = pd) + 
+#   theme(legend.position = "none") +
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   #geom_vline(xintercept = 1.5, linetype = "dotdash") +
+#   labs(x="",y="", title="School Enrollment")  +
+#   scale_colour_manual(values = c("black", "blue"))
+# 
+# ##Combine PLOTS
+# plot_grid(MA.plot,FS.plot,MT.plot,PA.plot,SE.plot,ncol=3)
+# ggsave(paste0(resultPath,"Settlement_matching/plots/3-big5-mpa.jpg"),width = 12, height = 6)
+# 
 
 
 ##Producing Big Five plots using "standardized" index
@@ -1311,7 +1326,7 @@ FS.plot_z <- ggplot(filter(model.out.mpalevel1,Response=="FSIndex_z"),aes(x=MPAN
   #geom_vline(xintercept = 1.5, linetype = "dotdash") +
   labs(x="",y="", title="Food Security")  +
   scale_colour_manual(values = c("black", "blue"))
-ggsave(paste0(resultPath,"Settlement_matching/plots/3-FS-mpa-z.jpg"),width = 12, height = 6)
+#ggsave(paste0(resultPath,"Settlement_matching/plots/3-FS-mpa-z.jpg"),width = 12, height = 6)
 
 
 MT.plot_z <- ggplot(filter(model.out.mpalevel1,Response=="MTIndex_z"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
@@ -1378,7 +1393,8 @@ ggsave(paste0(resultPath,"Settlement_matching/plots/3-big5-mpa-z.jpg"),width = 1
 ##---6.4. DiD Model for heterogeneous impact across subgroups (5 subgroups)
 ##-------------------------------------------------------------------------------##
 model.out.subgroup <- data.frame()
-varNames <- c("FSIndex","MAIndex","MTIndex","PAIndex","SERate", "FSIndex_z","MAIndex_z","MTIndex_z","PAIndex_z","SERate_z")
+varNames <- c("FSIndex_z","MAIndex_z","MTIndex_z","PAIndex_z","SERate_z")
+
 
 for (i in varNames) {
   
@@ -1387,34 +1403,49 @@ for (i in varNames) {
     DiD.data.gender <- DiD.data %>%  filter(Male==genderID)
     Y <- DiD.data.gender[,i]
     
-    regValue <- felm(Y  ~  n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge + Treatment + Post + Treatment:Post
-                     | SettlementID + InterviewYear + MPAID:InterviewYear + pair.id | 0 | SettlementID + pair.id,  data=DiD.data.gender,exactDOF = TRUE)
+    regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
+                       n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                     | SettlementID + pair.id + InterviewYear | 0 | SettlementID + pair.id,  data=DiD.data.gender,exactDOF = TRUE)
     
     reg.broom <- tidy(regValue) %>%
       mutate(Response=i, subgroup="Gender", subgroup_id=genderID)
     model.out.subgroup <- rbind(model.out.subgroup,reg.broom)
   }
+
+  ##DiD Regressions: by Occupation (non-fisher)
+    DiD.data.fisher <- DiD.data %>% filter(Fisher==0)
+    Y <- DiD.data.fisher[,i]
+
+    regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
+                       n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                     | SettlementID + pair.id + InterviewYear | 0 | SettlementID + pair.id, data=DiD.data.fisher,exactDOF = TRUE)
+
+    reg.broom <- tidy(regValue) %>%
+      mutate(Response=i, subgroup="Fishing Livelihood", subgroup_id=0)
+    model.out.subgroup <- rbind(model.out.subgroup,reg.broom)
   
-  ##DiD Regressions: by Occupation
-  for (fisherID in 0:1) {
-    DiD.data.fisher <- DiD.data %>% filter(Fisher==fisherID)
+    ##DiD Regressions: by Occupation (fisher only)
+    DiD.data.fisher <- DiD.data %>% filter(Fisher==1)
     Y <- DiD.data.fisher[,i]
     
-    regValue <- felm(Y  ~  n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge + Treatment + Post + Treatment:Post
-                     | SettlementID + InterviewYear + MPAID:InterviewYear + pair.id | 0 | SettlementID + pair.id, data=DiD.data.fisher,exactDOF = TRUE)
+    regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
+                       n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge 
+                     | SettlementID + pair.id + InterviewYear | 0 | SettlementID + pair.id, data=DiD.data.fisher,exactDOF = TRUE)
     
     reg.broom <- tidy(regValue) %>%
-      mutate(Response=i, subgroup="Fishing Livelihood", subgroup_id=fisherID)
+      mutate(Response=i, subgroup="Fishing Livelihood", subgroup_id=1)
     model.out.subgroup <- rbind(model.out.subgroup,reg.broom)
-  }
-  
+    
+
+
   ##DiD Regressions: by dom.eth
   for (dom.ethID in 0:1) {
     DiD.data.dom.eth <- DiD.data %>% filter(dom.eth==genderID)
     Y <- DiD.data.dom.eth[,i]
     
-    regValue <- felm(Y  ~  n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge + Treatment + Post + Treatment:Post
-                     | SettlementID + InterviewYear + MPAID:InterviewYear + pair.id | 0 | SettlementID + pair.id, data=DiD.data.dom.eth,exactDOF = TRUE)
+    regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
+                       n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                     | SettlementID + pair.id + InterviewYear | 0 | SettlementID + pair.id, data=DiD.data.dom.eth,exactDOF = TRUE)
     
     reg.broom <- tidy(regValue) %>%
       mutate(Response=i, subgroup="Ethnicity", subgroup_id=dom.ethID)
@@ -1426,8 +1457,9 @@ for (i in varNames) {
     DiD.data.wealth <- DiD.data %>% filter(wealth.above==wealthID)
     Y <- DiD.data.wealth[,i]
     
-    regValue <- felm(Y  ~  n.child  + ed.level + dom.eth + YearsResident + IndividualGender + IndividualAge + Treatment + Post + Treatment:Post
-                     | SettlementID + InterviewYear + MPAID:InterviewYear + pair.id | 0 | SettlementID + pair.id, data=DiD.data.wealth,exactDOF = TRUE)
+    regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
+                       n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                     | SettlementID + pair.id + InterviewYear | 0 | SettlementID + pair.id, data=DiD.data.wealth,exactDOF = TRUE)
     
     reg.broom <- tidy(regValue) %>%
       mutate(Response=i, subgroup="Economic Wealth", subgroup_id=wealthID)
