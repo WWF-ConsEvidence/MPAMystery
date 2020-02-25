@@ -771,7 +771,7 @@ stargazer(master.reg.list$FSIndex_z[c("Spec 1","Spec 2","Spec 3","Spec 4","Spec 
 
 
 stargazer(master.reg.list$PAIndex_z[c("Spec 1","Spec 2","Spec 3","Spec 4","Spec 5","Spec 6","Spec 7","Spec 8")],
-          out = "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/Settlement_matching/tables/DiD-seascape-z-Sensitivity_FS.txt", type = "text", 
+          out = "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/Settlement_matching/tables/DiD-seascape-z-Sensitivity_PA.txt", type = "text", 
           df = FALSE, notes.append = FALSE, star.cutoffs = NA, omit.table.layout = "n", 
           keep = c("Treatment:Post1"), covariate.labels=c("Treatment X Post"),
           title="DiD Regression Results",
@@ -785,7 +785,7 @@ stargazer(master.reg.list$PAIndex_z[c("Spec 1","Spec 2","Spec 3","Spec 4","Spec 
                            c("Settlement, Pair FEs",rep("Yes",8))))
 
 stargazer(master.reg.list$MTIndex_z[c("Spec 1","Spec 2","Spec 3","Spec 4","Spec 5","Spec 6","Spec 7","Spec 8")],
-          out = "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/Settlement_matching/tables/DiD-seascape-z-Sensitivity_FS.txt", type = "text", 
+          out = "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/Settlement_matching/tables/DiD-seascape-z-Sensitivity_MT.txt", type = "text", 
           df = FALSE, notes.append = FALSE, star.cutoffs = NA, omit.table.layout = "n", 
           keep = c("Treatment:Post1"), covariate.labels=c("Treatment X Post"),
           title="DiD Regression Results",
@@ -799,7 +799,7 @@ stargazer(master.reg.list$MTIndex_z[c("Spec 1","Spec 2","Spec 3","Spec 4","Spec 
                            c("Settlement, Pair FEs",rep("Yes",8))))
 
 stargazer(master.reg.list$MAIndex_z[c("Spec 1","Spec 2","Spec 3","Spec 4","Spec 5","Spec 6","Spec 7","Spec 8")],
-          out = "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/Settlement_matching/tables/DiD-seascape-z-Sensitivity_FS.txt", type = "text", 
+          out = "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/Settlement_matching/tables/DiD-seascape-z-Sensitivity_MA.txt", type = "text", 
           df = FALSE, notes.append = FALSE, star.cutoffs = NA, omit.table.layout = "n", 
           keep = c("Treatment:Post1"), covariate.labels=c("Treatment X Post"),
           title="DiD Regression Results",
@@ -813,7 +813,7 @@ stargazer(master.reg.list$MAIndex_z[c("Spec 1","Spec 2","Spec 3","Spec 4","Spec 
                            c("Settlement, Pair FEs",rep("Yes",8))))
 
 stargazer(master.reg.list$SERate_z[c("Spec 1","Spec 2","Spec 3","Spec 4","Spec 5","Spec 6","Spec 7","Spec 8")],
-          out = "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/Settlement_matching/tables/DiD-seascape-z-Sensitivity_FS.txt", type = "text", 
+          out = "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/Settlement_matching/tables/DiD-seascape-z-Sensitivity_SE.txt", type = "text", 
           df = FALSE, notes.append = FALSE, star.cutoffs = NA, omit.table.layout = "n", 
           keep = c("Treatment:Post1"), covariate.labels=c("Treatment X Post"),
           title="DiD Regression Results",
