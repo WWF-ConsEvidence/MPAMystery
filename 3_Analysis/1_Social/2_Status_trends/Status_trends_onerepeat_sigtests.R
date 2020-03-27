@@ -540,8 +540,8 @@ annex.sigvals  <-
 annex.sigvals[2:8] <- unlist(annex.sigvals[2:8])
 
 annex.sigvals.bahasa  <- 
-  rbind.data.frame(cbind.data.frame(SettlementName=c("Desa Kontrol"),trend.non.parametric.test.byControl ["sl",]),
-                   cbind.data.frame(SettlementName=gsub("MPA","KKP",MPA.name$MPAName),trend.non.parametric.test.byMPA ["sl",]),
+  rbind.data.frame(cbind.data.frame(SettlementName=c("Permukiman Kontrol"),trend.non.parametric.test.byControl ["sl",]),
+                   cbind.data.frame(SettlementName=MPA.name$MPAName.bahasa,trend.non.parametric.test.byMPA ["sl",]),
                    null.row.sigvals,
                    trend.non.parametric.test.bySett[rev(order(trend.non.parametric.test.bySett$SettlementName)),])
 

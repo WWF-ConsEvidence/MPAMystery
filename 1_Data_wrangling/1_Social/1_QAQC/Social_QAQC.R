@@ -28,8 +28,8 @@ pacman::p_load(foreach, reshape2, stringdist, rio, dplyr)
 
 # ---- 1.2 import data ----
 
-DEMOGRAPHIC.QAQC <- import('C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2019_KEI/3_QAQC/1_HWB/1_Pre-QAQC_imports_for_R/KEI_2019_pre-QAQC_DEMOGRAPHIC.csv')
-WELLBEING.QAQC <-  import('C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2019_KEI/3_QAQC/1_HWB/1_Pre-QAQC_imports_for_R/KEI_2019_pre-QAQC_WELLBEING.csv')
+DEMOGRAPHIC.QAQC <- import('C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2019_WAKATOBI/3_QAQC/1_HWB/1_Pre-QAQC_imports_for_R/WAKATOBI_2019_pre-QAQC_DEMOGRAPHIC.csv')
+WELLBEING.QAQC <-  import('C:/Users/claborn-intern/Dropbox (MPAMystery)/MPA_social_data/2_QUALITY_CONTROL/2019_WAKATOBI/3_QAQC/1_HWB/1_Pre-QAQC_imports_for_R/WAKATOBI_2019_pre-QAQC_WELLBEING.csv')
 
 # GTHREAT <- read.csv('2_Social/FlatDataFiles/SBS/SelatPantar_2017_QAQC/HH_tbl_GTHREAT_SelatPantar_2017_Pre-QAQC.csv')
 # GSTEPS <- read.csv('2_Social/FlatDataFiles/SBS/SelatPantar_2017_QAQC/HH_tbl_GSTEPS_SelatPantar_2017_Pre-QAQC.csv')

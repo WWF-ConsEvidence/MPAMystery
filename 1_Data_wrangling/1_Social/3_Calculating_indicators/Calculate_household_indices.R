@@ -24,7 +24,8 @@
 
 HHData <-
   HHData %>%
-  mutate(MAIndex = ifelse(RemoveMA=="No" & MPAID==17, # Kei Kecil (MPAID==17 cannot use TV in MAIndex score because question was missing from t3 repeat)
+  mutate(MAIndex = ifelse(RemoveMA=="No" & (MPAID==17 | # Kei Kecil (MPAID==17) cannot use TV in MAIndex score because question was missing from t3 repeat, 
+                                            MPAID==21), # and Wakatobi (MPAID==21) cannot use TV in MAIndex score because question was missing from t0 monitoring
                           rowSums(select(., "CarTruck", "Bicycle", "Motorcycle", "BoatNoMotor", "BoatOutboard",
                                          "BoatInboard", "PhoneCombined", "Entertain", "Satellite", "Generator"),
                                   na.rm = TRUE),

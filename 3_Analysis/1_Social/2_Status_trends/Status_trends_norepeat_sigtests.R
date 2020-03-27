@@ -362,12 +362,16 @@ sigvals.Sett <-
 #          (for status plots, comparing MPA households to control households)
 
 non.parametric.test.MPAvControl  <-
-  data.frame(mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
+  if(MPA.name$MPAID==21) {
+    data.frame(FSIndex=1,MAIndex=1,MTIndex=1,PAIndex=1,SERate=1,TimeMarket=1,DaysUnwell=1)
+  } else {
+    data.frame(mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
                     function(a){
                       var <- MPA.v.Control[,a]
                       wilcox.test(var~Treatment,
                                   data=MPA.v.Control,
                                   exact=F)}))["p.value",]
+    }
 
 sigvals.MPA  <- 
   cbind.data.frame(MPA.name$MPAName,non.parametric.test.MPAvControl)

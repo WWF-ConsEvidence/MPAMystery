@@ -6,29 +6,39 @@ pacman::p_load(rio,ggplot2,reshape2,dplyr)
 
 source('1_Data_wrangling/1_Social/2_Source_data/Source_social_data_flat_files.R')
 source('2_Functions/3_Plotting/Function_plotthemes.R')
+source('2_Functions/3_Plotting/Function_define_asteriskplotting.R')
 
 ed.lkp <- import('x_Flat_data_files/1_Social/Inputs/education_lkp.xlsx')
 
 MPA.name <- 
   import('x_Flat_data_files/1_Social/Inputs/Master_database_exports/HH_tbl_MPA.xlsx') %>%
-  filter(.,MPAID==15) %>%
-  transmute(MPAName=MPAName,
+  filter(.,MPAID==MPA) %>%
+  transmute(MPAID=MPAID,
+            MPAName=MPAName,
             MPAName.nospace=gsub(" ","",MPAName),
-            MPAName.final=gsub("MPA","",MPAName.nospace))
+            MPAName.final=gsub("MPA","",MPAName.nospace),
+            MPAName.bahasa=ifelse(MPAID==15,"SAP Selat Pantar",
+                                  ifelse(MPAID==16,"SAP Flores Timur",
+                                         ifelse(MPAID==17, "KKP3K TPK Pulau Kei Kecil",
+                                                ifelse(MPAID==18, "KKP3K Pulau Koon", 
+                                                       ifelse(MPAID==19,"KKP3K TPK Kepulauan Tanimbar",
+                                                              ifelse(MPAID==20, "KKPD Sulawesi Tenggara",
+                                                                     ifelse(MPAID==21, "Taman Nasional Wakatobi", gsub("MPA","KKP",MPAName)))))))))
 
 
 # ----- import post-coded threat type data from MPA of choice & analyze at settlement and MPA level ----
 
 ThreatType <-
-  import('x_Flat_data_files/1_Social/Outputs/Status_trends_analysis/SelatPantar_20191017/SelatPantarThreats2014_2017/SelatPantar_LTHREAT 2014&2017.xlsx')
+  import('x_Flat_data_files/1_Social/Outputs/Status_trends_analysis/Koon_20200123/Koon_LTHREAT-PostCod.xlsx') %>%
+  left_join(Settlements[,c("SettlementID","SettlementName")],by="SettlementID")
 
 Sett.level.ThreatType <- 
   ThreatType %>% filter(Treatment==1 & InterviewYear==max(InterviewYear)) %>%
   group_by(SettlementID,SettlementName,InterviewYear) %>%
   summarise(UnsustainableFish=(length(HouseholdID[MainThreat=="UnsustainableFishing" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
             Pollution=(length(HouseholdID[MainThreat=="Pollution" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
-            NaturalPhenomenon=(length(HouseholdID[MainThreat=="NaturalPhenomenon" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
-            Tourism=(length(HouseholdID[MainThreat=="TourismCoastalDevelopment" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
+            NaturalPhenomenon=(length(HouseholdID[MainThreat=="Natural phenomenon" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
+            Tourism=(length(HouseholdID[MainThreat=="Tourism & coastal development" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
             InadequateProc=(length(HouseholdID[MainThreat=="Inadequate protection" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
             Aquaculture=(length(HouseholdID[MainThreat=="Aquaculture" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
             NoThreat=(length(HouseholdID[MainThreat=="NoThreat" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100) %>%
@@ -42,8 +52,8 @@ MPA.level.ThreatType <-
   group_by(MPAID,Treatment,InterviewYear,SettlementID,SettlementName) %>%
   summarise(UnsustainableFish=(length(HouseholdID[MainThreat=="UnsustainableFishing" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
             Pollution=(length(HouseholdID[MainThreat=="Pollution" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
-            NaturalPhenomenon=(length(HouseholdID[MainThreat=="NaturalPhenomenon" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
-            Tourism=(length(HouseholdID[MainThreat=="TourismCoastalDevelopment" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
+            NaturalPhenomenon=(length(HouseholdID[MainThreat=="Natural phenomenon" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
+            Tourism=(length(HouseholdID[MainThreat=="Tourism & coastal development" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
             InadequateProc=(length(HouseholdID[MainThreat=="Inadequate protection" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
             Aquaculture=(length(HouseholdID[MainThreat=="Aquaculture" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
             NoThreat=(length(HouseholdID[MainThreat=="NoThreat" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100) %>%
@@ -63,8 +73,8 @@ FreqTables.ThreatType <-
   group_by(InterviewYear) %>%
   summarise(UnsustainableFish=length(MainThreat[MainThreat=="UnsustainableFishing" &  !is.na(MainThreat)]),
             Pollution=length(MainThreat[MainThreat=="Pollution" &  !is.na(MainThreat)]),
-            NaturalPhenomenon=length(MainThreat[MainThreat=="NaturalPhenomenon" &  !is.na(MainThreat)]),
-            Tourism=length(MainThreat[MainThreat=="TourismCoastalDevelopment" &  !is.na(MainThreat)]),
+            NaturalPhenomenon=length(MainThreat[MainThreat=="Natural phenomenon" &  !is.na(MainThreat)]),
+            Tourism=length(MainThreat[MainThreat=="Tourism & coastal development" &  !is.na(MainThreat)]),
             InadequateProc=length(MainThreat[MainThreat=="Inadequate protection" &  !is.na(MainThreat)]),
             Aquaculture=length(MainThreat[MainThreat=="Aquaculture" &  !is.na(MainThreat)]),
             NoThreat=length(MainThreat[MainThreat=="NoThreat" &  !is.na(MainThreat)]))
@@ -130,7 +140,7 @@ MPA.level.PostCodeData <-
   IndDemos %>%
   left_join(ed.lkp, by="IndividualEducation") %>%
   left_join(HHData[c("HouseholdID","SettlementName","Treatment","InterviewYear","MonitoringYear")], by="HouseholdID") %>%
-  filter(MPAID==15 & IndividualAge>=18 & ed.level<=5) %>%
+  filter(MPAID==18 & IndividualAge>=18 & ed.level<=5) %>%
   filter(InterviewYear==max(InterviewYear)) %>%
   mutate(SettlementID=NA,
          SettlementName=ifelse(Treatment==1,as.character(MPA.name$MPAName),"Control Settlements")) %>%
@@ -154,7 +164,7 @@ Sett.level.PostCodeData <-
   IndDemos %>%
   left_join(ed.lkp, by="IndividualEducation") %>%
   left_join(HHData[c("HouseholdID","SettlementName","Treatment","InterviewYear","MonitoringYear")], by="HouseholdID") %>%
-  filter(MPAID==15 & IndividualAge>=18 & ed.level<=5 & Treatment==1) %>%
+  filter(MPAID==18 & IndividualAge>=18 & ed.level<=5 & Treatment==1) %>%
   filter(InterviewYear==max(InterviewYear)) %>%
   group_by(SettlementID,SettlementName) %>%
   summarise(HHHEducNone=(length(DemographicID[ed.level==0 & !is.na(ed.level) & RelationHHH==0])/length(DemographicID[!is.na(ed.level) & RelationHHH==0]))*100,
@@ -192,15 +202,15 @@ PostCodeData.PLOTFORMAT <-
                                as.character(SettlementName)),
          SettlementName=factor(SettlementName,levels=unique(SettlementName),ordered=T),
          SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"),
-         SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Desa Kontrol",
-                                      ifelse(grepl("MPA",SettlementName,ignore.case=F),gsub("MPA","KKP",SettlementName),as.character(SettlementName))),
+         SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Permukiman Kontrol",
+                                      ifelse(grepl("MPA",SettlementName,ignore.case=F),MPA.name$MPAName.bahasa,as.character(SettlementName))),
          SettlementName.bahasa=factor(SettlementName.bahasa,levels=unique(SettlementName.bahasa),ordered=T))
 
 PostCode.trend.PLOTFORMAT <-
   data.frame(MonitoringYear=rep.int(c("Baseline","3 Year Post"),2),MPA.level.ThreatType) %>%
   rbind.data.frame(.,data.frame(MonitoringYear=NA,null.row.ThreatType)) %>%
-  left_join(.,define.year.monitoryear.column(MPA.Level.Means[MPA.Level.Means$MPAID==15,]),by="MonitoringYear") %>%
-  left_join(.,define.year.monitoryear.column.bahasa(MPA.Level.Means[MPA.Level.Means$MPAID==15,]),by="MonitoringYear") %>%
+  left_join(.,define.year.monitoryear.column(MPA.Level.Means[MPA.Level.Means$MPAID==18,]),by="MonitoringYear") %>%
+  left_join(.,define.year.monitoryear.column.bahasa(MPA.Level.Means[MPA.Level.Means$MPAID==18,]),by="MonitoringYear") %>%
   mutate(order=c(1,2,4,5,3),
          Label=ifelse(is.na(Label),"",as.character(Label)),
          Label.bahasa=ifelse(is.na(Label.bahasa),"",as.character(Label.bahasa)))
@@ -367,7 +377,7 @@ AdultEduc.statusplot.bahasa <-
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["AdultEducation"]],
                     labels=c("Pendidikan tinggi lanjutan","SMA (Sekolah Menengah Atas)","SMP (Sekolah Menengah Pertama)","SD (Sekolah Dasar)",
-                             "TK (Taman Kanak-kanak)", "Tidak mempunyai pendidikan formal")) +
+                             "TK (Taman Kanak-kanak)", "Tidak memiliki pendidikan formal")) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["AdultEduc"] + plot.guides.techreport
 
 # - HOUSEHOLD HEAD EDUCATION
@@ -412,7 +422,7 @@ HHHEduc.statusplot.bahasa <-
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["HHHEducation"]],
                     labels=c("Pendidikan tinggi lanjutan","SMA (Sekolah Menengah Atas)","SMP (Sekolah Menengah Pertama)","SD (Sekolah Dasar)",
-                             "TK (Taman Kanak-kanak)", "Tidak mempunyai pendidikan formal")) +
+                             "TK (Taman Kanak-kanak)", "Tidak memiliki pendidikan formal")) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["HHHEduc"] + plot.guides.techreport
 
 # 
@@ -464,9 +474,9 @@ HHHEduc.statusplot.bahasa <-
 
 # define figure output directory
 
-FigureFileName.english <- 'x_Flat_data_files/1_Social/Outputs/Status_trends_analysis/SelatPantar_20191106/Figures--produced_20191106'
+FigureFileName.english <- 'x_Flat_data_files/1_Social/Outputs/Status_trends_analysis/Koon_20200123/Figures--produced_20200325'
 
-FigureFileName.bahasa <- 'x_Flat_data_files/1_Social/Outputs/Status_trends_analysis/SelatPantar_20191106/Bahasa_Figures--produced_20191106'
+FigureFileName.bahasa <- 'x_Flat_data_files/1_Social/Outputs/Status_trends_analysis/Koon_20200123/Bahasa_Figures--produced_20200325'
 
 
 # ---- Threat Type ----

@@ -227,7 +227,7 @@ FS.statusplot.bahasa <-
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
-  geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(6.06-4.02))+4.02,label="Pangan tersedia"),
+  geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(6.06-4.02))+4.02,label="Aman Pangan"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(4.02-1.56))+1.56,label="Rawan Pangan\ntanpa kelaparan"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
@@ -558,7 +558,7 @@ Religion.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Religion"]],
-                    labels=c("Lainnya","Muslim","Kristen")) +
+                    labels=c("Lainnya","Islam","Kristen")) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["Religion"] +
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -772,7 +772,7 @@ FSCategorical.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FSCategorical"]],
-                    labels=c("Rawan Pangan dengan kelaparan", "Rawan Pangan tanpa kelaparan","Pangan tersedia" )) +
+                    labels=c("Rawan Pangan dengan kelaparan", "Rawan Pangan tanpa kelaparan","Aman Pangan" )) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FSCategorical"] + 
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -981,7 +981,7 @@ FS.trendplot.bahasa <-
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=(0.5*(6.06-4.02))+4.02,label="Pangan tersedia"),
+  geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=(0.5*(6.06-4.02))+4.02,label="Aman Pangan"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=(0.5*(4.02-1.56))+1.56,label="Rawan Pangan\ntanpa kelaparan"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
@@ -1653,7 +1653,7 @@ FS.annexplot.bahasa <-
              linetype=2,
              size=0.35,
              colour="#505050") +
-  geom_text(aes(x=length(unique(SettlementName)),y=(0.5*(6.06-4.02))+4.02,label="Pangan tersedia"),
+  geom_text(aes(x=length(unique(SettlementName)),y=(0.5*(6.06-4.02))+4.02,label="Aman Pangan"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   geom_text(aes(x=length(unique(SettlementName)),y=(0.5*(4.02-1.56))+1.56,label="Rawan Pangan\ntanpa kelaparan"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +

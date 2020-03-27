@@ -134,7 +134,7 @@ FS.statusplot.bahasa <-
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -152,7 +152,7 @@ FS.statusplot.bahasa <-
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
-  geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(6.06-4.02))+4.02,label="Pangan tersedia"),
+  geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(6.06-4.02))+4.02,label="Aman Pangan"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(4.02-1.56))+1.56,label="Rawan Pangan\ntanpa kelaparan"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
@@ -194,10 +194,10 @@ MA.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
-             colour="#505050") + 
+             colour="#505050") +
   geom_text(data=Statusplot.sigpos.bahasa,
             aes(x=SettlementName.bahasa,
                 y=MA),
@@ -236,7 +236,7 @@ PA.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -277,7 +277,7 @@ MT.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -316,7 +316,7 @@ SE.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -357,7 +357,7 @@ Time.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -399,7 +399,7 @@ Unwell.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -440,7 +440,7 @@ Gender.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -475,7 +475,7 @@ Religion.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -483,7 +483,7 @@ Religion.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Religion"]],
-                    labels=c("Lainnya","Muslim","Kristen")) +
+                    labels=c("Lainnya","Islam","Kristen")) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["Religion"] +
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -512,7 +512,7 @@ Primaryocc.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -536,7 +536,7 @@ Freqfish.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -561,7 +561,7 @@ Freqsellfish.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -586,7 +586,7 @@ Incfish.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -609,7 +609,7 @@ Fishtech.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -633,7 +633,7 @@ Childfs.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -668,7 +668,7 @@ Proteinfish.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -689,7 +689,7 @@ FSCategorical.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -697,7 +697,7 @@ FSCategorical.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FSCategorical"]],
-                    labels=c("Rawan Pangan dengan kelaparan", "Rawan Pangan tanpa kelaparan","Pangan tersedia" )) +
+                    labels=c("Rawan Pangan dengan kelaparan", "Rawan Pangan tanpa kelaparan","Aman Pangan" )) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FSCategorical"] + 
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -724,7 +724,7 @@ EconStatus.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -748,7 +748,7 @@ MarineMember.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -783,7 +783,7 @@ MarineMeeting.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -818,7 +818,7 @@ SocialConflict.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -840,7 +840,7 @@ NumThreat.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -861,7 +861,7 @@ MarineContribution.statusplot.bahasa <-
            position="dodge",
            width=0.75,
            show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
