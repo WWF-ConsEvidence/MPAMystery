@@ -19,46 +19,52 @@ str_clean <- function(strings) {
 }
 
 unclear <- unique(subgroup.EconResponse.df$Unclear)
+
+# create cleaned word dataframe
+words.df <- subgroup.EconResponse.df %>% 
+  mutate(EconomicStatusReasonEnglish=str_clean(EconomicStatusReasonEnglish), 
+         Gender=ifelse(Male==1, "Male", "Female")) %>% 
+  # split sentences to words, filter out unimportant words
+  unnest_tokens(output=word.val, input=EconomicStatusReasonEnglish) %>% 
+  filter(!word.val %in% stop_words$word) %>% 
+  filter(!word.val %in% unclear) 
+
+head(words.df)
+
 #---------------------------------------------------------------------------------------------------------#
 #--- 1. Plots by Gender (what are the top words/top distinct words for each)
-Gender.out <- subgroup.EconResponse.df %>% 
-  select(Male, EconomicStatusReasonEnglish) %>% 
-  mutate(EconomicStatusReasonEnglish=str_clean(EconomicStatusReasonEnglish), 
-         Gender=ifelse(Male==1, "Male", "Female"))
-
-words.by.Gender.n <- Gender.out %>% 
+words.by.Gender <- words.df %>% 
   group_by(Gender) %>% 
-  summarise(Gender.count=n()) 
+  mutate(sum.gender=n_distinct(HouseholdID)) %>% 
+  group_by(Gender,word.val,sum.gender) %>% 
+  summarise(Gender.count=n_distinct(HouseholdID),
+            Gender.pct=round(Gender.count/mean(sum.gender), digits = 2)) %>% 
+  arrange(-Gender.count)
 
-# find all words apear by each status, remove stop_words, count replication of each remaining words
-words.by.Gender <- Gender.out %>% 
-  # filter(MPAID <= 6) %>% 
-  mutate(EconomicStatusReasonEnglish=str_clean(EconomicStatusReasonEnglish)) %>% 
-  unnest_tokens(output=wordsBySubGroup, input=EconomicStatusReasonEnglish) %>% 
-  filter(!wordsBySubGroup %in% stop_words$word) %>% 
-  filter(!wordsBySubGroup %in% unclear) %>% 
-  #filter(!wordsBySubGroup %in% c("due","stable","cost", "2")) %>% 
-  count(Gender, wordsBySubGroup, sort = TRUE) %>% 
-  left_join(words.by.Gender.n,by="Gender")  
- 
 # use the bind_tf_idf to get all important/meaning words in each econ status (put less weight on common words appear in all MPAs such as "the", "a", "because" etc)
 words.by.Gender <- words.by.Gender %>%
-  bind_tf_idf(wordsBySubGroup, Gender, n)
+  bind_tf_idf(word.val, Gender, Gender.count)
 
+words.by.Gender.top10 <- words.by.Gender %>% 
+  group_by(Gender) %>% 
+  top_n(10,Gender.count)
 ##---------------------------------------------------------------------#
 #visualize by plotting 1) most words by status and 2) most distinct words by status
 # 1. top distinct words by econ status change
-words.by.Gender %>%
-  arrange(desc(tf_idf)) %>%
-  mutate(wordsBySubGroup = factor(wordsBySubGroup, levels = rev(unique(wordsBySubGroup)))) %>% 
-  group_by(Gender) %>% 
-  top_n(10) %>% 
-  ungroup() %>%
-  ggplot(aes(wordsBySubGroup, tf_idf, fill = Gender)) +
+
+ggplot(words.by.Gender.top10, aes(word.val, reorder(Gender.count, -Gender.count) , fill = Gender)) +
   geom_col(show.legend = FALSE) +
   labs(x = NULL, y = "Word importance (tf-idf)") +
   facet_wrap(~Gender, ncol = 2, scales = "free") +
   coord_flip()
+
+ggplot(words.by.Gender.top10, aes(word.val, Gender.pct, fill = Gender)) +
+  geom_col(show.legend = FALSE) +
+  labs(x = NULL, y = "Word importance (tf-idf)") +
+  facet_wrap(~Gender, ncol = 2, scales = "free") +
+  coord_flip()
+
+
 ggsave(paste0(resultPath,'Paper 1-MPA and Equity/results/plots/subGroup_word_frequency/ByGender_distinct.pdf'),width = 12, height = 8)
 
 
