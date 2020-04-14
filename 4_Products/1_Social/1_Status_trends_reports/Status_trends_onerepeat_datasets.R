@@ -171,8 +171,8 @@ Sett.level.PropData.status.PLOTFORMAT <-
                                as.character(SettlementName)),
          SettlementName=factor(SettlementName,levels=unique(SettlementName),ordered=T),
          SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"),
-         SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Desa Kontrol",
-                                      ifelse(grepl("MPA",SettlementName,ignore.case=F),gsub("MPA","KKP",SettlementName),as.character(SettlementName))),
+         SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Permukiman Kontrol",
+                                      ifelse(grepl("MPA",SettlementName,ignore.case=F),MPA.name$MPAName.bahasa,as.character(SettlementName))),
          SettlementName.bahasa=factor(SettlementName.bahasa,levels=unique(SettlementName.bahasa),ordered=T))
 
 
@@ -195,8 +195,8 @@ Sett.level.ContData.status.PLOTFORMAT <-
   mutate(SettlementName=ifelse(is.na(SettlementName),"",SettlementName),
          SettlementName=factor(SettlementName,levels=unique(SettlementName),ordered=T),
          SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"),
-         SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Desa Kontrol",
-                                      ifelse(grepl("MPA",SettlementName,ignore.case=F),gsub("MPA","KKP",SettlementName),as.character(SettlementName))),
+         SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Permukiman Kontrol",
+                                      ifelse(grepl("MPA",SettlementName,ignore.case=F),MPA.name$MPAName.bahasa,as.character(SettlementName))),
          SettlementName.bahasa=factor(SettlementName.bahasa,levels=unique(SettlementName.bahasa),ordered=T))
 
 
@@ -246,8 +246,8 @@ MPA.level.ContData.trend.PLOTFORMAT <-
   mutate(MonitoringYear=factor(MonitoringYear,
                                levels=unique(MonitoringYear),
                                ordered=T),
-         SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Desa Kontrol",
-                                      ifelse(grepl("MPA",SettlementName,ignore.case=F),gsub("MPA","KKP",SettlementName),as.character(SettlementName))),
+         SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Permukiman Kontrol",
+                                      ifelse(grepl("MPA",SettlementName,ignore.case=F),MPA.name$MPAName.bahasa,as.character(SettlementName))),
          order=c(4,3,2,1,NA),
          Treatment=ifelse(SettlementName=="Control Settlements","Control","MPA"))
 
@@ -274,8 +274,8 @@ Sett.level.ContData.annex.PLOTFORMAT <-
   mutate(SettlementName=ifelse(is.na(SettlementName),"",as.character(SettlementName)),
          SettlementName=factor(SettlementName,levels=unique(SettlementName),ordered=T),
          SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"),
-         SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Desa Kontrol",
-                                      ifelse(grepl("MPA",SettlementName,ignore.case=F),gsub("MPA","KKP",SettlementName),as.character(SettlementName))),
+         SettlementName.bahasa=ifelse(grepl("Control Settlements",SettlementName),"Permukiman Kontrol",
+                                      ifelse(grepl("MPA",SettlementName,ignore.case=F),MPA.name$MPAName.bahasa,as.character(SettlementName))),
          SettlementName.bahasa=factor(SettlementName.bahasa,levels=unique(SettlementName.bahasa),ordered=T))
 
 

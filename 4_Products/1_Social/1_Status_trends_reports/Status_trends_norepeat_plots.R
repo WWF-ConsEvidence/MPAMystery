@@ -135,7 +135,7 @@ FS.statusplot <-
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -195,10 +195,10 @@ MA.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
-             colour="#505050") + 
+             colour="#505050") +
   geom_text(data=Statusplot.sigpos,
             aes(x=SettlementName,
                 y=MA),
@@ -237,7 +237,7 @@ PA.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -278,7 +278,7 @@ MT.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -317,7 +317,7 @@ SE.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -358,7 +358,7 @@ Time.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -400,7 +400,7 @@ Unwell.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -441,7 +441,7 @@ Gender.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -476,7 +476,7 @@ Religion.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -513,7 +513,7 @@ Primaryocc.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -537,7 +537,7 @@ Freqfish.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -562,7 +562,7 @@ Freqsellfish.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -587,7 +587,7 @@ Incfish.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -610,7 +610,7 @@ Fishtech.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -634,7 +634,7 @@ Childfs.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -669,7 +669,7 @@ Proteinfish.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -690,7 +690,7 @@ FSCategorical.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -725,7 +725,7 @@ EconStatus.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -748,7 +748,7 @@ MarineMember.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -783,7 +783,7 @@ MarineMeeting.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -818,7 +818,7 @@ SocialConflict.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -840,7 +840,7 @@ NumThreat.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -861,7 +861,7 @@ MarineContribution.statusplot <-
            position="dodge",
            width=0.75,
            show.legend=F) +
-  geom_vline(aes(xintercept=3),
+  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
              linetype=2,
              size=0.35,
              colour="#505050") +

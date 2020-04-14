@@ -710,7 +710,7 @@ MPAimpact.summ.legend.bahasa <- ggplot(data=macp.koon.impacts[!grepl("Impact",ma
   scale_fill_manual(labels=c("Perlakuan","Kontrol"),
                     values=fill.cols.MPAimpacts,
                     name="Group") +
-  scale_colour_manual(labels="Dampak KKP",
+  scale_colour_manual(labels="Dampak Perlakuan",
                       values="black") +
   scale_x_discrete(labels=impact.x.labs.bahasa) +
   scale_size_manual(values=0.75) +
@@ -737,7 +737,7 @@ macp.koon.std.impacts <-
          Response=factor(Response,ordered=T,levels=c("PAIndex_z","MTIndex_z","SERate_z","FSIndex_z","MAIndex_z")))
 
 
-snapshot.sig.labs <- c("Budaya\n(Keterikatan Emosional\nterhadap Tempat)","Pemberdayaan\n(Kepemilikan Laut)","Pendidikan\n(Tingkat Pendidikan)",
+snapshot.sig.labs <- c("Budaya\n(Kelekatan Emosional\nterhadap Tempat)","Pemberdayaan\n(Penguasaan/Kepemilikan Laut)","Pendidikan\n(Tingkat Pendidikan)",
                        "Kesehatan\n(Ketahanan Pangan)","Kesejahteraan Ekonomi\n(Aset Material)")
 
 
@@ -770,7 +770,7 @@ snapshot.MPAimpact.summ.2yr.bahasa <- ggplot(data=macp.koon.std.impacts,
                     name="Arah Dampak",
                     labels=c("Negatif","Positif")) +
   scale_colour_manual(values=c(alpha("#2B5027",0.95),alpha("#1B4D6F",0.95))) +
-  labs(x="",y="\n Dampak KKP",title="") +
+  labs(x="",y="\n Dampak Perlakuan",title="") +
   coord_flip() + snapshot.plot.theme.MPAimpact.summ + 
   snapshot.plot.guide.MPAimpact.summ 
 
@@ -801,7 +801,7 @@ snapshot.MPAimpact.factsheet.2yr.bahasa <- ggplot(data=macp.koon.std.impacts,
                     name="Arah Dampak",
                     labels=c("Negatif","Positif")) +
   scale_colour_manual(values=c(alpha("#2B5027",0.95),alpha("#1B4D6F",0.95))) +
-  labs(x="",y="\n Dampak KKP",title="") +
+  labs(x="",y="\n Dampak Perlakuan",title="") +
   coord_flip() + snapshot.plot.theme.MPAimpact.factsheet + 
   snapshot.plot.guide.MPAimpact.factsheet
 
@@ -852,6 +852,7 @@ dir.create(paste("x_Flat_data_files/1_Social/Outputs/impact_analysis/Koon/Bahasa
 
 FigureFileName <- paste("x_Flat_data_files/1_Social/Outputs/impact_analysis/Koon/Bahasa_Figures--produced",
                         format(Sys.Date(),format="%Y_%m_%d"),sep="_")
+
 
 
 # ---- LEGEND PLOT ----

@@ -512,41 +512,41 @@ continuous.variables.plotlabs <- c("Mean household food security","Mean househol
                                    "Mean time suffering from illness or injury in past 4 weeks (days)")
 
 
-Statusplot.labs.bahasa <- list(FS=labs(y="Rata-rata ketahanan pangan rumah tangga",x="Desa"),
-                               MA=labs(y="Rata-rata aset rumah tangga",x="Desa"),
-                               PA=labs(y="Rata-rata ikatan/keterkaitan terhadap tempat",x="Desa"),
-                               MT=labs(y="Rata-rata hak kepemilikan laut oleh rumah tangga",x="Desa"),
-                               SE=labs(y="Tingkat Pendidikan (% anak usia 5-18 tahun)",x="Desa"),
-                               Time=labs(y="Jarak menuju pasar (jam)",x="Desa"),
+Statusplot.labs.bahasa <- list(FS=labs(y="Rata-rata ketahanan pangan rumah tangga",x="Permukiman"),
+                               MA=labs(y="Rata-rata aset rumah tangga",x="Permukiman"),
+                               PA=labs(y="Rata-rata ikatan/kelekatan terhadap tempat",x="Permukiman"),
+                               MT=labs(y="Rata-rata hak penguasaan/kepemilikan laut\noleh rumah tangga",x="Permukiman"),
+                               SE=labs(y="Tingkat Pendidikan (% anak usia 5-18 tahun)",x="Permukiman"),
+                               Time=labs(y="Jarak menuju pasar (jam)",x="Permukiman"),
                                Unwell=labs(y="Rata-rata waktu menderita sakit atau cedera\ndalam 4 minggu terakhir (hari)",
-                                           x="Desa"),
-                               Gender=labs(y="Jenis kelamin (% kepala rumah tangga)",x="Desa"),
-                               Religion=labs(y="Agama (% kepala rumah tangga)",x="Desa"),
-                               PrimaryOcc=labs(y="Pekerjaan utama (% rumah tangga)",x="Desa"),
-                               FreqFish=labs(y="Frekuensi penangkapan ikan (% rumah tangga)",x="Desa"),
+                                           x="Permukiman"),
+                               Gender=labs(y="Jenis kelamin (% kepala rumah tangga)",x="Permukiman"),
+                               Religion=labs(y="Agama (% kepala rumah tangga)",x="Permukiman"),
+                               PrimaryOcc=labs(y="Pekerjaan utama (% rumah tangga)",x="Permukiman"),
+                               FreqFish=labs(y="Frekuensi penangkapan ikan (% rumah tangga)",x="Permukiman"),
                                FreqSellFish=labs(y="Frekuensi penjualan setidaknya pada beberapa hasil tangkapan\n(% rumah tangga)",
-                                                 x="Desa"),
+                                                 x="Permukiman"),
                                FishProtein=labs(y="Protein makanan dari ikan dalam 6 bulan terakhir (% rumah tangga)",
-                                                x="Desa"),
+                                                x="Permukiman"),
                                IncFish=labs(y="Penghasilan dari penangkapan ikan dalam 6 bulan terakhir\n(% rumah tangga)",
-                                            x="Desa"),
+                                            x="Permukiman"),
                                FishTech=labs(y="Teknik penangkapan ikan yang paling sering digunakan\ndalam 6 bulan terakhir (% rumah tangga)",
-                                             x="Desa"),
-                               ChildFS=labs(y="Kelaparan pada anak (% rumah tangga)",x="Desa"),
-                               AdultEduc=labs(y="Pendidikan Terakhir (% usia 18 tahun ke atas)",x="Desa"),
-                               HHHEduc=labs(y="Tamat Pendidikan terakhir (% kepala rumah tangga)",x="Desa"),
-                               EconStatus=labs(y="Perubahan status ekonomi rumah tangga nelayan (% rumah tangga)",x="Desa"),
-                               SocialConflict=labs(y="Perubahan dalam konflik sosial atas sumber daya laut\ndalam 12 bulan terakhir(% rumah tangga)",x="Desa"),
-                               NumLocalThreats=labs(y="Jumlah ancaman lokal yang teridentifikasi terhadap lingkungan laut\n(% rumah tangga)",x="Desa"),
-                               ThreatTypes=labs(y="Jenis ancaman lokal terhadap lingkungan laut\n(% ancaman teridentifikasi)",x="Desa"),
-                               MarineMember=labs(y="Rumah tangga yang merupakan anggota organisasi kelautan\n(% rumah tangga)",x="Desa"),
-                               MarineAttendance=labs(y="Rumah tangga menghadiri pertemuan organisasi\ndalam bidang kelautan",x="Desa"),
-                               MarineContribution=labs(y="Rata-rata kontribusi rumah tangga dalam organisasi bidang kaluatan\n(Rupiah)",x="Desa"),
-                               FSCategorical= labs(y="Ketahanan pangan berdasarkan kategori (% rumah tangga)",x="Desa"))
+                                             x="Permukiman"),
+                               ChildFS=labs(y="Kelaparan pada anak (% rumah tangga)",x="Permukiman"),
+                               AdultEduc=labs(y="Pendidikan Terakhir (% usia 18 tahun ke atas)",x="Permukiman"),
+                               HHHEduc=labs(y="Tamat Pendidikan terakhir (% kepala rumah tangga)",x="Permukiman"),
+                               EconStatus=labs(y="Perubahan status ekonomi rumah tangga nelayan (% rumah tangga)",x="Permukiman"),
+                               SocialConflict=labs(y="Perubahan dalam konflik sosial atas sumber daya laut\ndalam 12 bulan terakhir(% rumah tangga)",x="Permukiman"),
+                               NumLocalThreats=labs(y="Jumlah ancaman lokal yang teridentifikasi terhadap lingkungan laut\n(% rumah tangga)",x="Permukiman"),
+                               ThreatTypes=labs(y="Jenis ancaman lokal terhadap lingkungan laut\n(% ancaman teridentifikasi)",x="Permukiman"),
+                               MarineMember=labs(y="Rumah tangga yang merupakan anggota organisasi kelautan\n(% rumah tangga)",x="Permukiman"),
+                               MarineAttendance=labs(y="Rumah tangga menghadiri pertemuan organisasi\ndalam bidang kelautan",x="Permukiman"),
+                               MarineContribution=labs(y="Rata-rata kontribusi rumah tangga dalam organisasi bidang kaluatan\n(Rupiah)",x="Permukiman"),
+                               FSCategorical= labs(y="Ketahanan pangan berdasarkan kategori (% rumah tangga)",x="Permukiman"))
 
 
 continuous.variables.plotlabs.bahasa <- c("Rata-rata ketahanan pangan rumah tangga","Rata-rata aset rumah tangga",
-                                          "Rata-rata ikatan/keterkaitan terhadap tempat","Rata-rata hak kepemilikan laut oleh rumah tangga",
+                                          "Rata-rata ikatan/kelekatan terhadap tempat","Rata-rata hak penguasaan/kepemilikan laut oleh rumah tangga",
                                           "Tingkat Pendidikan (% anak usia 5-18 tahun)", "Jarak menuju pasar (jam)",
                                           "Rata-rata waktu menderita sakit atau cedera\ndalam 4 minggu terakhir (hari)")
 
@@ -575,8 +575,8 @@ impact.x.labs <- c("MPA\nHouseholds","Control\nHouseholds")
 # Labels in bahasa
 plot.fs.labs.i.bahasa <- labs(x="",y="Perubahan Ketahanan Pangan Rumah Tangga\nsejak Baseline",title="")
 plot.ma.labs.i.bahasa <- labs(x="",y="Perubahan Aset Rumah Tangga\nsejak Baseline",title="")
-plot.pa.labs.i.bahasa <- labs(x="",y="Perubahan Rumah Tangga dalam Ikatan/Keterkaitan\nTempat sejak Baseline",title="")
-plot.mt.labs.i.bahasa <- labs(x="",y="Perubahan Hak Kepemilikan Laut Rumah Tangga\nsejak Baseline",title="")
+plot.pa.labs.i.bahasa <- labs(x="",y="Perubahan Rumah Tangga dalam Kelekatan\nTempat sejak Baseline",title="")
+plot.mt.labs.i.bahasa <- labs(x="",y="Perubahan Hak Penguasaan/Kepemilikan Laut Rumah Tangga\nsejak Baseline",title="")
 plot.se.labs.i.bahasa <- labs(x="",y="Perubahan Tingkat Pendidikan\nsejak Baseline",title="")
 
 plot.ma.hh.labs.i.bahasa <- labs(x="",y="Perubahan Aset Rumah Tangga\nsejak Baseline",title="Subkelas aset rumah tangga")
@@ -584,4 +584,4 @@ plot.ma.boatnomotor.labs.i.bahasa <- labs(x="",y="Perubahan Aset Perahu tanpa Mo
 plot.ma.boatmotor.labs.i.bahasa <- labs(x="",y="Perubahan Aset Perahu Bermotor\nsejak Baseline",title="Subkelas aset perahu bermotor")
 plot.ma.vehicles.labs.i.bahasa <- labs(x="",y="Perubahan Aset Kendaraan Darat\nsejak Baseline",title="Subkelas aset kendaraan darat")
 
-impact.x.labs.bahasa <- c("Rumah tangga\ndalam KKP","Rumah tangga\nKontrol")
+impact.x.labs.bahasa <- c("Rumah tangga\nPerlakuan","Rumah tangga\nKontrol")

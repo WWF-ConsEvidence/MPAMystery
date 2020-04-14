@@ -485,7 +485,14 @@ Settlements <-
   mutate(SettlementName=factor(SettlementName,
                                levels=unique(SettlementName)))
 
-
+LThreat_forexport <-
+  left_join(LTHREAT,HHData[,c("HouseholdID","SettlementID","MPAID","MonitoringYear","InterviewYear","Treatment",
+                              "PrimaryLivelihood","SecondaryLivelihood","TertiaryLivelihood")],by="HouseholdID") %>%
+  filter(MPAID==MPA) %>%
+  dplyr::mutate(Check.NA=paste(PrimaryLivelihood,SecondaryLivelihood,TertiaryLivelihood,sep=""),
+         Fisher=ifelse(grepl("3",Check.NA),"Fisher",
+                       ifelse(Check.NA=="NANANA",NA,"Not Fisher"))) %>%
+  select(-Check.NA)
 
 
 rm(baseline.dummy.rows)
