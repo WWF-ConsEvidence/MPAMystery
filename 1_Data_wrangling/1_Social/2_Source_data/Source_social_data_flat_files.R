@@ -50,7 +50,7 @@ today.date <- gsub("-","",Sys.Date())
 
 # Files (with package rio)
 last.file <- function(dir.nam,nam){
-  import(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))}
+  import(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))),guess_max=50000)}
 
 # # Shapefiles (with package sf)
 # st_last.file <- function(dir.nam,nam){
@@ -193,6 +193,9 @@ HHData <-   WELLBEING %>%
                    MajFishTechnique = as.integer(ifelse(MajorFishTechnique%in%c(1:6),MajorFishTechnique,NA)),
                    FreqEatFish = as.integer(ifelse(FreqEatFish%in%c(1:5),FreqEatFish,NA)),
                    PercentProteinFish = as.integer(ifelse(PercentProteinFish%in%c(1:5),PercentProteinFish,NA)),
+                   PrimaryFishTechnique = as.integer(ifelse(PrimaryFishTechnique%in%c(1:16,996),PrimaryFishTechnique,NA)),
+                   SecondaryFishTechnique = as.integer(ifelse(SecondaryFishTechnique%in%c(1:16,996),SecondaryFishTechnique,NA)),
+                   TertiaryFishTechnique = as.integer(ifelse(TertiaryFishTechnique%in%c(1:16,996),TertiaryFishTechnique,NA)),
                    
                    
                    # Economic Well-being (Sujective)
@@ -246,6 +249,7 @@ HHData <-   WELLBEING %>%
                 RightsAccess, RightsHarvest, RightsManage, RightsExclude, RightsTransfer, RemoveMT,
                 LowCostFood, ChildBalancedMeal, ChildNotEnough, ChildPortion, ChildHungry, ChildSkip, FreqChildSkip, NoMealChild, RemovecFS,
                 PrimaryLivelihood, SecondaryLivelihood, TertiaryLivelihood, FreqFish, FreqSaleFish, PercentIncFish, MajFishTechnique, FreqEatFish, PercentProteinFish, 
+                PrimaryFishTechnique, SecondaryFishTechnique, TertiaryFishTechnique, 
                 EconStatusTrend, EconStatusReason, Religion, YrResident, TimeMarket, SocialConflict,
                 MarineGroup, OtherGroup, VoteDistrict, VoteNational, NumLocalThreat, NumGlobalThreat, NumLocalAction, NumGlobalAction, 
                 LessProductiveDaysFishing, PoorCatch, PoorCatchUnits, MoreProductiveDaysFishing, GoodCatch, GoodCatchUnits, PaternalEthnicity)

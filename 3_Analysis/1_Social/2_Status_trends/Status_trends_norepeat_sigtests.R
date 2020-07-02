@@ -37,9 +37,11 @@ MPA.v.Control <-
 
 
 # - "MPA Settlement Means" dataset -- includes settlement level data for only treatment settlements
-MPA.Sett.Means<-
-  Sett.Level.Means %>%
-  filter(Treatment==1)
+MPA.Sett.Means <-
+  if(MPA.name$MPAID==21) {
+    Sett.Level.Means.byZone
+  } else { Sett.Level.Means %>% filter(Treatment==1)
+}
 
 # Removing the settlement with an NA in order for function to run
 MPA.Sett.Means <- 
@@ -363,7 +365,12 @@ sigvals.Sett <-
 
 non.parametric.test.MPAvControl  <-
   if(MPA.name$MPAID==21) {
-    data.frame(FSIndex=1,MAIndex=1,MTIndex=1,PAIndex=1,SERate=1,TimeMarket=1,DaysUnwell=1)
+    data.frame(mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
+                      function(a){
+                        var <- MPA.v.Control[,a]
+                        wilcox.test(var~Zone,
+                                    data=MPA.v.Control,
+                                    exact=F)}))["p.value",]
   } else {
     data.frame(mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
                     function(a){
@@ -374,8 +381,12 @@ non.parametric.test.MPAvControl  <-
     }
 
 sigvals.MPA  <- 
-  cbind.data.frame(MPA.name$MPAName,non.parametric.test.MPAvControl)
-
+  if(MPA.name$MPAID==21) {
+    cbind.data.frame("No Take Settlements",non.parametric.test.MPAvControl)
+    } else {
+      cbind.data.frame(MPA.name$MPAName,non.parametric.test.MPAvControl)
+  } 
+      
 colnames(sigvals.MPA) <- colnames(sigvals.Sett)
 
 null.row.sigvals  <- 

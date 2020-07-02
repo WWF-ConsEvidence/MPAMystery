@@ -105,6 +105,12 @@ png(paste(FigureFileName,"Religion.status.png",sep="/"),
 plot(Religion.statusplot)
 dev.off()
 
+# ONLY RUN THIS FOR MPAID==21
+# png(paste(FigureFileName,"Religion.updated.status.png",sep="/"),
+#     units="in",height=4,width=6,res=400)
+# plot(ReligionOther.statusplot)
+# dev.off()
+
 
 # ---- Primary occupation ----
 
@@ -330,6 +336,12 @@ png(paste(FigureFileName,"Religion.status.png",sep="/"),
     units="in",height=4,width=6,res=400)
 plot(Religion.statusplot.bahasa)
 dev.off()
+
+# ONLY RUN THIS FOR MPAID==21
+# png(paste(FigureFileName,"Religion.updated.status.png",sep="/"),
+#     units="in",height=4,width=6,res=400)
+# plot(ReligionOther.statusplot.bahasa)
+# dev.off()
 
 
 # ---- Primary occupation ----

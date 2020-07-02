@@ -1,15 +1,17 @@
 # 
-# Plotting themes, labels, legend guides
+# code: Plotting themes, labels, legend guides
+# 
+# 
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 1: Report Plot Themes, Legends, and Guides  ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-# 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#
-# ---- SECTION 3: Report Plot Themes, Legends, and Guides  ----
-#
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# 
-# ---- 3.1 MPA Technical Report plot themes ----
+
+# ---- 1.1 MPA Technical Report plot themes ----
 
 plot.theme <- theme(axis.ticks=element_blank(),
                     panel.background=element_rect(fill="white",
@@ -33,6 +35,29 @@ plot.theme <- theme(axis.ticks=element_blank(),
                     legend.position="top",
                     legend.justification="right",
                     legend.box.spacing=unit(0.1,"cm"))
+
+plot.theme.manysetts <- theme(axis.ticks=element_blank(),
+                              panel.background=element_rect(fill="white",
+                                                            colour="#909090"),
+                              panel.border=element_rect(fill=NA,
+                                                        size=0.25,
+                                                        colour="#C0C0C0"),
+                              panel.grid.major.x=element_line(colour="#C0C0C0",
+                                                              size=0.25,
+                                                              linetype=3),
+                              panel.grid.major.y=element_blank(),
+                              plot.margin=margin(t=0,r=20,b=5,l=5,unit="pt"),
+                              axis.title=element_text(size=10,
+                                                      angle=0,
+                                                      face="bold",
+                                                      colour="#303030"),
+                              axis.text=element_text(size=8,
+                                                     angle=0,
+                                                     colour="#303030",
+                                                     lineheight=0.7),
+                              legend.position="top",
+                              legend.justification="right",
+                              legend.box.spacing=unit(0.1,"cm"))
 
 age.gender.plot.theme <- theme(axis.ticks=element_blank(),
                                panel.background=element_rect(fill="white",
@@ -95,6 +120,8 @@ multianswer.fillcols.status <- list(Gender=c("HHH.male"=alpha("#253494",0.95),
                                     Religion=c("Percent.Rel.Christian"=alpha("#253494",0.95),
                                                "Percent.Rel.Muslim"=alpha("#7FCDBB",0.95),
                                                "Percent.Rel.Other"=alpha("#E1E198",0.95)),
+                                    ReligionOther=c("Percent.Rel.Muslim"=alpha("#253494",0.95),
+                                                    "Percent.Rel.Buddhist"=alpha("#7FCDBB",0.95)),
                                     PrimaryOcc=c("Percent.PrimaryOcc.Farm"=alpha("#253494",0.95), 
                                                  "Percent.PrimaryOcc.HarvestForest"=alpha("#7FCDBB",0.95), 
                                                  "Percent.PrimaryOcc.Fish"=alpha("#2C7FB8",0.95),                                         
@@ -173,7 +200,7 @@ multianswer.fillcols.status <- list(Gender=c("HHH.male"=alpha("#253494",0.95),
                                                  "NaturalProcesses"=alpha("#E31A1C",0.95),
                                                  "OtherMarineUses"=alpha("#FDBF6F",0.95),
                                                  "Other"=alpha("#FF7F00",0.95)),
-                                    ThreatType.SBS=c("NoThreat"=alpha("#FF7F00",0.95),
+                                    ThreatType=c("NoThreat"=alpha("#FF7F00",0.95),
                                                      "Aquaculture"=alpha("#E31A1C",0.95), 
                                                      "InadequateProc"=alpha("#FB9A99",0.95),
                                                      "Tourism"=alpha("#E1E198",0.95),
@@ -198,7 +225,7 @@ multianswer.fillcols.status <- list(Gender=c("HHH.male"=alpha("#253494",0.95),
                                                      "AdultEducHigher"=alpha("#101324", 0.95)))
 
 
-# ---- 3.2 MPA Impact Summary plot themes ----
+# ---- 1.2 MPA Impact Summary plot themes ----
 
 fill.cols.MPAimpact.summ <- c("MPA"=alpha("#1B448B",0.85),"Control"=alpha("#6B6B6B",0.4))
 err.cols.MPAimpact.summ <- c(alpha("#0A1D4E",0.5),alpha("#242424",0.25))
@@ -292,7 +319,7 @@ fs.st.plot.theme.MPAimpact.summ <- theme(axis.ticks.x=element_blank(),
                                                                    colour="#D0D0D0"))
 
 
-# ---- 3.3 MPA Technical Report plot legend guide ----
+# ---- 1.3 MPA Technical Report plot legend guide ----
 
 
 plot.guides.techreport <- guides(alpha=guide_legend(title.hjust=1,
@@ -351,7 +378,7 @@ g_legend<- function(a.gplot){
   legend <- tmp$grobs[[leg]]
   return(legend)}
 
-# ---- 3.4 MPA Impact Summary plot legend guide ----
+# ---- 1.4 MPA Impact Summary plot legend guide ----
 
 plot.guides.MPAimpact.summ <- guides(size=guide_legend(title=element_blank(),
                                                        label.theme=element_text(size=9,
@@ -444,7 +471,7 @@ snapshot.plot.guide.MPAimpact.factsheet <- guides(fill=guide_legend(order=1,
                                                                    label=F))
 
 
-# ---- 3.5 MPA continuous variables distribution plot theme ----
+# ---- 1.5 MPA continuous variables distribution plot theme ----
 
 dist.plot.theme <- theme(axis.ticks=element_blank(),
                          plot.title=element_text(face="bold",
@@ -468,7 +495,21 @@ dist.plot.theme <- theme(axis.ticks=element_blank(),
                                                 angle=0,
                                                 colour="#303030"))
 
-# ---- 3.6 MPA Technical Report plot labels ----
+
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 2: Report Labels  ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+
+# ---- 2.1 Labels in ENGLISH ----
+
+# NOTE: "\n" in any label means that it will provide a line break, which is necessary for particularly long labels.
+
+# MPA technical reports
 
 Statusplot.labs <- list(FS=labs(y="Mean household food security",x="Settlement"),
                         MA=labs(y="Mean household assets",x="Settlement"),
@@ -494,7 +535,7 @@ Statusplot.labs <- list(FS=labs(y="Mean household food security",x="Settlement")
                         Ethnicity=labs(y="Mean number of ethnicities (Settlement ethnicity frequency)",x="Settlement"),
                         AdultEduc=labs(y="Education completed (% adults 18 years and older)",x="Settlement"),
                         HHHEduc=labs(y="Education completed (% household heads)",x="Settlement"),
-                        EconStatus=labs(y="Change in economic status of fishing households (% households)",x="Settlement"),
+                        EconStatus=labs(y="Change in economic status of households (% households)",x="Settlement"),
                         SocialConflict=labs(y="Change in social conflict over marine resources in past 12 months\n(% households)",x="Settlement"),
                         NumLocalThreats=labs(y="Number of identified local threats to marine environment (% households)",x="Settlement"),
                         ThreatTypes=labs(y="Types of local threats to marine environment (% threats identified)",x="Settlement"),
@@ -511,6 +552,40 @@ continuous.variables.plotlabs <- c("Mean household food security","Mean househol
                                    "School enrollment (% children ages 5-18 years old)", "Distance to market (hours)",
                                    "Mean time suffering from illness or injury in past 4 weeks (days)")
 
+prop.variables.labs <- c("Primary occupation (% households)","Frequency of fishing (% households)","Frequency of selling at least some catch (% households)",
+                         "Income from fishing in past 6 months (% households)","Fishing technique most often used in past 6 months (% households)","Child hunger (% households)",
+                         "Dietary protein from fish in past 6 months (% households)","Change in economic status of fishing households (% households)",
+                         "Number of identified local threats to marine environment (% households)","Secondary occupation (% households)","Occupational diversity (% households)")
+
+
+# MPA impact summary "Big Five" plot labels
+
+plot.fs.labs.st <- labs(y="Household Food Security\n ",title="STATUS AND TREND")
+plot.ma.labs.st <- labs(y="Household Material Assets\n ",title="STATUS AND TREND")
+plot.pa.labs.st <- labs(y="Household Place Attachment\n ",title="STATUS AND TREND")
+plot.mt.labs.st <- labs(y="Household Marine Tenure\n ",title="STATUS AND TREND")
+plot.se.labs.st <- labs(y="Enrollment Rate\n ",title="STATUS AND TREND")
+
+plot.fs.labs.i <- labs(x="",y="Change in Household Food Security\nsince Baseline",title="")
+plot.ma.labs.i <- labs(x="",y="Change in Household Material Assets\nsince Baseline",title="")
+plot.pa.labs.i <- labs(x="",y="Change in Household Place Attachment\nsince Baseline",title="")
+plot.mt.labs.i <- labs(x="",y="Change in Household Marine Tenure\nsince Baseline",title="")
+plot.se.labs.i <- labs(x="",y="Change in Enrollment Rate\nsince Baseline",title="")
+
+plot.ma.hh.labs.i <- labs(x="",y="Change in Household Assets\nsince Baseline",title="Household assets sub-class")
+plot.ma.boatnomotor.labs.i <- labs(x="",y="Change in Motor-less Boat Assets\nsince Baseline",title="Motor-less boat assets sub-class")
+plot.ma.boatmotor.labs.i <- labs(x="",y="Change in Motorized Boat Assets\nsince Baseline",title="Motorized boat assets sub-class")
+plot.ma.vehicles.labs.i <- labs(x="",y="Change in Land Vehicle Assets\nsince Baseline",title="Land vehicle assets sub-class")
+
+impact.x.labs <- c("MPA\nHouseholds","Control\nHouseholds")
+
+
+
+# ---- 2.1 Labels in BAHASA ----
+
+# NOTE: "\n" in any label means that it will provide a line break, which is necessary for particularly long labels.
+
+# MPA technical reports 
 
 Statusplot.labs.bahasa <- list(FS=labs(y="Rata-rata ketahanan pangan rumah tangga",x="Permukiman"),
                                MA=labs(y="Rata-rata aset rumah tangga",x="Permukiman"),
@@ -535,14 +610,16 @@ Statusplot.labs.bahasa <- list(FS=labs(y="Rata-rata ketahanan pangan rumah tangg
                                ChildFS=labs(y="Kelaparan pada anak (% rumah tangga)",x="Permukiman"),
                                AdultEduc=labs(y="Pendidikan Terakhir (% usia 18 tahun ke atas)",x="Permukiman"),
                                HHHEduc=labs(y="Tamat Pendidikan terakhir (% kepala rumah tangga)",x="Permukiman"),
-                               EconStatus=labs(y="Perubahan status ekonomi rumah tangga nelayan (% rumah tangga)",x="Permukiman"),
+                               EconStatus=labs(y="Perubahan status ekonomi rumah tangga (% rumah tangga)",x="Permukiman"),
                                SocialConflict=labs(y="Perubahan dalam konflik sosial atas sumber daya laut\ndalam 12 bulan terakhir(% rumah tangga)",x="Permukiman"),
                                NumLocalThreats=labs(y="Jumlah ancaman lokal yang teridentifikasi terhadap lingkungan laut\n(% rumah tangga)",x="Permukiman"),
-                               ThreatTypes=labs(y="Jenis ancaman lokal terhadap lingkungan laut\n(% ancaman teridentifikasi)",x="Permukiman"),
+                               ThreatType=labs(y="Jenis ancaman lokal terhadap lingkungan laut\n(% ancaman teridentifikasi)",x="Permukiman"),
                                MarineMember=labs(y="Rumah tangga yang merupakan anggota organisasi kelautan\n(% rumah tangga)",x="Permukiman"),
                                MarineAttendance=labs(y="Rumah tangga menghadiri pertemuan organisasi\ndalam bidang kelautan",x="Permukiman"),
                                MarineContribution=labs(y="Rata-rata kontribusi rumah tangga dalam organisasi bidang kaluatan\n(Rupiah)",x="Permukiman"),
-                               FSCategorical= labs(y="Ketahanan pangan berdasarkan kategori (% rumah tangga)",x="Permukiman"))
+                               FSCategorical= labs(y="Ketahanan pangan berdasarkan kategori (% rumah tangga)",x="Permukiman"),
+                               AgeGender=labs(y="Distribusi populasi (% individu berdasarkan jenis kelamin)",x="Usia"),
+                               AgeGenderUpperPlot=labs(y="",x="Usia"))
 
 
 continuous.variables.plotlabs.bahasa <- c("Rata-rata ketahanan pangan rumah tangga","Rata-rata aset rumah tangga",
@@ -550,29 +627,64 @@ continuous.variables.plotlabs.bahasa <- c("Rata-rata ketahanan pangan rumah tang
                                           "Tingkat Pendidikan (% anak usia 5-18 tahun)", "Jarak menuju pasar (jam)",
                                           "Rata-rata waktu menderita sakit atau cedera\ndalam 4 minggu terakhir (hari)")
 
+prop.variables.labs.bahasa <- c("Pekerjaan utama (% rumah tangga)",
+                                "Frekuensi penangkapan ikan (% rumah tangga)",
+                                "Frekuensi penjualan setidaknya pada beberapa hasil tangkapan\n(% rumah tangga)",
+                                "Penghasilan dari penangkapan ikan dalam 6 bulan terakhir\n(% rumah tangga)",
+                                "Teknik penangkapan ikan yang paling sering digunakan\ndalam 6 bulan terakhir (% rumah tangga)",
+                                "Kelaparan pada anak (% rumah tangga)",
+                                "Protein makanan dari ikan dalam 6 bulan terakhir (% rumah tangga)",
+                                "Perubahan status ekonomi rumah tangga nelayan (% rumah tangga)",
+                                "Jumlah ancaman lokal yang teridentifikasi terhadap lingkungan laut\n(% rumah tangga)",
+                                "Pekerjaan sekunder (% rumah tangga)",
+                                "Keberagaman pekerjaan (% rumah tangga)")
 
-# ---- 3.7 MPA Impact Summary "Big Five" plot labels ----
+prop.variables.threat.bahasa <- "Jenis ancaman lokal terhadap lingkungan laut\n(% ancaman teridentifikasi)"
 
-plot.fs.labs.st <- labs(y="Household Food Security\n ",title="STATUS AND TREND")
-plot.ma.labs.st <- labs(y="Household Material Assets\n ",title="STATUS AND TREND")
-plot.pa.labs.st <- labs(y="Household Place Attachment\n ",title="STATUS AND TREND")
-plot.mt.labs.st <- labs(y="Household Marine Tenure\n ",title="STATUS AND TREND")
-plot.se.labs.st <- labs(y="Enrollment Rate\n ",title="STATUS AND TREND")
 
-plot.fs.labs.i <- labs(x="",y="Change in Household Food Security\nsince Baseline",title="")
-plot.ma.labs.i <- labs(x="",y="Change in Household Material Assets\nsince Baseline",title="")
-plot.pa.labs.i <- labs(x="",y="Change in Household Place Attachment\nsince Baseline",title="")
-plot.mt.labs.i <- labs(x="",y="Change in Household Marine Tenure\nsince Baseline",title="")
-plot.se.labs.i <- labs(x="",y="Change in Enrollment Rate\nsince Baseline",title="")
+sett.names.bahasa <- list(ControlSett="Permukiman Kontrol", 
+                          Use="Luar NTZ", 
+                          NoTake="Sekitar NTZ",
+                          Treatment="Perlakuan",
+                          Control="Kontrol",
+                          MonYear="Tahun Pemantauan")
 
-plot.ma.hh.labs.i <- labs(x="",y="Change in Household Assets\nsince Baseline",title="Household assets sub-class")
-plot.ma.boatnomotor.labs.i <- labs(x="",y="Change in Motor-less Boat Assets\nsince Baseline",title="Motor-less boat assets sub-class")
-plot.ma.boatmotor.labs.i <- labs(x="",y="Change in Motorized Boat Assets\nsince Baseline",title="Motorized boat assets sub-class")
-plot.ma.vehicles.labs.i <- labs(x="",y="Change in Land Vehicle Assets\nsince Baseline",title="Land vehicle assets sub-class")
+legend.labs.bahasa <- list(AgeGender=c("Perempuan","Laki-laki"),
+                           FoodSecure="Aman Pangan",
+                           NoHunger="Rawan Pangan\ntanpa kelaparan",
+                           YesHunger="Rawan Pangan\ndengan kelaparan",
+                           Religion=c("Lainnya","Islam","Kristen"),
+                           ReligionOther=c("Budha","Islam"),
+                           PrimaryOcc=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut\nyang tidak terbarukan",  
+                                        "Jenis pekerjaan berupah/\nburuh lainnya", "Hasil hutan", "Penangkapan ikan", "Pertanian"),
+                           FreqFish=c("Lebih dari beberapa kali perminggu","Beberapa kali perminggu","Beberapa kali perbulan",
+                                      "Beberapa kali dalam enam bulan","Hampir tidak pernah"),
+                           FreqSellFish=c("Lebih dari beberapa kali perminggu","Beberapa kali perminggu",
+                                          "Beberapa kali perbulan","Beberapa kali dalam enam bulan",
+                                          "Hampir tidak pernah"),
+                           IncFish=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada"),
+                           FishTech=c("Mobile line","Stationary line","Mobile net","Stationary net","Penangkapan dengan tangan"),
+                           ChildFS=c("Kejadian kelaparan\npada anak","Tidak ada kejadian\nkelaparan pada anak"),
+                           Protein=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada"),
+                           FSCategorical=c("Rawan Pangan dengan kelaparan", "Rawan Pangan tanpa kelaparan","Aman Pangan"),
+                           EconStatus=c("Jauh lebih baik","Sedikit lebih baik","Tidak lebih baik maupun lebih buruk","Sedikit lebih buruk","Jauh lebih buruk"),
+                           MarineMember=c("Bukan anggota","Anggota"),
+                           MarineAttendance=c("Tidak menghadiri pertemuan","Menghadiri pertemuan"),
+                           SocialConflict=c("Sangat meningkat","Meningkat","Tidak meningkat maupun menurun","Menurun","Sangat menurun"),
+                           NumLocalThreats=c("Lebih dari empat ancaman","Empat ancaman","Tiga ancaman","Dua ancaman","Satu ancaman", "Tidak ada ancaman"),
+                           SecondaryOcc=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut\nyang tidak terbarukan",  
+                                          "Jenis pekerjaan berupah/\nburuh lainnya", "Hasil hutan", "Penangkapan ikan", "Pertanian"),
+                           OccDiverse=c("Banyak Pekerjaan","Satu Pekerjaan"),
+                           ThreatType=c("Tidak ada ancaman", "Budidaya perairan", "Perlindungan yang tidak memadai", "Pariwisata", 
+                                        "Fenomena alam", "Polusi", "Penangkapan ikan yang\ntidak berkelanjutan"),
+                           AdultEduc=c("Pendidikan tinggi lanjutan","SMA (Sekolah Menengah Atas)","SMP (Sekolah Menengah Pertama)","SD (Sekolah Dasar)",
+                                       "TK (Taman Kanak-kanak)", "Tidak memiliki pendidikan formal"),
+                           HHHEduc=c("Pendidikan tinggi lanjutan","SMA (Sekolah Menengah Atas)","SMP (Sekolah Menengah Pertama)","SD (Sekolah Dasar)",
+                                     "TK (Taman Kanak-kanak)", "Tidak memiliki pendidikan formal"))
 
-impact.x.labs <- c("MPA\nHouseholds","Control\nHouseholds")
 
-# Labels in bahasa
+# MPA impact summary "Big Five" plot labels
+
 plot.fs.labs.i.bahasa <- labs(x="",y="Perubahan Ketahanan Pangan Rumah Tangga\nsejak Baseline",title="")
 plot.ma.labs.i.bahasa <- labs(x="",y="Perubahan Aset Rumah Tangga\nsejak Baseline",title="")
 plot.pa.labs.i.bahasa <- labs(x="",y="Perubahan Rumah Tangga dalam Kelekatan\nTempat sejak Baseline",title="")

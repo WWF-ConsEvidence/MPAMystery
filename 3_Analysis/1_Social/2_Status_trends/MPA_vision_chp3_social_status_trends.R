@@ -20,16 +20,28 @@ HHData <-
                                             "BoatInboard", "PhoneCombined", "Entertain", "Satellite", "Generator"),
                                      na.rm = TRUE),
                              NA),
+         MAIndex.boats=ifelse(RemoveMA=="No",
+                              rowSums(select(.,"BoatNoMotor","BoatOutboard","BoatInboard"),
+                                      na.rm=T),
+                              NA),
+         MAIndex.vehicles=ifelse(RemoveMA=="No",
+                                 rowSums(select(.,"CarTruck","Motorcycle","Bicycle"),
+                                         na.rm=T),
+                                 NA),
+         MAIndex.household=ifelse(RemoveMA=="No",
+                                  rowSums(select(.,"Entertain","Satellite","Generator"),
+                                          na.rm=T),
+                                  NA),
          RepeatYear=ifelse(Seascape==1,
                            ifelse(MonitoringYear=="2 Year Post","First Repeat",
                                   ifelse(MonitoringYear=="4 Year Post","Second Repeat",
                                          as.character(MonitoringYear))),
                            ifelse(MonitoringYear=="2 Year Post" | MonitoringYear=="3 Year Post","First Repeat",as.character(MonitoringYear))),
          Status=ifelse(InterviewYear==CurrentYear,"Yes","No"),
-         Province=ifelse(MPAID%in%c(1,2,3,4,5,6),"Papua Barat",
-                         ifelse(MPAID%in%c(15,16),"Nusa Tenggara Timur",
+         Province=ifelse(MPAID%in%c(1,2,3,4,5,6),"West Papua",
+                         ifelse(MPAID%in%c(15,16),"East Nusa Tenggara",
                                 ifelse(MPAID%in%c(17,18,19),"Maluku",
-                                       ifelse(MPAID%in%c(20,21),"Sulawesi Tenggara",NA)))))
+                                       ifelse(MPAID%in%c(20,21),"Southeast Sulawesi",NA)))))
 
 
 # ---- Calculate status and trends for province and national-level ----
@@ -50,7 +62,10 @@ Province.Level.ContData.Means <-
                    SEErr=round(sd(SERate,na.rm=T)/sqrt(length(SERate)),2),
                    Percent.FoodSecure=(length(HouseholdID[FSIndex>=4.02 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
                    Percent.FoodInsecure.NoHunger=(length(HouseholdID[FSIndex<4.02 & FSIndex>=1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
-                   Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100)
+                   Percent.FoodInsecure.YesHunger=(length(HouseholdID[FSIndex<1.56 & !is.na(FSIndex)])/length(HouseholdID[!is.na(FSIndex)]))*100,
+                   MAMean.boats=round(mean(MAIndex.boats,na.rm=T),2),
+                   MAMean.vehicles=round(mean(MAIndex.vehicles,na.rm=T),2),
+                   MAMean.household=round(mean(MAIndex.household,na.rm=T),2))
 
 
 # REMOVED all fishing characteristic responses for households that do not identify fishing as one of their 1/2/3 occupation.  To remain consistent across MPA monitoring protocols
@@ -199,24 +214,24 @@ Province.Level.PropData.Means <-
 # ---- province level statistical tests (monotonic trend) ----
 
 PapuaBarat.trend.test  <- 
-  cbind.data.frame(Province="Papua Barat",
+  cbind.data.frame(Province="West Papua",
                    mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate"),
                           function(a){
-                            t(MannKendall(c(HHData[HHData$Province=="Papua Barat" & HHData$Treatment==1 &
+                            t(MannKendall(c(HHData[HHData$Province=="West Papua" & HHData$Treatment==1 &
                                                                 HHData$RepeatYear==unique(HHData$RepeatYear)[1],a],
-                                                       HHData[HHData$Province=="Papua Barat" & HHData$Treatment==1 &
+                                                       HHData[HHData$Province=="West Papua" & HHData$Treatment==1 &
                                                                 HHData$RepeatYear==unique(HHData$RepeatYear)[2],a], 
-                                                       HHData[HHData$Province=="Papua Barat" & HHData$Treatment==1 &
+                                                       HHData[HHData$Province=="West Papua" & HHData$Treatment==1 &
                                                                 HHData$RepeatYear==unique(HHData$RepeatYear)[3],a]))["sl"])})) %>%
   rename(FS.trend.pval = FSIndex, MA.trend.pval = MAIndex, MT.trend.pval = MTIndex, PA.trend.pval = PAIndex, SE.trend.pval = SERate) 
 
 NusaTenggara.trend.test  <- 
-  cbind.data.frame(Province="Nusa Tenggara Timur",
+  cbind.data.frame(Province="East Nusa Tenggara",
                    mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate"),
                           function(a){
-                            t(MannKendall(c(HHData[HHData$Province=="Nusa Tenggara Timur" & HHData$Treatment==1 &
+                            t(MannKendall(c(HHData[HHData$Province=="East Nusa Tenggara" & HHData$Treatment==1 &
                                                      HHData$RepeatYear==unique(HHData$RepeatYear)[1],a],
-                                            HHData[HHData$Province=="Nusa Tenggara Timur" & HHData$Treatment==1 &
+                                            HHData[HHData$Province=="East Nusa Tenggara" & HHData$Treatment==1 &
                                                      HHData$RepeatYear==unique(HHData$RepeatYear)[2],a]))["sl"])})) %>%
   rename(FS.trend.pval = FSIndex, MA.trend.pval = MAIndex, MT.trend.pval = MTIndex, PA.trend.pval = PAIndex, SE.trend.pval = SERate) 
 
@@ -235,7 +250,7 @@ trend.pvals.byProvince <-
   rbind.data.frame(PapuaBarat.trend.test,
                    NusaTenggara.trend.test,
                    Maluku.trend.test,
-                   data.frame(Province="Sulawesi Tenggara",
+                   data.frame(Province="Southeast Sulawesi",
                               FS.trend.pval=1,
                               MA.trend.pval=1,
                               MT.trend.pval=1,
@@ -244,7 +259,7 @@ trend.pvals.byProvince <-
 
 Plotting.Province.ContData <-
   Province.Level.ContData.Means %>% filter(Treatment==1) %>% ungroup() %>%
-  rbind.data.frame(data.frame(Province=c("Maluku","Nusa Tenggara Timur","Sulawesi Tenggara","Sulawesi Tenggara"),
+  rbind.data.frame(data.frame(Province=c("Maluku","East Nusa Tenggara","Southeast Sulawesi","Southeast Sulawesi"),
                               RepeatYear=c("Second Repeat","Second Repeat","First Repeat","Second Repeat"),
                               Treatment=rep(1,4),
                               matrix(rep(NA,length(colnames(.))-3),
@@ -263,7 +278,7 @@ Plotting.Province.ContData <-
          Asterisk.PA=ifelse(PA.trend.pval<0.01,"***",
                             ifelse(PA.trend.pval<0.05 & PA.trend.pval>=0.01,"**",
                                    ifelse(PA.trend.pval<0.1 & PA.trend.pval>=0.05,"*",""))),
-         Asterisk.SE=ifelse(Province=="Nusa Tenggara Timur","", # Nusa Tenggara Timur's school enrollment rate is really variable between MPAs, causing monotonic trend results to be funky.  Removing asterisks.
+         Asterisk.SE=ifelse(Province=="East Nusa Tenggara","", # East Nusa Tenggara's school enrollment rate is really variable between MPAs, causing monotonic trend results to be funky.  Removing asterisks.
                             ifelse(SE.trend.pval<0.01,"***",
                                    ifelse(SE.trend.pval<0.05 & SE.trend.pval>=0.01,"**",
                                           ifelse(SE.trend.pval<0.1 & SE.trend.pval>=0.05,"*","")))),
@@ -272,7 +287,7 @@ Plotting.Province.ContData <-
          ProvinceName.MT=ifelse(Asterisk.MT=="",as.character(Province),paste(Province,Asterisk.MT,sep=" ")),
          ProvinceName.PA=ifelse(Asterisk.PA=="",as.character(Province),paste(Province,Asterisk.PA,sep=" ")),
          ProvinceName.SE=ifelse(Asterisk.SE=="",as.character(Province),paste(Province,Asterisk.SE,sep=" ")),
-         Province=factor(Province,levels=c("Sulawesi Tenggara","Nusa Tenggara Timur","Maluku","Papua Barat"),ordered=T))
+         Province=factor(Province,levels=c("Southeast Sulawesi","East Nusa Tenggara","Maluku","West Papua"),ordered=T))
 
 
 
@@ -353,7 +368,7 @@ FS.province <-
                               Province=" ",
                               ProvinceName.FS=" ")) %>%
   ungroup() %>%
-  mutate(Province=factor(Province,levels=c("Sulawesi Tenggara","Nusa Tenggara Timur","Maluku","Papua Barat"," "),ordered=T)) %>%
+  mutate(Province=factor(Province,levels=c("Southeast Sulawesi","East Nusa Tenggara","Maluku","West Papua"," "),ordered=T)) %>%
   ggplot(aes(x=Province,y=FSMean)) +
   geom_hline(aes(yintercept=1.56),size=0.25,colour="#909090") +
   geom_hline(aes(yintercept=4.02),size=0.25,colour="#909090") +
@@ -559,7 +574,7 @@ Primaryocc.province.status <-
                                                          "Percent.PrimaryOcc.Extraction","Percent.PrimaryOcc.WageLabor",
                                                          "Percent.PrimaryOcc.HarvestForest",
                                                          "Percent.PrimaryOcc.Fish","Percent.PrimaryOcc.Farm")) %>%
-  mutate(Province=factor(Province,levels=c("Papua Barat","Maluku","Nusa Tenggara Timur","Sulawesi Tenggara"),ordered=T)) %>%
+  mutate(Province=factor(Province,levels=c("West Papua","Maluku","East Nusa Tenggara","Southeast Sulawesi"),ordered=T)) %>%
   ggplot() +
   geom_bar(aes(x=Province,y=value,fill=variable),
            stat="identity",
@@ -729,7 +744,7 @@ FishFreq.province.status <-
        id.vars="Province",measure.vars=c("Prop.Fish.MoreFewTimesWk","Prop.Fish.FewTimesPerWk",
                                                          "Prop.Fish.FewTimesPerMo","Prop.Fish.FewTimesPer6Mo",
                                                          "Prop.Fish.AlmostNever")) %>%
-  mutate(Province=factor(Province,levels=c("Papua Barat","Maluku","Nusa Tenggara Timur","Sulawesi Tenggara"),ordered=T)) %>%
+  mutate(Province=factor(Province,levels=c("West Papua","Maluku","East Nusa Tenggara","Southeast Sulawesi"),ordered=T)) %>%
   ggplot() +
   geom_bar(aes(x=Province,y=value,fill=variable),
            stat="identity",
@@ -754,7 +769,7 @@ SellFishFreq.province.status <-
        id.vars="Province",measure.vars=c("Prop.SellFish.MoreFewTimesWk","Prop.SellFish.FewTimesPerWk",
                                                          "Prop.SellFish.FewTimesPerMo","Prop.SellFish.FewTimesPer6Mo",
                                                          "Prop.SellFish.AlmostNever")) %>%
-  mutate(Province=factor(Province,levels=c("Papua Barat","Maluku","Nusa Tenggara Timur","Sulawesi Tenggara"),ordered=T)) %>%
+  mutate(Province=factor(Province,levels=c("West Papua","Maluku","East Nusa Tenggara","Southeast Sulawesi"),ordered=T)) %>%
   ggplot() +
   geom_bar(aes(x=Province,y=value,fill=variable),
            stat="identity",
@@ -779,7 +794,7 @@ ProteinFish.province.status <-
        id.vars="Province",measure.vars=c("ProteinFish.All","ProteinFish.Most",
                                                          "ProteinFish.Half","ProteinFish.Some",
                                                          "ProteinFish.None")) %>%
-  mutate(Province=factor(Province,levels=c("Papua Barat","Maluku","Nusa Tenggara Timur","Sulawesi Tenggara"),ordered=T)) %>%
+  mutate(Province=factor(Province,levels=c("West Papua","Maluku","East Nusa Tenggara","Southeast Sulawesi"),ordered=T)) %>%
   ggplot() +
   geom_bar(aes(x=Province,y=value,fill=variable),
            stat="identity",

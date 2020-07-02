@@ -32,20 +32,25 @@ pacman::p_load(rio,ggplot2,tidyr,dplyr)
 
 source('2_Functions/3_Plotting/Function_plotthemes.R')
 
+# -- TO BE CHANGED BASED ON WHICH MPA YOU'RE ANALYZING
+# -- options currently are "Alor", "Flores Timur", "Kei Kecil", "Koon" -- ***NOTE: must spell exactly as listed!
+
+MPAName <- "Kei Kecil"
+
 
 # ---- 1.2 Call in MPA-specific impact outputs from DiD regression ----
 
-macp.koon.impacts <- 
-  import('x_Flat_data_files/1_Social/Outputs/impact_analysis/Koon/macp_plots_output.csv') %>%
-  filter(MPAID==18 & !(grepl("_z",Response))) %>%
+impacts <- 
+  import(paste('x_Flat_data_files/1_Social/Outputs/impact_analysis/',MPAName,'/macp_plots_output.csv',sep='')) %>%
+  filter(!(grepl("_z",Response))) %>%
   mutate(p.val=2*pnorm(-abs(z.score)),
          sig.labs=ifelse(p.val<=0.01,"*\n*\n*",
                          ifelse(p.val<=0.05 & p.val>0.01, "*\n*",
                                 ifelse(p.val<=0.1 & p.val>0.05, "*", ""))),
          Group=factor(Group,ordered=T,levels=c("Impact","Treatment","Control"))) 
 
-macp.koon.impacts.subclass <- 
-  import('x_Flat_data_files/1_Social/Outputs/impact_analysis/Koon/macp_plots_output_Asset_subClasses.csv') %>%
+impacts.subclass <- 
+  import(paste('x_Flat_data_files/1_Social/Outputs/impact_analysis/',MPAName,'/macp_plots_output_Asset_subClasses.csv',sep='')) %>%
   subset(Response=="Household_asset" | Response=="BoatNoMotor" | Response=="Boats_motor" | Response=="Vehicles") %>%
   mutate(p.val=2*pnorm(-abs(z.score)),
          sig.labs=ifelse(p.val<=0.01,"*\n*\n*",
@@ -55,13 +60,13 @@ macp.koon.impacts.subclass <-
          Response=factor(Response,ordered=T,levels=c("Household_asset","Boats_motor","BoatNoMotor","Vehicles"))) %>%
   .[order(.$Response),]
 
-macp.koon.allimpacts <- 
-  rbind.data.frame(macp.koon.impacts,macp.koon.impacts.subclass)
+allimpacts <- 
+  rbind.data.frame(impacts,impacts.subclass)
 
 # ---- 1.3 Calculate plot-specific variables for Big Five & Assets sub-classes ----
 
-impact.arrows <- data.frame(mapply(i=t(macp.koon.allimpacts%>%filter(Group=="Treatment")%>%select(estimate)),
-                                            j=t(macp.koon.allimpacts%>%filter(Group=="Control")%>%select(estimate)),
+impact.arrows <- data.frame(mapply(i=t(allimpacts%>%filter(Group=="Treatment")%>%select(estimate)),
+                                            j=t(allimpacts%>%filter(Group=="Control")%>%select(estimate)),
                                             function(i,j){
                                               if(i>0 & j>0 & i>j) {seq(i-(0.1*(i-j)),j+(0.1*(i-j)),length.out=4)} else
                                                 if(i>0 & j>0 & i<j) {seq(i+(0.1*(j-i)),j-(0.1*(j-i)),length.out=4)} else
@@ -74,10 +79,10 @@ impact.arrows <- data.frame(mapply(i=t(macp.koon.allimpacts%>%filter(Group=="Tre
   rename(FS=X1,MA=X2,MT=X3,PA=X4,SE=X5,HHAsset=X6,BoatMotor=X7,BoatNoMotor=X8,Vehicle=X9)
 
 
-plotrange <- mapply(imin=t(macp.koon.allimpacts%>%filter(Group=="Treatment")%>%select(estimate)),
-                         imax=t(macp.koon.allimpacts%>%filter(Group=="Treatment")%>%select(estimate)),
-                         jmin=t(macp.koon.allimpacts%>%filter(Group=="Control")%>%select(estimate)),
-                         jmax=t(macp.koon.allimpacts%>%filter(Group=="Control")%>%select(estimate)),
+plotrange <- mapply(imin=t(allimpacts%>%filter(Group=="Treatment")%>%select(estimate)),
+                         imax=t(allimpacts%>%filter(Group=="Treatment")%>%select(estimate)),
+                         jmin=t(allimpacts%>%filter(Group=="Control")%>%select(estimate)),
+                         jmax=t(allimpacts%>%filter(Group=="Control")%>%select(estimate)),
                          function(imin,imax,jmin,jmax){
                            max <- ifelse((imax>0 & jmax<=0) | (imax>0 & jmax>0 & imax>jmax),imax,
                                              ifelse((imax<=0 & jmax>0) | (imax>0 & jmax>0 & imax<jmax),jmax,0))
@@ -86,9 +91,9 @@ plotrange <- mapply(imin=t(macp.koon.allimpacts%>%filter(Group=="Treatment")%>%s
                            abs(max)+abs(min)
                          })
 
-sig.pos <- data.frame(TwoYr=mapply(i=t(macp.koon.allimpacts%>%filter(Group=="Treatment")%>%select(estimate)),
-                                        j=t(macp.koon.allimpacts%>%filter(Group=="Control")%>%select(estimate)),
-                                        k=t(macp.koon.allimpacts%>%filter(Group=="Impact")%>%select(sig.labs)),
+sig.pos <- data.frame(TwoYr=mapply(i=t(allimpacts%>%filter(Group=="Treatment")%>%select(estimate)),
+                                        j=t(allimpacts%>%filter(Group=="Control")%>%select(estimate)),
+                                        k=t(allimpacts%>%filter(Group=="Impact")%>%select(sig.labs)),
                                         range=plotrange+plotrange*0.6,
                                         function(i,j,k,range){
                                           if(k=="*\n*\n*" & i<j) {i-0.03*range} else
@@ -106,8 +111,8 @@ rownames(sig.pos) <- c("FS","MA","MT","PA","SE","HHAsset","BoatMotor","BoatNoMot
 fill.cols.MPAimpacts <- c("Treatment"=alpha("#2C7FB8",0.95),"Control"=alpha("#9B9B9B",0.95))
 err.cols.MPAimpacts <- c("Treatment"=alpha("#1B4D6F",0.7),"Control"=alpha("#242424",0.7))
 
-# -- EXAMPLE IMPACT PLOT FOR INTERPRETATION GUIDE --
 
+# -- EXAMPLE IMPACT PLOT FOR INTERPRETATION GUIDE --
 
 MPAimpact.summ.example.i <- ggplot(data=data.frame(Response=rep("Indicator",2),
                                                    Group=factor(c("Treatment","Control"),ordered=T, levels=c("Treatment","Control")),
@@ -167,8 +172,7 @@ MPAimpact.summ.example.i <- ggplot(data=data.frame(Response=rep("Indicator",2),
 
 # ---- 2.1 Food Security ----
 
-MPAimpact.summ.fs.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.impacts$Group) & 
-                                                              macp.koon.impacts$Response=="FSIndex",],
+MPAimpact.summ.fs.i <- ggplot(data=impacts[!grepl("Impact",impacts$Group) & impacts$Response=="FSIndex",],
                                    aes(x=Group,y=estimate)) +
   geom_bar(aes(fill=Group),
            stat="identity",
@@ -205,7 +209,7 @@ MPAimpact.summ.fs.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["FS","TwoYr"],x=0.35,
-           label=macp.koon.impacts%>%filter(Group=="Impact" & Response=="FSIndex")%>%select(sig.labs),
+           label=impacts%>%filter(Group=="Impact" & Response=="FSIndex")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
@@ -215,8 +219,8 @@ MPAimpact.summ.fs.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
   scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.koon.impacts%>%filter(Group=="Treatment" & Response=="FSIndex")%>%select(estimate)>
-                                             macp.koon.impacts%>%filter(Group=="Control" & Response=="FSIndex")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(impacts%>%filter(Group=="Treatment" & Response=="FSIndex")%>%select(estimate)>
+                                             impacts%>%filter(Group=="Control" & Response=="FSIndex")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.fs.labs.i + plot.guides.MPAimpact.summ
@@ -224,8 +228,7 @@ MPAimpact.summ.fs.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
 
 # ---- 2.2 Material Assets ----
 
-MPAimpact.summ.ma.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.impacts$Group) & 
-                                                              macp.koon.impacts$Response=="MAIndex",],
+MPAimpact.summ.ma.i <- ggplot(data=impacts[!grepl("Impact",impacts$Group) & impacts$Response=="MAIndex",],
                                    aes(x=Group,y=estimate)) +
   geom_bar(aes(fill=Group),
            stat="identity",
@@ -262,7 +265,7 @@ MPAimpact.summ.ma.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["MA","TwoYr"],x=0.35,
-           label=macp.koon.impacts%>%filter(Group=="Impact" & Response=="MAIndex")%>%select(sig.labs),
+           label=impacts%>%filter(Group=="Impact" & Response=="MAIndex")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
@@ -271,8 +274,8 @@ MPAimpact.summ.ma.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
   scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.koon.impacts%>%filter(Group=="Treatment" & Response=="MAIndex")%>%select(estimate)>
-                                             macp.koon.impacts%>%filter(Group=="Control" & Response=="MAIndex")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(impacts%>%filter(Group=="Treatment" & Response=="MAIndex")%>%select(estimate)>
+                                             impacts%>%filter(Group=="Control" & Response=="MAIndex")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.ma.labs.i + plot.guides.MPAimpact.summ
@@ -281,8 +284,7 @@ MPAimpact.summ.ma.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
 # -- Material assets sub-classes --
 # - Household items
 
-MPAimpact.summ.ma.hh.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impact",macp.koon.allimpacts$Group) & 
-                                                               macp.koon.allimpacts$Response=="Household_asset",],
+MPAimpact.summ.ma.hh.i <- ggplot(data=allimpacts[!grepl("Impact",allimpacts$Group) & allimpacts$Response=="Household_asset",],
                               aes(x=Group,y=estimate)) +
   geom_bar(aes(fill=Group),
            stat="identity",
@@ -319,7 +321,7 @@ MPAimpact.summ.ma.hh.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impact",macp.
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["HHAsset","TwoYr"],x=0.35,
-           label=macp.koon.allimpacts%>%filter(Group=="Impact" & Response=="Household_asset")%>%select(sig.labs),
+           label=allimpacts%>%filter(Group=="Impact" & Response=="Household_asset")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
@@ -328,8 +330,8 @@ MPAimpact.summ.ma.hh.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impact",macp.
   scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.koon.allimpacts%>%filter(Group=="Treatment" & Response=="Household_asset")%>%select(estimate)>
-                                             macp.koon.allimpacts%>%filter(Group=="Control" & Response=="Household_asset")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(allimpacts%>%filter(Group=="Treatment" & Response=="Household_asset")%>%select(estimate)>
+                                             allimpacts%>%filter(Group=="Control" & Response=="Household_asset")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.ma.hh.labs.i + plot.guides.MPAimpact.summ
@@ -337,8 +339,7 @@ MPAimpact.summ.ma.hh.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impact",macp.
 
 # - Boats no motor
 
-MPAimpact.summ.ma.boatnomotor.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impact",macp.koon.allimpacts$Group) & 
-                                                               macp.koon.allimpacts$Response=="BoatNoMotor",],
+MPAimpact.summ.ma.boatnomotor.i <- ggplot(data=allimpacts[!grepl("Impact",allimpacts$Group) & allimpacts$Response=="BoatNoMotor",],
                                  aes(x=Group,y=estimate)) +
   geom_bar(aes(fill=Group),
            stat="identity",
@@ -375,7 +376,7 @@ MPAimpact.summ.ma.boatnomotor.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impa
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["BoatNoMotor","TwoYr"],x=0.35,
-           label=macp.koon.allimpacts%>%filter(Group=="Impact" & Response=="BoatNoMotor")%>%select(sig.labs),
+           label=allimpacts%>%filter(Group=="Impact" & Response=="BoatNoMotor")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
@@ -384,8 +385,8 @@ MPAimpact.summ.ma.boatnomotor.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impa
   scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.koon.allimpacts%>%filter(Group=="Treatment" & Response=="BoatNoMotor")%>%select(estimate)>
-                                             macp.koon.allimpacts%>%filter(Group=="Control" & Response=="BoatNoMotor")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(allimpacts%>%filter(Group=="Treatment" & Response=="BoatNoMotor")%>%select(estimate)>
+                                             allimpacts%>%filter(Group=="Control" & Response=="BoatNoMotor")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.ma.boatnomotor.labs.i + plot.guides.MPAimpact.summ
@@ -393,8 +394,7 @@ MPAimpact.summ.ma.boatnomotor.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impa
 
 # - Motorized boats
 
-MPAimpact.summ.ma.boatmotor.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impact",macp.koon.allimpacts$Group) & 
-                                                                        macp.koon.allimpacts$Response=="Boats_motor",],
+MPAimpact.summ.ma.boatmotor.i <- ggplot(data=allimpacts[!grepl("Impact",allimpacts$Group) & allimpacts$Response=="Boats_motor",],
                                           aes(x=Group,y=estimate)) +
   geom_bar(aes(fill=Group),
            stat="identity",
@@ -431,7 +431,7 @@ MPAimpact.summ.ma.boatmotor.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impact
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["BoatMotor","TwoYr"],x=0.35,
-           label=macp.koon.allimpacts%>%filter(Group=="Impact" & Response=="Boats_motor")%>%select(sig.labs),
+           label=allimpacts%>%filter(Group=="Impact" & Response=="Boats_motor")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
@@ -440,8 +440,8 @@ MPAimpact.summ.ma.boatmotor.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impact
   scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.koon.allimpacts%>%filter(Group=="Treatment" & Response=="Boats_motor")%>%select(estimate)>
-                                             macp.koon.allimpacts%>%filter(Group=="Control" & Response=="Boats_motor")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(allimpacts%>%filter(Group=="Treatment" & Response=="Boats_motor")%>%select(estimate)>
+                                             allimpacts%>%filter(Group=="Control" & Response=="Boats_motor")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.ma.boatmotor.labs.i + plot.guides.MPAimpact.summ
@@ -449,8 +449,7 @@ MPAimpact.summ.ma.boatmotor.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impact
 
 # - Land vehicles
 
-MPAimpact.summ.ma.vehicle.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impact",macp.koon.allimpacts$Group) & 
-                                                                        macp.koon.allimpacts$Response=="Vehicles",],
+MPAimpact.summ.ma.vehicle.i <- ggplot(data=allimpacts[!grepl("Impact",allimpacts$Group) & allimpacts$Response=="Vehicles",],
                                           aes(x=Group,y=estimate)) +
   geom_bar(aes(fill=Group),
            stat="identity",
@@ -487,7 +486,7 @@ MPAimpact.summ.ma.vehicle.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impact",
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["Vehicle","TwoYr"],x=0.35,
-           label=macp.koon.allimpacts%>%filter(Group=="Impact" & Response=="Vehicles")%>%select(sig.labs),
+           label=allimpacts%>%filter(Group=="Impact" & Response=="Vehicles")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
@@ -496,8 +495,8 @@ MPAimpact.summ.ma.vehicle.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impact",
   scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.koon.allimpacts%>%filter(Group=="Treatment" & Response=="Vehicles")%>%select(estimate)>
-                                             macp.koon.allimpacts%>%filter(Group=="Control" & Response=="Vehicles")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(allimpacts%>%filter(Group=="Treatment" & Response=="Vehicles")%>%select(estimate)>
+                                             allimpacts%>%filter(Group=="Control" & Response=="Vehicles")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.ma.vehicles.labs.i + plot.guides.MPAimpact.summ
@@ -506,8 +505,7 @@ MPAimpact.summ.ma.vehicle.i <- ggplot(data=macp.koon.allimpacts[!grepl("Impact",
 
 # ---- 2.3 Place Attachment ----
 
-MPAimpact.summ.pa.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.impacts$Group) & 
-                                                         macp.koon.impacts$Response=="PAIndex",],
+MPAimpact.summ.pa.i <- ggplot(data=impacts[!grepl("Impact",impacts$Group) & impacts$Response=="PAIndex",],
                               aes(x=Group,y=estimate)) +
   geom_bar(aes(fill=Group),
            stat="identity",
@@ -544,7 +542,7 @@ MPAimpact.summ.pa.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["PA","TwoYr"],x=0.35,
-           label=macp.koon.impacts%>%filter(Group=="Impact" & Response=="PAIndex")%>%select(sig.labs),
+           label=impacts%>%filter(Group=="Impact" & Response=="PAIndex")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
@@ -553,8 +551,8 @@ MPAimpact.summ.pa.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
   scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.koon.impacts%>%filter(Group=="Treatment" & Response=="PAIndex")%>%select(estimate)>
-                                             macp.koon.impacts%>%filter(Group=="Control" & Response=="PAIndex")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(impacts%>%filter(Group=="Treatment" & Response=="PAIndex")%>%select(estimate)>
+                                             impacts%>%filter(Group=="Control" & Response=="PAIndex")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.pa.labs.i + plot.guides.MPAimpact.summ
@@ -562,8 +560,7 @@ MPAimpact.summ.pa.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
 
 # ---- 2.4 Marine Tenure ----
 
-MPAimpact.summ.mt.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.impacts$Group) & 
-                                                         macp.koon.impacts$Response=="MTIndex",],
+MPAimpact.summ.mt.i <- ggplot(data=impacts[!grepl("Impact",impacts$Group) & impacts$Response=="MTIndex",],
                               aes(x=Group,y=estimate)) +
   geom_bar(aes(fill=Group),
            stat="identity",
@@ -600,7 +597,7 @@ MPAimpact.summ.mt.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["MT","TwoYr"],x=0.35,
-           label=macp.koon.impacts%>%filter(Group=="Impact" & Response=="MTIndex")%>%select(sig.labs),
+           label=impacts%>%filter(Group=="Impact" & Response=="MTIndex")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
@@ -609,8 +606,8 @@ MPAimpact.summ.mt.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
   scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.koon.impacts%>%filter(Group=="Treatment" & Response=="MTIndex")%>%select(estimate)>
-                                             macp.koon.impacts%>%filter(Group=="Control" & Response=="MTIndex")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(impacts%>%filter(Group=="Treatment" & Response=="MTIndex")%>%select(estimate)>
+                                             impacts%>%filter(Group=="Control" & Response=="MTIndex")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.mt.labs.i + plot.guides.MPAimpact.summ
@@ -618,8 +615,7 @@ MPAimpact.summ.mt.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
 
 # ---- 2.5 School Enrollment ----
 
-MPAimpact.summ.se.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.impacts$Group) & 
-                                                         macp.koon.impacts$Response=="SERate",],
+MPAimpact.summ.se.i <- ggplot(data=impacts[!grepl("Impact",impacts$Group) & impacts$Response=="SERate",],
                               aes(x=Group,y=estimate)) +
   geom_bar(aes(fill=Group),
            stat="identity",
@@ -656,7 +652,7 @@ MPAimpact.summ.se.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
              size=2.75,
              show.legend=F) +
   annotate("text",y=sig.pos["SE","TwoYr"],x=0.35,
-           label=macp.koon.impacts%>%filter(Group=="Impact" & Response=="SERate")%>%select(sig.labs),
+           label=impacts%>%filter(Group=="Impact" & Response=="SERate")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
@@ -665,8 +661,8 @@ MPAimpact.summ.se.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
   scale_colour_manual(values=err.cols.MPAimpacts) +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.koon.impacts%>%filter(Group=="Treatment" & Response=="SERate")%>%select(estimate)>
-                                             macp.koon.impacts%>%filter(Group=="Control" & Response=="SERate")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(impacts%>%filter(Group=="Treatment" & Response=="SERate")%>%select(estimate)>
+                                             impacts%>%filter(Group=="Control" & Response=="SERate")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.se.labs.i + plot.guides.MPAimpact.summ
@@ -675,8 +671,7 @@ MPAimpact.summ.se.i <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.i
 
 # ---- LEGEND ----
 
-MPAimpact.summ.legend <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon.impacts$Group) & 
-                                                         macp.koon.impacts$Response=="FSIndex",],
+MPAimpact.summ.legend <- ggplot(data=impacts[!grepl("Impact",impacts$Group) & impacts$Response=="FSIndex",],
                               aes(x=Group,y=estimate)) +
   geom_bar(aes(fill=Group),
            stat="identity",
@@ -702,7 +697,7 @@ MPAimpact.summ.legend <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon
              fill="black",
              size=2.75) +
   annotate("text",y=sig.pos["FS","TwoYr"],x=0.35,
-           label=macp.koon.impacts%>%filter(Group=="Impact" & Response=="FSIndex")%>%select(sig.labs),
+           label=impacts%>%filter(Group=="Impact" & Response=="FSIndex")%>%select(sig.labs),
            colour="black",
            size=4,
            lineheight=0.4) +
@@ -713,8 +708,8 @@ MPAimpact.summ.legend <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon
                       values="black") +
   scale_x_discrete(labels=impact.x.labs) +
   scale_size_manual(values=0.75) +
-  scale_shape_manual(values=c("2yr"=ifelse(macp.koon.impacts%>%filter(Group=="Treatment" & Response=="FSIndex")%>%select(estimate)>
-                                             macp.koon.impacts%>%filter(Group=="Control" & Response=="FSIndex")%>%select(estimate),24,25)),
+  scale_shape_manual(values=c("2yr"=ifelse(impacts%>%filter(Group=="Treatment" & Response=="FSIndex")%>%select(estimate)>
+                                             impacts%>%filter(Group=="Control" & Response=="FSIndex")%>%select(estimate),24,25)),
                      labels="Direction of\nImpact (+/-)") +
   expand_limits(x=c(-0.2,3)) +
   plot.theme.impact + plot.fs.labs.i + plot.guides.MPAimpact.summ
@@ -728,9 +723,9 @@ MPAimpact.summ.legend <- ggplot(data=macp.koon.impacts[!grepl("Impact",macp.koon
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-macp.koon.std.impacts <- 
-  import('x_Flat_data_files/1_Social/Outputs/impact_analysis/Koon/macp_plots_output.csv') %>%
-  filter(MPAID==18 & grepl("_z",Response) & Group=="Impact") %>%
+std.impacts <- 
+  import(paste('x_Flat_data_files/1_Social/Outputs/impact_analysis/',MPAName,'/macp_plots_output.csv',sep='')) %>%
+  filter(grepl("_z",Response) & Group=="Impact") %>%
   mutate(p.val=2*pnorm(-abs(z.score)),
          impact.direction=ifelse(estimate<0,"Negative",ifelse(estimate>0,"Positive","Zero")),
          Response=factor(Response,ordered=T,levels=c("PAIndex_z","MTIndex_z","SERate_z","FSIndex_z","MAIndex_z")))
@@ -743,7 +738,7 @@ snapshot.sig.labs <- c("Culture\n(Place Attachment)","Empowerment\n(Marine Tenur
 # ---- 4.1 Snapshot plot, all Big Five standardized impacts on one plot ----
 
 # - 2 year impacts
-snapshot.MPAimpact.summ.2yr <- ggplot(data=macp.koon.std.impacts,
+snapshot.MPAimpact.summ.2yr <- ggplot(data=std.impacts,
                                        aes(x=Response,
                                            y=estimate)) +
   geom_bar(aes(fill=impact.direction),
@@ -775,7 +770,7 @@ snapshot.MPAimpact.summ.2yr <- ggplot(data=macp.koon.std.impacts,
 
 
 # - 2 year impacts for factsheet
-snapshot.MPAimpact.factsheet.2yr <- ggplot(data=macp.flotim.std.impacts,
+snapshot.MPAimpact.factsheet.2yr <- ggplot(data=std.impacts,
                                       aes(x=Response,
                                           y=estimate)) +
   geom_bar(aes(fill=impact.direction),
@@ -848,11 +843,11 @@ snapshot.MPAimpact.factsheet.2yr <- ggplot(data=macp.flotim.std.impacts,
 # 
 
 
-dir.create(paste("x_Flat_data_files/1_Social/Outputs/impact_analysis/Koon/Figures--produced",
-                 format(Sys.Date(),format="%Y_%m_%d"),sep="_"))
+dir.create(paste('x_Flat_data_files/1_Social/Outputs/impact_analysis/',MPAName,'/Figures--produced_',
+                 format(Sys.Date(),format="%Y_%m_%d"),sep=''))
 
-FigureFileName <- paste("x_Flat_data_files/1_Social/Outputs/impact_analysis/Koon/Figures--produced",
-                        format(Sys.Date(),format="%Y_%m_%d"),sep="_")
+FigureFileName <- paste('x_Flat_data_files/1_Social/Outputs/impact_analysis/',MPAName,'/Figures--produced_',
+                        format(Sys.Date(),format="%Y_%m_%d"),sep='')
 
 
 # ---- LEGEND PLOT ----

@@ -4,7 +4,7 @@
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2017
-# modified: October 2019
+# modified: June 2020
 # 
 # 
 # ---- inputs ----
@@ -57,27 +57,27 @@ Proptrendplot.ylabs.bahasa <-
   define.proptrendplot.ylabels.withasterisks.bahasa(propdata.trend.test)
 
 
-Trendplot.labs.bahasa <- list(FS=labs(y=as.character(Conttrendplot.ylabs.bahasa["FSMean"]),x="Tahun Pemantauan"),
-                       MA=labs(y=as.character(Conttrendplot.ylabs.bahasa["MAMean"]),x="Tahun Pemantauan"),
-                       PA=labs(y=as.character(Conttrendplot.ylabs.bahasa["PAMean"]),x="Tahun Pemantauan"),
-                       MT=labs(y=as.character(Conttrendplot.ylabs.bahasa["MTMean"]),x="Tahun Pemantauan"),
-                       SE=labs(y=as.character(Conttrendplot.ylabs.bahasa["SEMean"]),x="Tahun Pemantauan"),
-                       Time=labs(y=as.character(Conttrendplot.ylabs.bahasa["TimeMarketMean"]),x="Tahun Pemantauan"),
+Trendplot.labs.bahasa <- list(FS=labs(y=as.character(Conttrendplot.ylabs.bahasa["FSMean"]),x=sett.names.bahasa[["MonYear"]]),
+                       MA=labs(y=as.character(Conttrendplot.ylabs.bahasa["MAMean"]),x=sett.names.bahasa[["MonYear"]]),
+                       PA=labs(y=as.character(Conttrendplot.ylabs.bahasa["PAMean"]),x=sett.names.bahasa[["MonYear"]]),
+                       MT=labs(y=as.character(Conttrendplot.ylabs.bahasa["MTMean"]),x=sett.names.bahasa[["MonYear"]]),
+                       SE=labs(y=as.character(Conttrendplot.ylabs.bahasa["SEMean"]),x=sett.names.bahasa[["MonYear"]]),
+                       Time=labs(y=as.character(Conttrendplot.ylabs.bahasa["TimeMarketMean"]),x=sett.names.bahasa[["MonYear"]]),
                        Unwell=labs(y=as.character(Conttrendplot.ylabs.bahasa["UnwellMean"]),
-                                   x="Tahun Pemantauan"),
-                       Gender=labs(y="Jenis kelamin (% kepala rumah tangga)",x="Tahun Pemantauan"),
-                       Religion=labs(y="Agama (% kepala rumah tangga)",x="Tahun Pemantauan"),
-                       PrimaryOcc=labs(y=as.character(Proptrendplot.ylabs.bahasa["PrimaryOcc"]),x="Tahun Pemantauan"),
-                       FreqFish=labs(y=as.character(Proptrendplot.ylabs.bahasa["FreqFish"]),x="Tahun Pemantauan"),
-                       FreqSellFish=labs(y=as.character(Proptrendplot.ylabs.bahasa["SellFish"]),x="Tahun Pemantauan"),
-                       IncFish=labs(y=as.character(Proptrendplot.ylabs.bahasa["IncFish"]),x="Tahun Pemantauan"),
-                       FishTech=labs(y=as.character(Proptrendplot.ylabs.bahasa["FishTech"]),x="Tahun Pemantauan"),
-                       ChildFS=labs(y=as.character(Proptrendplot.ylabs.bahasa["child"]),x="Tahun Pemantauan"),
-                       Protein=labs(y=as.character(Proptrendplot.ylabs.bahasa["Protein"]),x="Tahun Pemantauan"),
-                       EconStatus=labs(y=as.character(Proptrendplot.ylabs.bahasa["EconStatus"]),x="Tahun Pemantauan"),
-                       NumLocalThreats=labs(y=as.character(Proptrendplot.ylabs.bahasa["NumLocalThreats"]),x="Tahun Pemantauan"),
-                       SecondaryOcc=labs(y=as.character(Proptrendplot.ylabs.bahasa["SecondaryOcc"]),x="Tahun Pemantauan"),
-                       OccDiverse=labs(y=as.character(Proptrendplot.ylabs.bahasa["OccDiverse"]),x="Tahun Pemantauan"))
+                                   x=sett.names.bahasa[["MonYear"]]),
+                       Gender=labs(y="Jenis kelamin (% kepala rumah tangga)",x=sett.names.bahasa[["MonYear"]]),
+                       Religion=labs(y="Agama (% kepala rumah tangga)",x=sett.names.bahasa[["MonYear"]]),
+                       PrimaryOcc=labs(y=as.character(Proptrendplot.ylabs.bahasa["PrimaryOcc"]),x=sett.names.bahasa[["MonYear"]]),
+                       FreqFish=labs(y=as.character(Proptrendplot.ylabs.bahasa["FreqFish"]),x=sett.names.bahasa[["MonYear"]]),
+                       FreqSellFish=labs(y=as.character(Proptrendplot.ylabs.bahasa["SellFish"]),x=sett.names.bahasa[["MonYear"]]),
+                       IncFish=labs(y=as.character(Proptrendplot.ylabs.bahasa["IncFish"]),x=sett.names.bahasa[["MonYear"]]),
+                       FishTech=labs(y=as.character(Proptrendplot.ylabs.bahasa["FishTech"]),x=sett.names.bahasa[["MonYear"]]),
+                       ChildFS=labs(y=as.character(Proptrendplot.ylabs.bahasa["child"]),x=sett.names.bahasa[["MonYear"]]),
+                       Protein=labs(y=as.character(Proptrendplot.ylabs.bahasa["Protein"]),x=sett.names.bahasa[["MonYear"]]),
+                       EconStatus=labs(y=as.character(Proptrendplot.ylabs.bahasa["EconStatus"]),x=sett.names.bahasa[["MonYear"]]),
+                       NumLocalThreats=labs(y=as.character(Proptrendplot.ylabs.bahasa["NumLocalThreats"]),x=sett.names.bahasa[["MonYear"]]),
+                       SecondaryOcc=labs(y=as.character(Proptrendplot.ylabs.bahasa["SecondaryOcc"]),x=sett.names.bahasa[["MonYear"]]),
+                       OccDiverse=labs(y=as.character(Proptrendplot.ylabs.bahasa["OccDiverse"]),x=sett.names.bahasa[["MonYear"]]))
 
 Annexplot.settnames.bahasa <- 
   define.annexplot.settname.labels(annex.sigvals.bahasa)
@@ -113,10 +113,10 @@ Age.gender.RepeatOne.bahasa <-
                      limits=c(-10,10),
                      labels=abs(seq(-10,10,5))) +
   scale_fill_manual(name="",
-                    labels=c("Perempuan","Laki-laki"),
+                    labels=legend.labs.bahasa[["AgeGender"]],
                     values=c("Female.RepeatOne"=alpha("#7FCDBB",0.95),
                              "Male.RepeatOne"=alpha("#253494",0.95)))+ 
-  coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Usia",y="")
+  coord_flip() + age.gender.plot.theme + plot.guides.techreport + Statusplot.labs.bahasa[["AgeGenderUpperPlot"]]
 
 
 # ---- 2.2 Baseline ----
@@ -138,10 +138,10 @@ Age.gender.Baseline.bahasa <-
                      limits=c(-10,10),
                      labels=abs(seq(-10,10,5))) +
   scale_fill_manual(name="",
-                    labels=c("Perempuan","Laki-laki"),
+                    labels=legend.labs.bahasa[["AgeGender"]],
                     values=c("Female.Baseline"=alpha("#7FCDBB",0.95),
                              "Male.Baseline"=alpha("#253494",0.95)))+ 
-  coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Usia",y="Distribusi populasi (% individu berdasarkan jenis kelamin)")
+  coord_flip() + age.gender.plot.theme + plot.guides.techreport + Statusplot.labs.bahasa[["AgeGender"]]
 
 
 # ---- 2.3 Create legend ----
@@ -163,7 +163,7 @@ Age.gender.legend.plot.bahasa <-
   scale_fill_manual(name="",
                     values=c("Female.Baseline"=alpha("#7FCDBB",0.95),
                              "Male.Baseline"=alpha("#253494",0.95)),
-                    labels=c("Perempuan","Laki-laki")) +
+                    labels=legend.labs.bahasa[["AgeGender"]]) +
   coord_flip() + plot.guides.techreport + theme(legend.justification="right")
 
 Age.gender.legend.bahasa <- g_legend(Age.gender.legend.plot.bahasa)
@@ -227,11 +227,11 @@ FS.statusplot.bahasa <-
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
-  geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(6.06-4.02))+4.02,label="Aman Pangan"),
+  geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(6.06-4.02))+4.02,label=legend.labs.bahasa[["FoodSecure"]]),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(4.02-1.56))+1.56,label="Rawan Pangan\ntanpa kelaparan"),
+  geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(4.02-1.56))+1.56,label=legend.labs.bahasa[["NoHunger"]]),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_text(aes(x=length(SettlementName.bahasa),y=0.5*1.56,label="Rawan Pangan\ndengan kelaparan"),
+  geom_text(aes(x=length(SettlementName.bahasa),y=0.5*1.56,label=legend.labs.bahasa[["YesHunger"]]),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,6.06)) +
@@ -523,7 +523,7 @@ Gender.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Gender"]],
-                    labels=c("Perempuan","Laki-laki")) +
+                    labels=legend.labs.bahasa[["AgeGender"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["Gender"] +
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -558,7 +558,7 @@ Religion.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Religion"]],
-                    labels=c("Lainnya","Islam","Kristen")) +
+                    labels=legend.labs.bahasa[["Religion"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["Religion"] +
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -595,8 +595,7 @@ Primaryocc.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["PrimaryOcc"]],
-                    labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut\nyang tidak terbarukan",  
-                             "Jenis pekerjaan berupah/\nburuh lainnya", "Hasil hutan", "Penangkapan ikan", "Pertanian")) +
+                    labels=legend.labs.bahasa[["PrimaryOcc"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["PrimaryOcc"] + plot.guides.techreport
 
 # - FISHING FREQUENCY
@@ -619,9 +618,7 @@ Freqfish.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FreqFish"]],
-                    labels=c("Lebih dari beberapa kali perminggu","Beberapa kali perminggu",
-                             "Beberapa kali perbulan","Beberapa kali dalam enam bulan",
-                             "Setiap enam bulan sekali")) +
+                    labels=legend.labs.bahasa[["FreqFish"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FreqFish"] + plot.guides.techreport
 
 # - SELL FISH FREQUENCY
@@ -644,9 +641,7 @@ Freqsellfish.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FreqSellFish"]],
-                    labels=c("Lebih dari beberapa kali perminggu","Beberapa kali perminggu",
-                             "Beberapa kali perbulan","Beberapa kali dalam enam bulan",
-                             "Setiap enam bulan sekali")) +
+                    labels=legend.labs.bahasa[["FreqSellFish"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FreqSellFish"] + plot.guides.techreport
 
 # - INCOME FROM FISHING
@@ -669,7 +664,7 @@ Incfish.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["IncFish"]],
-                    labels=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada")) +
+                    labels=legend.labs.bahasa[["IncFish"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["IncFish"] + plot.guides.techreport
 
 # - FISHING TECHNIQUE
@@ -692,8 +687,7 @@ Fishtech.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FishTech"]],
-                    labels=c("Mobile line","Stationary line",
-                             "Mobile net","Stationary net","Penangkapan dengan tangan")) +
+                    labels=legend.labs.bahasa[["FishTech"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FishTech"] + plot.guides.techreport
 
 # - CHILDHOOD FOOD SECURITY
@@ -716,7 +710,7 @@ Childfs.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["ChildFS"]],
-                    labels=c("Kejadian kelaparan\npada anak","Tidak ada kejadian\nkelaparan pada anak")) +
+                    labels=legend.labs.bahasa[["ChildFS"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["ChildFS"] +
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -751,7 +745,7 @@ Proteinfish.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Protein"]],
-                    labels=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada")) +
+                    labels=legend.labs.bahasa[["Protein"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FishProtein"] + plot.guides.techreport
 
 # - CATEGORICAL FOOD SECURITY
@@ -772,7 +766,7 @@ FSCategorical.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FSCategorical"]],
-                    labels=c("Rawan Pangan dengan kelaparan", "Rawan Pangan tanpa kelaparan","Aman Pangan" )) +
+                    labels=legend.labs.bahasa[["FSCategorical"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FSCategorical"] + 
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -807,8 +801,7 @@ EconStatus.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["EconStatus"]],
-                    labels=c("Jauh lebih baik","Sedikit lebih baik","Tidak lebih baik maupun lebih buruk",
-                             "Sedikit lebih buruk","Jauh lebih buruk")) +
+                    labels=legend.labs.bahasa[["EconStatus"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["EconStatus"] + plot.guides.techreport
 
 # - MEMBER OF MARINE RESOURCE ORGANIZATION
@@ -831,7 +824,7 @@ MarineMember.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["MarineMember"]],
-                    labels=c("Bukan anggota","Anggota")) +
+                    labels=legend.labs.bahasa[["MarineMember"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["MarineMember"] + 
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -866,7 +859,7 @@ MarineMeeting.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["MarineAttendance"]],
-                    labels=c("Tidak menghadiri pertemuan","Menghadiri pertemuan")) +
+                    labels=legend.labs.bahasa[["MarineAttendance"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["MarineAttendance"] + 
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -901,7 +894,7 @@ SocialConflict.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["SocialConflict"]],
-                    labels=c("Sangat meningkat","Meningkat","Tidak meningkat maupun menurun","Menurun","Sangat menurun")) +
+                    labels=legend.labs.bahasa[["SocialConflict"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["SocialConflict"] + plot.guides.techreport
 
 # - NUMBER OF LOCAL THREATS
@@ -923,7 +916,7 @@ NumThreat.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["NumLocalThreats"]],
-                    labels=c("Lebih dari empat ancaman","Empat ancaman","Tiga ancaman","Dua ancaman","Satu ancaman", "Tidak ada ancaman")) +
+                    labels=legend.labs.bahasa[["NumLocalThreats"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["NumLocalThreats"] + plot.guides.techreport
 
 # - MARINE GROUP CONTRIBUTION
@@ -981,16 +974,16 @@ FS.trendplot.bahasa <-
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=(0.5*(6.06-4.02))+4.02,label="Aman Pangan"),
+  geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=(0.5*(6.06-4.02))+4.02,label=legend.labs.bahasa[["FoodSecure"]]),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=(0.5*(4.02-1.56))+1.56,label="Rawan Pangan\ntanpa kelaparan"),
+  geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=(0.5*(4.02-1.56))+1.56,label=legend.labs.bahasa[["NoHunger"]]),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=0.5*1.56,label="Rawan Pangan\ndengan kelaparan"),
+  geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=0.5*1.56,label=legend.labs.bahasa[["YesHunger"]]),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=5.56,label="Perlakuan",fontface=2),
+  geom_text(aes(x=1.6,y=5.56,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=5.56,label="Kontrol",fontface=2),
+  geom_text(aes(x=1.47,y=5.56,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,6.06)) +
@@ -1033,9 +1026,9 @@ MA.trendplot.bahasa <-
                 position=position_dodge(width=0.75),
                 show.legend=F) +
   geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(MAMean,na.rm=T),label="Perlakuan",fontface=2),
+  geom_text(aes(x=1.6,y=max(MAMean,na.rm=T),label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(MAMean,na.rm=T),label="Kontrol",fontface=2),
+  geom_text(aes(x=1.47,y=max(MAMean,na.rm=T),label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1066,9 +1059,9 @@ PA.trendplot.bahasa <-
                 position=position_dodge(width=0.75),
                 show.legend=F) +
   geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=4.6,label="Perlakuan",fontface=2),
+  geom_text(aes(x=1.6,y=4.6,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=4.6,label="Kontrol",fontface=2),
+  geom_text(aes(x=1.47,y=4.6,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1097,9 +1090,9 @@ MT.trendplot.bahasa <-
                 position=position_dodge(width=0.75),
                 show.legend=F) +
   geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=4.6,label="Perlakuan",fontface=2),
+  geom_text(aes(x=1.6,y=4.6,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=4.6,label="Kontrol",fontface=2),
+  geom_text(aes(x=1.47,y=4.6,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +  
@@ -1128,9 +1121,9 @@ SE.trendplot.bahasa <-
                 position=position_dodge(width=0.75),
                 show.legend=F) +
   geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=0.91,label="Perlakuan",fontface=2),
+  geom_text(aes(x=1.6,y=0.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=0.91,label="Kontrol",fontface=2),
+  geom_text(aes(x=1.47,y=0.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1160,9 +1153,9 @@ Time.trendplot.bahasa <-
                 position=position_dodge(width=0.75),
                 show.legend=F) +
   geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label="Perlakuan",fontface=2),
+  geom_text(aes(x=1.6,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label="Kontrol",fontface=2),
+  geom_text(aes(x=1.47,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1193,9 +1186,9 @@ Unwell.trendplot.bahasa <-
                 position=position_dodge(width=0.75),
                 show.legend=F) +
   geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label="Perlakuan",fontface=2),
+  geom_text(aes(x=1.6,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label="Kontrol",fontface=2),
+  geom_text(aes(x=1.47,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1220,16 +1213,16 @@ Gender.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Gender"]],
-                    labels=c("Perempuan","Laki-laki")) +
+                    labels=legend.labs.bahasa[["AgeGender"]]) +
   coord_flip() + Trendplot.labs.bahasa["Gender"] + plot.theme + 
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -1255,16 +1248,16 @@ Religion.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Religion"]],
-                    labels=c("Lainnya","Muslim","Kristen")) +
+                    labels=legend.labs.bahasa[["Religion"]]) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["Religion"] + 
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -1294,17 +1287,16 @@ Primaryocc.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["PrimaryOcc"]],
-                    labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut\nyang tidak terbarukan",  
-                             "Jenis pekerjaan berupah/\nburuh lainnya", "Hasil hutan", "Penangkapan ikan", "Pertanian")) +
+                    labels=legend.labs.bahasa[["PrimaryOcc"]]) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["PrimaryOcc"] + plot.guides.techreport 
 
 # - FISHING FREQUENCY
@@ -1320,18 +1312,16 @@ Freqfish.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FreqFish"]],
-                    labels=c("Lebih dari beberapa kali perminggu","Beberapa kali perminggu",
-                             "Beberapa kali perbulan","Beberapa kali dalam enam bulan",
-                             "Setiap enam bulan sekali")) +
+                    labels=legend.labs.bahasa[["FreqFish"]]) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["FreqFish"] + plot.guides.techreport
 
 # - SELL FISH FREQUENCY
@@ -1347,18 +1337,16 @@ Freqsellfish.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FreqSellFish"]],
-                    labels=c("Lebih dari beberapa kali perminggu","Beberapa kali perminggu",
-                             "Beberapa kali perbulan","Beberapa kali dalam enam bulan",
-                             "Setiap enam bulan sekali")) +
+                    labels=legend.labs.bahasa[["FreqSellFish"]]) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["FreqSellFish"] + plot.guides.techreport
 
 # - INCOME FROM FISHING
@@ -1374,16 +1362,16 @@ Incfish.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["IncFish"]],
-                    labels=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada")) +
+                    labels=legend.labs.bahasa[["IncFish"]]) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["IncFish"] + plot.guides.techreport
 
 # - FISHING TECHNIQUE
@@ -1399,17 +1387,16 @@ Fishtech.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FishTech"]],
-                    labels=c("Mobile line","Stationary line",
-                             "Mobile net","Stationary net","Penangkapan dengan tangan")) +
+                    labels=legend.labs.bahasa[["FishTech"]]) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["FishTech"] + plot.guides.techreport
 
 # - CHILDHOOD FOOD SECURITY
@@ -1423,16 +1410,16 @@ Childfs.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["ChildFS"]],
-                    labels=c("Kejadian kelaparan\npada anak","Tidak ada kejadian\nkelaparan pada anak")) +
+                    labels=legend.labs.bahasa[["ChildFS"]]) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["ChildFS"] + 
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -1460,16 +1447,16 @@ Proteinfish.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Protein"]],
-                    labels=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada")) +
+                    labels=legend.labs.bahasa[["Protein"]]) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["Protein"] + plot.guides.techreport
 
 # - ECONOMIC STATUS 
@@ -1485,17 +1472,16 @@ EconStatus.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["EconStatus"]],
-                    labels=c("Jauh lebih baik","Sedikit lebih baik","Tidak lebih baik maupun lebih buruk",
-                             "Sedikit lebih buruk","Jauh lebih buruk")) +
+                    labels=legend.labs.bahasa[["EconStatus"]]) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["EconStatus"] + plot.guides.techreport
 
 # - NUMBER OF LOCAL THREATS
@@ -1510,16 +1496,16 @@ NumThreat.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["NumLocalThreats"]],
-                    labels=c("Lebih dari empat ancaman","Empat ancaman","Tiga ancaman","Dua ancaman","Satu ancaman", "Tidak ada ancaman")) +
+                    labels=legend.labs.bahasa[["NumLocalThreats"]]) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["NumLocalThreats"] + plot.guides.techreport
 
 # - SECONDARY OCCUPATION
@@ -1537,17 +1523,16 @@ Secondaryocc.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["SecondaryOcc"]],
-                    labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut\nyang tidak terbarukan",  
-                             "Jenis pekerjaan berupah/\nburuh lainnya", "Hasil hutan", "Penangkapan ikan", "Pertanian")) +
+                    labels=legend.labs.bahasa[["SecondaryOcc"]]) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["SecondaryOcc"] + plot.guides.techreport 
 
 # - OCCUPATIONAL DIVERSITY
@@ -1561,16 +1546,16 @@ OccDiverse.trendplot.bahasa <-
            size=0.15,
            colour="#505050") +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
+  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
+  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
   scale_x_discrete(labels=MPA.level.PropData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.PropData.trend.PLOTFORMAT$order)]) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["OccDiverse"]],
-                    labels=c("Banyak Pekerjaan","Satu Pekerjaan")) +
+                    labels=legend.labs.bahasa[["OccDiverse"]]) +
   coord_flip() + plot.theme + Trendplot.labs.bahasa["OccDiverse"] + 
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -1597,9 +1582,9 @@ MarineContribution.trendplot.bahasa <-
            width=0.75,
            show.legend=F) +
   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(MarineContribution)+-0.06*max(MarineContribution),label="Perlakuan",fontface=2),
+  geom_text(aes(x=1.6,y=max(MarineContribution)+-0.06*max(MarineContribution),label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(MarineContribution)-0.06*max(MarineContribution),label="Kontrol",fontface=2),
+  geom_text(aes(x=1.47,y=max(MarineContribution)-0.06*max(MarineContribution),label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,max(MPA.level.PropData.trend.PLOTFORMAT$MarineContribution,na.rm=T) +
@@ -1653,11 +1638,11 @@ FS.annexplot.bahasa <-
              linetype=2,
              size=0.35,
              colour="#505050") +
-  geom_text(aes(x=length(unique(SettlementName)),y=(0.5*(6.06-4.02))+4.02,label="Aman Pangan"),
+  geom_text(aes(x=length(unique(SettlementName)),y=(0.5*(6.06-4.02))+4.02,label=legend.labs.bahasa[["FoodSecure"]]),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_text(aes(x=length(unique(SettlementName)),y=(0.5*(4.02-1.56))+1.56,label="Rawan Pangan\ntanpa kelaparan"),
+  geom_text(aes(x=length(unique(SettlementName)),y=(0.5*(4.02-1.56))+1.56,label=legend.labs.bahasa[["NoHunger"]]),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_text(aes(x=length(unique(SettlementName)),y=0.5*1.56,label="Rawan Pangan\ndengan kelaparan"),
+  geom_text(aes(x=length(unique(SettlementName)),y=0.5*1.56,label=legend.labs.bahasa[["YesHunger"]]),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   scale_alpha_manual(name="",
                      values=c(0.6,1),

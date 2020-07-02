@@ -540,7 +540,7 @@ annex.sigvals  <-
 annex.sigvals[2:8] <- unlist(annex.sigvals[2:8])
 
 annex.sigvals.bahasa  <- 
-  rbind.data.frame(cbind.data.frame(SettlementName=c("Permukiman Kontrol"),trend.non.parametric.test.byControl ["sl",]),
+  rbind.data.frame(cbind.data.frame(SettlementName=sett.names.bahasa[["Control"]],trend.non.parametric.test.byControl ["sl",]),
                    cbind.data.frame(SettlementName=MPA.name$MPAName.bahasa,trend.non.parametric.test.byMPA ["sl",]),
                    null.row.sigvals,
                    trend.non.parametric.test.bySett[rev(order(trend.non.parametric.test.bySett$SettlementName)),])
@@ -619,11 +619,7 @@ propdata.trend.test  <-
 
 propdata.trend.test <-
   rbind(propdata.trend.test, 
-        c("Primary occupation (% households)","Frequency of fishing (% households)","Frequency of selling at least some catch (% households)",
-          "Income from fishing in past 6 months (% households)","Fishing technique most often used in past 6 months (% households)","Child hunger (% households)",
-          "Dietary protein from fish in past 6 months (% households)","Change in economic status of fishing households (% households)",
-          "Number of identified local threats to marine environment (% households)","Secondary occupation (% households)","Occupational diversity (% households)"),
-        c("Pekerjaan utama (% rumah tangga)","Frekuensi penangkapan ikan (% rumah tangga)","Frekuensi penjualan setidaknya pada beberapa hasil tangkapan\n(% rumah tangga)",
-          "Penghasilan dari penangkapan ikan dalam 6 bulan terakhir\n(% rumah tangga)","Teknik penangkapan ikan yang paling sering digunakan\ndalam 6 bulan terakhir (% rumah tangga)",
-          "Kelaparan pada anak (% rumah tangga)","Protein makanan dari ikan dalam 6 bulan terakhir (% rumah tangga)","Perubahan status ekonomi rumah tangga nelayan (% rumah tangga)",
-          "Jumlah ancaman lokal yang teridentifikasi terhadap lingkungan laut\n(% rumah tangga)","Pekerjaan sekunder (% rumah tangga)","Keberagaman pekerjaan (% rumah tangga)"))
+        prop.variables.labs,
+        prop.variables.labs.bahasa)
+
+

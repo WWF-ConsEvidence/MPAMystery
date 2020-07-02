@@ -116,10 +116,17 @@ Age.gender.plot <-
 # - FOOD SECURITY
 FS.statusplot <- 
   rbind.data.frame(Sett.level.ContData.status.PLOTFORMAT[,c("SettlementName","FSMean","FSErr","SettLevel")],
-                   data.frame(SettlementName="  ",
+                   if(length(Sett.level.ContData.status.PLOTFORMAT$SettlementName)<25) {
+                             data.frame(SettlementName="  ",
                               FSMean=NA,
                               FSErr=NA,
-                              SettLevel="Dummy")) %>%
+                              SettLevel="Dummy")
+                     } else {
+                       data.frame(SettlementName=c("  ","  "),
+                                  FSMean=NA,
+                                  FSErr=NA,
+                                  SettLevel=c("Dummy","Dummy"))
+                     }) %>%
   ggplot(aes(x=SettlementName)) +
   geom_hline(aes(yintercept=1.56),size=0.25,colour="#505050") +
   geom_hline(aes(yintercept=4.02),size=0.25,colour="#505050") +
@@ -135,7 +142,7 @@ FS.statusplot <-
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -153,14 +160,17 @@ FS.statusplot <-
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
-  geom_text(aes(x=length(SettlementName),y=(0.5*(6.06-4.02))+4.02,label="Food secure"),
+  geom_text(aes(x=length(SettlementName),
+                y=(0.5*(6.06-4.02))+4.02,label="Food secure"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_text(aes(x=length(SettlementName),y=(0.5*(4.02-1.56))+1.56,label="Food insecure\nwithout hunger"),
+  geom_text(aes(x=length(SettlementName),
+                y=(0.5*(4.02-1.56))+1.56,label="Food insecure\nwithout hunger"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_text(aes(x=length(SettlementName),y=0.5*1.56,label="Food insecure\nwith hunger"),
+  geom_text(aes(x=length(SettlementName),
+                y=0.5*1.56,label="Food insecure\nwith hunger"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  scale_y_continuous(expand=c(0,0),
-                     limits=c(0,6.06)) +
+  scale_y_continuous(expand=c(0,0,0.05,0)) +
+  scale_x_discrete(expand=c(0.02,0.02,0.08,0.08)) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
   coord_flip() + Statusplot.labs["FS"] + theme(axis.ticks=element_blank(),
@@ -195,7 +205,7 @@ MA.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -213,7 +223,7 @@ MA.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
-  scale_y_continuous(expand=c(0,0),
+  scale_y_continuous(expand=c(0,0,0.05,0),
                      limits=c(0,max(Sett.level.ContData.status.PLOTFORMAT$MAMean,na.rm=T)+
                                 max(Sett.level.ContData.status.PLOTFORMAT$MAErr,na.rm=T)+
                                 0.03*max(Sett.level.ContData.status.PLOTFORMAT$MAMean,na.rm=T))) +
@@ -237,7 +247,7 @@ PA.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -256,7 +266,7 @@ PA.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
-  scale_y_continuous(expand=c(0,0),
+  scale_y_continuous(expand=c(0,0,0.05,0),
                      limits=c(0,5)) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
@@ -278,7 +288,7 @@ MT.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -296,7 +306,7 @@ MT.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
-  scale_y_continuous(expand=c(0,0),
+  scale_y_continuous(expand=c(0,0,0.05,0),
                      limits=c(0,5)) +
   scale_fill_manual(values=fillcols.status) +
   scale_colour_manual(values=errcols.status) +
@@ -317,7 +327,7 @@ SE.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -335,7 +345,7 @@ SE.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
-  scale_y_continuous(expand=c(0,0),
+  scale_y_continuous(expand=c(0,0,0.05,0),
                      labels=scales::percent_format(),
                      limits=c(0,1.1)) +
   scale_fill_manual(values=fillcols.status) +
@@ -358,7 +368,7 @@ Time.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -376,7 +386,7 @@ Time.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
-  scale_y_continuous(expand=c(0,0),
+  scale_y_continuous(expand=c(0,0,0.05,0),
                      limits=c(0,max(Sett.level.ContData.status.PLOTFORMAT$TimeMarketMean,na.rm=T)+
                                 max(Sett.level.ContData.status.PLOTFORMAT$TimeMarketErr,na.rm=T)+
                                 0.03*max(Sett.level.ContData.status.PLOTFORMAT$TimeMarketMean,na.rm=T))) +
@@ -400,7 +410,7 @@ Unwell.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -418,7 +428,7 @@ Unwell.statusplot <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
-  scale_y_continuous(expand=c(0,0),
+  scale_y_continuous(expand=c(0,0,0.05,0),
                      limits=c(0,max(Sett.level.ContData.status.PLOTFORMAT$UnwellMean,na.rm=T)+
                                 max(Sett.level.ContData.status.PLOTFORMAT$UnwellErr,na.rm=T)+
                                 0.03*max(Sett.level.ContData.status.PLOTFORMAT$UnwellMean,na.rm=T))) +
@@ -441,7 +451,7 @@ Gender.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -476,7 +486,7 @@ Religion.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -513,7 +523,7 @@ Primaryocc.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -537,7 +547,7 @@ Freqfish.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -562,7 +572,7 @@ Freqsellfish.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -587,7 +597,7 @@ Incfish.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -610,7 +620,7 @@ Fishtech.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -634,7 +644,7 @@ Childfs.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -669,7 +679,7 @@ Proteinfish.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -690,7 +700,7 @@ FSCategorical.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -725,7 +735,7 @@ EconStatus.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -748,7 +758,7 @@ MarineMember.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -783,7 +793,7 @@ MarineMeeting.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -818,7 +828,7 @@ SocialConflict.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -840,7 +850,7 @@ NumThreat.statusplot <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -861,7 +871,7 @@ MarineContribution.statusplot <-
            position="dodge",
            width=0.75,
            show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +

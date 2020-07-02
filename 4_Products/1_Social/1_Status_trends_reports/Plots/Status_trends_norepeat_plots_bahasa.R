@@ -4,7 +4,7 @@
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2017
-# modified: October 2019
+# modified: June 2020
 # 
 # 
 # ---- inputs ----
@@ -63,10 +63,10 @@ Age.gender.Baseline.bahasa <-
                      limits=c(-10,10),
                      labels=abs(seq(-10,10,5))) +
   scale_fill_manual(name="",
-                    labels=c("Perempuan","Laki-laki"),
+                    labels=legend.labs.bahasa[["AgeGender"]],
                     values=c("Female.Baseline"=alpha("#7FCDBB",0.95),
                              "Male.Baseline"=alpha("#253494",0.95)))+ 
-  coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Usia",y="Distribusi populasi (% individu berdasarkan jenis kelamin)")
+  coord_flip() + age.gender.plot.theme + plot.guides.techreport + Statusplot.labs.bahasa[["AgeGender"]]
 
 
 # ---- 2.3 Create legend ----
@@ -88,7 +88,7 @@ Age.gender.legend.plot.bahasa <-
   scale_fill_manual(name="",
                     values=c("Female.Baseline"=alpha("#7FCDBB",0.95),
                              "Male.Baseline"=alpha("#253494",0.95)),
-                    labels=c("Perempuan","Laki-laki")) +
+                    labels=legend.labs.bahasa[["AgeGender"]]) +
   coord_flip() + plot.guides.techreport + theme(legend.justification="right")
 
 Age.gender.legend.bahasa <- g_legend(Age.gender.legend.plot.bahasa)
@@ -114,11 +114,20 @@ Age.gender.plot.bahasa <-
 
 # - FOOD SECURITY
 FS.statusplot.bahasa <- 
-  rbind.data.frame(Sett.level.ContData.status.PLOTFORMAT[,c("SettlementName.bahasa","FSMean","FSErr","SettLevel")],
-                   data.frame(SettlementName.bahasa="  ",
-                              FSMean=NA,
-                              FSErr=NA,
-                              SettLevel="Dummy")) %>%
+  rbind.data.frame(Sett.level.ContData.status.PLOTFORMAT[,c("SettlementName.bahasa","Zone","FSMean","FSErr","SettLevel")],
+                   if(length(Sett.level.ContData.status.PLOTFORMAT$SettlementName)<25) {
+                     data.frame(SettlementName.bahasa="  ",
+                                Zone="",
+                                FSMean=NA,
+                                FSErr=NA,
+                                SettLevel="Dummy")
+                   } else {
+                     data.frame(SettlementName.bahasa=c("  ","  "),
+                                Zone=c("",""),
+                                FSMean=NA,
+                                FSErr=NA,
+                                SettLevel=c("Dummy","Dummy"))
+                   }) %>%
   ggplot(aes(x=SettlementName.bahasa)) +
   geom_hline(aes(yintercept=1.56),size=0.25,colour="#505050") +
   geom_hline(aes(yintercept=4.02),size=0.25,colour="#505050") +
@@ -134,7 +143,7 @@ FS.statusplot.bahasa <-
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -152,11 +161,11 @@ FS.statusplot.bahasa <-
             nudge_x=0.02,
             fontface="bold.italic",
             colour=errcols.status["NotDummy"]) +
-  geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(6.06-4.02))+4.02,label="Aman Pangan"),
+  geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(6.06-4.02))+4.02,label=legend.labs.bahasa[["FoodSecure"]]),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(4.02-1.56))+1.56,label="Rawan Pangan\ntanpa kelaparan"),
+  geom_text(aes(x=length(SettlementName.bahasa),y=(0.5*(4.02-1.56))+1.56,label=legend.labs.bahasa[["NoHunger"]]),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_text(aes(x=length(SettlementName.bahasa),y=0.5*1.56,label="Rawan Pangan\ndengan kelaparan"),
+  geom_text(aes(x=length(SettlementName.bahasa),y=0.5*1.56,label=legend.labs.bahasa[["YesHunger"]]),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,6.06)) +
@@ -194,7 +203,7 @@ MA.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -236,7 +245,7 @@ PA.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -277,7 +286,7 @@ MT.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -316,7 +325,7 @@ SE.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -357,7 +366,7 @@ Time.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -399,7 +408,7 @@ Unwell.statusplot.bahasa <- ggplot(data=Sett.level.ContData.status.PLOTFORMAT,
                 width=0.25,
                 size=0.5,
                 show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -440,7 +449,7 @@ Gender.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -448,7 +457,7 @@ Gender.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Gender"]],
-                    labels=c("Perempuan","Laki-laki")) +
+                    labels=legend.labs.bahasa[["AgeGender"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["Gender"] +
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -475,7 +484,7 @@ Religion.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -483,7 +492,7 @@ Religion.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Religion"]],
-                    labels=c("Lainnya","Islam","Kristen")) +
+                    labels=legend.labs.bahasa[["Religion"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["Religion"] +
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -512,7 +521,7 @@ Primaryocc.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -520,8 +529,7 @@ Primaryocc.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["PrimaryOcc"]],
-                    labels=c("Lainnya", "Budidaya perairan", "Pariwisata", "Pemanfaatan sumber daya laut\nyang tidak terbarukan",  
-                             "Jenis pekerjaan berupah/\nburuh lainnya", "Hasil hutan", "Penangkapan ikan", "Pertanian")) +
+                    labels=legend.labs.bahasa[["PrimaryOcc"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["PrimaryOcc"] + plot.guides.techreport
 
 # - FISHING FREQUENCY
@@ -536,7 +544,7 @@ Freqfish.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -544,9 +552,7 @@ Freqfish.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FreqFish"]],
-                    labels=c("Lebih dari beberapa kali perminggu","Beberapa kali perminggu",
-                             "Beberapa kali perbulan","Beberapa kali dalam enam bulan",
-                             "Setiap enam bulan sekali")) +
+                    labels=legend.labs.bahasa[["FreqFish"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FreqFish"] + plot.guides.techreport
 
 # - SELL FISH FREQUENCY
@@ -561,7 +567,7 @@ Freqsellfish.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -569,9 +575,7 @@ Freqsellfish.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FreqSellFish"]],
-                    labels=c("Lebih dari beberapa kali perminggu","Beberapa kali perminggu",
-                             "Beberapa kali perbulan","Beberapa kali dalam enam bulan",
-                             "Setiap enam bulan sekali")) +
+                    labels=legend.labs.bahasa[["FreqSellFish"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FreqSellFish"] + plot.guides.techreport
 
 # - INCOME FROM FISHING
@@ -586,7 +590,7 @@ Incfish.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -594,7 +598,7 @@ Incfish.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["IncFish"]],
-                    labels=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada")) +
+                    labels=legend.labs.bahasa[["IncFish"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["IncFish"] + plot.guides.techreport
 
 # - FISHING TECHNIQUE
@@ -609,7 +613,7 @@ Fishtech.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -617,8 +621,7 @@ Fishtech.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FishTech"]],
-                    labels=c("Mobile line","Stationary line",
-                             "Mobile net","Stationary net","Penangkapan dengan tangan")) +
+                    labels=legend.labs.bahasa[["FishTech"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FishTech"] + plot.guides.techreport
 
 # - CHILDHOOD FOOD SECURITY
@@ -633,7 +636,7 @@ Childfs.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -641,7 +644,7 @@ Childfs.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["ChildFS"]],
-                    labels=c("Kejadian kelaparan\npada anak","Tidak ada kejadian\nkelaparan pada anak")) +
+                    labels=legend.labs.bahasa[["ChildFS"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["ChildFS"] +
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -668,7 +671,7 @@ Proteinfish.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -676,7 +679,7 @@ Proteinfish.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["Protein"]],
-                    labels=c("Seluruhnya","Sebagian besar","Sebagian","Sebagian kecil","Tidak ada")) +
+                    labels=legend.labs.bahasa[["Protein"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FishProtein"] + plot.guides.techreport
 
 # - CATEGORICAL FOOD SECURITY
@@ -689,7 +692,7 @@ FSCategorical.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -697,7 +700,7 @@ FSCategorical.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["FSCategorical"]],
-                    labels=c("Rawan Pangan dengan kelaparan", "Rawan Pangan tanpa kelaparan","Aman Pangan" )) +
+                    labels=legend.labs.bahasa[["FSCategorical"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["FSCategorical"] + 
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -724,7 +727,7 @@ EconStatus.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -732,8 +735,7 @@ EconStatus.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["EconStatus"]],
-                    labels=c("Jauh lebih baik","Sedikit lebih baik","Tidak lebih baik maupun lebih buruk",
-                             "Sedikit lebih buruk","Jauh lebih buruk")) +
+                    labels=legend.labs.bahasa[["EconStatus"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["EconStatus"] + plot.guides.techreport
 
 # - MEMBER OF MARINE RESOURCE ORGANIZATION
@@ -748,7 +750,7 @@ MarineMember.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -756,7 +758,7 @@ MarineMember.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["MarineMember"]],
-                    labels=c("Bukan anggota","Anggota")) +
+                    labels=legend.labs.bahasa[["MarineMember"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["MarineMember"] + 
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -783,7 +785,7 @@ MarineMeeting.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -791,7 +793,7 @@ MarineMeeting.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["MarineAttendance"]],
-                    labels=c("Tidak menghadiri pertemuan","Menghadiri pertemuan")) +
+                    labels=legend.labs.bahasa[["MarineAttendance"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["MarineAttendance"] + 
   guides(fill=guide_legend(label.vjust=0.5,
                            label.theme=element_text(size=rel(9),
@@ -818,7 +820,7 @@ SocialConflict.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -826,7 +828,7 @@ SocialConflict.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["SocialConflict"]],
-                    labels=c("Sangat meningkat","Meningkat","Tidak meningkat maupun menurun","Menurun","Sangat menurun")) +
+                    labels=legend.labs.bahasa[["SocialConflict"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["SocialConflict"] + plot.guides.techreport
 
 # - NUMBER OF LOCAL THREATS
@@ -840,7 +842,7 @@ NumThreat.statusplot.bahasa <-
            width=0.75,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +
@@ -848,7 +850,7 @@ NumThreat.statusplot.bahasa <-
                      labels=scales::percent_format()) +
   scale_fill_manual(name="",
                     values=multianswer.fillcols.status[["NumLocalThreats"]],
-                    labels=c("Lebih dari empat ancaman","Empat ancaman","Tiga ancaman","Dua ancaman","Satu ancaman", "Tidak ada ancaman")) +
+                    labels=legend.labs.bahasa[["NumLocalThreats"]]) +
   coord_flip() + plot.theme + Statusplot.labs.bahasa["NumLocalThreats"] + plot.guides.techreport
 
 # - MARINE GROUP CONTRIBUTION
@@ -861,7 +863,7 @@ MarineContribution.statusplot.bahasa <-
            position="dodge",
            width=0.75,
            show.legend=F) +
-  geom_vline(aes(xintercept=ifelse(MPA.name$MPAID==21,2,3)),
+  geom_vline(aes(xintercept=3),
              linetype=2,
              size=0.35,
              colour="#505050") +

@@ -70,6 +70,7 @@ mpa.trends <- function(MPA=NULL) {
   # calculate indicators at household level, settlement level, and MPA level
   source('1_Data_wrangling/1_Social/3_Calculating_indicators/Calculate_household_indices.R', local=T)
   source('3_Analysis/1_Social/2_Status_trends/Sett_MPA_level_means.R', local=T)
+  ifelse(MPA==21, source('3_Analysis/1_Social/2_Status_trends/Sett_MPA_level_means_byzone.R', local=T), NA) # Wakatobi doesn't have control settlements, but can be broken down by zone, so has additional analyses by zone
   
   # significance tests, based on number of repeat monitoring years
   ifelse(num.years==1, source('3_Analysis/1_Social/2_Status_trends/Status_trends_norepeat_sigtests.R', local=T), 
@@ -83,19 +84,21 @@ mpa.trends <- function(MPA=NULL) {
     source('2_Functions/3_Plotting/Function_define_asteriskplotting.R', local=T)
   
   # plotting datasets, based on number of repeat monitoring years
-  ifelse(num.years==1, source('4_Products/1_Social/1_Status_trends_reports/Status_trends_norepeat_datasets.R', local=T),
-         ifelse(num.years==2, source('4_Products/1_Social/1_Status_trends_reports/Status_trends_onerepeat_datasets.R', local=T), 
-                ifelse(num.years==3, source('4_Products/1_Social/1_Status_trends_reports/Status_trends_tworepeat_datasets.R', local=T), NA)))
+  ifelse(num.years==1, source('4_Products/1_Social/1_Status_trends_reports/Datasets/Status_trends_norepeat_datasets.R', local=T),
+         ifelse(num.years==2, source('4_Products/1_Social/1_Status_trends_reports/Datasets/Status_trends_onerepeat_datasets.R', local=T), 
+                ifelse(num.years==3, source('4_Products/1_Social/1_Status_trends_reports/Datasets/Status_trends_tworepeat_datasets.R', local=T), NA)))
   
   # source plot scripts (English language plots)
-  ifelse(num.years==1, source('4_Products/1_Social/1_Status_trends_reports/Status_trends_norepeat_plots.R', local=T), 
-         ifelse(num.years==2, source('4_Products/1_Social/1_Status_trends_reports/Status_trends_onerepeat_plots.R', local=T),
-                ifelse(num.years==3, source('4_Products/1_Social/1_Status_trends_reports/Status_trends_tworepeat_plots.R', local=T), NA)))
+  ifelse(num.years==1 & MPA==21, source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_norepeat_plots_byzone.R', local=T),
+         ifelse(num.years==1 & MPA!=21,source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_norepeat_plots.R', local=T), 
+                ifelse(num.years==2, source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_onerepeat_plots.R', local=T),
+                       ifelse(num.years==3, source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_tworepeat_plots.R', local=T), NA))))
   
   # source plot scripts (Bahasa language plots)
-  ifelse(num.years==1, source('4_Products/1_Social/1_Status_trends_reports/Status_trends_norepeat_plots_bahasa.R', local=T), 
-         ifelse(num.years==2, source('4_Products/1_Social/1_Status_trends_reports/Status_trends_onerepeat_plots_bahasa.R', local=T),
-                ifelse(num.years==3, source('4_Products/1_Social/1_Status_trends_reports/Status_trends_tworepeat_plots_bahasa.R', local=T), NA)))
+  ifelse(num.years==1 & MPA==21, source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_norepeat_plots_byzone_bahasa.R', local=T),
+         ifelse(num.years==1 & MPA!=21,source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_norepeat_plots_bahasa.R', local=T),
+                ifelse(num.years==2, source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_onerepeat_plots_bahasa.R', local=T),
+                       ifelse(num.years==3, source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_tworepeat_plots_bahasa.R', local=T), NA))))
   
   
   # ---- EXPORT ----
@@ -129,6 +132,11 @@ mpa.trends <- function(MPA=NULL) {
               Proportional_trend=MPA.level.PropData.trend.PLOTFORMAT,
               Proportional_trend_pvalues=propdata.trend.test),
          paste(paste(OutputFileName,MPA.name$MPAName.final,sep="/"),"MPA_Level_Data_forplotting.xlsx",sep="_"))
+  }
+  
+  if(MPA.name$MPAID==21){
+    export(Detailed.FishTechnique,
+           paste(paste(OutputFileName,MPA.name$MPAName.final,sep="/"),"Detailed_Fishing_Technique_data.xlsx",sep="_"))
   }
   
   # output plots
