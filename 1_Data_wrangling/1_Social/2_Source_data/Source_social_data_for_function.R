@@ -7,7 +7,7 @@
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: May 2019
 # QAQC_modified by: Duong Le & David Gill  
-# Date: June 2019
+# Date modified: June 2019
 # 
 # 
 # ---- inputs ----
