@@ -46,7 +46,7 @@ AgeGender <-
 # ---- 1.3 MPA-level proportional data (row to be added to bottom of status and annex plots in tech report) ----
 
 MPA.level.PropData.status <- 
-  if(MPA.name$MPAID==21) {
+  if(MPA.name$MPAID==21) { # this allows for Wakatobi data to be calculated with separate aggregations for No Take vs. Use zones (because there are no controls)
     data.frame(SettlementName=paste(MPA.Level.Means.byZone$Zone,"Settlements",sep=" "),
                MPA.Level.Means.byZone %>% 
                  select(Zone, HHH.female, HHH.male, Percent.Rel.Christian, Percent.Rel.Muslim, Percent.Rel.Other, Percent.Rel.Buddhist,
@@ -204,10 +204,10 @@ Sett.level.PropData.status <-
 
 Sett.level.PropData.status <-
   if(MPA.name$MPAID==21) {
-    rbind.data.frame(Sett.level.PropData.status%>%filter(Zone=="Use"),
+    rbind.data.frame(Sett.level.PropData.status %>% filter(Zone=="Use"),
                      data.frame(SettlementName=" ",
                                 null.row.PropData[-1]),
-                     Sett.level.PropData.status%>%filter(Zone=="No Take"))
+                     Sett.level.PropData.status %>% filter(Zone=="No Take"))
   }
 
 
@@ -221,8 +221,8 @@ Sett.level.PropData.status.PLOTFORMAT <-
                                as.character(SettlementName)),
          SettlementName=factor(SettlementName,levels=unique(SettlementName),ordered=T),
          SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"),
-         SettlementName.bahasa=ifelse(grepl("Use Settlements",SettlementName),sett.names.bahasa[["Use"]],  # still need translation for "Use Settlements"
-                                      ifelse(grepl("No Take Settlements",SettlementName),sett.names.bahasa[["NoTake"]], # still need translation for "No Take Settlements"
+         SettlementName.bahasa=ifelse(grepl("Use Settlements",SettlementName),sett.names.bahasa[["Use"]], 
+                                      ifelse(grepl("No Take Settlements",SettlementName),sett.names.bahasa[["NoTake"]], 
                                              ifelse(grepl("Control Settlements",SettlementName),sett.names.bahasa[["ControlSett"]],
                                                     ifelse(grepl("MPA",SettlementName,ignore.case=F),MPA.name$MPAName.bahasa,as.character(SettlementName))))),
          SettlementName.bahasa=factor(SettlementName.bahasa,levels=unique(SettlementName.bahasa),ordered=T))
@@ -265,8 +265,8 @@ Sett.level.ContData.status.PLOTFORMAT <-
   mutate(SettlementName=ifelse(is.na(SettlementName),"",SettlementName),
          SettlementName=factor(SettlementName,levels=unique(SettlementName),ordered=T),
          SettLevel=ifelse(SettlementName=="","Dummy","NotDummy"),
-         SettlementName.bahasa=ifelse(grepl("Use Settlements",SettlementName),sett.names.bahasa[["Use"]],  # still need translation for "Use Settlements"
-                                      ifelse(grepl("No Take Settlements",SettlementName),sett.names.bahasa[["NoTake"]], # still need translation for "No Take Settlements"
+         SettlementName.bahasa=ifelse(grepl("Use Settlements",SettlementName),sett.names.bahasa[["Use"]], 
+                                      ifelse(grepl("No Take Settlements",SettlementName),sett.names.bahasa[["NoTake"]],
                                              ifelse(grepl("Control Settlements",SettlementName),sett.names.bahasa[["ControlSett"]],
                                                     ifelse(grepl("MPA",SettlementName,ignore.case=F),MPA.name$MPAName.bahasa,as.character(SettlementName))))),
          SettlementName.bahasa=factor(SettlementName.bahasa,levels=unique(SettlementName.bahasa),ordered=T))

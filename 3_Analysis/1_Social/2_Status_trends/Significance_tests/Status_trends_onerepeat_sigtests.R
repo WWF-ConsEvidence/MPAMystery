@@ -3,7 +3,7 @@
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2016
-# modified: July 2019
+# modified: July 2020
 # 
 # 
 # ---- code sections ----
@@ -38,9 +38,11 @@ MPA.v.Control <-
 
 
 # - "MPA Settlement Means" dataset -- includes settlement level data for only treatment settlements from most recent year
-MPA.Sett.Means<-
-  Sett.Level.Means %>%
-  filter(Treatment==1 & InterviewYear==status)
+MPA.Sett.Means <-
+  if(MPA.name$MPAID==21) {
+    Sett.Level.Means.byZone %>% filter(InterviewYear==status)
+  } else { Sett.Level.Means %>% filter(Treatment==1 & InterviewYear==status)
+  }
 
 # Removing the settlement with an NA in order for function to run
 MPA.Sett.Means <- 
@@ -50,7 +52,8 @@ MPA.Sett.Means <-
 # - Frequency tables for chi-square tests
 
 FreqTables <- 
-  HHData[HHData$Treatment==1,] %>%
+  left_join(HHData,SETTLEMENT[,c("SettlementID","Zone")], by= "SettlementID") %>%
+  filter(if(MPA.name$MPAID==21) { Zone=="NoTake" } else { Treatment==1 }) %>%
   group_by(MonitoringYear) %>%
   summarise(PrimaryOcc.Fish=length(PrimaryLivelihood[PrimaryLivelihood==3 &  !is.na(PrimaryLivelihood)]),
             PrimaryOcc.Farm=length(PrimaryLivelihood[PrimaryLivelihood==1 & !is.na(PrimaryLivelihood)]),
@@ -440,15 +443,28 @@ sigvals.Sett <-
 #          (for status plots, comparing MPA households to control households)
 
 non.parametric.test.MPAvControl  <-
-  data.frame(mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
-                    function(a){
-                      var <- MPA.v.Control[,a]
-                      wilcox.test(var~Treatment,
-                                  data=MPA.v.Control,
-                                  exact=F)}))["p.value",]
+  if(MPA.name$MPAID==21) {
+    data.frame(mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
+                      function(a){
+                        var <- MPA.v.Control[,a]
+                        wilcox.test(var~Zone,
+                                    data=MPA.v.Control,
+                                    exact=F)}))["p.value",]
+  } else {
+    data.frame(mapply(a=c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell"),
+                      function(a){
+                        var <- MPA.v.Control[,a]
+                        wilcox.test(var~Treatment,
+                                    data=MPA.v.Control,
+                                    exact=F)}))["p.value",]
+  }
 
 sigvals.MPA  <- 
-  cbind.data.frame(MPA.name$MPAName,non.parametric.test.MPAvControl)
+  if(MPA.name$MPAID==21) {
+    cbind.data.frame("No Take Settlements",non.parametric.test.MPAvControl)
+  } else {
+    cbind.data.frame(MPA.name$MPAName,non.parametric.test.MPAvControl)
+  } 
 
 colnames(sigvals.MPA) <- colnames(sigvals.Sett)
 
@@ -475,23 +491,42 @@ sigvals[,c("FS.pval", "MA.pval", "MT.pval" , "PA.pval", "SE.pval", "TimeMarket.p
 # ---- 4.3 Define function for trend data significance ---- 
 
 trend.non.parametric.test.byMPA  <- 
-  data.frame(mapply(i=HHData[HHData$Treatment==1,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
-                    function(i){
-                      MannKendall(c(i[HHData$InterviewYear==unique(HHData$InterviewYear)[1]],
-                                    i[HHData$InterviewYear==unique(HHData$InterviewYear)[2]]))
-                    }))  %>%
-  rename(FS.pval = FSIndex, MA.pval = MAIndex, MT.pval = MTIndex, PA.pval = PAIndex, SE.pval = SERate, 
-         TimeMarket.pval = TimeMarket, Unwell.pval = DaysUnwell)
+  if(MPA.name$MPAID==21) {
+    data.frame(mapply(i=left_join(HHData,SETTLEMENT[,c("SettlementID","Zone")], by="SettlementID") %>% filter(Zone=="No Take") %>% select(FSIndex,MAIndex,MTIndex,PAIndex,SERate,TimeMarket,DaysUnwell),
+                      function(i){
+                        MannKendall(c(i[HHData$InterviewYear==unique(HHData$InterviewYear)[1]],
+                                      i[HHData$InterviewYear==unique(HHData$InterviewYear)[2]]))
+                      }))  %>%
+      rename(FS.pval = FSIndex, MA.pval = MAIndex, MT.pval = MTIndex, PA.pval = PAIndex, SE.pval = SERate, 
+             TimeMarket.pval = TimeMarket, Unwell.pval = DaysUnwell) 
+  } else {
+    data.frame(mapply(i=HHData[HHData$Treatment==1,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
+                      function(i){
+                        MannKendall(c(i[HHData$InterviewYear==unique(HHData$InterviewYear)[1]],
+                                      i[HHData$InterviewYear==unique(HHData$InterviewYear)[2]]))
+                      }))  %>%
+      rename(FS.pval = FSIndex, MA.pval = MAIndex, MT.pval = MTIndex, PA.pval = PAIndex, SE.pval = SERate, 
+             TimeMarket.pval = TimeMarket, Unwell.pval = DaysUnwell) 
+    }
 
 trend.non.parametric.test.byControl  <- 
-  data.frame(mapply(i=HHData[HHData$Treatment==0,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
-                    function(i){
-                      MannKendall(c(i[HHData$InterviewYear==unique(HHData$InterviewYear)[1]],
-                                    i[HHData$InterviewYear==unique(HHData$InterviewYear)[2]]))
-                    }))  %>%
-  rename(FS.pval = FSIndex, MA.pval = MAIndex, MT.pval = MTIndex, PA.pval = PAIndex, SE.pval = SERate, 
-         TimeMarket.pval = TimeMarket, Unwell.pval = DaysUnwell)
-
+  if(MPA.name$MPAID==21) {
+    data.frame(mapply(i=left_join(HHData,SETTLEMENT[,c("SettlementID","Zone")], by="SettlementID") %>% filter(Zone=="Take") %>% select(FSIndex,MAIndex,MTIndex,PAIndex,SERate,TimeMarket,DaysUnwell),
+                      function(i){
+                        MannKendall(c(i[HHData$InterviewYear==unique(HHData$InterviewYear)[1]],
+                                      i[HHData$InterviewYear==unique(HHData$InterviewYear)[2]]))
+                      }))  %>%
+      rename(FS.pval = FSIndex, MA.pval = MAIndex, MT.pval = MTIndex, PA.pval = PAIndex, SE.pval = SERate, 
+             TimeMarket.pval = TimeMarket, Unwell.pval = DaysUnwell) 
+  } else {
+    data.frame(mapply(i=HHData[HHData$Treatment==0,c("FSIndex","MAIndex","MTIndex","PAIndex","SERate","TimeMarket","DaysUnwell")],
+                      function(i){
+                        MannKendall(c(i[HHData$InterviewYear==unique(HHData$InterviewYear)[1]],
+                                      i[HHData$InterviewYear==unique(HHData$InterviewYear)[2]]))
+                      }))  %>%
+      rename(FS.pval = FSIndex, MA.pval = MAIndex, MT.pval = MTIndex, PA.pval = PAIndex, SE.pval = SERate, 
+             TimeMarket.pval = TimeMarket, Unwell.pval = DaysUnwell) 
+  }
 
 
 
@@ -532,16 +567,20 @@ trend.non.parametric.test.bySett  <-
 #   variable, using monotonic trend test, Mann-Kendall -- so, interpretation is "across the sampling years, 
 #   there [is/is not] a significant difference in this variable across the settlement)
 annex.sigvals  <- 
-  rbind.data.frame(cbind.data.frame(SettlementName=c("Control Settlements"),trend.non.parametric.test.byControl ["sl",]),
-                   cbind.data.frame(SettlementName=MPA.name$MPAName,trend.non.parametric.test.byMPA ["sl",]),
+  rbind.data.frame(cbind.data.frame(SettlementName=if(MPA.name$MPAID==21) { "Use Settlements" } else { c("Control Settlements") },
+                                    trend.non.parametric.test.byControl ["sl",]),
+                   cbind.data.frame(SettlementName=if(MPA.name$MPAID==21) { sett.names.bahasa[["NoTake"]]} else { MPA.name$MPAName },
+                                    trend.non.parametric.test.byMPA ["sl",]),
                    null.row.sigvals,
                    trend.non.parametric.test.bySett[rev(order(trend.non.parametric.test.bySett$SettlementName)),])
 
 annex.sigvals[2:8] <- unlist(annex.sigvals[2:8])
 
 annex.sigvals.bahasa  <- 
-  rbind.data.frame(cbind.data.frame(SettlementName=sett.names.bahasa[["Control"]],trend.non.parametric.test.byControl ["sl",]),
-                   cbind.data.frame(SettlementName=MPA.name$MPAName.bahasa,trend.non.parametric.test.byMPA ["sl",]),
+  rbind.data.frame(cbind.data.frame(SettlementName=if(MPA.name$MPAID==21) { sett.names.bahasa[["Use"]] } else { sett.names.bahasa[["Control"]] },
+                                    trend.non.parametric.test.byControl ["sl",]),
+                   cbind.data.frame(SettlementName=if(MPA.name$MPAID==21) { sett.names.bahasa[["NoTake"]] } else { MPA.name$MPAName.bahasa },
+                                    trend.non.parametric.test.byMPA ["sl",]),
                    null.row.sigvals,
                    trend.non.parametric.test.bySett[rev(order(trend.non.parametric.test.bySett$SettlementName)),])
 

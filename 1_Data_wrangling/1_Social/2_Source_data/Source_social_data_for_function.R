@@ -50,14 +50,8 @@ today.date <- gsub("-","",Sys.Date())
 last.file <- function(dir.nam,nam){
   import(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))),guess_max=50000)}
 
-# # Shapefiles (with package sf)
-# st_last.file <- function(dir.nam,nam){
-#   st_read(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))}
-# 
-# # RData files
-# last.Rdata <- function(dir.nam,nam){
-#   load(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))
-# }
+# suppress messages for experimental new group_by() and summarise() functionality in dplyr
+options(dplyr.summarise.inform = FALSE)
 
 
 # ---- 1.2 Import data ----
@@ -69,6 +63,7 @@ ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_data
 NMORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam="HH_tbl_NMORGANIZATION")
 LTHREAT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_LTHREAT')
 LSTEPS <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_LSTEPS')
+
 
 
 # 
@@ -195,7 +190,7 @@ HHData <-   WELLBEING %>%
                    TertiaryFishTechnique = as.integer(ifelse(TertiaryFishTechnique%in%c(1:16,996),TertiaryFishTechnique,NA)),
                    
                    
-                   # Economic Well-being (Sujective)
+                   # Economic Well-being (Subjective)
                    EconStatusTrend = as.integer(ifelse(EconomicStatusTrend%in%c(1:5),EconomicStatusTrend,NA)),
                    EconStatusReason = ifelse(EconomicStatusReason %in% c("994", "995", "996", "997", "998", "999"), NA, as.character(EconomicStatusReason)), 
                    

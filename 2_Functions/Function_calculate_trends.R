@@ -73,9 +73,9 @@ mpa.trends <- function(MPA=NULL) {
   ifelse(MPA==21, source('3_Analysis/1_Social/2_Status_trends/Sett_MPA_level_means_byzone.R', local=T), NA) # Wakatobi doesn't have control settlements, but can be broken down by zone, so has additional analyses by zone
   
   # significance tests, based on number of repeat monitoring years
-  ifelse(num.years==1, source('3_Analysis/1_Social/2_Status_trends/Status_trends_norepeat_sigtests.R', local=T), 
-         ifelse(num.years==2, source('3_Analysis/1_Social/2_Status_trends/Status_trends_onerepeat_sigtests.R', local=T), 
-                ifelse(num.years==3, source('3_Analysis/1_Social/2_Status_trends/Status_trends_tworepeat_sigtests.R', local=T), NA)))
+  ifelse(num.years==1, source('3_Analysis/1_Social/2_Status_trends/Significance_tests/Status_trends_norepeat_sigtests.R', local=T), 
+         ifelse(num.years==2, source('3_Analysis/1_Social/2_Status_trends/Significance_tests/Status_trends_onerepeat_sigtests.R', local=T), 
+                ifelse(num.years==3, source('3_Analysis/1_Social/2_Status_trends/Significance_tests/Status_trends_tworepeat_sigtests.R', local=T), NA)))
   
   # ---- SOURCE DATASETS AND PLOTTING ----
   
