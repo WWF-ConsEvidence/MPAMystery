@@ -2,6 +2,15 @@
 # code: Plotting themes, labels, legend guides
 # 
 # 
+# author: Kelly Claborn, clabornkelly@gmail.com
+# created: June 2017
+# modified: July 2020
+# 
+# 
+# ---- code sections ----
+#  1) Report Plot Themes, Legends, and Guides
+#  2) Report Labels
+# 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -28,10 +37,10 @@ plot.theme <- theme(axis.ticks=element_blank(),
                                             angle=0,
                                             face="bold",
                                             colour="#303030"),
-                    axis.text=element_text(size=rel(0.9),
-                                           angle=0,
-                                           colour="#303030",
-                                           lineheight=0.7),
+                    axis.text=element_text(size=if(num.years==2) { rel(0.9) } else { rel(0.7) },
+                                                  angle=0,
+                                                  colour="#303030",
+                                                  lineheight=0.7),
                     legend.position="top",
                     legend.justification="right",
                     legend.box.spacing=unit(0.1,"cm"))
@@ -104,7 +113,7 @@ plot.theme.impact <- theme(axis.ticks=element_blank(),
                     legend.justification="right",
                     legend.box.spacing=unit(0.1,"cm"))
 
-
+# fill colors
 fillcols.status <- c("NotDummy"=alpha("#2C7FB8",0.95),"Dummy"=alpha("#FFFFFF",0))
 fillcols.trend <- c(alpha("#2C7FB8",0.95))
 fillcols.cont.trend <- c("MPA"=alpha("#2C7FB8",0.95),"Control"=alpha("#505050",0.95))
@@ -223,6 +232,11 @@ multianswer.fillcols.status <- list(Gender=c("HHH.male"=alpha("#253494",0.95),
                                                      "AdultEducMid"=alpha("#2C7FB8",0.95),
                                                      "AdultEducSec"=alpha("#253494",0.95),
                                                      "AdultEducHigher"=alpha("#101324", 0.95)))
+
+annex.alpha <- list(numyear2=c(0.6,1),
+                    numyear3=c(0.4,0.7,1),
+                    numyear4=c(0.3,0.5,0.7,1),
+                    numyear5=c(0.2,0.4,0.6,0.8,1))
 
 
 # ---- 1.2 MPA Impact Summary plot themes ----

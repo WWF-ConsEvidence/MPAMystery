@@ -65,6 +65,7 @@ mpa.trends <- function(MPA=NULL) {
   # define number of repeat monitoring years
   num.years <- length(unique(HHData$MonitoringYear))
   
+  
   # ---- ANALYSIS ----
   
   # calculate indicators at household level, settlement level, and MPA level
@@ -75,7 +76,10 @@ mpa.trends <- function(MPA=NULL) {
   # significance tests, based on number of repeat monitoring years
   ifelse(num.years==1, source('3_Analysis/1_Social/2_Status_trends/Significance_tests/Status_trends_norepeat_sigtests.R', local=T), 
          ifelse(num.years==2, source('3_Analysis/1_Social/2_Status_trends/Significance_tests/Status_trends_onerepeat_sigtests.R', local=T), 
-                ifelse(num.years==3, source('3_Analysis/1_Social/2_Status_trends/Significance_tests/Status_trends_tworepeat_sigtests.R', local=T), NA)))
+                ifelse(num.years==3, source('3_Analysis/1_Social/2_Status_trends/Significance_tests/Status_trends_tworepeat_sigtests.R', local=T), 
+                       ifelse(num.years==4, source('3_Analysis/1_Social/2_Status_trends/Significance_tests/Status_trends_threerepeat_sigtests.R', local=T),
+                              ifelse(num.years==5, source('3_Analysis/1_Social/2_Status_trends/Significance_tests/Status_trends_fourrepeat_sigtests.R', local=T), NA)))))
+  
   
   # ---- SOURCE DATASETS AND PLOTTING ----
   
@@ -85,20 +89,17 @@ mpa.trends <- function(MPA=NULL) {
   
   # plotting datasets, based on number of repeat monitoring years
   ifelse(num.years==1, source('4_Products/1_Social/1_Status_trends_reports/Datasets/Status_trends_norepeat_datasets.R', local=T),
-         ifelse(num.years==2, source('4_Products/1_Social/1_Status_trends_reports/Datasets/Status_trends_onerepeat_datasets.R', local=T), 
-                ifelse(num.years==3, source('4_Products/1_Social/1_Status_trends_reports/Datasets/Status_trends_tworepeat_datasets.R', local=T), NA)))
+         ifelse(num.years>1, source('4_Products/1_Social/1_Status_trends_reports/Datasets/Status_trends_multirepeat_datasets.R', local=T), NA))
   
   # source plot scripts (English language plots)
   ifelse(num.years==1 & MPA==21, source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_norepeat_plots_byzone.R', local=T),
          ifelse(num.years==1 & MPA!=21,source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_norepeat_plots.R', local=T), 
-                ifelse(num.years==2, source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_onerepeat_plots.R', local=T),
-                       ifelse(num.years==3, source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_tworepeat_plots.R', local=T), NA))))
+                ifelse(num.years>1 & MPA!=21, source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_multirepeat_plots.R', local=T), NA)))
   
   # source plot scripts (Bahasa language plots)
   ifelse(num.years==1 & MPA==21, source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_norepeat_plots_byzone_bahasa.R', local=T),
          ifelse(num.years==1 & MPA!=21,source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_norepeat_plots_bahasa.R', local=T),
-                ifelse(num.years==2, source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_onerepeat_plots_bahasa.R', local=T),
-                       ifelse(num.years==3, source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_tworepeat_plots_bahasa.R', local=T), NA))))
+                ifelse(num.years>1 & MPA!=21, source('4_Products/1_Social/1_Status_trends_reports/Plots/Status_trends_multirepeat_plots_bahasa.R', local=T), NA)))
   
   
   # ---- EXPORT ----

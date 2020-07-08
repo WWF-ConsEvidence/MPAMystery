@@ -1,10 +1,10 @@
 # 
-# code:  Status & Trend Plots, for data with one repeat - BAHASA
+# code:  Status & Trend Plots, for data with multiple repeats - BAHASA
 # 
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2017
-# modified: June 2020
+# modified: July 2020
 # 
 # 
 # ---- inputs ----
@@ -42,9 +42,6 @@ Statusplot.sigpos.bahasa <-
 
 Monitoryear.labs.bahasa <- 
   define.year.monitoryear.column.bahasa(MPA.Level.Means)
-
-Trendplot.monitoryear.labs.bahasa <- 
-  rep(paste(Monitoryear.labs.bahasa$Label[2],"\n\n\n\n",Monitoryear.labs.bahasa$Label[1]),2)
 
 
 Conttrendplot.ylabs.bahasa <- 
@@ -94,32 +91,7 @@ Annexplot.settnames.bahasa[3,] <- rep("",length(Annexplot.settnames.bahasa[3,]))
 # 
 
 
-# ---- 2.1 Repeat One ----
-
-Age.gender.RepeatOne.bahasa <- 
-  melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.RepeatOne","Male.RepeatOne")) %>%
-  ggplot() +
-  geom_bar(aes(x=AgeCat,
-               y=value,
-               fill=variable),
-           stat="identity",
-           width=0.75,
-           colour="#505050",
-           size=0.15,
-           show.legend=F) +
-  geom_text(aes(x=19,y=-7,label=Monitoryear.labs.bahasa$Label[2]),
-            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  scale_y_continuous(expand=c(0,0),
-                     limits=c(-10,10),
-                     labels=abs(seq(-10,10,5))) +
-  scale_fill_manual(name="",
-                    labels=legend.labs.bahasa[["AgeGender"]],
-                    values=c("Female.RepeatOne"=alpha("#7FCDBB",0.95),
-                             "Male.RepeatOne"=alpha("#253494",0.95)))+ 
-  coord_flip() + age.gender.plot.theme + plot.guides.techreport + Statusplot.labs.bahasa[["AgeGenderUpperPlot"]]
-
-
-# ---- 2.2 Baseline ----
+# ---- 2.1 Baseline ----
 
 Age.gender.Baseline.bahasa <- 
   melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.Baseline","Male.Baseline")) %>%
@@ -144,7 +116,115 @@ Age.gender.Baseline.bahasa <-
   coord_flip() + age.gender.plot.theme + plot.guides.techreport + Statusplot.labs.bahasa[["AgeGender"]]
 
 
-# ---- 2.3 Create legend ----
+# ---- 2.2 Repeat One ----
+
+Age.gender.RepeatOne.bahasa <- 
+  melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.RepeatOne","Male.RepeatOne")) %>%
+  ggplot() +
+  geom_bar(aes(x=AgeCat,
+               y=value,
+               fill=variable),
+           stat="identity",
+           width=0.75,
+           colour="#505050",
+           size=0.15,
+           show.legend=F) +
+  geom_text(aes(x=19,y=-7,label=Monitoryear.labs.bahasa$Label[2]),
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(-10,10),
+                     labels=abs(seq(-10,10,5))) +
+  scale_fill_manual(name="",
+                    labels=legend.labs.bahasa[["AgeGender"]],
+                    values=c("Female.RepeatOne"=alpha("#7FCDBB",0.95),
+                             "Male.RepeatOne"=alpha("#253494",0.95)))+ 
+  coord_flip() + age.gender.plot.theme + plot.guides.techreport + 
+  if(num.years==4) { Statusplot.labs.bahasa[["AgeGender"]] 
+    } else { Statusplot.labs.bahasa[["AgeGenderUpperPlot"]] }
+
+
+# ---- 2.3 Repeat Two ----
+
+Age.gender.RepeatTwo.bahasa <- 
+  if(num.years>2) {
+    melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.RepeatTwo","Male.RepeatTwo")) %>%
+      ggplot() +
+      geom_bar(aes(x=AgeCat,
+                   y=value,
+                   fill=variable),
+               stat="identity",
+               width=0.75,
+               colour="#505050",
+               size=0.15,
+               show.legend=F) +
+      geom_text(aes(x=19,y=-7,label=Monitoryear.labs.bahasa$Label[3]),
+                size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+      scale_y_continuous(expand=c(0,0),
+                         limits=c(-10,10),
+                         labels=abs(seq(-10,10,5))) +
+      scale_fill_manual(name="",
+                        labels=legend.labs.bahasa[["AgeGender"]],
+                        values=c("Female.RepeatTwo"=alpha("#7FCDBB",0.95),
+                                 "Male.RepeatTwo"=alpha("#253494",0.95)))+ 
+      coord_flip() + age.gender.plot.theme + plot.guides.techreport + Statusplot.labs.bahasa[["AgeGenderUpperPlot"]]
+  } else { NA }
+
+
+# ---- 2.4 Repeat Three ----
+
+Age.gender.RepeatThree.bahasa <- 
+  if(num.years>3) {
+  melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.RepeatThree","Male.RepeatThree")) %>%
+  ggplot() +
+  geom_bar(aes(x=AgeCat,
+               y=value,
+               fill=variable),
+           stat="identity",
+           width=0.75,
+           colour="#505050",
+           size=0.15,
+           show.legend=F) +
+  geom_text(aes(x=19,y=-7,label=Monitoryear.labs.bahasa$Label[4]),
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(-10,10),
+                     labels=abs(seq(-10,10,5))) +
+  scale_fill_manual(name="",
+                    labels=legend.labs.bahasa[["AgeGender"]],
+                    values=c("Female.RepeatThree"=alpha("#7FCDBB",0.95),
+                             "Male.RepeatThree"=alpha("#253494",0.95)))+ 
+  coord_flip() + age.gender.plot.theme + plot.guides.techreport + Statusplot.labs.bahasa[["AgeGenderUpperPlot"]]
+  } else { NA }
+
+
+# ---- 2.5 Repeat Four ----
+
+Age.gender.RepeatFour.bahasa <- 
+  if(num.years>4) {
+  melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.RepeatFour","Male.RepeatFour")) %>%
+  ggplot() +
+  geom_bar(aes(x=AgeCat,
+               y=value,
+               fill=variable),
+           stat="identity",
+           width=0.75,
+           colour="#505050",
+           size=0.15,
+           show.legend=F) +
+  geom_text(aes(x=19,y=-7,label=Monitoryear.labs.bahasa$Label[5]),
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(-10,10),
+                     labels=abs(seq(-10,10,5))) +
+  scale_fill_manual(name="",
+                    labels=legend.labs.bahasa[["AgeGender"]],
+                    values=c("Female.RepeatFour"=alpha("#7FCDBB",0.95),
+                             "Male.RepeatFour"=alpha("#253494",0.95)))+ 
+  coord_flip() + age.gender.plot.theme + plot.guides.techreport + Statusplot.labs.bahasa[["AgeGenderUpperPlot"]]
+  } else { NA }
+    
+    
+# ---- 2.6 Create legend ----
 
 Age.gender.legend.plot.bahasa <-
   melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.Baseline","Male.Baseline")) %>%
@@ -172,10 +252,36 @@ Age.gender.legend.bahasa <- g_legend(Age.gender.legend.plot.bahasa)
 # ---- 2.4 Arrange grob ----
 
 Age.gender.plot.bahasa <- 
-  grid.arrange(Age.gender.legend.bahasa,
-               arrangeGrob(
-                 Age.gender.RepeatOne.bahasa,
-                 Age.gender.Baseline.bahasa,ncol=1),nrow=2,heights=c(0.35,10))
+  if(num.years==2) {
+    grid.arrange(Age.gender.legend.bahasa,
+                 arrangeGrob(
+                   Age.gender.RepeatOne.bahasa,
+                   Age.gender.Baseline.bahasa,ncol=1),nrow=2,heights=c(0.35,10))
+  } else { if(num.years==3) {
+    grid.arrange(Age.gender.legend.bahasa,
+                 arrangeGrob(
+                   Age.gender.RepeatTwo.bahasa,
+                   Age.gender.RepeatOne.bahasa,
+                   Age.gender.Baseline.bahasa,ncol=1),nrow=2,heights=c(0.35,10))
+  } else { if(num.years==4) {
+    grid.arrange(Age.gender.legend.bahasa,
+                 arrangeGrob(
+                   Age.gender.RepeatThree.bahasa,
+                   Age.gender.Repeat.Two.bahasa,
+                   Age.gender.RepeatOne.bahasa,
+                   Age.gender.Baseline.bahasa,ncol=2),nrow=2,heights=c(0.35,10))
+  } else { if(num.years==5) {
+    grid.arrange(Age.gender.legend.bahasa,
+                 arrangeGrob(
+                   Age.gender.RepeatFour.bahasa,
+                   Age.gender.RepeatThree.bahasa,
+                   Age.gender.Repeat.Two.bahasa,
+                   Age.gender.RepeatOne.bahasa,
+                   Age.gender.Baseline.bahasa,ncol=2),nrow=2,heights=c(0.35,10))
+  } else { NA }}}}
+
+
+
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -955,12 +1061,15 @@ MarineContribution.statusplot.bahasa <-
 
 # - FOOD SECURITY 
 FS.trendplot.bahasa <- 
-  ggplot(MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
-         aes(x=SettlementName.bahasa)) +
+  ggplot(rbind.data.frame(MPA.level.ContData.trend.PLOTFORMAT %>% 
+                            mutate(FSMean=ifelse(MonitoringYear=="p.value",NA,FSMean)) %>% 
+                            select(MonitoringYear, Treatment, FSMean, FSErr, order),
+                          data.frame(MonitoringYear="", Treatment=NA, FSMean=NA, FSErr=NA,
+                                     order=max(MPA.level.ContData.trend.PLOTFORMAT$order)+1)),
+         aes(x=factor(order))) +
   geom_hline(aes(yintercept=1.56),size=0.25,colour="#505050") +
   geom_hline(aes(yintercept=4.02),size=0.25,colour="#505050") +
   geom_bar(aes(y=FSMean,
-               group=MonitoringYear,
                fill=Treatment),
            stat="identity",
            position=position_dodge(width=0.75),
@@ -968,7 +1077,6 @@ FS.trendplot.bahasa <-
            show.legend=F) +
   geom_errorbar(aes(ymin=FSMean-FSErr,
                     ymax=FSMean+FSErr,
-                    group=MonitoringYear,
                     colour=Treatment),
                 width=0.15,
                 size=0.5,
@@ -980,14 +1088,14 @@ FS.trendplot.bahasa <-
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=0.5*1.56,label=legend.labs.bahasa[["YesHunger"]]),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=5.56,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=5.56,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=5.56,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=5.56,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,6.06)) +
-  scale_x_discrete(labels=Trendplot.monitoryear.labs.bahasa) +
+  scale_x_discrete(labels=c(MPA.level.ContData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.ContData.trend.PLOTFORMAT$order)],"")) +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
   coord_flip() + Trendplot.labs.bahasa["FS"] + theme(axis.ticks=element_blank(),
@@ -1008,10 +1116,10 @@ FS.trendplot.bahasa <-
 
 # - MATERIAL ASSETS
 MA.trendplot.bahasa <- 
-  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
-         aes(x=SettlementName.bahasa)) +
+  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
+           mutate(MAMean=ifelse(MonitoringYear=="p.value",NA,MAMean)),
+         aes(x=factor(order))) +
   geom_bar(aes(y=MAMean,
-               group=MonitoringYear,
                fill=Treatment),
            stat="identity",
            position=position_dodge(width=0.75),
@@ -1019,16 +1127,15 @@ MA.trendplot.bahasa <-
            show.legend=F) +
   geom_errorbar(aes(ymin=MAMean-MAErr,
                     ymax=MAMean+MAErr,
-                    group=MonitoringYear,
                     colour=Treatment),
                 width=0.15,
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(MAMean,na.rm=T),label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=max(MAMean,na.rm=T),label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(MAMean,na.rm=T),label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=max(MAMean,na.rm=T),label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1036,15 +1143,15 @@ MA.trendplot.bahasa <-
                      limits=c(0,max(MPA.level.ContData.trend.PLOTFORMAT$MAMean,na.rm=T)+
                                 max(MPA.level.ContData.trend.PLOTFORMAT$MAErr,na.rm=T)+
                                 0.03*max(MPA.level.ContData.trend.PLOTFORMAT$MAMean,na.rm=T))) +
-  scale_x_discrete(labels=Trendplot.monitoryear.labs.bahasa) +
+  scale_x_discrete(labels=MPA.level.ContData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.ContData.trend.PLOTFORMAT$order)]) +
   coord_flip() + Trendplot.labs.bahasa["MA"] + plot.theme
 
 # - PLACE ATTACHMENT
 PA.trendplot.bahasa <- 
-  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
-         aes(x=SettlementName.bahasa)) +
+  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
+           mutate(PAMean=ifelse(MonitoringYear=="p.value",NA,PAMean)),
+         aes(x=factor(order))) +
   geom_bar(aes(y=PAMean,
-               group=MonitoringYear,
                fill=Treatment),
            stat="identity",
            position=position_dodge(width=0.75),
@@ -1052,30 +1159,29 @@ PA.trendplot.bahasa <-
            show.legend=F) +
   geom_errorbar(aes(ymin=PAMean-PAErr,
                     ymax=PAMean+PAErr,
-                    group=MonitoringYear,
                     colour=Treatment),
                 width=0.15,
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=4.6,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=4.6,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=4.6,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=4.6,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,5)) +
-  scale_x_discrete(labels=Trendplot.monitoryear.labs.bahasa) +
+  scale_x_discrete(labels=MPA.level.ContData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.ContData.trend.PLOTFORMAT$order)]) +
   coord_flip() + Trendplot.labs.bahasa["PA"] + plot.theme
 
 # - MARINE TENURE
 MT.trendplot.bahasa <- 
-  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
-         aes(x=SettlementName.bahasa)) +
+  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
+           mutate(MTMean=ifelse(MonitoringYear=="p.value",NA,MTMean)),
+         aes(x=factor(order))) +
   geom_bar(aes(y=MTMean,
-               group=MonitoringYear,
                fill=Treatment),
            stat="identity",
            position=position_dodge(width=0.75),
@@ -1083,30 +1189,29 @@ MT.trendplot.bahasa <-
            show.legend=F) +
   geom_errorbar(aes(ymin=MTMean-MTErr,
                     ymax=MTMean+MTErr,
-                    group=MonitoringYear,
                     colour=Treatment),
                 width=0.15,
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=4.6,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=4.6,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=4.6,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=4.6,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +  
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,5)) +
-  scale_x_discrete(labels=Trendplot.monitoryear.labs.bahasa) +
+  scale_x_discrete(labels=MPA.level.ContData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.ContData.trend.PLOTFORMAT$order)]) +
   coord_flip() + Trendplot.labs.bahasa["MT"] + plot.theme
 
 # - SCHOOL ENROLLMENT
 SE.trendplot.bahasa <- 
-  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
-         aes(x=SettlementName.bahasa)) +
+  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
+           mutate(SEMean=ifelse(MonitoringYear=="p.value",NA,SEMean)),
+         aes(x=factor(order))) +
   geom_bar(aes(y=SEMean,
-               group=MonitoringYear,
                fill=Treatment),
            stat="identity",
            position=position_dodge(width=0.75),
@@ -1114,31 +1219,30 @@ SE.trendplot.bahasa <-
            show.legend=F) +
   geom_errorbar(aes(ymin=SEMean-SEErr,
                     ymax=SEMean+SEErr,
-                    group=MonitoringYear,
                     colour=Treatment),
                 width=0.15,
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=0.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=0.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=0.91,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=0.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format(),
                      limits=c(0,1)) +
-  scale_x_discrete(labels=Trendplot.monitoryear.labs.bahasa) +
+  scale_x_discrete(labels=MPA.level.ContData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.ContData.trend.PLOTFORMAT$order)]) +
   coord_flip() + Trendplot.labs.bahasa["SE"] + plot.theme
 
 # - TIME TO MARKET
 Time.trendplot.bahasa <- 
-  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
-         aes(x=SettlementName.bahasa)) +
+  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
+           mutate(TimeMarketMean=ifelse(MonitoringYear=="p.value",NA,TimeMarketMean)),
+         aes(x=factor(order))) +
   geom_bar(aes(y=TimeMarketMean,
-               group=MonitoringYear,
                fill=Treatment),
            stat="identity",
            position=position_dodge(width=0.75),
@@ -1146,16 +1250,15 @@ Time.trendplot.bahasa <-
            show.legend=F) +
   geom_errorbar(aes(ymin=TimeMarketMean-TimeMarketErr,
                     ymax=TimeMarketMean+TimeMarketErr,
-                    group=MonitoringYear,
                     colour=Treatment),
                 width=0.15,
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1163,15 +1266,15 @@ Time.trendplot.bahasa <-
                      limits=c(0,max(MPA.level.ContData.trend.PLOTFORMAT$TimeMarketMean,na.rm=T)+
                                 max(MPA.level.ContData.trend.PLOTFORMAT$TimeMarketErr,na.rm=T)+
                                 0.03*max(MPA.level.ContData.trend.PLOTFORMAT$TimeMarketMean,na.rm=T))) +
-  scale_x_discrete(labels=Trendplot.monitoryear.labs.bahasa) +
+  scale_x_discrete(labels=MPA.level.ContData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.ContData.trend.PLOTFORMAT$order)]) +
   coord_flip() + Trendplot.labs.bahasa["Time"] + plot.theme
 
 # - DAYS UNWELL
 Unwell.trendplot.bahasa <- 
-  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
-         aes(x=SettlementName.bahasa)) +
+  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
+           mutate(UnwellMean=ifelse(MonitoringYear=="p.value",NA,UnwellMean)),
+         aes(x=factor(order))) +
   geom_bar(aes(y=UnwellMean,
-               group=MonitoringYear,
                fill=Treatment),
            stat="identity",
            position=position_dodge(width=0.75),
@@ -1179,16 +1282,15 @@ Unwell.trendplot.bahasa <-
            show.legend=F) +
   geom_errorbar(aes(ymin=UnwellMean-UnwellErr,
                     ymax=UnwellMean+UnwellErr,
-                    group=MonitoringYear,
                     colour=Treatment),
                 width=0.15,
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1196,7 +1298,7 @@ Unwell.trendplot.bahasa <-
                      limits=c(0,max(MPA.level.ContData.trend.PLOTFORMAT$UnwellMean,na.rm=T)+
                                 max(MPA.level.ContData.trend.PLOTFORMAT$UnwellErr,na.rm=T)+
                                 0.03*max(MPA.level.ContData.trend.PLOTFORMAT$UnwellMean,na.rm=T))) +
-  scale_x_discrete(labels=Trendplot.monitoryear.labs.bahasa) +
+  scale_x_discrete(labels=MPA.level.ContData.trend.PLOTFORMAT$Label.bahasa[order(MPA.level.ContData.trend.PLOTFORMAT$order)]) +
   coord_flip() + Trendplot.labs.bahasa["Unwell"] + plot.theme
 
 
@@ -1212,10 +1314,10 @@ Gender.trendplot.bahasa <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1247,10 +1349,10 @@ Religion.trendplot.bahasa <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1286,10 +1388,10 @@ Primaryocc.trendplot.bahasa <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1311,10 +1413,10 @@ Freqfish.trendplot.bahasa <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1336,10 +1438,10 @@ Freqsellfish.trendplot.bahasa <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1361,10 +1463,10 @@ Incfish.trendplot.bahasa <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1386,10 +1488,10 @@ Fishtech.trendplot.bahasa <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1409,10 +1511,10 @@ Childfs.trendplot.bahasa <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1446,10 +1548,10 @@ Proteinfish.trendplot.bahasa <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1471,10 +1573,10 @@ EconStatus.trendplot.bahasa <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1495,10 +1597,10 @@ NumThreat.trendplot.bahasa <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1522,10 +1624,10 @@ Secondaryocc.trendplot.bahasa <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1545,10 +1647,10 @@ OccDiverse.trendplot.bahasa <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1581,10 +1683,10 @@ MarineContribution.trendplot.bahasa <-
            position="dodge",
            width=0.75,
            show.legend=F) +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(MarineContribution)+-0.06*max(MarineContribution),label=sett.names.bahasa[["Treatment"]],fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=max(MarineContribution,na.rm=T)+0.06*max(MarineContribution,na.rm=T),label=sett.names.bahasa[["Treatment"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(MarineContribution)-0.06*max(MarineContribution),label=sett.names.bahasa[["Control"]],fontface=2),
+  geom_text(aes(x=num.years+0.95,y=max(MarineContribution,na.rm=T)+0.06*max(MarineContribution,na.rm=T),label=sett.names.bahasa[["Control"]],fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,max(MPA.level.PropData.trend.PLOTFORMAT$MarineContribution,na.rm=T) +
@@ -1645,7 +1747,7 @@ FS.annexplot.bahasa <-
   geom_text(aes(x=length(unique(SettlementName)),y=0.5*1.56,label=legend.labs.bahasa[["YesHunger"]]),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   scale_alpha_manual(name="",
-                     values=c(0.6,1),
+                     values=annex.alpha[[paste("numyear",num.years,sep="")]],
                      labels=(Monitoryear.labs.bahasa$Label),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
@@ -1700,7 +1802,7 @@ MA.annexplot.bahasa <-
              size=0.35,
              colour="#505050") +
   scale_alpha_manual(name="",
-                     values=c(0.6,1),
+                     values=annex.alpha[[paste("numyear",num.years,sep="")]],
                      labels=(Monitoryear.labs.bahasa$Label),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
@@ -1739,7 +1841,7 @@ PA.annexplot.bahasa <-
              size=0.35,
              colour="#505050") +
   scale_alpha_manual(name="",
-                     values=c(0.6,1),
+                     values=annex.alpha[[paste("numyear",num.years,sep="")]],
                      labels=(Monitoryear.labs.bahasa$Label),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
@@ -1776,7 +1878,7 @@ MT.annexplot.bahasa <-
              size=0.35,
              colour="#505050") +
   scale_alpha_manual(name="",
-                     values=c(0.6,1),
+                     values=annex.alpha[[paste("numyear",num.years,sep="")]],
                      labels=(Monitoryear.labs.bahasa$Label),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
@@ -1813,7 +1915,7 @@ SE.annexplot.bahasa <-
              size=0.35,
              colour="#505050") +
   scale_alpha_manual(name="",
-                     values=c(0.6,1),
+                     values=annex.alpha[[paste("numyear",num.years,sep="")]],
                      labels=(Monitoryear.labs.bahasa$Label),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
@@ -1850,7 +1952,7 @@ Time.annexplot.bahasa <-
              size=0.35,
              colour="#505050") +
   scale_alpha_manual(name="",
-                     values=c(0.6,1),
+                     values=annex.alpha[[paste("numyear",num.years,sep="")]],
                      labels=(Monitoryear.labs.bahasa$Label),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
@@ -1889,7 +1991,7 @@ Unwell.annexplot.bahasa <-
              size=0.35,
              colour="#505050") +
   scale_alpha_manual(name="",
-                     values=c(0.6,1),
+                     values=annex.alpha[[paste("numyear",num.years,sep="")]],
                      labels=(Monitoryear.labs.bahasa$Label),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +

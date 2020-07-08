@@ -1,11 +1,10 @@
 # 
-# code:  Status & Trends Plots, for data with one repeat
+# code:  Status & Trends Plots, for data with multiple repeats
 # 
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: November 2017
-# modified: Amari Bauer, June 2019
-# modified: Kelly Claborn, October 2019
+# modified: Kelly Claborn, July 2020
 # 
 # 
 # ---- inputs ----
@@ -43,9 +42,6 @@ Statusplot.sigpos <-
 
 Monitoryear.labs <- 
   define.year.monitoryear.column(MPA.Level.Means)
-
-Trendplot.monitoryear.labs <- 
-  rep(paste(Monitoryear.labs$Label[2],"\n\n\n\n",Monitoryear.labs$Label[1]),2)
 
 
 Conttrendplot.ylabs <- 
@@ -95,32 +91,7 @@ Annexplot.settnames[3,] <- rep("",length(Annexplot.settnames[3,]))
 # 
 
 
-# ---- 2.1 Repeat One ----
-
-Age.gender.RepeatOne <- 
-  melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.RepeatOne","Male.RepeatOne")) %>%
-  ggplot() +
-  geom_bar(aes(x=AgeCat,
-               y=value,
-               fill=variable),
-           stat="identity",
-           width=0.75,
-           colour="#505050",
-           size=0.15,
-           show.legend=F) +
-  geom_text(aes(x=19,y=-8,label=Monitoryear.labs$Label[2]),
-            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  scale_y_continuous(expand=c(0,0),
-                     limits=c(-10,10),
-                     labels=abs(seq(-10,10,5))) +
-  scale_fill_manual(name="",
-                    labels=c("Female","Male"),
-                    values=c("Female.RepeatOne"=alpha("#7FCDBB",0.95),
-                             "Male.RepeatOne"=alpha("#253494",0.95)))+ 
-  coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="")
-
-
-# ---- 2.2 Baseline ----
+# ---- 2.1 Baseline ----
 
 Age.gender.Baseline <- 
   melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.Baseline","Male.Baseline")) %>%
@@ -145,7 +116,115 @@ Age.gender.Baseline <-
   coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="Population distribution (% of individuals by gender)")
 
 
-# ---- 2.3 Create legend ----
+# ---- 2.2 Repeat One ----
+
+Age.gender.RepeatOne <- 
+  melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.RepeatOne","Male.RepeatOne")) %>%
+  ggplot() +
+  geom_bar(aes(x=AgeCat,
+               y=value,
+               fill=variable),
+           stat="identity",
+           width=0.75,
+           colour="#505050",
+           size=0.15,
+           show.legend=F) +
+  geom_text(aes(x=19,y=-8,label=Monitoryear.labs$Label[2]),
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(-10,10),
+                     labels=abs(seq(-10,10,5))) +
+  scale_fill_manual(name="",
+                    labels=c("Female","Male"),
+                    values=c("Female.RepeatOne"=alpha("#7FCDBB",0.95),
+                             "Male.RepeatOne"=alpha("#253494",0.95)))+ 
+  coord_flip() + age.gender.plot.theme + plot.guides.techreport + 
+  if(num.years==4) { labs(x="Age",y="Population distribution (% of individuals by gender)") 
+    } else { labs(x="Age",y="") }
+
+
+# ---- 2.3 Repeat Two ----
+
+Age.gender.RepeatTwo <- 
+  if(num.years>2) {
+  melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.RepeatTwo","Male.RepeatTwo")) %>%
+  ggplot() +
+  geom_bar(aes(x=AgeCat,
+               y=value,
+               fill=variable),
+           stat="identity",
+           width=0.75,
+           colour="#505050",
+           size=0.15,
+           show.legend=F) +
+  geom_text(aes(x=19,y=-8,label=Monitoryear.labs$Label[3]),
+            size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(-10,10),
+                     labels=abs(seq(-10,10,5))) +
+  scale_fill_manual(name="",
+                    labels=c("Female","Male"),
+                    values=c("Female.RepeatTwo"=alpha("#7FCDBB",0.95),
+                             "Male.RepeatTwo"=alpha("#253494",0.95)))+ 
+  coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="")
+  } else { NA }
+
+
+# ---- 2.4 Repeat Three ----
+
+Age.gender.RepeatThree <- 
+  if(num.years>3) {
+    melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.RepeatThree","Male.RepeatThree")) %>%
+      ggplot() +
+      geom_bar(aes(x=AgeCat,
+                   y=value,
+                   fill=variable),
+               stat="identity",
+               width=0.75,
+               colour="#505050",
+               size=0.15,
+               show.legend=F) +
+      geom_text(aes(x=19,y=-8,label=Monitoryear.labs$Label[4]),
+                size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+      scale_y_continuous(expand=c(0,0),
+                         limits=c(-10,10),
+                         labels=abs(seq(-10,10,5))) +
+      scale_fill_manual(name="",
+                        labels=c("Female","Male"),
+                        values=c("Female.RepeatThree"=alpha("#7FCDBB",0.95),
+                                 "Male.RepeatThree"=alpha("#253494",0.95)))+ 
+      coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="")
+  } else { NA }
+
+
+# ---- 2.5 Repeat Four ----
+
+Age.gender.RepeatFour <- 
+  if(num.years>4) {
+    melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.RepeatFour","Male.RepeatThree")) %>%
+      ggplot() +
+      geom_bar(aes(x=AgeCat,
+                   y=value,
+                   fill=variable),
+               stat="identity",
+               width=0.75,
+               colour="#505050",
+               size=0.15,
+               show.legend=F) +
+      geom_text(aes(x=19,y=-8,label=Monitoryear.labs$Label[5]),
+                size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
+      scale_y_continuous(expand=c(0,0),
+                         limits=c(-10,10),
+                         labels=abs(seq(-10,10,5))) +
+      scale_fill_manual(name="",
+                        labels=c("Female","Male"),
+                        values=c("Female.RepeatFour"=alpha("#7FCDBB",0.95),
+                                 "Male.RepeatFour"=alpha("#253494",0.95)))+ 
+      coord_flip() + age.gender.plot.theme + plot.guides.techreport + labs(x="Age",y="")
+  } else { NA }
+
+
+# ---- 2.6 Create legend ----
 
 Age.gender.legend.plot <-
   melt(AgeGender,id.vars="AgeCat",measure.vars=c("Female.Baseline","Male.Baseline")) %>%
@@ -170,13 +249,39 @@ Age.gender.legend.plot <-
 Age.gender.legend <- g_legend(Age.gender.legend.plot)
 
 
-# ---- 2.4 Arrange grob ----
+# ---- 2.7 Arrange grob ----
 
 Age.gender.plot <- 
-  grid.arrange(Age.gender.legend,
+  if(num.years==2) {
+    grid.arrange(Age.gender.legend,
                arrangeGrob(
                  Age.gender.RepeatOne,
                  Age.gender.Baseline,ncol=1),nrow=2,heights=c(0.35,10))
+  } else { if(num.years==3) {
+    grid.arrange(Age.gender.legend,
+                 arrangeGrob(
+                   Age.gender.RepeatTwo,
+                   Age.gender.RepeatOne,
+                   Age.gender.Baseline,ncol=1),nrow=2,heights=c(0.35,10))
+  } else { if(num.years==4) {
+    grid.arrange(Age.gender.legend,
+                 arrangeGrob(
+                   Age.gender.RepeatThree,
+                   Age.gender.Repeat.Two,
+                   Age.gender.RepeatOne,
+                   Age.gender.Baseline,ncol=2),nrow=2,heights=c(0.35,10))
+  } else { if(num.years==5) {
+    grid.arrange(Age.gender.legend,
+                 arrangeGrob(
+                   Age.gender.RepeatFour,
+                   Age.gender.RepeatThree,
+                   Age.gender.Repeat.Two,
+                   Age.gender.RepeatOne,
+                   Age.gender.Baseline,ncol=2),nrow=2,heights=c(0.35,10))
+  } else { NA }}}}
+
+
+
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -962,12 +1067,15 @@ MarineContribution.statusplot <-
 
 # - FOOD SECURITY 
 FS.trendplot <- 
-  ggplot(MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
-         aes(x=SettlementName)) +
+  ggplot(rbind.data.frame(MPA.level.ContData.trend.PLOTFORMAT %>% 
+                            mutate(FSMean=ifelse(MonitoringYear=="p.value",NA,FSMean)) %>% 
+                            select(MonitoringYear, Treatment, FSMean, FSErr, order),
+                          data.frame(MonitoringYear="", Treatment=NA, FSMean=NA, FSErr=NA,
+                                     order=max(MPA.level.ContData.trend.PLOTFORMAT$order)+1)),
+         aes(x=factor(order))) +
   geom_hline(aes(yintercept=1.56),size=0.25,colour="#505050") +
   geom_hline(aes(yintercept=4.02),size=0.25,colour="#505050") +
   geom_bar(aes(y=FSMean,
-               group=MonitoringYear,
                fill=Treatment),
            stat="identity",
            position=position_dodge(width=0.75),
@@ -975,26 +1083,25 @@ FS.trendplot <-
            show.legend=F) +
   geom_errorbar(aes(ymin=FSMean-FSErr,
                     ymax=FSMean+FSErr,
-                    group=MonitoringYear,
                     colour=Treatment),
                 width=0.15,
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=(0.5*(6.06-4.02))+4.02,label="Food secure"),
+  geom_text(aes(x=length(MonitoringYear),y=(0.5*(6.06-4.02))+4.02,label="Food secure"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=(0.5*(4.02-1.56))+1.56,label="Food insecure\nwithout hunger"),
+  geom_text(aes(x=length(MonitoringYear),y=(0.5*(4.02-1.56))+1.56,label="Food insecure\nwithout hunger"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_text(aes(x=length(unique(MonitoringYear))+0.46,y=0.5*1.56,label="Food insecure\nwith hunger"),
+  geom_text(aes(x=length(MonitoringYear),y=0.5*1.56,label="Food insecure\nwith hunger"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
-  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=5.56,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=5.56,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=5.56,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=5.56,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,6.06)) +
-  scale_x_discrete(labels=Trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=c(MPA.level.ContData.trend.PLOTFORMAT$Label[order(MPA.level.ContData.trend.PLOTFORMAT$order)],"")) +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
   coord_flip() + Trendplot.labs["FS"] + theme(axis.ticks=element_blank(),
@@ -1015,10 +1122,10 @@ FS.trendplot <-
 
 # - MATERIAL ASSETS
 MA.trendplot <- 
-  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
-         aes(x=SettlementName)) +
+  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
+           mutate(MAMean=ifelse(MonitoringYear=="p.value",NA,MAMean)),
+         aes(x=factor(order))) +
   geom_bar(aes(y=MAMean,
-               group=MonitoringYear,
                fill=Treatment),
            stat="identity",
            position=position_dodge(width=0.75),
@@ -1026,16 +1133,15 @@ MA.trendplot <-
            show.legend=F) +
   geom_errorbar(aes(ymin=MAMean-MAErr,
                     ymax=MAMean+MAErr,
-                    group=MonitoringYear,
                     colour=Treatment),
                 width=0.15,
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(MAMean,na.rm=T),label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=max(MAMean,na.rm=T),label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(MAMean,na.rm=T),label="Control",fontface=2),
+  geom_text(aes(x=num.years+.95,y=max(MAMean,na.rm=T),label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1043,15 +1149,15 @@ MA.trendplot <-
                      limits=c(0,max(MPA.level.ContData.trend.PLOTFORMAT$MAMean,na.rm=T)+
                                 max(MPA.level.ContData.trend.PLOTFORMAT$MAErr,na.rm=T)+
                                 0.03*max(MPA.level.ContData.trend.PLOTFORMAT$MAMean,na.rm=T))) +
-  scale_x_discrete(labels=Trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=MPA.level.ContData.trend.PLOTFORMAT$Label[order(MPA.level.ContData.trend.PLOTFORMAT$order)]) +
   coord_flip() + Trendplot.labs["MA"] + plot.theme
 
 # - PLACE ATTACHMENT
 PA.trendplot <- 
-  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
-         aes(x=SettlementName)) +
+  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
+           mutate(PAMean=ifelse(MonitoringYear=="p.value",NA,PAMean)),
+         aes(x=factor(order))) +
   geom_bar(aes(y=PAMean,
-               group=MonitoringYear,
                fill=Treatment),
            stat="identity",
            position=position_dodge(width=0.75),
@@ -1059,30 +1165,29 @@ PA.trendplot <-
            show.legend=F) +
   geom_errorbar(aes(ymin=PAMean-PAErr,
                     ymax=PAMean+PAErr,
-                    group=MonitoringYear,
                     colour=Treatment),
                 width=0.15,
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=4.6,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=4.6,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=4.6,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=4.6,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,5)) +
-  scale_x_discrete(labels=Trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=MPA.level.ContData.trend.PLOTFORMAT$Label[order(MPA.level.ContData.trend.PLOTFORMAT$order)]) +
   coord_flip() + Trendplot.labs["PA"] + plot.theme
 
 # - MARINE TENURE
 MT.trendplot <- 
-  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
-         aes(x=SettlementName)) +
+  ggplot(data=data=MPA.level.ContData.trend.PLOTFORMAT %>% 
+           mutate(MTMean=ifelse(MonitoringYear=="p.value",NA,MTMean)),
+         aes(x=factor(order))) +
   geom_bar(aes(y=MTMean,
-               group=MonitoringYear,
                fill=Treatment),
            stat="identity",
            position=position_dodge(width=0.75),
@@ -1090,30 +1195,29 @@ MT.trendplot <-
            show.legend=F) +
   geom_errorbar(aes(ymin=MTMean-MTErr,
                     ymax=MTMean+MTErr,
-                    group=MonitoringYear,
                     colour=Treatment),
                 width=0.15,
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=4.6,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=4.6,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=4.6,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=4.6,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +  
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,5)) +
-  scale_x_discrete(labels=Trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=MPA.level.ContData.trend.PLOTFORMAT$Label[order(MPA.level.ContData.trend.PLOTFORMAT$order)]) +
   coord_flip() + Trendplot.labs["MT"] + plot.theme
 
 # - SCHOOL ENROLLMENT
 SE.trendplot <- 
-  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
-         aes(x=SettlementName)) +
+  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
+           mutate(SEMean=ifelse(MonitoringYear=="p.value",NA,SEMean)),
+         aes(x=order(factor))) +
   geom_bar(aes(y=SEMean,
-               group=MonitoringYear,
                fill=Treatment),
            stat="identity",
            position=position_dodge(width=0.75),
@@ -1121,31 +1225,30 @@ SE.trendplot <-
            show.legend=F) +
   geom_errorbar(aes(ymin=SEMean-SEErr,
                     ymax=SEMean+SEErr,
-                    group=MonitoringYear,
                     colour=Treatment),
                 width=0.15,
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=0.91,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=0.91,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=0.91,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=0.91,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format(),
                      limits=c(0,1)) +
-  scale_x_discrete(labels=Trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=MPA.level.ContData.trend.PLOTFORMAT$Label[order(MPA.level.ContData.trend.PLOTFORMAT$order)]) +
   coord_flip() + Trendplot.labs["SE"] + plot.theme
 
 # - TIME TO MARKET
 Time.trendplot <- 
-  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
+  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
+           mutate(TimeMarketMean=ifelse(MonitoringYear=="p.value",NA,TimeMarketMean)),
          aes(x=SettlementName)) +
   geom_bar(aes(y=TimeMarketMean,
-               group=MonitoringYear,
                fill=Treatment),
            stat="identity",
            position=position_dodge(width=0.75),
@@ -1153,16 +1256,15 @@ Time.trendplot <-
            show.legend=F) +
   geom_errorbar(aes(ymin=TimeMarketMean-TimeMarketErr,
                     ymax=TimeMarketMean+TimeMarketErr,
-                    group=MonitoringYear,
                     colour=Treatment),
                 width=0.15,
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=max(TimeMarketMean)+max(TimeMarketErr)-0.06*max(TimeMarketMean),label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1170,15 +1272,15 @@ Time.trendplot <-
                      limits=c(0,max(MPA.level.ContData.trend.PLOTFORMAT$TimeMarketMean,na.rm=T)+
                                 max(MPA.level.ContData.trend.PLOTFORMAT$TimeMarketErr,na.rm=T)+
                                 0.03*max(MPA.level.ContData.trend.PLOTFORMAT$TimeMarketMean,na.rm=T))) +
-  scale_x_discrete(labels=Trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=MPA.level.ContData.trend.PLOTFORMAT$Label[order(MPA.level.ContData.trend.PLOTFORMAT$order)]) +
   coord_flip() + Trendplot.labs["Time"] + plot.theme
 
 # - DAYS UNWELL
 Unwell.trendplot <- 
-  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT[MPA.level.ContData.trend.PLOTFORMAT$MonitoringYear!="p.value",],
+  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
+           mutate(UnwellMean=ifelse(MonitoringYear=="p.value",NA,UnwellMean)),
          aes(x=SettlementName)) +
   geom_bar(aes(y=UnwellMean,
-               group=MonitoringYear,
                fill=Treatment),
            stat="identity",
            position=position_dodge(width=0.75),
@@ -1186,16 +1288,15 @@ Unwell.trendplot <-
            show.legend=F) +
   geom_errorbar(aes(ymin=UnwellMean-UnwellErr,
                     ymax=UnwellMean+UnwellErr,
-                    group=MonitoringYear,
                     colour=Treatment),
                 width=0.15,
                 size=0.5,
                 position=position_dodge(width=0.75),
                 show.legend=F) +
-  geom_vline(aes(xintercept=1.5),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=max(UnwellMean)+max(UnwellErr)-0.06*max(UnwellMean),label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_fill_manual(values=fillcols.cont.trend) +
   scale_colour_manual(values=errcols.cont.trend) +
@@ -1203,7 +1304,7 @@ Unwell.trendplot <-
                      limits=c(0,max(MPA.level.ContData.trend.PLOTFORMAT$UnwellMean,na.rm=T)+
                                 max(MPA.level.ContData.trend.PLOTFORMAT$UnwellErr,na.rm=T)+
                                 0.03*max(MPA.level.ContData.trend.PLOTFORMAT$UnwellMean,na.rm=T))) +
-  scale_x_discrete(labels=Trendplot.monitoryear.labs) +
+  scale_x_discrete(labels=MPA.level.ContData.trend.PLOTFORMAT$Label[order(MPA.level.ContData.trend.PLOTFORMAT$order)]) +
   coord_flip() + Trendplot.labs["Unwell"] + plot.theme
 
 
@@ -1219,10 +1320,10 @@ Gender.trendplot <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1254,10 +1355,10 @@ Religion.trendplot <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1293,10 +1394,10 @@ Primaryocc.trendplot <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1319,10 +1420,10 @@ Freqfish.trendplot <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1346,10 +1447,10 @@ Freqsellfish.trendplot <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1373,10 +1474,10 @@ Incfish.trendplot <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1398,10 +1499,10 @@ Fishtech.trendplot <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1422,10 +1523,10 @@ Childfs.trendplot <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1459,10 +1560,10 @@ Proteinfish.trendplot <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1484,10 +1585,10 @@ EconStatus.trendplot <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1508,10 +1609,10 @@ NumThreat.trendplot <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1535,10 +1636,10 @@ Secondaryocc.trendplot <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1559,10 +1660,10 @@ OccDiverse.trendplot <-
            width=0.8,
            size=0.15,
            colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=.91,label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=.91,label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      labels=scales::percent_format()) +
@@ -1595,10 +1696,10 @@ MarineContribution.trendplot <-
            position="dodge",
            width=0.75,
            show.legend=F) +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=1.6,y=max(MarineContribution)+-0.06*max(MarineContribution),label="Treatment",fontface=2),
+  geom_vline(aes(xintercept=num.years+1),size=0.25,colour="#505050") +
+  geom_text(aes(x=num.years+1.25,y=max(MarineContribution,na.rm=T)+0.06*max(MarineContribution,na.rm=T),label="Treatment",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=1.47,y=max(MarineContribution)-0.06*max(MarineContribution),label="Control",fontface=2),
+  geom_text(aes(x=num.years+0.95,y=max(MarineContribution,na.rm=T)+0.06*max(MarineContribution,na.rm=T),label="Control",fontface=2),
             size=rel(2.5),vjust=1,lineheight=0.8,colour="#505050") +
   scale_y_continuous(expand=c(0,0),
                      limits=c(0,max(MPA.level.PropData.trend.PLOTFORMAT$MarineContribution,na.rm=T) +
@@ -1659,7 +1760,7 @@ FS.annexplot <-
   geom_text(aes(x=length(unique(SettlementName)),y=0.5*1.56,label="Food insecure\nwith hunger"),
             size=rel(2.5),lineheight=0.8,fontface="bold.italic",colour="#505050") +
   scale_alpha_manual(name="",
-                     values=c(0.6,1),
+                     values=annex.alpha[[paste("numyear",num.years,sep="")]],
                      labels=(Monitoryear.labs$Label),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
@@ -1714,7 +1815,7 @@ MA.annexplot <-
              size=0.35,
              colour="#505050") +
   scale_alpha_manual(name="",
-                     values=c(0.6,1),
+                     values=annex.alpha[[paste("numyear",num.years,sep="")]],
                      labels=(Monitoryear.labs$Label),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
@@ -1753,7 +1854,7 @@ PA.annexplot <-
              size=0.35,
              colour="#505050") +
   scale_alpha_manual(name="",
-                     values=c(0.6,1),
+                     values=annex.alpha[[paste("numyear",num.years,sep="")]],
                      labels=(Monitoryear.labs$Label),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
@@ -1790,7 +1891,7 @@ MT.annexplot <-
              size=0.35,
              colour="#505050") +
   scale_alpha_manual(name="",
-                     values=c(0.6,1),
+                     values=annex.alpha[[paste("numyear",num.years,sep="")]],
                      labels=(Monitoryear.labs$Label),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
@@ -1827,7 +1928,7 @@ SE.annexplot <-
              size=0.35,
              colour="#505050") +
   scale_alpha_manual(name="",
-                     values=c(0.6,1),
+                     values=annex.alpha[[paste("numyear",num.years,sep="")]],
                      labels=(Monitoryear.labs$Label),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
@@ -1864,7 +1965,7 @@ Time.annexplot <-
              size=0.35,
              colour="#505050") +
   scale_alpha_manual(name="",
-                     values=c(0.6,1),
+                     values=annex.alpha[[paste("numyear",num.years,sep="")]],
                      labels=(Monitoryear.labs$Label),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +
@@ -1903,7 +2004,7 @@ Unwell.annexplot <-
              size=0.35,
              colour="#505050") +
   scale_alpha_manual(name="",
-                     values=c(0.6,1),
+                     values=annex.alpha[[paste("numyear",num.years,sep="")]],
                      labels=(Monitoryear.labs$Label),
                      na.translate=FALSE) +
   scale_fill_manual(values=fillcols.status) +

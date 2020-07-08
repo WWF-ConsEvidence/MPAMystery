@@ -366,11 +366,11 @@ dev.off()
 # ---- Age/Gender ----
 
 png(paste(FigureFileName,"Age.gender.png",sep="/"),
-    units="in",height=10,width=4,res=400)
+    units="in",height=10,width=if(num.years%in%c(1:3)) { 5 } else { 10 },res=400) 
 grid.newpage()
 grid.draw(Age.gender.plot)
 dev.off()
-
+    
 
 
 # 
@@ -722,7 +722,7 @@ dev.off()
 # ---- Age/Gender ----
 
 png(paste(FigureFileName,"Age.gender.png",sep="/"),
-    units="in",height=10,width=5,res=400)
+    units="in",height=10,width=if(num.years%in%c(1:3)) { 5 } else { 10 },res=400)
 grid.newpage()
 grid.draw(Age.gender.plot.bahasa)
 dev.off()
