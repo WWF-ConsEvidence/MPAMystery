@@ -14,7 +14,7 @@ pacman::p_load(httr, jsonlite)
 # ---- 1.1 create objects for API endpoint URL ----
 
 base <- "https://mpasocial.org/api/" # this is the api base url
-endpoint <- "household" # this is the name of the api endpoint where you specify the database subtable you want to access
+endpoint <- "birth" # this is the name of the api endpoint where you specify the database subtable you want to access
 
 # Names of functional API endpoints as of July 1, 2020: 
 # household, demographic, birth, death, 
@@ -41,7 +41,7 @@ url <- paste(base,endpoint, sep = "")
 
 # ---- 2 CONNECT TO API ENDPOINT USING LOGIN CREDENTIALS ----
 
-api_connect <- GET(url, 
+api.connect <- GET(url, 
                    authenticate(user = rstudioapi::askForPassword("Please enter your USERNAME:"),
                                 password = rstudioapi::askForPassword("Please enter your PASSWORD:"), 
                                 type = "basic"), verbose())
@@ -50,7 +50,7 @@ api_connect <- GET(url,
 
 # ---- 3.1 deserialize data: convert into readable JSON text format ----
 
-api_data_deserialize <- content(api_connect, "text")
+api.data.deserialize <- content(api.connect, "text")
 
 # ---- 3.2 Read and save data as R workable object  ----
 
@@ -58,6 +58,6 @@ api_data_deserialize <- content(api_connect, "text")
 # For "lookups" api endpoint, will save as list containing multiple dataframes
 # Use list2env(api_data_final, envir=.GlobalEnv) to save listed dataframes to environment
 
-api_data_final <- fromJSON(api_data_deserialize, flatten = TRUE) # conversion to r workable object (list or df)
-assign(paste(endpoint), api_data_final) # rename data object the same name as api endpoing (see list above)
-rm(api_data_final)
+api.data.final <- fromJSON(api.data.deserialize, flatten = TRUE) # conversion to r workable object (list or df)
+assign(paste(endpoint), api.data.final) # rename data object the same name as api endpoing (see list above)
+rm(api.data.final)
