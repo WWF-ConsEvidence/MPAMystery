@@ -21,8 +21,8 @@
 ##---BEGIN---##
 ##---BEGIN---##
 ##---0. Sourcing and creating data frame 
-
-setwd("D:/Dropbox/MPA_research/MPAMystery/")
+getwd()
+#setwd("D:/Dropbox/MPA_research/MPAMystery/")
 source('2_Functions/2_Analysis/Function_process_covariates.R')
 mpa.nam <- rio::import("x_Flat_data_files/1_Social/Inputs/HH_tbl_MPA.xlsx")
 pacman::p_load(lfe,cowplot,stargazer,broom,qvalue,psych,factoextra,ineq, sf, tidyverse)
@@ -208,8 +208,9 @@ DiD.data <-  DiD.data %>%
 DiD.data.summary <- DiD.data %>% 
   select(MPAID,MonitoringYear,InterviewYear, yearsPost, MPAName) %>% 
   group_by(MPAID,MonitoringYear) %>%
-  summarise(yearsPost = mean(yearsPost),InterviewYear = first(InterviewYear), MPAName=first(MPAName))  
-
+  summarise(n=sum(!is.na(yearsPost)),
+            yearsPost = mean(yearsPost),InterviewYear = first(InterviewYear), MPAName=first(MPAName))  
+DiD.data.summary
 
 # calculate Z scores (standardized values for each of the Big Five and the sub_asset groups)
 DiD.data <- DiD.data %>% 
