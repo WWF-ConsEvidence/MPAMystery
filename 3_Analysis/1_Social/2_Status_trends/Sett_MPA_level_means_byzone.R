@@ -14,7 +14,7 @@
 # 
 
 HHData <-
-  left_join(HHData,SETTLEMENT[,c("SettlementID","Zone")],by="SettlementID") %>%
+  HHData %>% 
   mutate(Zone=ifelse(Zone=="Take","Use",Zone),
          Zone=factor(Zone,levels=c("Use","No Take"),ordered=T))
 

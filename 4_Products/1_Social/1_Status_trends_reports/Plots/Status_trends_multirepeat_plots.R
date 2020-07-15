@@ -1184,7 +1184,7 @@ PA.trendplot <-
 
 # - MARINE TENURE
 MT.trendplot <- 
-  ggplot(data=data=MPA.level.ContData.trend.PLOTFORMAT %>% 
+  ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
            mutate(MTMean=ifelse(MonitoringYear=="p.value",NA,MTMean)),
          aes(x=factor(order))) +
   geom_bar(aes(y=MTMean,
@@ -1216,7 +1216,7 @@ MT.trendplot <-
 SE.trendplot <- 
   ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
            mutate(SEMean=ifelse(MonitoringYear=="p.value",NA,SEMean)),
-         aes(x=order(factor))) +
+         aes(x=factor(order))) +
   geom_bar(aes(y=SEMean,
                fill=Treatment),
            stat="identity",
@@ -1247,7 +1247,7 @@ SE.trendplot <-
 Time.trendplot <- 
   ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
            mutate(TimeMarketMean=ifelse(MonitoringYear=="p.value",NA,TimeMarketMean)),
-         aes(x=SettlementName)) +
+         aes(x=factor(order))) +
   geom_bar(aes(y=TimeMarketMean,
                fill=Treatment),
            stat="identity",
@@ -1279,7 +1279,7 @@ Time.trendplot <-
 Unwell.trendplot <- 
   ggplot(data=MPA.level.ContData.trend.PLOTFORMAT %>% 
            mutate(UnwellMean=ifelse(MonitoringYear=="p.value",NA,UnwellMean)),
-         aes(x=SettlementName)) +
+         aes(x=factor(order))) +
   geom_bar(aes(y=UnwellMean,
                fill=Treatment),
            stat="identity",

@@ -1,9 +1,23 @@
-#---- Preprocess matching covariates function ----
+#
+# code: Preprocess matching covariates function
+# 
 # author: Louise Glew, louise.glew@gmail.com
+# date: May 2019
 # modified: --
+# 
+
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 1: SOuRCE DATA ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+source('1_Data_wrangling/1_Social/2_Source_data/Source_social_data_flat_files.R')
+source('1_Data_wrangling/1_Social/3_Calculating_indicators/Calculate_household_indices.R')
 
 
-source('1_Data_wrangling/1_Social/3_Calculating_indicators/Calculate_BigFive.R')
 # Creating yearsPost to create a continuous variable of time after baseline
 HHData <- HHData %>%
   mutate(yearsPost = ifelse(MonitoringYear=="Baseline",0,
@@ -11,7 +25,7 @@ HHData <- HHData %>%
 
 #---- Import look up tables ----
 ethnic.lkp<- import("x_Flat_data_files/1_Social/Inputs/master_ethnic_lookup_2017_117.xlsx")
-education.lkp <- import("x_Flat_data_files/1_Social/Inputs/education_lkp_BHS.xlsx")
+education.lkp <- import("x_Flat_data_files/1_Social/Inputs/education_lkp.xlsx")
 
 # ---Create functions
 # Function to remove all white space in string variables
@@ -77,6 +91,7 @@ max.eth <- HH.eth %>%
   top_n(1, freq.eth) 
 
 HH.eth$dom.eth <- NA
+
 # assign dominant ethnicity in a loop will assign a 0 if parentalEthinicity==NA
 for (i in unique(HH.eth$SettlYear)){
   max.eth.dom<-  max.eth$eth.iso[max.eth$SettlYear==i]
@@ -107,19 +122,19 @@ HH.ed <- IndDemos %>%
 #   arrange(HouseholdID)
 
 # Children in Household
-IndDemos$Child<-ifelse(IndDemos$IndividualAge<19,1,0) #  create new variable, child/adult
-N.Child<-IndDemos%>%
+IndDemos$Child <- ifelse(IndDemos$IndividualAge<19,1,0) #  create new variable, child/adult
+N.Child <- IndDemos%>%
   group_by(HouseholdID) %>% 
   summarise(n.child=sum(Child))
 
 # Market distance
 #create mean by settlement-year
-market.mean.sett.yr <-HHData %>%
+market.mean.sett.yr <- HHData %>%
   group_by(SettlementID,MonitoringYear)%>%
   summarise (TimeMean.sett.yr=mean(TimeMarket, trim = 0.9,na.rm = T))
 
 #create mean by settlement
-market.mean.sett <-HHData %>%
+market.mean.sett <- HHData %>%
   group_by(SettlementID)%>%
   summarise (TimeMean.sett=mean(TimeMarket, trim = 0.9,na.rm = T)) 
 
@@ -150,8 +165,8 @@ head(market.distance)
 # rm(market.mean, impute.market)
 
 # Compile match covariate
-match.covariate <-HHData %>% 
-  dplyr::select(HouseholdID,MPAID,SettlementID,MonitoringYear,yearsPost, Treatment) %>% 
+match.covariate <- HHData %>% 
+  dplyr::select(HouseholdID, MPAID, SettlementID, MonitoringYear, yearsPost, Treatment) %>% 
   left_join(market.distance[,c("HouseholdID","TimeMarket")],by="HouseholdID") %>%
   left_join(N.Child,by="HouseholdID") %>%
   left_join(HH.ed,by="HouseholdID") %>%
@@ -164,7 +179,7 @@ match.covariate <-HHData %>%
 
 covariate.means <- 
   match.covariate %>%
-  group_by(SettlementID,MPAID,MonitoringYear) %>%
+  group_by(SettlementID, MPAID, MonitoringYear) %>%
   summarise(mean.age=mean(IndividualAge,na.rm=T),
             mean.year.res=mean(YearsResident,na.rm=T),
             mean.ed.level=mean(ed.level,na.rm=T),

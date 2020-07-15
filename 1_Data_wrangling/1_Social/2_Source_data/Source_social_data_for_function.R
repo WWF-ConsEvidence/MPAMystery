@@ -288,7 +288,7 @@ NMOrganization <-
 Settlements <- 
   SETTLEMENT %>%
   dplyr::mutate(Seascape = ifelse(MPAID %in% c(1,2,3,4,5,6), 1,  # Seascape 1 is Bird's Head, and Seascape 2 is Sunda Banda
-                                  ifelse(MPAID %in% c(15,16,17,18,19,20), 2,
+                                  ifelse(MPAID %in% c(15,16,17,18,19,20,21), 2,
                                          NA))) %>%
   dplyr::select(.,c("SettlementID","SettlementName","MPAID","Treatment","Seascape"))
 

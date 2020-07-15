@@ -65,6 +65,10 @@ mpa.trends <- function(MPA=NULL) {
   # define number of repeat monitoring years
   num.years <- length(unique(HHData$MonitoringYear))
   
+  # source plotting/labeling/reference functions first
+  source('2_Functions/3_Plotting/Function_plotthemes.R', local=T)
+  source('2_Functions/3_Plotting/Function_define_asteriskplotting.R', local=T)
+  
   
   # ---- ANALYSIS ----
   
@@ -82,10 +86,6 @@ mpa.trends <- function(MPA=NULL) {
   
   
   # ---- SOURCE DATASETS AND PLOTTING ----
-  
-  # source plotting functions first
-    source('2_Functions/3_Plotting/Function_plotthemes.R', local=T)
-    source('2_Functions/3_Plotting/Function_define_asteriskplotting.R', local=T)
   
   # plotting datasets, based on number of repeat monitoring years
   ifelse(num.years==1, source('4_Products/1_Social/1_Status_trends_reports/Datasets/Status_trends_norepeat_datasets.R', local=T),

@@ -29,7 +29,7 @@ HHData <-
                           rowSums(select(., "CarTruck", "Bicycle", "Motorcycle", "BoatNoMotor", "BoatOutboard",
                                          "BoatInboard", "PhoneCombined", "Entertain", "Satellite", "Generator"),
                                   na.rm = TRUE),
-                          ifelse(RemoveMA=="No" & MPAID!=17,
+                          ifelse(RemoveMA=="No" & MPAID!=17 & MPAID!=21,
                                  rowSums(select(.,"CarTruck", "Bicycle", "Motorcycle", "BoatNoMotor", "BoatOutboard",
                                                 "BoatInboard", "PhoneCombined", "TV", "Entertain", "Satellite", "Generator"),
                                          na.rm = TRUE),
