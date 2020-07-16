@@ -1,7 +1,16 @@
 # 
-# ---- code: Social status and trends analysis for MPA Vision report, Chp 3 ----
+# code: Social status and trends analysis for MPA Vision report, Chp 3
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
+# created: March 2020
+# 
+# 
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 1: SOURCE AND WRANGLE DATA ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
 # ---- source data ----
@@ -13,7 +22,7 @@ source('2_Functions/3_Plotting/Function_plotthemes.R')
 pacman::p_load(grid, gridExtra, cowplot)
 
 
-# ---- add a couple of columns, especially to remove TV from MAIndex ----
+# ---- add a couple of columns, especially to remove TV from MAIndex & group aspects of MAIndex into subgroups ----
 
 HHData <-
   HHData %>% group_by(MPAID) %>% summarise(CurrentYear=max(InterviewYear)) %>% ungroup() %>% left_join(HHData,.,by="MPAID") %>%
@@ -34,7 +43,7 @@ HHData <-
                                   rowSums(select(.,"Entertain","Satellite","Generator"),
                                           na.rm=T),
                                   NA),
-         RepeatYear=ifelse(Seascape==1,
+         RepeatYear=ifelse(Seascape==1, # Repeat year provides a standard way to group MPAs post-baseline, since some MPAs have t2 vs. t3 for their first repeat, etc. 
                            ifelse(MonitoringYear=="2 Year Post","First Repeat",
                                   ifelse(MonitoringYear=="4 Year Post","Second Repeat",
                                          as.character(MonitoringYear))),
@@ -49,8 +58,9 @@ HHData <-
 # ---- Calculate status and trends for province and national-level ----
 
 # NOTE: Calculating material assets mean WITHOUT TV since it is missing from a few of the MPAs.
+
 Province.Level.ContData.Means <- 
-  HHData %>% filter(MPAID!= 19 & MPAID!=21) %>%
+  HHData %>% filter(MPAID!= 19 & MPAID!=21) %>% # Remove Yamdena and Wakatobi from provincial level means. Yamdena doesn't have trend, so cannot be compared across time to other Maluku MPAs, and Wakatobi is not a true baseline.
   dplyr::group_by(Province,RepeatYear,Treatment) %>%
   dplyr::summarise(FSMean=round(mean(FSIndex,na.rm=T),2),
                    FSErr=round(sd(FSIndex,na.rm=T)/sqrt(length(FSIndex)),2),
@@ -71,6 +81,7 @@ Province.Level.ContData.Means <-
 
 
 # REMOVED all fishing characteristic responses for households that do not identify fishing as one of their 1/2/3 occupation.  To remain consistent across MPA monitoring protocols
+# NOTE: keep Yamdena and Wakatobi data in the proportional means analyses, because we are not displaying trends, rather just the most recently collected data (e.g., status) from each MPA
 Province.Level.PropData.Means <-
   HHData %>% filter(Status=="Yes" & Treatment==1) %>% mutate(Check.NA=paste(PrimaryLivelihood,SecondaryLivelihood,TertiaryLivelihood,sep=""),
                                                              Fisher=ifelse(grepl("3",Check.NA),1,
