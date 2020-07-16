@@ -7,13 +7,11 @@
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: May 2019
 # QAQC_modified by: Duong Le & David Gill  
-# Date: June 2019
+# modified: July 2020
 # 
 # 
 # ---- inputs ----
-#  1) Exported HH_tbl_WELLBEING.csv in x_Flat_data_files/Inputs
-#  2) Exported HH_tbl_DEMOGRAPHIC.csv in x_Flat_data_files/Inputs
-#  3) Exported HH_tbl_SETTLEMENT.csv in x_Flat_data_files/Inputs
+#  1) Exported excel files from MPASocial in x_Flat_data_files/1_Social/Inputs/Master_database_exports (all endpoints, except look-up tables)
 # 
 # ---- outputs ----
 #  1) HHData data frame for all analyses on the BigFive & Middle15 variables 
@@ -40,8 +38,6 @@
 
 # ---- 1.1 Load libraries & data ----
 
-pacman::p_load(rio, reldist, ggplot2, reshape2, Kendall, dplyr)
-
 # Sourcing most recent files
 
 # Date in format YYYYMMDD (could be changed but we believe it makes most sense 
@@ -49,29 +45,23 @@ pacman::p_load(rio, reldist, ggplot2, reshape2, Kendall, dplyr)
 today.date <- gsub("-","",Sys.Date())
 
 # Files (with package rio)
-last.file <- function(dir.nam,nam){
-  import(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))),guess_max=50000)}
+last.file <- function(dir.nam, nam){
+  import(paste0(dir.nam, last(sort(grep(nam, list.files(dir.nam), value=T, fixed=T)))), guess_max=50000)}
 
-# # Shapefiles (with package sf)
-# st_last.file <- function(dir.nam,nam){
-#   st_read(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))}
-# 
-# # RData files
-# last.Rdata <- function(dir.nam,nam){
-#   load(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))))
-# }
+# suppress messages for experimental new group_by() and summarise() functionality in dplyr
+options(dplyr.summarise.inform = FALSE)
 
-#getwd()
-#setwd("D:/Dropbox/MPA_research/MPAMystery/")
+
 # ---- 1.2 Import data ----
 
-WELLBEING <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_WELLBEING')
-DEMOGRAPHIC <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_DEMOGRAPHIC')
-SETTLEMENT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_SETTLEMENT')
-ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_ORGANIZATION')
-NMORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam="HH_tbl_NMORGANIZATION")
-LTHREAT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_LTHREAT')
-LSTEPS <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_LSTEPS')
+WELLBEING <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_household')
+DEMOGRAPHIC <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_demographic')
+SETTLEMENT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_settlement')
+ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_marineorganizationmembership')
+NMORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_nonmarineorganizationmembership')
+LTHREAT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_localthreat')
+LSTEPS <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_localstep')
+MPA <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_mpa')
 
 
 # 
@@ -85,18 +75,18 @@ LSTEPS <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_e
 # -- 2.1 Clean & post-code WELLBEING to create HHData for analysis ----
 
 HHData <-   WELLBEING %>%
-  dplyr::transmute(HouseholdID = HouseholdID, 
-                   MPAID = MPAID, 
-                   SettlementID = SettlementID, 
-                   InterviewYear = InterviewYear,
+  dplyr::transmute(HouseholdID = householdid, 
+                   MPAID = mpa, 
+                   SettlementID = settlement, 
+                   InterviewYear = interviewyear,
                    
                    # Food Security
-                   DidNotLastCoded = as.integer(ifelse((FSDidNotLast==1 | FSDidNotLast==2),1,ifelse(FSDidNotLast==3,0,990))),
-                   BalancedDietCoded = as.integer(ifelse((FSBalancedDiet==1 | FSBalancedDiet==2),1,ifelse(FSBalancedDiet==3,0,990))),
-                   FreqAdultSkipCoded = as.integer(ifelse((FSFreqAdultSkip==1 | FSFreqAdultSkip==2),1,ifelse(FSFreqAdultSkip==3 | FSAdultSkip==0,0,990))),
-                   AdultSkipCoded = as.integer(ifelse(FSAdultSkip==1,1,ifelse(FSAdultSkip==0,0,990))),
-                   EatLessCoded = as.integer(ifelse(FSEatLess==1,1, ifelse(FSEatLess==0,0,990))),
-                   HungryCoded = as.integer(ifelse(FSHungry==1,1,ifelse(FSHungry==0,0,990))),
+                   DidNotLastCoded = as.integer(ifelse((fsdidnotlast==1 | fsdidnotlast==2),1,ifelse(fsdidnotlast==3,0,990))),
+                   BalancedDietCoded = as.integer(ifelse((fsbalanceddiet==1 | fsbalanceddiet==2),1,ifelse(fsbalanceddiet==3,0,990))),
+                   FreqAdultSkipCoded = as.integer(ifelse((fsfreqadultskip==1 | fsfreqadultskip==2),1,ifelse(fsfreqadultskip==3 | fsadultskip==0,0,990))),
+                   AdultSkipCoded = as.integer(ifelse(fsadultskip==1,1,ifelse(fsadultskip==0,0,990))),
+                   EatLessCoded = as.integer(ifelse(fseatless==1,1, ifelse(fseatless==0,0,990))),
+                   HungryCoded = as.integer(ifelse(fshungry==1,1,ifelse(fshungry==0,0,990))),
                    
                    DidNotLast = as.integer(ifelse(DidNotLastCoded==990,
                                                   ifelse((BalancedDietCoded==1 | AdultSkipCoded==1 | EatLessCoded==1 | FreqAdultSkipCoded==1 | HungryCoded==1),1,NA),DidNotLastCoded)),
@@ -112,58 +102,58 @@ HHData <-   WELLBEING %>%
                                               ifelse((DidNotLast==1 & BalancedDiet==1 & FreqAdultSkip==1 & AdultSkip==1 & EatLess==1),1,NA),HungryCoded)),
                    
                    # Assets and Economic Well-being
-                   Bicycle = as.integer(ifelse(AssetBicycle>989,NA,AssetBicycle*9)),
-                   Motorcycle = as.integer(ifelse(AssetMotorcycle>989,NA,AssetMotorcycle*10)),
-                   BoatNoMotor = as.integer(ifelse(AssetBoatNoMotor>989,NA,AssetBoatNoMotor*6)),
-                   BoatOutboard = as.integer(ifelse(AssetBoatOutboard>989,NA,AssetBoatOutboard*7)),
-                   BoatInboard =  as.integer(ifelse(AssetBoatInboard>989,NA,AssetBoatInboard*8)),
-                   TV = as.integer(ifelse(AssetTV>989,NA,AssetTV*2)),
-                   Entertain = as.integer(ifelse(AssetEntertain>989,NA,AssetEntertain*1)),
-                   Satellite = as.integer(ifelse(AssetSatellite>989,NA,AssetSatellite*3)),
-                   Generator = as.integer(ifelse(AssetGenerator>989,NA,AssetGenerator*5)),
+                   Bicycle = as.integer(ifelse(assetbicycle>989,NA,assetbicycle*9)),
+                   Motorcycle = as.integer(ifelse(assetmotorcycle>989,NA,assetmotorcycle*10)),
+                   BoatNoMotor = as.integer(ifelse(assetboatnomotor>989,NA,assetboatnomotor*6)),
+                   BoatOutboard = as.integer(ifelse(assetboatoutboard>989,NA,assetboatoutboard*7)),
+                   BoatInboard =  as.integer(ifelse(assetboatinboard>989,NA,assetboatinboard*8)),
+                   TV = as.integer(ifelse(assettv>989,NA,assettv*2)),
+                   Entertain = as.integer(ifelse(assetentertain>989,NA,assetentertain*1)),
+                   Satellite = as.integer(ifelse(assetsatellite>989,NA,assetsatellite*3)),
+                   Generator = as.integer(ifelse(assetgenerator>989,NA,assetgenerator*5)),
                    
-                   Car = as.integer(ifelse(AssetCar>989,NA,AssetCar)),
-                   Truck = as.integer(ifelse(AssetTruck>989,NA,AssetTruck)),
-                   CarTruck = as.integer(ifelse(AssetCarTruck<993,AssetCarTruck*11,
-                                                ifelse(AssetCarTruck==993,(Car+Truck)*11,NA))),
+                   Car = as.integer(ifelse(assetcar>989,NA,assetcar)),
+                   Truck = as.integer(ifelse(assettruck>989,NA,assettruck)),
+                   CarTruck = as.integer(ifelse(assetcartruck<993,assetcartruck*11,
+                                                ifelse(assetcartruck==993,(Car+Truck)*11,NA))),
                    
-                   LandlinePhone = as.integer(ifelse(AssetLandlinePhone>989,NA,AssetLandlinePhone)),
-                   CellPhone = as.integer(ifelse(AssetCellPhone>989,NA,AssetCellPhone)),
-                   PhoneCombined = as.integer(ifelse(AssetPhoneCombined<993,AssetPhoneCombined*4,
-                                                     ifelse(AssetPhoneCombined==993,(LandlinePhone+CellPhone)*4,NA))),
+                   LandlinePhone = as.integer(ifelse(assetlandlinephone>989,NA,assetlandlinephone)),
+                   CellPhone = as.integer(ifelse(assetcellphone>989,NA,assetcellphone)),
+                   PhoneCombined = as.integer(ifelse(assetphonecombined<993,assetphonecombined*4,
+                                                     ifelse(assetphonecombined==993,(LandlinePhone+CellPhone)*4,NA))),
                    
-                   Radio = as.integer(ifelse(AssetRadio>989,NA,AssetRadio)),
-                   Stereo = as.integer(ifelse(AssetStereo>989,NA,AssetStereo)),
-                   CD = as.integer(ifelse(AssetCD>989,NA,AssetCD)),
-                   DVD = as.integer(ifelse(AssetDVD>989,NA,AssetDVD)),
-                   Entertain = as.integer(ifelse(AssetEntertain<993,AssetEntertain*1,
-                                                 ifelse(AssetEntertain==993,Radio+Stereo+CD+DVD,NA))),
+                   Radio = as.integer(ifelse(assetradio>989,NA,assetradio)),
+                   Stereo = as.integer(ifelse(assetstereo>989,NA,assetstereo)),
+                   CD = as.integer(ifelse(assetcd>989,NA,assetcd)),
+                   DVD = as.integer(ifelse(assetdvd>989,NA,assetdvd)),
+                   Entertain = as.integer(ifelse(assetentertain<993,assetentertain*1,
+                                                 ifelse(assetentertain==993,Radio+Stereo+CD+DVD,NA))),
                    
-                   CookingFuel.Biomass = as.integer(ifelse(CookingFuel==1|CookingFuel==2,0,
-                                                           ifelse(CookingFuel==3|CookingFuel==4|CookingFuel==5|CookingFuel==6,1,NA))),
+                   CookingFuel.Biomass = as.integer(ifelse(cookingfuel==1|cookingfuel==2,0,
+                                                           ifelse(cookingfuel==3|cookingfuel==4|cookingfuel==5|cookingfuel==6,1,NA))),
                    
                    # Place Attachment
-                   PlaceHappy = as.integer(ifelse(PlaceHappy%in%c(1:5),PlaceHappy,NA)),
-                   PlaceFavourite = as.integer(ifelse(PlaceFavourite%in%c(1:5),PlaceFavourite,NA)),
-                   PlaceMiss = as.integer(ifelse(PlaceMiss%in%c(1:5),PlaceMiss,NA)),
-                   PlaceBest = as.integer(ifelse(PlaceBest%in%c(1:5),PlaceBest,NA)),
-                   PlaceFishHere = as.integer(ifelse(PlaceFishHere%in%c(1:5),PlaceFishHere,NA)),
-                   PlaceBeMyself = as.integer(ifelse(PlaceBeMyself%in%c(1:5),PlaceBeMyself,NA)),
+                   PlaceHappy = as.integer(ifelse(placehappy%in%c(1:5),placehappy,NA)),
+                   PlaceFavourite = as.integer(ifelse(placefavourite%in%c(1:5),placefavourite,NA)),
+                   PlaceMiss = as.integer(ifelse(placemiss%in%c(1:5),placemiss,NA)),
+                   PlaceBest = as.integer(ifelse(placebest%in%c(1:5),placebest,NA)),
+                   PlaceFishHere = as.integer(ifelse(placefishhere%in%c(1:5),placefishhere,NA)),
+                   PlaceBeMyself = as.integer(ifelse(placebemyself%in%c(1:5),placebemyself,NA)),
                    
                    # Tenure
-                   RightsAccess = as.integer(ifelse(RightsAccess%in%c(0:1),RightsAccess,NA)),
-                   RightsHarvest = as.integer(ifelse(RightsHarvest%in%c(0:1),RightsHarvest,NA)),
-                   RightsManage = as.integer(ifelse(RightsManage%in%c(0:1),RightsManage,NA)),
-                   RightsExclude = as.integer(ifelse(RightsExclude%in%c(0:1),RightsExclude,NA)),
-                   RightsTransfer = as.integer(ifelse(RightsTransfer%in%c(0:1),RightsTransfer,NA)),
+                   RightsAccess = as.integer(ifelse(rightsaccess%in%c(0:1),rightsaccess,NA)),
+                   RightsHarvest = as.integer(ifelse(rightsharvest%in%c(0:1),rightsharvest,NA)),
+                   RightsManage = as.integer(ifelse(rightsmanage%in%c(0:1),rightsmanage,NA)),
+                   RightsExclude = as.integer(ifelse(rightsexclude%in%c(0:1),rightsexclude,NA)),
+                   RightsTransfer = as.integer(ifelse(rightstransfer%in%c(0:1),rightstransfer,NA)),
                    
                    
                    # Child's Food Security
-                   ChildPortionCoded = as.integer(ifelse(FSChildPortion==1,1,ifelse(FSChildPortion==0,0,990))),
-                   LowCostFoodCoded = as.integer(ifelse((FSLowCostFood==1 | FSLowCostFood==2),1,ifelse(FSLowCostFood==3,0,990))),
-                   ChildSkipCoded =  as.integer(ifelse(FSChildSkip==1,1,ifelse(FSChildSkip==0,0,990))),
-                   FreqChildSkipCoded = as.integer(ifelse((FSFreqChildSkip==1 | FSFreqChildSkip==2),1,ifelse(FSFreqChildSkip==3,0,990))),
-                   NoMealChildCoded = as.integer(ifelse((FSNoMealChild==1 | FSNoMealChild==2),1,ifelse(FSNoMealChild==3,0,990))),
+                   ChildPortionCoded = as.integer(ifelse(fschildportion==1,1,ifelse(fschildportion==0,0,990))),
+                   LowCostFoodCoded = as.integer(ifelse((fslowcostfood==1 | fslowcostfood==2),1,ifelse(fslowcostfood==3,0,990))),
+                   ChildSkipCoded =  as.integer(ifelse(fschildskip==1,1,ifelse(fschildskip==0,0,990))),
+                   FreqChildSkipCoded = as.integer(ifelse((fsfreqchildskip==1 | fsfreqchildskip==2),1,ifelse(fsfreqchildskip==3,0,990))),
+                   NoMealChildCoded = as.integer(ifelse((fsnomealchild==1 | fsnomealchild==2),1,ifelse(fsnomealchild==3,0,990))),
                    
                    LowCostFood = as.integer(ifelse(LowCostFoodCoded==990,
                                                    ifelse((ChildPortionCoded==1 | ChildSkipCoded==1 | FreqChildSkipCoded==1 |NoMealChildCoded==1),1,NA),LowCostFoodCoded)),
@@ -181,58 +171,58 @@ HHData <-   WELLBEING %>%
                    
                    
                    # Livelihoods & Occupations
-                   PrimaryLivelihood = as.integer(ifelse(PrimaryLivelihood%in%c(1:7,996),PrimaryLivelihood,NA)),
-                   SecondaryLivelihood = as.integer(ifelse(SecondaryLivelihood%in%c(1:7,996),SecondaryLivelihood,NA)),
-                   TertiaryLivelihood = as.integer(ifelse(TertiaryLivelihood%in%c(1:7,996),TertiaryLivelihood,NA)),
+                   PrimaryLivelihood = as.integer(ifelse(primarylivelihood%in%c(1:7,996),primarylivelihood,NA)),
+                   SecondaryLivelihood = as.integer(ifelse(secondarylivelihood%in%c(1:7,996),secondarylivelihood,NA)),
+                   TertiaryLivelihood = as.integer(ifelse(tertiarylivelihood%in%c(1:7,996),tertiarylivelihood,NA)),
                    
                    
                    # Fishing Characteristics
-                   FreqFish = as.integer(ifelse(FreqFish%in%c(1:5),FreqFish,NA)),
-                   FreqSaleFish = as.integer(ifelse(FreqSaleFish%in%c(1:5),FreqSaleFish,NA)),
-                   PercentIncFish = as.integer(ifelse(PercentIncomeFish%in%c(1:5),PercentIncomeFish,NA)),
-                   MajFishTechnique = as.integer(ifelse(MajorFishTechnique%in%c(1:6),MajorFishTechnique,NA)),
-                   FreqEatFish = as.integer(ifelse(FreqEatFish%in%c(1:5),FreqEatFish,NA)),
-                   PercentProteinFish = as.integer(ifelse(PercentProteinFish%in%c(1:5),PercentProteinFish,NA)),
-                   PrimaryFishTechnique = as.integer(ifelse(PrimaryFishTechnique%in%c(1:16,996),PrimaryFishTechnique,NA)),
-                   SecondaryFishTechnique = as.integer(ifelse(SecondaryFishTechnique%in%c(1:16,996),SecondaryFishTechnique,NA)),
-                   TertiaryFishTechnique = as.integer(ifelse(TertiaryFishTechnique%in%c(1:16,996),TertiaryFishTechnique,NA)),
+                   FreqFish = as.integer(ifelse(freqfishtime%in%c(1:5),freqfishtime,NA)),
+                   FreqSaleFish = as.integer(ifelse(freqsalefish%in%c(1:5),freqsalefish,NA)),
+                   PercentIncFish = as.integer(ifelse(percentincomefish%in%c(1:5),percentincomefish,NA)),
+                   MajFishTechnique = as.integer(ifelse(majorfishtechnique%in%c(1:6),majorfishtechnique,NA)),
+                   FreqEatFish = as.integer(ifelse(freqeatfish%in%c(1:5),freqeatfish,NA)),
+                   PercentProteinFish = as.integer(ifelse(percentproteinfish%in%c(1:5),percentproteinfish,NA)),
+                   PrimaryFishTechnique = as.integer(ifelse(primaryfishtechnique%in%c(1:16,996),primaryfishtechnique,NA)),
+                   SecondaryFishTechnique = as.integer(ifelse(secondaryfishtechnique%in%c(1:16,996),secondaryfishtechnique,NA)),
+                   TertiaryFishTechnique = as.integer(ifelse(tertiaryfishtechnique%in%c(1:16,996),tertiaryfishtechnique,NA)),
                    
                    
-                   # Economic Well-being (Sujective)
-                   EconStatusTrend = as.integer(ifelse(EconomicStatusTrend%in%c(1:5),EconomicStatusTrend,NA)),
-                   EconStatusReason = ifelse(EconomicStatusReason %in% c("994", "995", "996", "997", "998", "999"), NA, as.character(EconomicStatusReason)), 
+                   # Economic Well-being (Subjective)
+                   EconStatusTrend = as.integer(ifelse(economicstatustrend%in%c(1:5),economicstatustrend,NA)),
+                   EconStatusReason = ifelse(economicstatusreason %in% c("994", "995", "996", "997", "998", "999"), NA, as.character(economicstatusreason)), 
                    
                    # Community Organization
-                   MarineGroup = as.integer(ifelse(MarineGroup%in%c(0:1),MarineGroup,NA)),
-                   OtherGroup = as.integer(ifelse(OtherGroup%in%c(0:1),OtherGroup,NA)),    
-                   VoteDistrict = as.integer(ifelse(VoteDistrict%in%c(0:1),VoteDistrict,NA)),
-                   VoteNational = as.integer(ifelse(VoteNational%in%c(0:1),VoteNational,NA)),   
+                   MarineGroup = as.integer(ifelse(marinegroup%in%c(0:1),marinegroup,NA)),
+                   OtherGroup = as.integer(ifelse(othergroup%in%c(0:1),othergroup,NA)),    
+                   VoteDistrict = as.integer(ifelse(votedistrict%in%c(0:1),votedistrict,NA)),
+                   VoteNational = as.integer(ifelse(votenational%in%c(0:1),votenational,NA)),   
                    
-                   NumLocalThreat = as.integer(ifelse(NumLocalThreat>989,NA,NumLocalThreat)), 
-                   NumGlobalThreat = as.integer(ifelse(NumGlobalThreat>989,NA,NumGlobalThreat)), 
-                   NumLocalAction = as.integer(ifelse(NumLocalAction>989,NA,NumLocalAction)),   
-                   NumGlobalAction = as.integer(ifelse(NumGlobalAction>989,NA,NumGlobalAction)), 
+                   NumLocalThreat = as.integer(ifelse(numlocalthreat>989,NA,numlocalthreat)), 
+                   NumGlobalThreat = as.integer(ifelse(numglobalthreat>989,NA,numglobalthreat)), 
+                   NumLocalAction = as.integer(ifelse(numlocalaction>989,NA,numlocalaction)),   
+                   NumGlobalAction = as.integer(ifelse(numglobalaction>989,NA,numglobalaction)), 
                    
                    
                    # Other Characteristics
-                   Religion = as.integer(ifelse(Religion%in%c(1:7),Religion,NA)),
-                   YrResident = as.integer(ifelse(YearsResident>=150,NA,YearsResident)),
-                   TimeMarket = as.numeric(ifelse(TimeMarket>989,NA,TimeMarket)),
-                   SocialConflict = as.integer(ifelse(SocialConflict%in%c(1:5),SocialConflict,NA)),
-                   PaternalEthnicity = PaternalEthnicity,
+                   Religion = as.integer(ifelse(religion%in%c(1:7),religion,NA)),
+                   YrResident = as.integer(ifelse(yearsresident>=150,NA,yearsresident)),
+                   TimeMarket = as.numeric(ifelse(timemarket>989,NA,timemarket)),
+                   SocialConflict = as.integer(ifelse(socialconflict%in%c(1:5),socialconflict,NA)),
+                   PaternalEthnicity = paternalethnicity,
                    
                    #Fishing 
-                   LessProductiveDaysFishing = as.integer(ifelse(LessProductiveDaysFishing%in%c(0:366),LessProductiveDaysFishing,NA)),
-                   PoorCatch = PoorCatch,
-                   PoorCatchUnits = PoorCatchUnits, 
+                   LessProductiveDaysFishing = as.integer(ifelse(lessproductivedaysfishing%in%c(0:366),lessproductivedaysfishing,NA)),
+                   PoorCatch = poorcatch,
+                   PoorCatchUnits = poorcatchunits, 
                    
-                   MoreProductiveDaysFishing = as.integer(ifelse(MoreProductiveDaysFishing%in%c(0:366),MoreProductiveDaysFishing,NA)),
-                   GoodCatch = GoodCatch,
-                   GoodCatchUnits = GoodCatchUnits) %>%
+                   MoreProductiveDaysFishing = as.integer(ifelse(moreproductivedaysfishing%in%c(0:366),moreproductivedaysfishing,NA)),
+                   GoodCatch = goodcatch,
+                   GoodCatchUnits = goodcatchunits) %>%
   
   
   dplyr::mutate(RemoveFS = as.factor(ifelse(rowSums(.[c("DidNotLastCoded", "BalancedDietCoded", "FreqAdultSkipCoded", 
-                                                              "AdultSkipCoded", "EatLessCoded", "HungryCoded")])>2969,"Yes","No")), #2970 would be 3 or more blind codes
+                                                        "AdultSkipCoded", "EatLessCoded", "HungryCoded")])>2969,"Yes","No")), #2970 would be 3 or more blind codes
                 RemoveMA = as.factor(ifelse(rowSums(is.na(.[c("CarTruck", "Bicycle", "Motorcycle", "BoatNoMotor", 
                                                               "BoatOutboard", "BoatInboard", "PhoneCombined", 
                                                               "TV", "Entertain", "Satellite", "Generator")]))>10,"Yes","No")),
@@ -241,7 +231,7 @@ HHData <-   WELLBEING %>%
                 RemoveMT = as.factor(ifelse(rowSums(is.na(.[c("RightsAccess", "RightsHarvest", "RightsManage", 
                                                               "RightsExclude", "RightsTransfer")]))>4,"Yes","No")),
                 RemovecFS = as.factor(ifelse(rowSums(.[c("ChildPortionCoded", "LowCostFoodCoded", "ChildSkipCoded", 
-                                                               "FreqChildSkipCoded", "NoMealChildCoded")])>1979,"Yes","No"))) %>% #1980 would vbe 2 or more blind codes
+                                                         "FreqChildSkipCoded", "NoMealChildCoded")])>1979,"Yes","No"))) %>% #1980 would vbe 2 or more blind codes
   
   dplyr::select(HouseholdID, MPAID, SettlementID, InterviewYear, DidNotLast, BalancedDiet, AdultSkip, EatLess, FreqAdultSkip, Hungry, RemoveFS,
                 CarTruck, Bicycle, Motorcycle,  BoatNoMotor, BoatOutboard, BoatInboard, PhoneCombined, TV, Entertain, Satellite, Generator, RemoveMA, CookingFuel.Biomass,
@@ -259,20 +249,20 @@ HHData <-   WELLBEING %>%
 
 IndDemos <- 
   DEMOGRAPHIC %>%
-  dplyr::transmute(DemographicID = DemographicID,
-                HouseholdID = HouseholdID,
-                RelationHHH = as.integer(ifelse(RelationHHH%in%c(0:13),RelationHHH,NA)),
-                IndividualGender = ifelse(IndividualGender==2,0,ifelse(IndividualGender>989,NA,IndividualGender)),
-                IndividualAge = ifelse(IndividualAge>150,NA,IndividualAge),
-                IndividualEducation = ifelse(IndividualEducation %in% c("995", "997", "998", "999"),NA,as.character(IndividualEducation)),
-                SchoolAge = ifelse((IndividualAge>4 & IndividualAge<19),1,ifelse(IndividualAge>150 | is.na(IndividualAge),NA,0)),
-                IndividualEnrolled = as.integer(ifelse(IndividualEnrolled%in%c(0:1),IndividualEnrolled,NA)),
-                ChildEnrolled = ifelse((IndividualEnrolled==1 & SchoolAge==1),1,ifelse((is.na(IndividualAge) | SchoolAge==0),NA,0)),
-                DaysUnwell = ifelse(IndividualDaysUnwell>32,NA,
-                                    ifelse(IndividualDaysUnwell%in%c(29:32),28,IndividualDaysUnwell)),
-                IndividualUnwell = as.integer(ifelse(IndividualUnwell%in%c(0:1),IndividualUnwell,NA)),
-                IndividualLostDays = ifelse(IndividualLostDays>32, NA, 
-                                            ifelse(IndividualLostDays %in% c(29:32),28,IndividualLostDays))) %>%
+  dplyr::transmute(DemographicID = demographicid,
+                   HouseholdID = household,
+                   RelationHHH = as.integer(ifelse(relationhhh%in%c(0:13),relationhhh,NA)),
+                   IndividualGender = ifelse(individualgender==2,0,ifelse(individualgender>989,NA,individualgender)),
+                   IndividualAge = ifelse(individualage>150,NA,individualage),
+                   IndividualEducation = ifelse(individualeducation %in% c("995", "997", "998", "999"),NA,as.character(individualeducation)),
+                   SchoolAge = ifelse((individualage>4 & individualage<19),1,ifelse(individualage>150 | is.na(individualage),NA,0)),
+                   IndividualEnrolled = as.integer(ifelse(individualenrolled%in%c(0:1),individualenrolled,NA)),
+                   ChildEnrolled = ifelse((individualenrolled==1 & SchoolAge==1),1,ifelse((is.na(IndividualAge) | SchoolAge==0),NA,0)),
+                   DaysUnwell = ifelse(individualdaysunwell>32,NA,
+                                       ifelse(individualdaysunwell%in%c(29:32),28,individualdaysunwell)),
+                   IndividualUnwell = as.integer(ifelse(individualunwell%in%c(0:1),individualunwell,NA)),
+                   IndividualLostDays = ifelse(individuallostdays>32, NA, 
+                                               ifelse(individuallostdays %in% c(29:32),28,individuallostdays))) %>%
   left_join(., HHData[,c("HouseholdID","MPAID","SettlementID")], by="HouseholdID")
 
 
@@ -280,27 +270,41 @@ IndDemos <-
 
 Organization <- 
   ORGANIZATION %>%
-  dplyr::mutate(MarineMeeting = ifelse(MarineMeeting%in%c(0:1),MarineMeeting, NA),
-                MarineContribution = ifelse(MarineContribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, MarineContribution)) %>%
+  dplyr::transmute(OrganizationID = morganizationid,
+                   HouseholdID = household,
+                   MarineGroupName = name,
+                   MarinePosition = position,
+                   MarineMeeting = ifelse(meeting%in%c(0:1),meeting, NA),
+                   MarineContribution = ifelse(contribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, contribution)) %>%
   left_join(HHData[,c("HouseholdID","MPAID","SettlementID")], by="HouseholdID")
 
 NMOrganization <-
   NMORGANIZATION %>%
-  dplyr::mutate(OtherGroupMeeting = ifelse(OtherGroupMeeting%in%c(0:1),OtherGroupMeeting, NA),
-                OtherGroupContribution = ifelse(OtherGroupContribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, OtherGroupContribution)) %>%
+  dplyr::transmute(NMOrganizationID = nmorganizationid,
+                   HouseholdID = household,
+                   OtherGroupName = name,
+                   OtherGroupPosition = position,
+                   OtherGroupMeeting = ifelse(meeting%in%c(0:1),meeting, NA),
+                   OtherGroupContribution = ifelse(contribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, contribution)) %>%
   left_join(HHData[,c("HouseholdID","MPAID","SettlementID")], by="HouseholdID")
+
 
 # ---- 2.4 Add seascape column to SETTLEMENTS for analysis ----
 
 Settlements <- 
   SETTLEMENT %>%
-  dplyr::mutate(Seascape = ifelse(MPAID %in% c(1,2,3,4,5,6), 1,  #Seascape 1 is Bird's Head, and Seascape 2 is Sunda Banda
-                                  ifelse(MPAID %in% c(15,16,17,18,19,20,21), 2,
-                                         NA))) %>%
-  dplyr::select(.,c("SettlementID","SettlementName","MPAID","Treatment","Seascape"))
+  dplyr::transmute(SettlementID = settlementid,
+                   SettlementName = name,
+                   MPAID = mpa,
+                   Treatment = treatment, 
+                   Zone = zone,
+                   Seascape = ifelse(MPAID %in% c(1,2,3,4,5,6), 1,  # Seascape 1 is Bird's Head, and Seascape 2 is Sunda Banda
+                                     ifelse(MPAID %in% c(15,16,17,18,19,20,21), 2,
+                                            NA)))
 
 
 # ---- 2.5 Add monitoring year column to HHData for analysis ----
+
 
 HHData$MonitoringYear <- factor(mapply(a=HHData$MPAID,
                                        b=HHData$InterviewYear,
@@ -313,19 +317,45 @@ HHData$MonitoringYear <- factor(mapply(a=HHData$MPAID,
                                                      ThreeYear=Baseline+3,
                                                      FourYear=Baseline+4,
                                                      FiveYear=Baseline+5,
-                                                     SixYear=Baseline+6) %>%
-                                           na.omit(.)
+                                                     SixYear=Baseline+6,
+                                                     SevenYear=Baseline+7,
+                                                     EightYear=Baseline+8,
+                                                     NineYear=Baseline+9,
+                                                     TenYear=Baseline+10)
                                          
                                          mon.year <- ifelse(b==define$Baseline[define$MPAID==a],"Baseline",
                                                             ifelse(b==define$TwoYear[define$MPAID==a],"2 Year Post",
                                                                    ifelse(b==define$ThreeYear[define$MPAID==a],"3 Year Post",
                                                                           ifelse(b==define$FourYear[define$MPAID==a],"4 Year Post",
                                                                                  ifelse(b==define$FiveYear[define$MPAID==a],"5 Year Post",
-                                                                                        ifelse(b==define$SixYear[define$MPAID==a],"6 Year Post",NA))))))
+                                                                                        ifelse(b==define$SixYear[define$MPAID==a],"6 Year Post",
+                                                                                               ifelse(b==define$SevenYear[define$MPAID==a],"7 Year Post",
+                                                                                                      ifelse(b==define$EightYear[define$MPAID==a],"8 Year Post",
+                                                                                                             ifelse(b==define$NineYear[define$MPAID==a],"9 Year Post",
+                                                                                                                    ifelse(b==define$TenYear[define$MPAID==a],"10 Year Post"))))))))))
                                          mon.year
                                        }),
-                                levels=c("Baseline", "2 Year Post", "3 Year Post", "4 Year Post", "5 Year Post", "6 Year Post"),
+                                levels=c("Baseline", "2 Year Post", "3 Year Post", "4 Year Post", "5 Year Post", "6 Year Post",
+                                         "7 Year Post", "8 Year Post", "9 Year Post", "10 Year Post"),
                                 ordered=T)
+
+
+# ---- 2.6 Create MPA.name table to define formal MPA names, in English and Bahasa, for plotting and automated R wrapper ----
+
+MPA.name <- 
+  MPA %>% 
+  transmute(MPAID=mpaid,
+            MPAName=name,
+            MPAName.nospace=gsub(" ","",MPAName), # this is used for the automated R wrapper, to create a filepath with the MPA name
+            MPAName.final=gsub("MPA","",MPAName.nospace), # this is used to label the MPA without "MPA" in the name
+            MPAName.bahasa=ifelse(MPAID==15,"SAP Selat Pantar",
+                                  ifelse(MPAID==16,"SAP Flores Timur",
+                                         ifelse(MPAID==17, "KKP3K TPK Pulau Kei Kecil",
+                                                ifelse(MPAID==18, "KKP3K Pulau Koon", 
+                                                       ifelse(MPAID==19,"KKP3K TPK Kepulauan Tanimbar",
+                                                              ifelse(MPAID==20, "KKPD Sulawesi Tenggara",
+                                                                     ifelse(MPAID==21, "Taman Nasional Wakatobi", gsub("MPA","KKP",MPAName)))))))))
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -437,43 +467,48 @@ HHData <-
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# ---- SECTION 4: OPTIONAL FILTERING BY SEASCAPE OR MPA ----
+# ---- SECTION 4: FILTERING BY MPA ----
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 
-# ---- 4.1 Filter by seascape ----
-
-# adjust filter() function with either "Seascape %in% 1" for Bird's Head, or "Seascape %in% 2" for Sunda Banda
+# ---- 4.1 Filter by MPA ----
 
 # HHData <-
 #   HHData %>%
-#   dplyr::filter(Seascape %in% 2)
-# 
-# IndDemos <-
-#   left_join(IndDemos,HHData[,c("HouseholdID","Seascape")],by=c("HouseholdID"))
-#   dplyr::filter(Seascape %in% 2)
-# 
-# Organization <-
-#   left_join(Organization,HHData[,c("HouseholdID","Seascape")],by="HouseholdID") %>%
-#   dplyr::filter(Seascape %in% 2)
-
-
-# ---- 4.2 Filter by MPA ----
-
-# adjust filter() function with "MPAID %in%" whatever list of MPAs you'd like to filter by
-
-# HHData <-
-#   HHData %>%
-#   dplyr::filter(MPAID %in% c(1,2,3))
+#   filter(MPAID==MPA) %>%
+#   mutate(MonitoringYear=factor(MonitoringYear,
+#                                levels=unique(MonitoringYear),
+#                                ordered=T))
 # 
 # IndDemos <-
 #   left_join(IndDemos,HHData[,c("HouseholdID","Seascape")],by=c("HouseholdID")) %>%
-#   dplyr::filter(MPAID %in% c(1,2,3))
+#   filter(MPAID==MPA)
 # 
 # Organization <-
 #   left_join(Organization,HHData[,c("HouseholdID","Seascape")],by="HouseholdID") %>%
-#   dplyr::filter(MPAID %in% c(1,2,3))
-
-
+#   filter(MPAID==MPA)
+# 
+# Settlements <- 
+#   Settlements %>%
+#   filter(MPAID==MPA) %>%
+#   mutate(SettlementName=factor(SettlementName,
+#                                levels=unique(SettlementName)))
+# 
+# MPA.name <-
+#    MPA.name %>% 
+#    filter(MPAID==MPA) %>%
+# 
+# LThreat_forexport <-
+#   LTHREAT %>% mutate(HouseholdID=household) %>%
+#   left_join(LTHREAT[,c("HouseholdID","localthreatid","localmarinethreat")],HHData[,c("HouseholdID","SettlementID","MPAID","MonitoringYear","InterviewYear","Treatment",
+#                               "PrimaryLivelihood","SecondaryLivelihood","TertiaryLivelihood")],by="HouseholdID") %>%
+#   filter(MPAID==MPA) %>%
+#   dplyr::mutate(Check.NA=paste(PrimaryLivelihood,SecondaryLivelihood,TertiaryLivelihood,sep=""),
+#                 Fisher=ifelse(grepl("3",Check.NA),"Fisher",
+#                               ifelse(Check.NA=="NANANA",NA,"Not Fisher"))) %>%
+#   select(-Check.NA)
+# 
+# 
 rm(baseline.dummy.rows)
+
