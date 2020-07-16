@@ -41,20 +41,6 @@ mpa.trends <- function(MPA=NULL) {
   
   pacman::p_load(rio, reldist, Kendall, reshape2, ggplot2, grid, gridExtra, dplyr)
   
-  MPA.name <- 
-    import('x_Flat_data_files/1_Social/Inputs/Master_database_exports/HH_tbl_MPA.xlsx') %>%
-    filter(.,MPAID==MPA) %>%
-    transmute(MPAID=MPAID,
-              MPAName=MPAName,
-              MPAName.nospace=gsub(" ","",MPAName),
-              MPAName.final=gsub("MPA","",MPAName.nospace),
-              MPAName.bahasa=ifelse(MPAID==15,"SAP Selat Pantar",
-                                    ifelse(MPAID==16,"SAP Flores Timur",
-                                           ifelse(MPAID==17, "KKP3K TPK Pulau Kei Kecil",
-                                                  ifelse(MPAID==18, "KKP3K Pulau Koon", 
-                                                         ifelse(MPAID==19,"KKP3K TPK Kepulauan Tanimbar",
-                                                                ifelse(MPAID==20, "KKPD Sulawesi Tenggara",
-                                                                       ifelse(MPAID==21, "Taman Nasional Wakatobi", gsub("MPA","KKP",MPAName)))))))))
   
   # source data, clean/post-code data, subset to MPA
   source('1_Data_wrangling/1_Social/2_Source_data/Source_social_data_for_function.R', local=T)

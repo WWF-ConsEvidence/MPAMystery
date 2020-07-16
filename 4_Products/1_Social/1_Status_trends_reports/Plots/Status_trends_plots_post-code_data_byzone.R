@@ -14,19 +14,9 @@ source('2_Functions/3_Plotting/Function_define_asteriskplotting.R')
 ed.lkp <- import('x_Flat_data_files/1_Social/Inputs/education_lkp.xlsx')
 
 MPA.name <- 
-  import('x_Flat_data_files/1_Social/Inputs/Master_database_exports/HH_tbl_MPA.xlsx') %>%
-  filter(.,MPAID==21) %>%
-  transmute(MPAID=MPAID,
-            MPAName=MPAName,
-            MPAName.nospace=gsub(" ","",MPAName),
-            MPAName.final=gsub("MPA","",MPAName.nospace),
-            MPAName.bahasa=ifelse(MPAID==15,"SAP Selat Pantar",
-                                  ifelse(MPAID==16,"SAP Flores Timur",
-                                         ifelse(MPAID==17, "KKP3K TPK Pulau Kei Kecil",
-                                                ifelse(MPAID==18, "KKP3K Pulau Koon", 
-                                                       ifelse(MPAID==19,"KKP3K TPK Kepulauan Tanimbar",
-                                                              ifelse(MPAID==20, "KKPD Sulawesi Tenggara",
-                                                                     ifelse(MPAID==21, "Taman Nasional Wakatobi", gsub("MPA","KKP",MPAName)))))))))
+  MPA.name %>%
+  filter(.,MPAID==21)
+
 
 
 # ----- import post-coded threat type data from MPA of choice & analyze at settlement and MPA level ----

@@ -1,13 +1,9 @@
 # 
-# code:  Source social data from flat files for all social MPA Mystery analysis
-# 
-# github: WWF-ConsEvidence/MPAMystery/1_Data_wrangling/1_Social/2_Source_data
-# --- Duplicate all code from MPAMystery repo folder to maintain sourcing functionality throughout scripts
+# code:  Source social data from flat files (exported from MPASocial) for all social MPA Mystery analysis
 # 
 # author: Kelly Claborn, clabornkelly@gmail.com
 # created: May 2019
-# QAQC_modified by: Duong Le & David Gill  
-# Date modified: June 2019
+# modified: July 2020
 # 
 # 
 # ---- inputs ----
@@ -47,8 +43,8 @@
 today.date <- gsub("-","",Sys.Date())
 
 # Files (with package rio)
-last.file <- function(dir.nam,nam){
-  import(paste0(dir.nam,last(sort(grep(nam,list.files(dir.nam), value=T)))),guess_max=50000)}
+last.file <- function(dir.nam, nam){
+  import(paste0(dir.nam, last(sort(grep(nam, list.files(dir.nam), value=T, fixed=T)))), guess_max=50000)}
 
 # suppress messages for experimental new group_by() and summarise() functionality in dplyr
 options(dplyr.summarise.inform = FALSE)
@@ -56,16 +52,14 @@ options(dplyr.summarise.inform = FALSE)
 
 # ---- 1.2 Import data ----
 
-household <- source.from.SQL(endpoint="household")
-
-WELLBEING <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_WELLBEING')
-DEMOGRAPHIC <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_DEMOGRAPHIC')
-SETTLEMENT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_SETTLEMENT')
-ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_ORGANIZATION')
-NMORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam="HH_tbl_NMORGANIZATION")
-LTHREAT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_LTHREAT')
-LSTEPS <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/',nam='HH_tbl_LSTEPS')
-
+WELLBEING <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_household')
+DEMOGRAPHIC <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_demographic')
+SETTLEMENT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_settlement')
+ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_marineorganizationmembership')
+NMORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_nonmarineorganizationmembership')
+LTHREAT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_localthreat')
+LSTEPS <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_localstep')
+MPA <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_mpa')
 
 
 # 
@@ -256,7 +250,7 @@ IndDemos <-
   dplyr::transmute(DemographicID = demographicid,
                    HouseholdID = household,
                    RelationHHH = as.integer(ifelse(relationhhh%in%c(0:13),relationhhh,NA)),
-                   IndividualGender = ifelse(individualgender==2,0,ifelse(individualgender>989,NA,IndividualGender)),
+                   IndividualGender = ifelse(individualgender==2,0,ifelse(individualgender>989,NA,individualgender)),
                    IndividualAge = ifelse(individualage>150,NA,individualage),
                    IndividualEducation = ifelse(individualeducation %in% c("995", "997", "998", "999"),NA,as.character(individualeducation)),
                    SchoolAge = ifelse((individualage>4 & individualage<19),1,ifelse(individualage>150 | is.na(individualage),NA,0)),
@@ -274,22 +268,22 @@ IndDemos <-
 
 Organization <- 
   ORGANIZATION %>%
-  dplyr::transmute(OrganizationID = organizationid,
+  dplyr::transmute(OrganizationID = morganizationid,
                    HouseholdID = household,
-                   MarineGroupName = marinegroupname,
-                   MarinePosition = marineposition,
-                   MarineMeeting = ifelse(marinemeeting%in%c(0:1),marinemeeting, NA),
-                   MarineContribution = ifelse(marinecontribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, MarineContribution)) %>%
+                   MarineGroupName = name,
+                   MarinePosition = position,
+                   MarineMeeting = ifelse(meeting%in%c(0:1),meeting, NA),
+                   MarineContribution = ifelse(contribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, contribution)) %>%
   left_join(HHData[,c("HouseholdID","MPAID","SettlementID")], by="HouseholdID")
 
 NMOrganization <-
   NMORGANIZATION %>%
   dplyr::transmute(NMOrganizationID = nmorganizationid,
                    HouseholdID = household,
-                   OtherGroupName = othergroupname,
-                   OtherGroupPosition = othergroupposition,
-                   OtherGroupMeeting = ifelse(OtherGroupMeeting%in%c(0:1),OtherGroupMeeting, NA),
-                   OtherGroupContribution = ifelse(OtherGroupContribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, OtherGroupContribution)) %>%
+                   OtherGroupName = name,
+                   OtherGroupPosition = position,
+                   OtherGroupMeeting = ifelse(meeting%in%c(0:1),meeting, NA),
+                   OtherGroupContribution = ifelse(contribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, contribution)) %>%
   left_join(HHData[,c("HouseholdID","MPAID","SettlementID")], by="HouseholdID")
 
 
@@ -298,7 +292,7 @@ NMOrganization <-
 Settlements <- 
   SETTLEMENT %>%
   dplyr::transmute(SettlementID = settlementid,
-                SettlementName = settlementname,
+                SettlementName = name,
                 MPAID = mpa,
                 Treatment = treatment, 
                 Zone = zone,
@@ -308,6 +302,7 @@ Settlements <-
 
 
 # ---- 2.5 Add monitoring year column to HHData for analysis ----
+
 
 HHData$MonitoringYear <- factor(mapply(a=HHData$MPAID,
                                        b=HHData$InterviewYear,
@@ -324,16 +319,7 @@ HHData$MonitoringYear <- factor(mapply(a=HHData$MPAID,
                                                      SevenYear=Baseline+7,
                                                      EightYear=Baseline+8,
                                                      NineYear=Baseline+9,
-                                                     TenYear=Baseline+10,
-                                                     ElevenYear=Baseline+11,
-                                                     TwelveYear=Baseline+12,
-                                                     ThirteenYear=Baseline+13,
-                                                     FourteenYear=Baseline+14,
-                                                     FifteenYear=Baseline+15,
-                                                     SixteenYear=Baseline+16,
-                                                     SeventeenYear=Baseline+17,
-                                                     EighteenYear=Baseline+18) %>%
-                                           na.omit(.)
+                                                     TenYear=Baseline+10)
                                          
                                          mon.year <- ifelse(b==define$Baseline[define$MPAID==a],"Baseline",
                                                             ifelse(b==define$TwoYear[define$MPAID==a],"2 Year Post",
@@ -344,21 +330,30 @@ HHData$MonitoringYear <- factor(mapply(a=HHData$MPAID,
                                                                                                ifelse(b==define$SevenYear[define$MPAID==a],"7 Year Post",
                                                                                                       ifelse(b==define$EightYear[define$MPAID==a],"8 Year Post",
                                                                                                              ifelse(b==define$NineYear[define$MPAID==a],"9 Year Post",
-                                                                                                                    ifelse(b==define$TenYear[define$MPAID==a],"10 Year Post",
-                                                                                                                           ifelse(b==define$ElevenYear[define$MPAID==a],"11 Year Post",
-                                                                                                                                  ifelse(b==define$TwelveYear[define$MPAID==a],"12 Year Post",
-                                                                                                                                         ifelse(b==define$ThirteenYear[define$MPAID==a],"13 Year Post",
-                                                                                                                                                ifelse(b==define$FourteenYear[define$MPAID==a],"14 Year Post",
-                                                                                                                                                       ifelse(b==define$FifteenYear[define$MPAID==a],"15 Year Post",
-                                                                                                                                                              ifelse(b==define$SixteenYear[define$MPAID==a],"16 Year Post",
-                                                                                                                                                                     ifelse(b==define$SeventeenYear[define$MPAID==a],"17 Year Post",
-                                                                                                                                                                            ifelse(b==define$EighteenYear[define$MPAID==a],"18 Year Post", NA))))))))))))))))))
+                                                                                                                    ifelse(b==define$TenYear[define$MPAID==a],"10 Year Post"))))))))))
                                          mon.year
                                        }),
                                 levels=c("Baseline", "2 Year Post", "3 Year Post", "4 Year Post", "5 Year Post", "6 Year Post",
-                                         "7 Year Post", "8 Year Post", "9 Year Post", "10 Year Post", "11 Year Post", "12 Year Post",
-                                         "13 Year Post", "14 Year Post", "15 Year Post", "16 Year Post", "17 Year Post", "18 Year Post"),
+                                         "7 Year Post", "8 Year Post", "9 Year Post", "10 Year Post"),
                                 ordered=T)
+
+
+# ---- 2.6 Create MPA.name table to define formal MPA names, in English and Bahasa, for plotting and automated R wrapper ----
+
+MPA.name <- 
+  MPA %>% 
+  transmute(MPAID=mpaid,
+            MPAName=name,
+            MPAName.nospace=gsub(" ","",MPAName), # this is used for the automated R wrapper, to create a filepath with the MPA name
+            MPAName.final=gsub("MPA","",MPAName.nospace), # this is used to label the MPA without "MPA" in the name
+            MPAName.bahasa=ifelse(MPAID==15,"SAP Selat Pantar",
+                                  ifelse(MPAID==16,"SAP Flores Timur",
+                                         ifelse(MPAID==17, "KKP3K TPK Pulau Kei Kecil",
+                                                ifelse(MPAID==18, "KKP3K Pulau Koon", 
+                                                       ifelse(MPAID==19,"KKP3K TPK Kepulauan Tanimbar",
+                                                              ifelse(MPAID==20, "KKPD Sulawesi Tenggara",
+                                                                     ifelse(MPAID==21, "Taman Nasional Wakatobi", gsub("MPA","KKP",MPAName)))))))))
+
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -498,8 +493,13 @@ HHData <-
 #   mutate(SettlementName=factor(SettlementName,
 #                                levels=unique(SettlementName)))
 # 
+# MPA.name <-
+#    MPA.name %>% 
+#    filter(MPAID==MPA) %>%
+# 
 # LThreat_forexport <-
-#   left_join(LTHREAT,HHData[,c("HouseholdID","SettlementID","MPAID","MonitoringYear","InterviewYear","Treatment",
+#   LTHREAT %>% mutate(HouseholdID=household) %>%
+#   left_join(LTHREAT[,c("HouseholdID","localthreatid","localmarinethreat")],HHData[,c("HouseholdID","SettlementID","MPAID","MonitoringYear","InterviewYear","Treatment",
 #                               "PrimaryLivelihood","SecondaryLivelihood","TertiaryLivelihood")],by="HouseholdID") %>%
 #   filter(MPAID==MPA) %>%
 #   dplyr::mutate(Check.NA=paste(PrimaryLivelihood,SecondaryLivelihood,TertiaryLivelihood,sep=""),

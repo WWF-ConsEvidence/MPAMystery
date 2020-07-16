@@ -1,6 +1,7 @@
 # 
 # ---- code: Social status and trends analysis for MPA Vision report, Chp 3 ----
 # 
+# author: Kelly Claborn, clabornkelly@gmail.com
 # 
 
 # ---- source data ----
@@ -11,7 +12,8 @@ source('2_Functions/3_Plotting/Function_plotthemes.R')
 
 pacman::p_load(grid, gridExtra, cowplot)
 
-# ---- add a couple of columns ----
+
+# ---- add a couple of columns, especially to remove TV from MAIndex ----
 
 HHData <-
   HHData %>% group_by(MPAID) %>% summarise(CurrentYear=max(InterviewYear)) %>% ungroup() %>% left_join(HHData,.,by="MPAID") %>%
@@ -46,7 +48,7 @@ HHData <-
 
 # ---- Calculate status and trends for province and national-level ----
 
-
+# NOTE: Calculating material assets mean WITHOUT TV since it is missing from a few of the MPAs.
 Province.Level.ContData.Means <- 
   HHData %>% filter(MPAID!= 19 & MPAID!=21) %>%
   dplyr::group_by(Province,RepeatYear,Treatment) %>%
