@@ -46,6 +46,7 @@ today.date <- gsub("-","",Sys.Date())
 
 # Files (with package rio)
 last.file <- function(dir.nam, nam){
+  pacman::p_load(rio)
   import(paste0(dir.nam, last(sort(grep(nam, list.files(dir.nam), value=T, fixed=T)))), guess_max=50000)}
 
 # suppress messages for experimental new group_by() and summarise() functionality in dplyr
@@ -128,7 +129,8 @@ HHData <-   WELLBEING %>%
                    DVD = as.integer(ifelse(assetdvd>989,NA,assetdvd)),
                    Entertain = as.integer(ifelse(assetentertain<993,assetentertain*1,
                                                  ifelse(assetentertain==993,Radio+Stereo+CD+DVD,NA))),
-                   
+                  
+                   CookingFuel = as.integer(ifelse(cookingfuel%in%c(1:6), cookingfuel, NA)),
                    CookingFuel.Biomass = as.integer(ifelse(cookingfuel==1|cookingfuel==2,0,
                                                            ifelse(cookingfuel==3|cookingfuel==4|cookingfuel==5|cookingfuel==6,1,NA))),
                    
@@ -234,7 +236,7 @@ HHData <-   WELLBEING %>%
                                                          "FreqChildSkipCoded", "NoMealChildCoded")])>1979,"Yes","No"))) %>% #1980 would vbe 2 or more blind codes
   
   dplyr::select(HouseholdID, MPAID, SettlementID, InterviewYear, DidNotLast, BalancedDiet, AdultSkip, EatLess, FreqAdultSkip, Hungry, RemoveFS,
-                CarTruck, Bicycle, Motorcycle,  BoatNoMotor, BoatOutboard, BoatInboard, PhoneCombined, TV, Entertain, Satellite, Generator, RemoveMA, CookingFuel.Biomass,
+                CarTruck, Bicycle, Motorcycle,  BoatNoMotor, BoatOutboard, BoatInboard, PhoneCombined, TV, Entertain, Satellite, Generator, RemoveMA, CookingFuel, CookingFuel.Biomass,
                 PlaceHappy,  PlaceFavourite, PlaceMiss, PlaceBest, PlaceFishHere, PlaceBeMyself, RemovePA,
                 RightsAccess, RightsHarvest, RightsManage, RightsExclude, RightsTransfer, RemoveMT,
                 LowCostFood, ChildBalancedMeal, ChildNotEnough, ChildPortion, ChildHungry, ChildSkip, FreqChildSkip, NoMealChild, RemovecFS,
@@ -275,6 +277,7 @@ Organization <-
                    MarineGroupName = name,
                    MarinePosition = position,
                    MarineMeeting = ifelse(meeting%in%c(0:1),meeting, NA),
+                   MarineDays = ifelse(days%in%c(0:365),days, NA),
                    MarineContribution = ifelse(contribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, contribution)) %>%
   left_join(HHData[,c("HouseholdID","MPAID","SettlementID")], by="HouseholdID")
 
@@ -285,6 +288,7 @@ NMOrganization <-
                    OtherGroupName = name,
                    OtherGroupPosition = position,
                    OtherGroupMeeting = ifelse(meeting%in%c(0:1),meeting, NA),
+                   OtherGroupDays = ifelse(days%in%c(0:365),days, NA),
                    OtherGroupContribution = ifelse(contribution%in%c(994, 995, 996, 997, 998, 999, 0), NA, contribution)) %>%
   left_join(HHData[,c("HouseholdID","MPAID","SettlementID")], by="HouseholdID")
 
