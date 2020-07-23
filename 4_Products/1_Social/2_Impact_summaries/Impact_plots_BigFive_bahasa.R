@@ -36,7 +36,7 @@ source('2_Functions/3_Plotting/Function_plotthemes.R')
 # -- TO BE CHANGED BASED ON WHICH MPA YOU'RE ANALYZING
 # -- options currently are "Alor", "Flores Timur", "Kei Kecil", "Koon" -- ***NOTE: must spell exactly as listed!
 
-MPAName <- "Kei Kecil"
+MPAName <- "Koon"
 
 
 # ---- 1.2 Call in MPA-specific impact outputs from DiD regression ----
