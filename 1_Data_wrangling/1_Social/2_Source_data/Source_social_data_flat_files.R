@@ -38,6 +38,8 @@
 
 # ---- 1.1 Load libraries & data ----
 
+pacman::p_load(rio, reldist, Kendall, reshape2, ggplot2, grid, gridExtra, dplyr)
+
 # Sourcing most recent files
 
 # Date in format YYYYMMDD (could be changed but we believe it makes most sense 

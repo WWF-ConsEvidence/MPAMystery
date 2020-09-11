@@ -25,7 +25,7 @@ source.from.SQL <- function(endpoint=NULL) {
   
   
   # load libraries
-  pacman::p_load(httr, jsonlite)
+  pacman::p_load(httr, jsonlite, rstudioapi)
   
   
   # ---- PREPARATION: SET UP URL FOR API ENDPOINT ----

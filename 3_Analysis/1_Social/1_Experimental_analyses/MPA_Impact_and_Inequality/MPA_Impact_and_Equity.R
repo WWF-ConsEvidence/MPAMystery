@@ -23,11 +23,13 @@
 #--- 10. Step 3a. (conflict/participation/community cohesiveness splits)
 #--- 10. Step 3b - causal explanation using econ trend reason 
 
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##---0. Sourcing and creating data frame for status/trend and impact
-##---0. Sourcing and creating data frame for status/trend and impact
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# ---- 0. SOURCING ---- 
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+##---0. Sourcing and creating data frame for status/trend and impact 
 
 
 #setwd("D:/Dropbox/MPA_research/MPAMystery/")
@@ -84,6 +86,9 @@ DiD.data <- match.covariate %>%
 # --- Filter to look at 6 BHS and 4 SBS MPAs (with t2 and/or t4 data) --- Jan 2020
 DiD.data <- DiD.data %>% 
   filter(MPAID%in%c(1:6, 15:18))
+
+DiD.data.test <- DiD.data %>% 
+  filter(MPAID%in%c(1:6))
 
 #plyr::count(DiD.data, "indigenous")
 
@@ -189,16 +194,7 @@ DiD.data <- DiD.data %>%
          Bicycle_no = ifelse(Bicycle==0,1,0),
          Motorcycle_no = ifelse(Motorcycle==0,1,0),
          CarTruck_no = ifelse(CarTruck==0,1,0))  
-  # mutate(Household_asset = Entertain + 2*PhoneCombined + 3*Satellite + 4*TV + 5*Generator,
-  #        Boats_w1 = BoatNoMotor + 2*BoatOutboard + 3*BoatInboard,
-  #        Boats_w2 = 6*BoatNoMotor + 7*BoatOutboard + 8*BoatInboard,
-  #        Boats_motor_w1 = 1*BoatOutboard + 2*BoatInboard,
-  #        Boats_motor_w2 = 7*BoatOutboard + 8*BoatInboard,
-  #        Vehicles_w1 = Bicycle + 2*Motorcycle + 3*CarTruck,
-  #        Vehicles_w2 = 9*Bicycle + 10*Motorcycle + 11*CarTruck) %>% 
-  # mutate(Boats_dum = ifelse(BoatNoMotor>0 | BoatOutboard >0 | BoatInboard >0,1,0),
-  #        Boats_motor_dum = ifelse(BoatOutboard >0 | BoatInboard >0,1,0),
-  #        Vehicles_dum = ifelse(Bicycle>0 | Motorcycle>0 | CarTruck>0,1,0))
+
 
 # --- Adding Indicators for community Participation (marine and non-marine groups)
 MarineGroup.Indicators <- Organization %>%
@@ -234,7 +230,7 @@ DiD.data <-  DiD.data %>%
 
 
 
-# --- Categorizing cooking fuel indicator
+# ---- Categorizing cooking fuel indicator 
 plyr::count(HHData, "CookingFuel")
 cooking.fuel.df <- HHData %>% 
   select(HouseholdID, CookingFuel) %>% 
@@ -279,17 +275,13 @@ DiD.data <- DiD.data %>%
 # mean2 <- function(x){ mean(x,na.rm=T)}
 # sd2 <- function(x){ sd(x,na.rm=T)}
 
-##---END---##
-##---END---##
-##---END---##
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+# ---- 1. GENERATING KEY INDICATORS ---- 
 
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##---2. Generating subGroup indicators (Male, Fisher, age.retired, yrResident.above)
-##---2. Generating subGroup indicators
-#---- Import ethnic and education look up tables ----
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ---- 1a. Generating subGroup indicators ---- 
+#---Import ethnic and education look up tables 
 ethnic.lkp<- import("x_Flat_data_files/1_Social/Inputs/master_ethnic_lookup_2017_117.xlsx")
 education.lkp <- import("x_Flat_data_files/1_Social/Inputs/education_lkp_BHS.xlsx")
 
@@ -349,15 +341,8 @@ DiD.data <- DiD.data %>%
 DiD.data <- DiD.data %>% 
   mutate(adat_1 = ifelse( (adat==1 & indigenous==1) , 1, 0 ))
 
-##---END---##
-##---END---##
 
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##---2. Generating household demographic indicators
-##---2. Generating household demographic indicators
-
+# ---- 1b. Generating social indicators ---- 
 
 IndDemos <- IndDemos %>% 
   left_join(education.lkp1, by=c("IndividualEducation")) %>% 
@@ -505,14 +490,67 @@ count.MPA.IDs <- DiD.data %>%
   group_by(MPAID, Treatment) %>%
   summarise(MPA=length(MPAID))
 count.MPA.IDs
-##---END---##
-##---END---##
-##---END---##
 
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##---3. Conducting Principle Component Analysis (PCA) for Asset weights
+
+# ---- 1C. Generate ethnic dominance indicator ----
+
+# some duplicates in ethnicity table (NAs), filtering out these here
+# ethnic.lkp1 <- ethnic.lkp %>% 
+#   distinct(std.eth.str,eth.iso,.keep_all = T) %>%
+#   filter(eth.iso!="NA")
+# filter(!ethnic.id%in%c(2734,2813,5422,5425,5643)) # select out the specific five duplicates
+
+# HH.eth.new <- HHData %>% 
+#   select(HouseholdID,PaternalEthnicity, MTIndex, YrResident, MonitoringYear, SettlementID) %>% 
+#   mutate(PaternalEthnicity=str_clean(PaternalEthnicity)) %>% 
+#   left_join(ethnic.lkp1, by=c("PaternalEthnicity"="std.eth.str")) %>% 
+#   mutate(SettlYear=paste0(MonitoringYear,"_",SettlementID))
+# 
+# 
+# # this code gives you the ethnicity associated with (1) highest MT and (2) MT>=4, for each settlement at each sampling period
+# max.eth.highest.Tenure <- HH.eth.new %>%
+#   group_by(SettlYear,eth.iso) %>%
+#   summarise(MT.mean=mean(MTIndex), MT.median=median(MTIndex)) %>% 
+#   top_n(1, MT.mean) 
+# 
+# 
+# HH.eth.new$dom.eth <- NA
+# # assign dominant ethnicity in a loop will assign a 0 if parentalEthinicity==NA
+# for (i in unique(HH.eth.new$SettlYear)){
+#   max.eth.dom <-  max.eth.highest.Tenure$eth.iso[max.eth.highest.Tenure$SettlYear==i]
+#   HH.eth.new$dom.eth[HH.eth.new$SettlYear==i] <- ifelse(HH.eth.new$eth.iso[HH.eth.new$SettlYear==i]%in%max.eth.dom,1,0)
+# }
+# 
+# HH.eth.new <- HH.eth.new %>% 
+#   mutate(ethDom.highest.MT=dom.eth) %>% 
+#   select(HouseholdID, ethDom.highest.MT) 
+# 
+# 
+# #merge HH.eth.new into the main DiD.data
+# DiD.data <- DiD.data %>% 
+#   left_join(HH.eth.new, by = "HouseholdID") 
+# summary(DiD.data)
+# 
+# 
+# # calculate p scores
+# pscore <- glm(Treatment ~ TimeMarket + n.child  + ed.level + ethDom.highest.MT + YearsResident + IndividualGender + IndividualAge,
+#               data=DiD.data)$fitted.values
+# 
+# DiD.data <- cbind(DiD.data,pscore)  
+
+
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# ---- 2. PCA CONSTRUCTION---- 
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+##---2. Conducting Principle Component Analysis (PCA) for Asset weights
 
 ##---raw 11 assets (3 separate boats) and 4 fuel types
 # poverty.df.1 <- DiD.data %>%
@@ -616,63 +654,14 @@ hist(DiD.data$PovertyIndex_pca, main="Distribution of Asset-based Poverty", xlab
 #ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/toUse_final/povertyIndex_PCA_histo.png"),width = 12, height = 8)
 
 
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##---4. Generate new ethnic dominance indicator (by marine tenureship)
-
-# some duplicates in ethnicity table (NAs), filtering out these here
-# ethnic.lkp1 <- ethnic.lkp %>% 
-#   distinct(std.eth.str,eth.iso,.keep_all = T) %>%
-#   filter(eth.iso!="NA")
-# filter(!ethnic.id%in%c(2734,2813,5422,5425,5643)) # select out the specific five duplicates
-
-# HH.eth.new <- HHData %>% 
-#   select(HouseholdID,PaternalEthnicity, MTIndex, YrResident, MonitoringYear, SettlementID) %>% 
-#   mutate(PaternalEthnicity=str_clean(PaternalEthnicity)) %>% 
-#   left_join(ethnic.lkp1, by=c("PaternalEthnicity"="std.eth.str")) %>% 
-#   mutate(SettlYear=paste0(MonitoringYear,"_",SettlementID))
-# 
-# 
-# # this code gives you the ethnicity associated with (1) highest MT and (2) MT>=4, for each settlement at each sampling period
-# max.eth.highest.Tenure <- HH.eth.new %>%
-#   group_by(SettlYear,eth.iso) %>%
-#   summarise(MT.mean=mean(MTIndex), MT.median=median(MTIndex)) %>% 
-#   top_n(1, MT.mean) 
-# 
-# 
-# HH.eth.new$dom.eth <- NA
-# # assign dominant ethnicity in a loop will assign a 0 if parentalEthinicity==NA
-# for (i in unique(HH.eth.new$SettlYear)){
-#   max.eth.dom <-  max.eth.highest.Tenure$eth.iso[max.eth.highest.Tenure$SettlYear==i]
-#   HH.eth.new$dom.eth[HH.eth.new$SettlYear==i] <- ifelse(HH.eth.new$eth.iso[HH.eth.new$SettlYear==i]%in%max.eth.dom,1,0)
-# }
-# 
-# HH.eth.new <- HH.eth.new %>% 
-#   mutate(ethDom.highest.MT=dom.eth) %>% 
-#   select(HouseholdID, ethDom.highest.MT) 
-# 
-# 
-# #merge HH.eth.new into the main DiD.data
-# DiD.data <- DiD.data %>% 
-#   left_join(HH.eth.new, by = "HouseholdID") 
-# summary(DiD.data)
-# 
-# 
-# # calculate p scores
-# pscore <- glm(Treatment ~ TimeMarket + n.child  + ed.level + ethDom.highest.MT + YearsResident + IndividualGender + IndividualAge,
-#               data=DiD.data)$fitted.values
-# 
-# DiD.data <- cbind(DiD.data,pscore)  
-##---END---##
-##---END---##
-##---END---##
 
 
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##---5. Calculate GINI for baseline MA for each settlement at each sampling period
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+## ---- 3. GINI INDEX CALCULATION ----
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+##---3. Calculate GINI for baseline MA for each settlement at each sampling period
 
 #install.packages("ineq")
 library(ineq)
@@ -733,17 +722,10 @@ lines(Lc.BHS.post, col="blue")
 
 hist(DiD.data.GINI$PovertyIndex_GINI_Settl, main="Distribution of Poverty-exposure GINI Index", xlab="GINI Index (Settlement-level)")
 
-##---END---##
-##---END---##
-##---END---##
 
 
 
-
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##---6. Export data frame to Excel for exploratory Stata analysis
+##---Export data frame to Excel for exploratory Stata analysis
 # 
 # #Export to txt file
 # library(foreign)
@@ -758,13 +740,16 @@ DiD.data <- DiD.data %>%
                                  ifelse(yearsPost%in%2:3,"First Postline",
                                         "Second Postline")))
 
-## -------------------------------------------------------------------------------- ##
-## -------------------------------------------------------------------------------- ##
-## -------------------------------------------------------------------------------- ##
-# Descriptive Statistics
-# Descriptive Statistics
-# Descriptive Statistics
-# Descriptive statistics for cars with automatic transmission
+
+
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+## ---- 4. SUMMARY STATISTICS & DESCRIPTIVE EVIDENCE ----
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 # stargazer(subset(DiD.data[c("MAIndex_pca","MAIndex_pca.1","Fisher", "Female", "Ethnic", "Indigenous",
 #                             "TimeMarket","n.child","ed.level", 
 #                             "ed.no", "ed.primary", "ed.high", "ed.college",
@@ -773,15 +758,8 @@ DiD.data <- DiD.data %>%
 # 
 # 
 
-##---END---##
-##---END---##
-##---END---##
 
-
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##---7. Evidence for baseline inequality in Poverty (PovertyIndex_pca)
+## ---- 4a. Evidence for baseline inequality in Poverty (PovertyIndex_pca) ----
 #Define 4 subgroups (and construct baseline daaset) Male, Fisher, age.retired, yrResident.above
 DiD.data.baseline <- DiD.data %>% 
   filter(yearsPost==0) %>% 
@@ -803,7 +781,6 @@ DiD.data.baseline <- DiD.data.baseline %>%
                                         ifelse(ed.level.round==4, "3. Senior Secondary", "4. College or above"))))
 
 plyr::count(DiD.data.baseline, "ed.level.round")
-##-------Correlation Matrix for the 4 subGroups ---##
 ##-------Correlation Matrix for the 4 subGroups ---##
 #install.packages("Hmisc")
 #install.packages("corrplot")
@@ -840,9 +817,8 @@ data_summary <- function(data, varname, groupnames){
 }
 
 ##---------------------------------------------------------------------------##
-#summary stats
-#summary stats
-#summary stats
+## ---- 4b. Summary statistics tables ----
+
 
 DiD.data.sumstat <- DiD.data.baseline %>%
   mutate(age.working = 1- age.retired) %>% 
@@ -902,8 +878,9 @@ plyr::count(DiD.data.baseline, "eth.iso")
 
 ##----------------------------------------------------------------#
 ##--- correlation between Poverty Index and other indicators of poverty
-##--- correlation between Poverty Index and other indicators of poverty
-##--- correlation between Poverty Index and other indicators of poverty
+
+## ---- 4c. correlation bw Poverty Index and social indicators ----
+
 # corr.poverty.df <- DiD.data %>% 
 #   select(PovertyIndex_pca, EconStatusTrend, EconTrend_decrease, MAIndex, FSIndex, SERate, PAIndex, MTIndex, DidNotLast:Hungry) 
 # 
@@ -944,15 +921,10 @@ Poverty_Educ.fig
 plot_grid(Poverty_FS.plot, Poverty_Educ.plot, ncol=1)
 #ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/toUse_final/Poverty_Heath_Educ_corr.jpg"), width = 10, height = 10)
 
-##---END---##
 
+#------------------------------------------------------------------------------------------------------#
 
-##----------------------------------------------------------------#
-
-#--- Step 1: Baseline Social Inequality -- Point plots
-#--- Step 1: Baseline Social Inequality -- Point plots
-#--- Step 1: Baseline Social Inequality -- Point plots
-#--- Step 1: Baseline Social Inequality -- Point plots
+# ---- 4d. Baseline social inequality (Point plots) ----
 
 pd <- position_dodge(.05) # move them .05 to the left and right
 ##----Gender
@@ -1150,10 +1122,8 @@ plot_grid(Gender.point.plot, Age_Cohort.point.plot, Fisher.point.plot, Adat.poin
 
 
 
-#--- Step 1: Baseline Social Inequality -- Vilolin plots (Appendix)
-#--- Step 1: Baseline Social Inequality -- Vilolin plots (Appendix)
-#--- Step 1: Baseline Social Inequality -- Vilolin plots (Appendix)
-#--- Step 1: Baseline Social Inequality -- Vilolin plots (Appendix)
+# ---- 4d. Baseline social inequality (Violin plots) ----
+
 
 # # --Gender  
 # Gender.violin <-  ggplot(filter(DiD.data.baseline,!is.na(Gender)),aes(x=Gender,y=PovertyIndex_pca))+
@@ -1214,20 +1184,14 @@ plot_grid(Gender.point.plot, Age_Cohort.point.plot, Fisher.point.plot, Adat.poin
 # ggsave(paste0(resultPath, "Paper 1-MPA and Equity/results/2020/plots/baseline_inequality/Combine_baseIneq_2_violin",".jpg"), width = 12, height = 12)
 # 
 
-##---END---##
-##---END---##
-##---END---##
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-#--- 8. Reduced-form impact plots on poverty index & perceived changes in econ wellbeing (seperate for each subgroup)
-#--- 8. Reduced-form impact plots on poverty index & perceived changes in econ wellbeing (seperate for each subgroup)
-#--- 8. Reduced-form impact plots on poverty index & perceived changes in econ wellbeing (seperate for each subgroup)
-##------8a. set up settlement-matching data frame (coarsematching and 1-to-3 settleMatch)
-##------8a. set up settlement-matching data frame (coarsematching and 1-to-3 settleMatch)
-##---dataframe for matching settlements
+## ---- 5. REGRESSION ANALYSIS 1----
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ---- 5a. Covariates matching (Mahalanobis) ----
+##-- create dataframe for matching settlements; note; we are using coarsematching for this paper
 
 DiD.data.matchingCov <- DiD.data %>%
   filter(yearsPost==0) %>% 
@@ -1249,6 +1213,8 @@ DiD.data.matchingCov.final <- DiD.data.matchingCov %>%
 
 ## -- Mathcing settlements
 Tr<-as.vector(DiD.data.matchingCov$Treatment)  
+
+
 ##-------------------------------------------------------------------------------------------##
 ### Run match algorithm (COVARIATE MATCHING (Malanobis) with calipers
 ## Always run with replace=TRUE, and ties=TRUE, vary M (# matches)
@@ -1327,24 +1293,17 @@ DiD.data.coarseMatch <- as.data.frame(DiD.data.coarseMatch)
 
 DiD.data.coarseMatch <-DiD.data.coarseMatch %>% 
   mutate(dist.wt=1, 
-         pair.id = 1) #insert a fake "weight" and "pair.id" columns (with all equals to 1) so can keep the same regression format for both coarseMatch and 1-to-3 matching datasets
-##---END---##
-##---END---##
-##---END---##
+         pair.id=1)
 
+##-----------------------------------------------------------------------------------------##
+         
+# ---- 5b. Produce aggregate subgroup impacts (stargazer) ----
 
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##------8b. aggreagte subgroup impacts on inequality in poverty exposure (discussed in inequality typology format)
 model.out.subgroup <- data.frame()
 varNames <- c("PovertyIndex_pca", "EconTrend_decrease")
 regValue.list <-list()
 
-
-##-------------------------------------------------------##
 ##--------------------Stargazer Section------------------##
-
 for (i in varNames) {
   
   ##----------------Gender------------------------------##
@@ -1473,6 +1432,7 @@ stargazer(regValue.list["EconTrend_decrease"],
 
 ##--------------------------------------------------------------------##
 ##------------------Plot section--------------------------------------##
+# ---- 5c. Produce aggregate subgroup impacts (plots) ----
 
 for (i in varNames) {
   
@@ -1697,7 +1657,7 @@ model.out.subgroup1 <- model.out.subgroup %>%
 
 
 ##----------------------------------------------------------------##
-##PLOT: "regular" index
+
 pd <- position_dodge(width=.5) # move them .05 to the left and right
 
 # Gender
@@ -1774,15 +1734,9 @@ plot_grid(Gender.plot_z, Age.plot_z, Livelihood.plot_z, Tenureship.plot_z, ncol=
 #ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/Impact_plots/Poverty_EconTrend_4groups.png"),width = 12, height = 8)
 
 
-##---END---##
-##---END---##
-##---END---##
 
-
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##------8c. changes in poverty impact overtime (t2 and t4; using BHS data only)
+# ---- 5d. Produce over-time impact plot ----
+##------5d. changes in poverty impact overtime (t2 and t4; using BHS data only)
 model.out.time <- data.frame()
 varNames <- c("PovertyIndex_pca", "EconTrend_decrease")
 DiD.data.coarseMatch.BHS <- DiD.data.coarseMatch %>% filter(MPAID%in%c(1:6))
@@ -2045,9 +1999,7 @@ model.out.time1 <- model.out.time %>%
 
 
 
-
 ##----------------------------------------------------------------##
-##PLOT: "regular" index
 pd <- position_dodge(width=.5) # move them .05 to the left and right
 
 # Gender
@@ -2123,19 +2075,15 @@ Age.plot_z
 plot_grid(Gender.plot_z, Age.plot_z, Livelihood.plot_z, Tenureship.plot_z, ncol=2)
 #ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/Impact_plots/Poverty_EconTrend_t2-4.png"),width = 12, height = 8)
 
-##---END---##
-##---END---##
-##---END---##
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-# -- 9. aggregate regression on GINI index
-# -- 9. aggregate regression on GINI index
-# -- 9. aggregate regression on GINI index
+## ---- 6. REGRESSION ANALYSIS 2----
 
-#--- 9a. generating settlement-level of participation index
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ---- 6a. Settlement-level Aggregate impacts ----
+
+#--- Generating settlement-level of participation index
 
 ##------##
 ## Generating Participation indicators for subgroups 
@@ -2258,7 +2206,7 @@ DiD.data.coarseMatch.settl <- DiD.data.coarseMatch.settl %>%
          Parti_settl.nonAdat.m = ifelse(is.nan(Parti_settl.nonAdat.m), 0, Parti_settl.nonAdat.m), 
          Parti_settl.nonAdat.pct = ifelse(is.nan(Parti_settl.nonAdat.pct), 0, Parti_settl.nonAdat.pct))
 
-## -- now get mean/median value for each MPA (i.e. to split settlements by participation values later on)
+## --  get mean/median value for each MPA (i.e. to split settlements by participation values later on)
 DiD.data.coarseMatch.MPA <- DiD.data.coarseMatch.settl %>% 
   group_by(MPAID, yearsPost) %>% 
   summarise(PovertyIndex_GINI_MPA.m = mean(PovertyIndex_GINI_Settl, na.rm=TRUE), 
@@ -2353,7 +2301,7 @@ DiD.data.coarseMatch.settl <- DiD.data.coarseMatch.settl %>%
   left_join(select(DiD.data.Parti.sGroup.base, SettlementID, Parti_settl.m.above:Parti_settl.nonAdat.pct.above), by=c("SettlementID"))
 
 #---------------------------------------------------------------------------#
-# --- Settlement-level regression with Gini being the response variable
+# --- Settlement-level regressions: Poverty Index, EconTrend, and Poverty's Gini
          
 model.out.GINI <- data.frame()
 varNames <- c("PovertyIndex_GINI_Settl", "PovertyIndex_pca", "EconTrend_decrease")
@@ -2414,6 +2362,8 @@ for (i in varNames) {
     mutate(term=gsub("Treatment:Post1","Impact",term),
            term=gsub("Post1","Control_trend",term),
            Response=i, Spec="base+InterviewYear+control", sample="All Settlements")
+  
+  
   
   ##-------Now use model 4, splitting to sub-samples of below and above participation
   ##-- Parti.above == 1
@@ -2498,42 +2448,42 @@ model.out.GINI[order(model.out.GINI$term),]
 ##-- Settlement-level results (with model sensitivity tests) for 
 ##-- 1. Poverty_pca; 2.Poverty_GINI outcome; 3. EconTrend_decrease
 
-##save html (can open in MS Word)
+##save html (can open in MS Word or Excel)
 stargazer(master.reg.list$PovertyIndex_GINI_Settl[c("Spec 1","Spec 2","Spec 3","Spec 4")],
           out = paste0(resultPath,"Paper 1-MPA and Equity/results/2020/tables/Settle_GINI_impact"), type = "html", 
-          df = FALSE, notes.append = FALSE, star.cutoffs = NA, omit.table.layout = "n", 
+          df = FALSE, notes.append = FALSE,  omit.table.layout = "n", 
           #keep = c("Treatment:Post1"), 
           #covariate.labels=c("Treatment X Post"),
           column.labels=names(master.reg.list$PovertyIndex_GINI_Settl),
-          title="MPA impact: Settlement's poverty PCA",
+          title="MPA impact: Settlement level regression",
           align=TRUE, dep.var.labels="Poverty Index's GINI",
           add.lines = list(c("MPA-cluster FEs","Yes","Yes","Yes","Yes"),
                            c("Interview Year FEs","No","Yes","No","Yes"),
                            c("Settlement Covariates","No","No","Yes","Yes")))
 
-##save html (can open in MS Word)
+##save html (can open in MS Word or Excel)
 stargazer(master.reg.list$PovertyIndex_pca[c("Spec 1","Spec 2","Spec 3","Spec 4")],
           out = paste0(resultPath,"Paper 1-MPA and Equity/results/2020/tables/Settle_poverty_impact"), type = "html", 
-          df = FALSE, notes.append = FALSE, star.cutoffs = NA, omit.table.layout = "n", 
+          df = FALSE, notes.append = FALSE, omit.table.layout = "n", 
           #keep = c("Treatment:Post1"), 
           #covariate.labels=c("Treatment X Post"),
           column.labels=names(master.reg.list$PovertyIndex_GINI_Settl),
-          title="MPA impact: Settlement's poverty PCA",
-          align=TRUE, dep.var.labels="Poverty Index's GINI",
+          title="MPA impact: Settlement level regression",
+          align=TRUE, dep.var.labels="Poverty Index PCA",
           add.lines = list(c("MPA-cluster FEs","Yes","Yes","Yes","Yes"),
                            c("Interview Year FEs","No","Yes","No","Yes"),
                            c("Settlement Covariates","No","No","Yes","Yes")))
 
 
-##save html (can open in MS Word)
+##save html (can open in MS Word or Excel)
 stargazer(master.reg.list$EconTrend_decrease[c("Spec 1","Spec 2","Spec 3","Spec 4")],
           out = paste0(resultPath,"Paper 1-MPA and Equity/results/2020/tables/Settle_EconTrend_impact"), type = "html", 
-          df = FALSE, notes.append = FALSE, star.cutoffs = NA, omit.table.layout = "n", 
+          df = FALSE, notes.append = FALSE, omit.table.layout = "n", 
           #keep = c("Treatment:Post1"), 
           #covariate.labels=c("Treatment X Post"),
           column.labels=names(master.reg.list$PovertyIndex_GINI_Settl),
-          title="MPA impact: Settlement's poverty PCA",
-          align=TRUE, dep.var.labels="Poverty Index's GINI",
+          title="MPA impact: Settlement level regression",
+          align=TRUE, dep.var.labels="Econ Trend",
           add.lines = list(c("MPA-cluster FEs","Yes","Yes","Yes","Yes"),
                            c("Interview Year FEs","No","Yes","No","Yes"),
                            c("Settlement Covariates","No","No","Yes","Yes")))
@@ -2557,14 +2507,14 @@ stargazer(master.reg.list$EconTrend_decrease[c("Spec 1","Spec 2","Spec 3","Spec 
 #ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/Impact_plots/GINI_impacts.jpg"), width = 8, height = 8)
 
 
-##---END---##
-##---END---##
-##---END---##
 
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-#--- 10. Step 3 - causal explanation using Participation level 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# ---- 7. REGRESSION ANALYSIS 3----
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# ---- 7a. Moderating Factor: Communiy Participation  ----
 
 model.out.subgroup.Parti <- data.frame()
 reg.broom.cumulative <- data.frame() 
@@ -2878,8 +2828,6 @@ for (i in varNames) {
   model.out.subgroup.Parti <- reg.broom.cumulative
 }
 
-
-
 ## -- binding all model.out dfs for all outcome vars together
 model.out.subgroup.Parti <- rbind(model.out.subgroup.Parti, reg.broom.cumulative)
 
@@ -2900,7 +2848,6 @@ model.out.subgroup.Parti <- model.out.subgroup.Parti %>%
                                                                     ifelse(subgroup=="Age" & subgroup_id==0, "Retirement-age", "Working-age"))))))))
 
 ##----------------------------------------------------------------##
-##PLOT: "regular" index
 pd <- position_dodge(width=.5) # move them .05 to the left and right
 
 # Gender
@@ -2985,449 +2932,45 @@ Age.plot.Parti
 plot_grid(Gender.plot.Parti, Age.plot.Parti, Livelihood.plot.Parti, Tenureship.plot.Parti, ncol=1)
 #ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/Impact_plots/Poverty_EconTrend_4groups_Parti_OneSampleSplit.jpg"), width=10, height=14)
 
-##---END---##
-##---END---##
-##---END---##
 
 
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-#--- 10. Step 4 - Exploring qualitative evidence of subgroup participations (cross-tab)
+# ---- 7b. Moderating Factor: Communiy Participation (add. evidence)  ----
 
+#summary stats
 
-
-
-
+DiD.sumstat.Parti.settl.base <- DiD.data.coarseMatch.settl %>%
+  filter(yearsPost==0) %>% 
+  select(Treatment, Parti_settl.pct:Parti_settl.nonAdat.pct) 
+DiD.sumstat.Parti.settl.base.out <- describeBy(DiD.sumstat.Parti.settl.base)
+write_xlsx(DiD.sumstat.Parti.settl.base.out, path = paste0(resultPath, "Paper 1-MPA and Equity/results/2020/tables/Summary_Stat_Parti.xlsx"), col_names = TRUE, format_headers = TRUE)
 
 
 
+DiD.sumstat.Parti.settl.base.treat <- DiD.sumstat.Parti.settl.base %>%  filter(Treatment==1)
+DiD.sumstat.Parti.settl.base.treat <- describeBy(DiD.sumstat.Parti.settl.base.treat)
+write_xlsx(DiD.sumstat.Parti.settl.base.treat, path = paste0(resultPath, "Paper 1-MPA and Equity/results/2020/tables/Summary_Stat_Parti_Treat.xlsx"), col_names = TRUE, format_headers = TRUE)
+
+DiD.sumstat.Parti.settl.base.control <- DiD.sumstat.Parti.settl.base %>%  filter(Treatment==0)
+DiD.sumstat.Parti.settl.base.control <- describeBy(DiD.sumstat.Parti.settl.base.control)
+write_xlsx(DiD.sumstat.Parti.settl.base.control, path = paste0(resultPath, "Paper 1-MPA and Equity/results/2020/tables/Summary_Stat_Parti_control.xlsx"), col_names = TRUE, format_headers = TRUE)
+
+describe(DiD.sumstat.Parti.settl.base)
 
 
-# ##---BEGIN---##
-# ##---BEGIN---##
-# ##---BEGIN---##
-# #--- 10. Step 3 - causal explanation using Participation level 
-# 
-# model.out.subgroup.Parti <- data.frame()
-# reg.broom.cumulative <- data.frame() 
-# 
-# varNames <- c("PovertyIndex_pca", "EconTrend_decrease")
-# #varNames <- c("PovertyIndex_pca")
-# 
-# for (i in varNames) {
-#   ##----------------Gender------------------------------##
-#   
-#   ##----DiD with Female group 
-#   #-- Parti_settl.m.above==1
-#   reg.df <- DiD.data.coarseMatch %>% filter(Male==0, Parti_settl.Female.m.above==1)
-#   Y <- reg.df[,i]
-#   w <- reg.df[,"dist.wt"]
-#   
-#   regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-#                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                    | SettlementID + InterviewYear+ pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#   
-#   reg.broom <- tidy(regValue) %>% 
-#     filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#     mutate(term=gsub("Treatment:Post1","Impact",term),
-#            term=gsub("Post1","Control_trend",term),
-#            Response=i, subgroup="Gender", subgroup_id=0, sample="High Participation")
-#   
-#   reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)
-#   
-#   #-- Parti_settl.m.above==0
-#   reg.df <- DiD.data.coarseMatch %>% filter(Male==0, Parti_settl.Female.m.above==0)
-#   Y <- reg.df[,i]
-#   w <- reg.df[,"dist.wt"]
-#   
-#   regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-#                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                    | SettlementID + InterviewYear+ pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#   
-#   reg.broom <- tidy(regValue) %>% 
-#     filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#     mutate(term=gsub("Treatment:Post1","Impact",term),
-#            term=gsub("Post1","Control_trend",term),
-#            Response=i, subgroup="Gender", subgroup_id=0, sample="Low Participation")
-#   
-#   reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)
-#   
-#   
-#   ##----DiD with Male group 
-#   #-- Parti_settl.m.above==1
-#   reg.df <- DiD.data.coarseMatch %>% filter(Male==1, Parti_settl.Male.m.above==1)
-#   Y <- reg.df[,i]
-#   w <- reg.df[,"dist.wt"]
-#   
-#   regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-#                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                    | SettlementID + InterviewYear+ pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#   
-#   reg.broom <- tidy(regValue) %>% 
-#     filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#     mutate(term=gsub("Treatment:Post1","Impact",term),
-#            term=gsub("Post1","Control_trend",term),
-#            Response=i, subgroup="Gender", subgroup_id=1, sample="High Participation")
-#   
-#   reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)
-#   
-#   #-- Parti_settl.m.above==0
-#   reg.df <- DiD.data.coarseMatch %>% filter(Male==1, Parti_settl.Male.m.above==0)
-#   Y <- reg.df[,i]
-#   w <- reg.df[,"dist.wt"]
-#   
-#   regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-#                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                    | SettlementID + InterviewYear+ pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#   
-#   reg.broom <- tidy(regValue) %>% 
-#     filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#     mutate(term=gsub("Treatment:Post1","Impact",term),
-#            term=gsub("Post1","Control_trend",term),
-#            Response=i, subgroup="Gender", subgroup_id=1, sample="Low Participation")
-#   
-#   reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)
-#   
-#   
-#   
-#   ##----------------Tenureship (by Adat)------------------------------##
-#   
-#   ##----DiD with nonAdat group 
-#   #-- Parti_settl.m.above==1
-#     reg.df <- DiD.data.coarseMatch %>% filter(adat==0, Parti_settl.nonAdat.m.above==1)
-#     Y <- reg.df[,i]
-#     w <- reg.df[,"dist.wt"]
-#     
-#     regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-#                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                      | SettlementID + InterviewYear+ pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#     
-#     reg.broom <- tidy(regValue) %>% 
-#       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#       mutate(term=gsub("Treatment:Post1","Impact",term),
-#              term=gsub("Post1","Control_trend",term),
-#              Response=i, subgroup="Tenureship", subgroup_id=0, sample="High Participation")
-#     
-#     reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)
-#     
-#     #-- Parti_settl.m.above==0
-#     reg.df <- DiD.data.coarseMatch %>% filter(adat==0, Parti_settl.nonAdat.m.above==0)
-#     Y <- reg.df[,i]
-#     w <- reg.df[,"dist.wt"]
-#     
-#     regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-#                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                      | SettlementID + InterviewYear+ pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#     
-#     reg.broom <- tidy(regValue) %>% 
-#       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#       mutate(term=gsub("Treatment:Post1","Impact",term),
-#              term=gsub("Post1","Control_trend",term),
-#              Response=i, subgroup="Tenureship", subgroup_id=0, sample="Low Participation")
-#     
-#     reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)
-#     
-#   
-#     ##----DiD with Adat group 
-#     #-- Parti_settl.m.above==1
-#     reg.df <- DiD.data.coarseMatch %>% filter(adat==1, Parti_settl.Adat.m.above==1)
-#     Y <- reg.df[,i]
-#     w <- reg.df[,"dist.wt"]
-#     
-#     regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-#                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                      | SettlementID + InterviewYear+ pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#     
-#     reg.broom <- tidy(regValue) %>% 
-#       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#       mutate(term=gsub("Treatment:Post1","Impact",term),
-#              term=gsub("Post1","Control_trend",term),
-#              Response=i, subgroup="Tenureship", subgroup_id=1, sample="High Participation")
-#     
-#     reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)
-#     
-#     #-- Parti_settl.m.above==0
-#     reg.df <- DiD.data.coarseMatch %>% filter(adat==1, Parti_settl.Adat.m.above==0)
-#     Y <- reg.df[,i]
-#     w <- reg.df[,"dist.wt"]
-#     
-#     regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-#                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                      | SettlementID + InterviewYear+ pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#     
-#     reg.broom <- tidy(regValue) %>% 
-#       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#       mutate(term=gsub("Treatment:Post1","Impact",term),
-#              term=gsub("Post1","Control_trend",term),
-#              Response=i, subgroup="Tenureship", subgroup_id=1, sample="Low Participation")
-#     
-#     reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)
-#     
-#  
-#     
-#   ##----------------Age (retirement vs working)------------------------------##
-#     ##---Age = Retired
-#     #-- Parti_settl.m.above==1
-#     reg.df <- DiD.data.coarseMatch %>% filter(age.retired==1, Parti_settl.AgeRetired.m.above==1)
-#     Y <- reg.df[,i]
-#     w <- reg.df[,"dist.wt"]
-#     
-#     regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-#                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                      | SettlementID+ InterviewYear + pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#     
-#     reg.broom <- tidy(regValue) %>% 
-#       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#       mutate(term=gsub("Treatment:Post1","Impact",term),
-#              term=gsub("Post1","Control_trend",term),
-#              Response=i, subgroup="Age", subgroup_id=0, sample="High Participation")
-#     
-#     reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)
-#     
-# 
-# 
-#     #-- Parti_settl.m.above==0
-#     reg.df <- DiD.data.coarseMatch %>% filter(age.retired==1, Parti_settl.AgeRetired.m.above==0)
-#     Y <- reg.df[,i]
-#     w <- reg.df[,"dist.wt"]
-#     
-#     regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-#                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                      | SettlementID+ InterviewYear + pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#     
-#     reg.broom <- tidy(regValue) %>% 
-#       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#       mutate(term=gsub("Treatment:Post1","Impact",term),
-#              term=gsub("Post1","Control_trend",term),
-#              Response=i, subgroup="Age", subgroup_id=0, sample="Low Participation")
-#     
-#     reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)
-#     
-# 
-#     ##---Age = Working
-#     #-- Parti_settl.m.above==1
-#     reg.df <- DiD.data.coarseMatch %>% filter(age.retired==0, Parti_settl.AgeWorking.m.above==1)
-#     Y <- reg.df[,i]
-#     w <- reg.df[,"dist.wt"]
-#     
-#     regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-#                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                      | SettlementID+ InterviewYear + pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#     
-#     reg.broom <- tidy(regValue) %>% 
-#       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#       mutate(term=gsub("Treatment:Post1","Impact",term),
-#              term=gsub("Post1","Control_trend",term),
-#              Response=i, subgroup="Age", subgroup_id=1, sample="High Participation")
-#     
-#     reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)
-#     
-#     
-#     
-#     #-- Parti_settl.m.above==0
-#     reg.df <- DiD.data.coarseMatch %>% filter(age.retired==0, Parti_settl.AgeWorking.m.above==0)
-#     Y <- reg.df[,i]
-#     w <- reg.df[,"dist.wt"]
-#     
-#     regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-#                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                      | SettlementID+ InterviewYear + pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#     
-#     reg.broom <- tidy(regValue) %>% 
-#       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#       mutate(term=gsub("Treatment:Post1","Impact",term),
-#              term=gsub("Post1","Control_trend",term),
-#              Response=i, subgroup="Age", subgroup_id=1, sample="Low Participation")
-#     
-#     reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)  
-#   
-#   
-#   ##----------------Occupation (fisher/non-fisher)------------------------------##
-#   
-#   ##---DiD Regressions: by Occupation (non-fisher only)
-#   #-- Parti_settl.m.above==1
-#   reg.df <- DiD.data.coarseMatch %>% filter(Fisher==0, Parti_settl.nonFisher.m.above==1)
-#   Y <- reg.df[,i]
-#   w <- reg.df[,"dist.wt"]
-#   
-#   regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
-#                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                    | SettlementID + InterviewYear+ pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#   
-#   reg.broom <- tidy(regValue) %>% 
-#     filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#     mutate(term=gsub("Treatment:Post1","Impact",term),
-#            term=gsub("Post1","Control_trend",term),
-#            Response=i, subgroup="Fishing Livelihood", subgroup_id=0, sample="High Participation")
-#   
-#   reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)  
-#   
-#   #-- Parti_settl.m.above==0
-#   reg.df <- DiD.data.coarseMatch %>% filter(Fisher==0, Parti_settl.nonFisher.m.above==0)
-#   Y <- reg.df[,i]
-#   w <- reg.df[,"dist.wt"]
-#   
-#   regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
-#                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                    | SettlementID + InterviewYear+ pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#   
-#   reg.broom <- tidy(regValue) %>% 
-#     filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#     mutate(term=gsub("Treatment:Post1","Impact",term),
-#            term=gsub("Post1","Control_trend",term),
-#            Response=i, subgroup="Fishing Livelihood", subgroup_id=0, sample="Low Participation")
-#   
-#   reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)  
-#   
-#   
-#   ##---DiD Regressions: by Occupation (fisher only)
-#   #-- Parti_settl.m.above==1
-#   reg.df <- DiD.data.coarseMatch %>% filter(Fisher==1, Parti_settl.Fisher.m.above==1)
-#   Y <- reg.df[,i]
-#   w <- reg.df[,"dist.wt"]
-#   
-#   regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
-#                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge 
-#                    | SettlementID + InterviewYear+ pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#   
-#   reg.broom <- tidy(regValue) %>% 
-#     filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#     mutate(term=gsub("Treatment:Post1","Impact",term),
-#            term=gsub("Post1","Control_trend",term),
-#            Response=i, subgroup="Fishing Livelihood", subgroup_id=1, sample="High Participation")
-#   
-#   reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)  
-#   
-#   
-#   #-- Parti_settl.m.above==0
-#   reg.df <- DiD.data.coarseMatch %>% filter(Fisher==1, Parti_settl.Fisher.m.above==0)
-#   Y <- reg.df[,i]
-#   w <- reg.df[,"dist.wt"]
-#   
-#   regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
-#                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge 
-#                    | SettlementID + InterviewYear+ pair.id | 0 | SettlementID, data=reg.df, exactDOF = TRUE, weights=w)
-#   
-#   reg.broom <- tidy(regValue) %>% 
-#     filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#     mutate(term=gsub("Treatment:Post1","Impact",term),
-#            term=gsub("Post1","Control_trend",term),
-#            Response=i, subgroup="Fishing Livelihood", subgroup_id=1, sample="Low Participation")
-#   
-#   reg.broom.cumulative <- rbind(reg.broom.cumulative, reg.broom)  
-#   
-#   ## -- binding all reg.brooms for first outcome variable and into model.out df
-#   model.out.subgroup.Parti <- reg.broom.cumulative
-# }
-# 
-# 
-# 
-# ## -- binding all model.out dfs for all outcome vars together
-# model.out.subgroup.Parti <- rbind(model.out.subgroup.Parti, reg.broom.cumulative)
-# 
-# 
-# ##keeping only 2 relevant terms "Treatment:Post1" and "Post1" 
-# model.out.subgroup.Parti <- model.out.subgroup.Parti %>%
-#   mutate(Indicator= ifelse(Response=="EconTrend_decrease", "2. Decreasing Economic Trend", 
-#                            ifelse(Response=="PovertyIndex_pca", "1. Poverty Index", "")),
-#          Indicator=gsub(" \\(", "\n \\(", Indicator)) %>% 
-#   mutate(subgroup=ifelse(subgroup=="Indigenous", "Residence", subgroup), 
-#          subgroup=ifelse(subgroup=="Fishing Livelihood", "Livelihood", subgroup)) %>% 
-#   mutate(subgroup_label = ifelse(subgroup=="Gender" & subgroup_id==0, "Female",    
-#                                  ifelse(subgroup=="Gender" & subgroup_id==1, "Male", 
-#                                         ifelse(subgroup=="Tenureship" & subgroup_id==0, "non-Adat", 
-#                                                ifelse(subgroup=="Tenureship" & subgroup_id==1, " Adat", 
-#                                                       ifelse(subgroup=="Livelihood" & subgroup_id==0, "non-Fisher", 
-#                                                              ifelse(subgroup=="Livelihood" & subgroup_id==1, "Fisher",
-#                                                                     ifelse(subgroup=="Age" & subgroup_id==0, "Retirement-age", "Working-age"))))))))
-# 
-# ##----------------------------------------------------------------##
-# ##PLOT: "regular" index
-# pd <- position_dodge(width=.5) # move them .05 to the left and right
-# 
-# # Gender
-# Gender.plot.Parti <- ggplot(filter(model.out.subgroup.Parti,term=="Impact",subgroup=="Gender"),aes(x=Indicator, y=estimate, fill=subgroup_label, group=subgroup_label)) +
-#   facet_grid(. ~ sample) +
-#   geom_bar(stat="identity", position =pd, width = 0.5, size=1)+ 
-#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=1.5, position = pd ) +
-#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.1, size=0.3, position = pd ) +
-#   theme_bw() + theme(legend.position=c(0.5,0.8), legend.title = element_blank(), legend.text = element_text(size=10),
-#                      legend.background = element_rect(size=0.5, linetype="solid", color="black"), 
-#                      axis.text.x=element_text(size=12, angle = 0, hjust = 0.5, vjust = 1),
-#                      axis.text.y=element_text(size=12, angle = 90, hjust = 0.5, vjust = 1),
-#                      axis.title.y=element_text(size=12,face="bold")) +
-#   geom_hline(yintercept = 0, linetype = "dashed") + scale_fill_manual(values = c("#00AFBB", "#E7B800")) +
-#   labs(x="",y="Impact Estimates", title="Gender")  
-# Gender.plot.Parti
-# 
-# 
-# # Livelihood
-# Livelihood.plot.Parti <- ggplot(filter(model.out.subgroup.Parti,term=="Impact",subgroup=="Livelihood"),aes(x=Indicator, y=estimate, fill=subgroup_label, group=subgroup_label)) +
-#    facet_grid(. ~ sample) +
-#    geom_bar(stat="identity", position =pd, width = 0.5, size=1)+ 
-#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=1.5, position = pd ) +
-#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.1, size=0.3, position = pd ) +
-#   theme_bw() + theme(legend.position=c(0.5,0.8), legend.title = element_blank(), legend.text = element_text(size=10),
-#                      legend.background = element_rect(size=0.5, linetype="solid", color="black"), 
-#                      axis.text.x=element_text(size=12, angle = 0, hjust = 0.5, vjust = 1),
-#                      axis.text.y=element_text(size=12, angle = 90, hjust = 0.5, vjust = 1),
-#                      axis.title.y=element_text(size=12,face="bold")) +
-#   geom_hline(yintercept = 0, linetype = "dashed") + scale_fill_manual(values = c("#00AFBB", "#E7B800")) +
-#   labs(x="",y="Impact Estimates", title="Livelihood")  
-# Livelihood.plot.Parti
-# 
-# 
-# # # Residence
-# # Residence.plot.Parti <- ggplot(filter(model.out.subgroup.Parti,term=="Impact",subgroup=="Residence"),aes(x=Indicator, y=estimate, fill=subgroup_label, group=subgroup_label)) +
-# #   facet_grid(. ~ sample) +
-# #   geom_bar(stat="identity", position =pd, width = 0.5, size=1)+ 
-# #   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=1.5, position = pd ) +
-# #   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.1, size=0.3, position = pd ) +
-# #   theme_bw() + theme(legend.position=c(0.5,0.8), legend.title = element_blank(), legend.text = element_text(size=10),
-# #                      legend.background = element_rect(size=0.5, linetype="solid", color="black"), 
-#                         # axis.text.x=element_text(size=12, angle = 0, hjust = 0.5, vjust = 1),
-#                         # axis.text.y=element_text(size=12, angle = 90, hjust = 0.5, vjust = 1),
-#                         # axis.title.y=element_text(size=12,face="bold")) +
-# #   geom_hline(yintercept = 0, linetype = "dashed") + scale_fill_manual(values = c("#00AFBB", "#E7B800")) +
-# #   labs(x="",y="Impact Estimates", title="Indigenousness")  
-# # Residence.plot.Parti
-# 
-# # Tenureship
-# Tenureship.plot.Parti <- ggplot(filter(model.out.subgroup.Parti,term=="Impact",subgroup=="Tenureship"),aes(x=Indicator, y=estimate, fill=subgroup_label, group=subgroup_label)) +
-#   facet_grid(. ~ sample) +
-#   geom_bar(stat="identity", position =pd, width = 0.5, size=1)+ 
-#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=1.5, position = pd ) +
-#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.1, size=0.3, position = pd ) +
-#   theme_bw() + theme(legend.position=c(0.5,0.8), legend.title = element_blank(), legend.text = element_text(size=10),
-#                      legend.background = element_rect(size=0.5, linetype="solid", color="black"), 
-#                      axis.text.x=element_text(size=12, angle = 0, hjust = 0.5, vjust = 1),
-#                      axis.text.y=element_text(size=12, angle = 90, hjust = 0.5, vjust = 1),
-#                      axis.title.y=element_text(size=12,face="bold")) +
-#   geom_hline(yintercept = 0, linetype = "dashed") + scale_fill_manual(values = c("#00AFBB", "#E7B800")) +
-#   labs(x="",y="Impact Estimates", title="Tenureship")  
-# Tenureship.plot.Parti
-# 
-# # Age
-# Age.plot.Parti <- ggplot(filter(model.out.subgroup.Parti,term=="Impact",subgroup=="Age"),aes(x=Indicator, y=estimate, fill=subgroup_label, group=subgroup_label)) +
-#   facet_grid(. ~ sample) +
-#   geom_bar(stat="identity", position =pd, width = 0.5, size=1)+ 
-#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=1.5, position = pd ) +
-#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.1, size=0.3, position = pd ) +
-#   theme_bw() + theme(legend.position=c(0.5,0.8), legend.title = element_blank(), legend.text = element_text(size=10),
-#                      legend.background = element_rect(size=0.5, linetype="solid", color="black"), 
-#                      axis.text.x=element_text(size=12, angle = 0, hjust = 0.5, vjust = 1),
-#                      axis.text.y=element_text(size=12, angle = 90, hjust = 0.5, vjust = 1),
-#                      axis.title.y=element_text(size=12,face="bold")) +
-#   geom_hline(yintercept = 0, linetype = "dashed") + scale_fill_manual(values = c("#00AFBB", "#E7B800")) +
-#   labs(x="",y="Impact Estimates", title="Age Group")  
-# Age.plot.Parti
-# 
-# 
-# ##combine PLOTS
-# plot_grid(Gender.plot.Parti, Age.plot.Parti, Livelihood.plot.Parti, Tenureship.plot.Parti, ncol=1)
-# ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/Impact_plots/Poverty_EconTrend_4groups_Parti.jpg"), width=10, height=14)
+# Correlation plots
+library(psych)
+DiD.sumstat.Parti.settl.base.1 <- DiD.sumstat.Parti.settl.base %>%
+  select(Parti_settl.Female.pct:Parti_settl.nonFisher.pct, Parti_settl.Adat.pct:Parti_settl.nonAdat.pct) %>% 
+  transmute(Female = Parti_settl.Female.pct, 
+            Male = Parti_settl.Male.pct, 
+            Retired = Parti_settl.AgeRetired.pct, 
+            Working = Parti_settl.AgeWorking.pct, 
+            Fisher = Parti_settl.Fisher.pct, 
+            non_Fisher = Parti_settl.nonFisher.pct, 
+            Adat = Parti_settl.Adat.pct, 
+            non_Adat = Parti_settl.nonAdat.pct)
 
+pairs.panels(DiD.sumstat.Parti.settl.base.1 %>% select(-SettlementID), scale=TRUE, )
 
 
 
