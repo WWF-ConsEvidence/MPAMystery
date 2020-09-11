@@ -114,16 +114,14 @@ Age.gender.plot.bahasa <-
 
 # - FOOD SECURITY
 FS.statusplot.bahasa <- 
-  rbind.data.frame(Sett.level.ContData.status.PLOTFORMAT[,c("SettlementName.bahasa","Zone","FSMean","FSErr","SettLevel")],
+  rbind.data.frame(Sett.level.ContData.status.PLOTFORMAT[,c("SettlementName.bahasa","FSMean","FSErr","SettLevel")],
                    if(length(Sett.level.ContData.status.PLOTFORMAT$SettlementName)<25) {
                      data.frame(SettlementName.bahasa="  ",
-                                Zone="",
                                 FSMean=NA,
                                 FSErr=NA,
                                 SettLevel="Dummy")
                    } else {
                      data.frame(SettlementName.bahasa=c("  ","  "),
-                                Zone=c("",""),
                                 FSMean=NA,
                                 FSErr=NA,
                                 SettLevel=c("Dummy","Dummy"))

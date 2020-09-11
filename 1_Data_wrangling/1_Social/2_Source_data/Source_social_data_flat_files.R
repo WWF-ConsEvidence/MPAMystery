@@ -62,7 +62,7 @@ ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_data
 NMORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_nonmarineorganizationmembership')
 LTHREAT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_localthreat')
 LSTEPS <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_localstep')
-MPA <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_mpa')
+MPA.LKP <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_mpa')
 
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -343,10 +343,10 @@ HHData$MonitoringYear <- factor(mapply(a=HHData$MPAID,
                                 ordered=T)
 
 
-# ---- 2.6 Create MPA.name table to define formal MPA names, in English and Bahasa, for plotting and automated R wrapper ----
+ # ---- 2.6 Create MPA.name table to define formal MPA names, in English and Bahasa, for plotting and automated R wrapper ----
 
 MPA.name <- 
-  MPA %>% 
+  MPA.LKP %>% 
   transmute(MPAID=mpaid,
             MPAName=name,
             MPAName.nospace=gsub(" ","",MPAName), # this is used for the automated R wrapper, to create a filepath with the MPA name
@@ -500,18 +500,20 @@ HHData <-
 # 
 # MPA.name <-
 #    MPA.name %>% 
-#    filter(MPAID==MPA) %>%
+#    filter(MPAID==MPA)
 # 
 # LThreat_forexport <-
-#   LTHREAT %>% mutate(HouseholdID=household) %>%
-#   left_join(LTHREAT[,c("HouseholdID","localthreatid","localmarinethreat")],HHData[,c("HouseholdID","SettlementID","MPAID","MonitoringYear","InterviewYear","Treatment",
-#                               "PrimaryLivelihood","SecondaryLivelihood","TertiaryLivelihood")],by="HouseholdID") %>%
+#   left_join(LTHREAT[,c("household","localthreatid","localmarinethreat")],
+#             HHData[,c("HouseholdID","SettlementID","MPAID","MonitoringYear","InterviewYear","Treatment","PrimaryLivelihood","SecondaryLivelihood","TertiaryLivelihood")],
+#             by=c("household"="HouseholdID")) %>%
+#   rename(HouseholdID=household) %>%
 #   filter(MPAID==MPA) %>%
 #   dplyr::mutate(Check.NA=paste(PrimaryLivelihood,SecondaryLivelihood,TertiaryLivelihood,sep=""),
 #                 Fisher=ifelse(grepl("3",Check.NA),"Fisher",
 #                               ifelse(Check.NA=="NANANA",NA,"Not Fisher"))) %>%
 #   select(-Check.NA)
-# 
+
+
 # 
 rm(baseline.dummy.rows)
 

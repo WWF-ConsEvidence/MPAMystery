@@ -1306,7 +1306,7 @@ MarineContribution.statusplot.bahasa <-
   geom_text(aes(x=(length(unique(SettlementName.bahasa[Zone=="No Take" & !is.na(Zone)]))/2)+4+length(unique(SettlementName.bahasa[Zone=="Use" & !is.na(Zone)])),
                 y=max(Sett.level.PropData.status.PLOTFORMAT$MarineContribution,na.rm=T) +
                   1.5* max(Sett.level.PropData.status.PLOTFORMAT$MarineContribution,na.rm=T), 
-                label=ssett.names.bahasa[["NoTake"]]),
+                label=sett.names.bahasa[["NoTake"]]),
             size=rel(2.5),angle=270,fontface="bold",colour="#505050") + 
   scale_y_continuous(expand=c(0,0,0.05,0),
                      limits=c(0,max(Sett.level.PropData.status.PLOTFORMAT$MarineContribution,na.rm=T) +
