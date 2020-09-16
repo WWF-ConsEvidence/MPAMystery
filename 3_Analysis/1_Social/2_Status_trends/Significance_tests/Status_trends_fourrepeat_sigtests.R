@@ -52,7 +52,7 @@ MPA.Sett.Means <-
 # - Frequency tables for chi-square tests
 
 FreqTables <- 
-  left_join(HHData,SETTLEMENT[,c("SettlementID","Zone")], by= "SettlementID") %>%
+  left_join(HHData,Settlements[,c("SettlementID","Zone")], by= "SettlementID") %>%
   filter(if(MPA.name$MPAID==21) { Zone=="NoTake" } else { Treatment==1 }) %>%
   group_by(MonitoringYear) %>%
   summarise(PrimaryOcc.Fish=length(PrimaryLivelihood[PrimaryLivelihood==3 &  !is.na(PrimaryLivelihood)]),
