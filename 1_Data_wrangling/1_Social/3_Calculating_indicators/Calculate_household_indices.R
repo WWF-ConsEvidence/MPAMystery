@@ -24,54 +24,54 @@
 
 HHData <-
   HHData %>%
-  mutate(MAIndex = ifelse(RemoveMA=="No" & (MPAID==17 | # Kei Kecil (MPAID==17) cannot use TV in MAIndex score because question was missing from t3 repeat, 
-                                            MPAID==21), # and Wakatobi (MPAID==21) cannot use TV in MAIndex score because question was missing from t0 monitoring
-                          rowSums(select(., "CarTruck", "Bicycle", "Motorcycle", "BoatNoMotor", "BoatOutboard",
-                                         "BoatInboard", "PhoneCombined", "Entertain", "Satellite", "Generator"),
-                                  na.rm = TRUE),
-                          ifelse(RemoveMA=="No" & MPAID!=17 & MPAID!=21,
-                                 rowSums(select(.,"CarTruck", "Bicycle", "Motorcycle", "BoatNoMotor", "BoatOutboard",
-                                                "BoatInboard", "PhoneCombined", "TV", "Entertain", "Satellite", "Generator"),
+  dplyr::mutate(MAIndex = ifelse(RemoveMA=="No" & (MPAID==17 | # Kei Kecil (MPAID==17) cannot use TV in MAIndex score because question was missing from t3 repeat, 
+                                                     MPAID==21), # and Wakatobi (MPAID==21) cannot use TV in MAIndex score because question was missing from t0 monitoring
+                                 rowSums(dplyr::select(., "CarTruck", "Bicycle", "Motorcycle", "BoatNoMotor", "BoatOutboard",
+                                                       "BoatInboard", "PhoneCombined", "Entertain", "Satellite", "Generator"),
                                          na.rm = TRUE),
-                                 NA)),
-         
-         PAIndex = ifelse(RemovePA=="No",
-                        round(rowMeans(select(.,"PlaceHappy", "PlaceFavourite", "PlaceMiss", "PlaceBest", 
-                                                 "PlaceFishHere", "PlaceBeMyself"),
-                                       na.rm = TRUE), 2),
-                        NA),
-         
-         MTIndex = ifelse(RemoveMT=="No",
-                        rowSums(select(.,"RightsAccess", "RightsHarvest", "RightsManage", 
-                                          "RightsExclude", "RightsTransfer"),
-                                na.rm = TRUE),
-                        NA),
-         
-         FSIndex = as.character(ifelse(RemoveFS=="No",
-                                     rowSums(select(., "DidNotLast", "BalancedDiet", "AdultSkip", "EatLess", 
-                                                       "FreqAdultSkip", "Hungry"),
-                                             na.rm = TRUE),
-                                     NA)) %>%
-                 recode(., "0"="0", "1"="2.04","2"="2.99","3"="3.77","4"="4.5","5"="5.38","6"="6.06") %>%
-                 as.numeric(.),
-         
-         FSIndex = 6.06 - FSIndex,
-         
-         cFS = ifelse(RemovecFS=="No",
-                      rowSums(select(.,"LowCostFood", "ChildBalancedMeal", "ChildNotEnough", 
-                                        "ChildPortion", "ChildHungry", "ChildSkip", "FreqChildSkip", 
-                                        "NoMealChild"),
-                              na.rm = TRUE),
-                      NA),
-         
-         cat.cFS = ifelse(cFS>=6.9,"Evidence",
-                          ifelse(cFS<6.9,"No or insufficient evidence",NA)),
-         
-         InterviewYear = factor(InterviewYear,
-                                levels=c("2010","2011","2012","2013","2014","2015","2016","2017","2018",
-                                         "2019","2020","2021","2022","2023","2024","2025","2026","2027",
-                                         "2028","2029","2030"),
-                                ordered=T))
+                                 ifelse(RemoveMA=="No" & MPAID!=17 & MPAID!=21,
+                                        rowSums(dplyr::select(.,"CarTruck", "Bicycle", "Motorcycle", "BoatNoMotor", "BoatOutboard",
+                                                              "BoatInboard", "PhoneCombined", "TV", "Entertain", "Satellite", "Generator"),
+                                                na.rm = TRUE),
+                                        NA)),
+                
+                PAIndex = ifelse(RemovePA=="No",
+                                 round(rowMeans(dplyr::select(.,"PlaceHappy", "PlaceFavourite", "PlaceMiss", "PlaceBest", 
+                                                              "PlaceFishHere", "PlaceBeMyself"),
+                                                na.rm = TRUE), 2),
+                                 NA),
+                
+                MTIndex = ifelse(RemoveMT=="No",
+                                 rowSums(dplyr::select(.,"RightsAccess", "RightsHarvest", "RightsManage", 
+                                                       "RightsExclude", "RightsTransfer"),
+                                         na.rm = TRUE),
+                                 NA),
+                
+                FSIndex = as.character(ifelse(RemoveFS=="No",
+                                              rowSums(dplyr::select(., "DidNotLast", "BalancedDiet", "AdultSkip", "EatLess", 
+                                                                    "FreqAdultSkip", "Hungry"),
+                                                      na.rm = TRUE),
+                                              NA)) %>%
+                  recode(., "0"="0", "1"="2.04","2"="2.99","3"="3.77","4"="4.5","5"="5.38","6"="6.06") %>%
+                  as.numeric(.),
+                
+                FSIndex = 6.06 - FSIndex,
+                
+                cFS = ifelse(RemovecFS=="No",
+                             rowSums(dplyr::select(.,"LowCostFood", "ChildBalancedMeal", "ChildNotEnough", 
+                                                   "ChildPortion", "ChildHungry", "ChildSkip", "FreqChildSkip", 
+                                                   "NoMealChild"),
+                                     na.rm = TRUE),
+                             NA),
+                
+                cat.cFS = ifelse(cFS>=6.9,"Evidence",
+                                 ifelse(cFS<6.9,"No or insufficient evidence",NA)),
+                
+                InterviewYear = factor(InterviewYear,
+                                       levels=c("2010","2011","2012","2013","2014","2015","2016","2017","2018",
+                                                "2019","2020","2021","2022","2023","2024","2025","2026","2027",
+                                                "2028","2029","2030"),
+                                       ordered=T))
 
 
 HHData <- 
