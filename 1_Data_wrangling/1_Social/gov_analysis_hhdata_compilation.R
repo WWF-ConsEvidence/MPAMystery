@@ -1,12 +1,15 @@
 source('2_Functions/2_Analysis/Function_process_covariates.R')
 mpa.nam <- rio::import("x_Flat_data_files/1_Social/Inputs/Master_database_exports/HH_tbl_MPA.xlsx")
-
 pacman::p_load(rio,fastDummies, tidyverse)
 mean2=function(x){mean(x,na.rm=TRUE)}
 today.date <- gsub("-","",Sys.Date())
 output.dir <- "C:/Users/david/Dropbox/Governance analysis/tables/"
 
+
+
+
 # splitting livelihood data
+names(HHData)
 pri.livl <- dummy_cols(HHData$PrimaryLivelihood)
 summary(pri.livl)
 pri.livl <- select(pri.livl,.data_1:.data_7)
@@ -24,7 +27,7 @@ names(ter.livl) <- c("ter.farming","ter.harv.forest","ter.fishing","ter.aqucultu
 
 # compile all wanted variables
 hh.subset <- HHData %>% 
-  select(SettlementID,InterviewYear,MarineGroup,FreqEatFish,FreqSaleFish,PercentIncFish,
+  select(SettlementID,InterviewYear,MarineGroup,OtherGroup,FreqEatFish,FreqSaleFish,PercentIncFish,
          PAIndex,TimeMarket,MAIndex,EconStatusTrend,FSIndex,MTIndex,
          RightsAccess, RightsHarvest, RightsManage, RightsExclude,RightsTransfer) %>% 
   bind_cols(pri.livl,sec.livl,ter.livl)
@@ -39,7 +42,7 @@ summary(sett.avg)
 # join to settlement data
 sett.out <- Settlements %>% 
   select(-Zone) %>% 
-  left_join(select(mpa.nam,MPACode,MPAName),by=c("MPAID"="MPACode"))
+  left_join(select(mpa.nam,MPACode,MPAName),by=c("MPAID"="MPACode")) %>% 
   left_join(sett.avg,by="SettlementID")
 summary(sett.out)
 export(sett.out,paste0(output.dir,today.date,"_sett_avg_hh_data.csv"))
