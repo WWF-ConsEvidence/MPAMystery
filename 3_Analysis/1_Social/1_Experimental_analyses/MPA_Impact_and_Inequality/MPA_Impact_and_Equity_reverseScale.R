@@ -82,7 +82,7 @@ DiD.data <- match.covariate %>%
 # 4.Marine tourism + wage labor
 # 5.Extractives + other
 
-  
+
 # --- Filter to look at 6 BHS and 4 SBS MPAs (with t2 and/or t4 data) --- Jan 2020
 DiD.data <- DiD.data %>% 
   filter(MPAID%in%c(1:6, 15:18))
@@ -99,7 +99,7 @@ DiD.data <- DiD.data %>%
          SocialConflict_increase = ifelse(is.na(SocialConflict), NA, 
                                           ifelse(SocialConflict==1|SocialConflict==2, 1, 0)), 
          EconTrend_decrease = ifelse(is.na(EconStatusTrend), NA, 
-                                          ifelse(EconStatusTrend==1|EconStatusTrend==2, 1, 0)))
+                                     ifelse(EconStatusTrend==1|EconStatusTrend==2, 1, 0)))
 
 
 # Prepare ethnic polarization index 
@@ -177,7 +177,7 @@ DiD.data <- DiD.data %>%
          BoatNoMotor_yes = ifelse(BoatNoMotor>0,1,0),
          BoatOutboard_yes = ifelse(BoatOutboard>0,1,0),
          BoatInboard_yes = ifelse(BoatInboard>0,1,0),
-         Boat_no = ifelse(Boat>0,1,0),
+         Boat_yes = ifelse(Boat>0,1,0),
          Bicycle_yes = ifelse(Bicycle>0,1,0),
          Motorcycle_yes = ifelse(Motorcycle>0,1,0),
          CarTruck_yes = ifelse(CarTruck>0,1,0)) %>%
@@ -243,7 +243,8 @@ cooking.fuel.df <- HHData %>%
 DiD.data <- DiD.data %>% 
   select(-CookingFuel.Biomass) %>% 
   left_join(cooking.fuel.df, by=c("HouseholdID")) %>% 
-  mutate(fuel.biomass=ifelse(fuel.elec==0 & fuel.oil==0, 1, 0))
+  mutate(fuel.biomass=ifelse(fuel.elec==0 & fuel.oil==0, 1, 0),
+         fuel.nonBiomass=ifelse(fuel.elec==1 | fuel.oil==1, 1, 0))
 
 # --- summary(DiD.data)
 DiD.data.summary <- DiD.data %>% 
@@ -577,11 +578,10 @@ MA.df.2 <- DiD.data %>%
 ##---dummies (negative) only (with boat)
 poverty.df.3 <- DiD.data %>%
   subset(RemoveMA=="No") %>%
-  select(Entertain_no, PhoneCombined_no, Satellite_no, TV_no, Generator_no, Bicycle_no, Motorcycle_no, CarTruck_no, Boat_no, fuel.biomass) %>%                  
+  select(Entertain_yes, PhoneCombined_yes, Satellite_yes, TV_yes, Generator_yes, Bicycle_yes, Motorcycle_yes, CarTruck_yes, Boat_yes, fuel.nonBiomass) %>%                  
   na.omit()
 
-##--function to get weights: 
-##--function to get weights: 
+
 ##--function to get weights: 
 # Function to clean string variables (lower case, remove punctuation)
 get_pca_weight <- function(df) {
@@ -589,7 +589,7 @@ get_pca_weight <- function(df) {
   
   ##---Using z values: Perform PCA to get eigenvalues (i.e. loading factors) for each asset's weight-----##
   poverty.pca.z <- prcomp(df, scale = FALSE)
-
+  
   #Get eigenvalues, or variance percentage, for each principle components (i.e. how well each of PCs contribute in explaning the total variance in our asset data set)
   asset.eig.val <- get_eigenvalue(poverty.pca.z)
   asset.eig.val
@@ -606,7 +606,7 @@ get_pca_weight <- function(df) {
   asset.weight.frame <- asset.weight.frame[ ,1:nrow(asset.eig.val.keep)] 
   asset.weight.frame <- as.data.frame(t(asset.weight.frame))
   asset.weight.frame <- cbind(asset.weight.frame,asset.eig.val.keep) 
-
+  
   #Extract weights (scoring factors) using the variance contribution of each assets to the First PC
   asset.weight.pc1 <- asset.weight.frame[1,] %>% 
     select(-c("eigenvalue", "variance.percent", "cumulative.variance.percent", "pc.contrib")) 
@@ -616,44 +616,32 @@ get_pca_weight <- function(df) {
 #Produce 2-dimensional PCA plots (i.e. looking at the first 2 PCs) to visualize the correlation of each assets in contributing to the first 2 PCs
 poverty.pca.z <- prcomp(poverty.df.3, scale = FALSE)
 fviz_pca_var(poverty.pca.z, col.var = "contrib", gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE)
+ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/toUse_final_reverseSCale/povertyAllev_PCA_dimension.png"),width = 12, height = 8)
 
 ##--- excecute fn to get_pca_weights to get weights
 asset.weight.pc1 <- get_pca_weight(poverty.df.3)
 
-CarTruck_w <- (1/100) * asset.weight.pc1$CarTruck_no
-Bicycle_w <- (1/100) * asset.weight.pc1$Bicycle_no
-Motorcycle_w <- (1/100) * asset.weight.pc1$Motorcycle_no
-PhoneCombined_w <- (1/100) * asset.weight.pc1$PhoneCombined_no
-TV_w <- (1/100) * asset.weight.pc1$TV_no
-Entertain_w <- (1/100) * asset.weight.pc1$Entertain_no
-Satellite_w <- (1/100) * asset.weight.pc1$Satellite_no
-Generator_w <- (1/100) * asset.weight.pc1$Generator_no
-fuel.biomass_w <- (1/100) * asset.weight.pc1$fuel.biomass
-Boat_w <- (1/100) * asset.weight.pc1$Boat_no
+CarTruck_w <- (1/100) * asset.weight.pc1$CarTruck_yes
+Bicycle_w <- (1/100) * asset.weight.pc1$Bicycle_yes
+Motorcycle_w <- (1/100) * asset.weight.pc1$Motorcycle_yes
+PhoneCombined_w <- (1/100) * asset.weight.pc1$PhoneCombined_yes
+TV_w <- (1/100) * asset.weight.pc1$TV_yes
+Entertain_w <- (1/100) * asset.weight.pc1$Entertain_yes
+Satellite_w <- (1/100) * asset.weight.pc1$Satellite_yes
+Generator_w <- (1/100) * asset.weight.pc1$Generator_yes
+fuel.nonBiomass_w <- (1/100) * asset.weight.pc1$fuel.nonBiomass
+Boat_w <- (1/100) * asset.weight.pc1$Boat_yes
 
-# CarTruck_w_z <- (1/100) * asset.weight.pc1$CarTruck_z
-# Bicycle_w_z <- (1/100) * asset.weight.pc1$Bicycle_z
-# Motorcycle_w_z <- (1/100) * asset.weight.pc1$Motorcycle_z
-# PhoneCombined_w_z <- (1/100) * asset.weight.pc1$PhoneCombined_z
-# TV_w_z <- (1/100) * asset.weight.pc1$TV_z
-# Entertain_w_z <- (1/100) * asset.weight.pc1$Entertain_z
-# Satellite_w_z <- (1/100) * asset.weight.pc1$Satellite_z
-# Generator_w_z <- (1/100) * asset.weight.pc1$Generator_z
-# #fuel.biomass_w_z <- (1/100) * asset.weight.pc1$fuel.biomass
-# Boat_w_z <- (1/100) * asset.weight.pc1$Boat_z
 
 #----------##
 DiD.data <- DiD.data %>% 
-  mutate(PovertyIndex_pca = Entertain_w*Entertain_no + PhoneCombined_w*PhoneCombined_no + Satellite_w*Satellite_no+ TV_w*TV_no +
-                            Generator_w*Generator_no + Bicycle_w*Bicycle_no + Motorcycle_w*Motorcycle_no +CarTruck_w*CarTruck_no+Boat_w*Boat_no+fuel.biomass_w*fuel.biomass)     
+  mutate(PovertyIndex_pca = Entertain_w*Entertain_yes + PhoneCombined_w*PhoneCombined_yes + Satellite_w*Satellite_yes + TV_w*TV_yes +
+           Generator_w*Generator_yes + Bicycle_w*Bicycle_yes + Motorcycle_w*Motorcycle_yes + CarTruck_w*CarTruck_yes + Boat_w*Boat_yes + fuel.nonBiomass_w*fuel.nonBiomass)     
 
-# DiD.data <- DiD.data %>% 
-#   mutate(PovertyIndex_pca_z = Entertain_w_z*Entertain_z + PhoneCombined_w_z*PhoneCombined_z + Satellite_w_z*Satellite_z + TV_w_z*TV_z +
-#            Generator_w_z*Generator_z + Bicycle_w_z*Bicycle_z + Motorcycle_w_z*Motorcycle_z + CarTruck_w_z*CarTruck_z + Boat_w_z*Boat_z)
 
 # histogram of PovertyIndex_pca
 hist(DiD.data$PovertyIndex_pca, main="Distribution of Asset-based Poverty", xlab="Poverty Index (PCA)")
-#ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/toUse_final/povertyIndex_PCA_histo.png"),width = 12, height = 8)
+#ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/toUse_final_reverseSCale/povertyIndex_PCA_histo.png"),width = 12, height = 8)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -680,10 +668,10 @@ DiD.data.post <- DiD.data %>% filter(yearsPost%in% c(3:4))
 Lc.pre <- Lc(DiD.data.pre$PovertyIndex_pca)
 Lc.post <- Lc(DiD.data.post$PovertyIndex_pca)
 
-            
-plot(Lc.pre, col="red",lwd=2, main="Lorenz Curve of Poverty Exposure Score",  
-     xlab="Household Percentile by Poverty Exposure Score",  ylab="Cumulative Poverty Exposure")
-#lines(Lc.post, col="blue")
+
+plot(Lc.pre, col="red",lwd=2, main="Lorenz Curve of Poverty Alleviation Index Score",  
+     xlab="Household Percentile by Poverty Alleviation Score",  ylab="Cumulative Poverty Alleviation Score")
+#ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/toUse_final_reverseSCale/povertyAllev_GINI_Lorenz.png"),width = 12, height = 8)
 
 
 #Plot settlement-level GINI histogram
@@ -720,7 +708,8 @@ lines(Lc.BHS.post, col="blue")
 #dev.off()
 
 
-hist(DiD.data.GINI$PovertyIndex_GINI_Settl, main="Distribution of Poverty-exposure GINI Index", xlab="GINI Index (Settlement-level)")
+hist(DiD.data.GINI$PovertyIndex_GINI_Settl, main="Distribution of Poverty-alleviation GINI Index", xlab="GINI Index (Settlement-level)")
+#ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/toUse_final_reverseSCale/histogram_povertyGINI_settlementLvl.png"),width = 12, height = 8)
 
 
 
@@ -771,8 +760,8 @@ DiD.data.baseline <- DiD.data %>%
          Age_Cohort= ifelse(age.retired==1,"Retirement-age", "Working-age"),
          Adat_label= ifelse(adat==1,"Adat Right-holder", "Non-Adat"),
          Ada_1_label= ifelse(adat_1==1,"Adat Right-holder", "Non-Adat"))
-        
-        
+
+
 DiD.data.baseline <- DiD.data.baseline %>% 
   mutate(ed.level.round = round(ed.level, 0),
          ed.level.round = ifelse(ed.level.round<2,2,ed.level.round),
@@ -854,24 +843,19 @@ DiD.data.sumstat <- DiD.data.baseline %>%
          EconTrend_Stable = ifelse(EconStatusTrend==3,1,0),
          EconTrend_IncreaseLittle= ifelse(EconStatusTrend==4,1,0),
          EconTrend_IncreaseMore = ifelse(EconStatusTrend==5,1,0), 
-         EconTrend_Increase = ifelse(EconStatusTrend%in%c(4:5),1,0)) %>% 
+         EconTrend_Increase = ifelse(EconStatusTrend%in%c(3:5),1,0)) %>% 
   mutate(FS.secure = ifelse(FSIndex>=4.02, 1,0), 
          FS.insecure.noHunger = ifelse(FSIndex>=1.56 & FSIndex<4.02, 1, 0), 
          FS.insecure.Hunger = ifelse(FSIndex<1.56, 1, 0))
-         
+
 
 DiD.data.sumstat.treat <- DiD.data.sumstat %>%  filter(Treatment==1)
 DiD.data.sumstat.treat <- describeBy(DiD.data.sumstat.treat)
-#write_xlsx(DiD.data.sumstat.treat, path = paste0(resultPath, "Paper 1-MPA and Equity/results/2020/tables/Summary_Stat_Treat.xlsx"), col_names = TRUE, format_headers = TRUE)
+write_xlsx(DiD.data.sumstat.treat, path = paste0(resultPath, "Paper 1-MPA and Equity/results/2020/tables/Summary_Stat_Treat_Nov2020.xlsx"), col_names = TRUE, format_headers = TRUE)
 
 DiD.data.sumstat.control <- DiD.data.sumstat %>%  filter(Treatment==0)
 DiD.data.sumstat.control <- describeBy(DiD.data.sumstat.control)
-#write_xlsx(DiD.data.sumstat.control, path = paste0(resultPath, "Paper 1-MPA and Equity/results/2020/tables/Summary_Stat_Control.xlsx"), col_names = TRUE, format_headers = TRUE)
-
-# 
-# DiD.data.sumstat <- describeBy(DiD.data.sumstat.treat, DiD.data.sumstat.treat$Treatment)
-# write_xlsx(DiD.data.sumstat.control, path = paste0(resultPath, "Paper 1-MPA and Equity/results/2020/tables/Summary_Stat.xlsx"), col_names = TRUE, format_headers = TRUE)
-# 
+write_xlsx(DiD.data.sumstat.control, path = paste0(resultPath, "Paper 1-MPA and Equity/results/2020/tables/Summary_Stat_Control_Nov2020.xlsx"), col_names = TRUE, format_headers = TRUE)
 
 plyr::count(DiD.data.baseline, "eth.iso")
 
@@ -899,7 +883,7 @@ Poverty_FS.plot <- ggplot(DiD.data.baseline, aes(x=FSIndex, y=PovertyIndex_pca))
                      axis.text.y=element_text(size=12, angle = 90, hjust = 0.5, vjust = 1),
                      axis.title.x=element_text(size=13,face="bold"),
                      axis.title.y=element_text(size=13,face="bold")) +
-  labs(x="Food Security Index",y="Poverty Index", title="Correlation: Poverty Index & Food Security Index")
+  labs(x="Food Security Index",y="Poverty Alleviation Index", title="Correlation: Poverty Alleviation Index & Food Security Index")
 Poverty_FS.plot
 Poverty_FS.fig <- plotly::ggplotly(Poverty_FS.plot)
 Poverty_FS.fig
@@ -914,12 +898,12 @@ Poverty_Educ.plot <- ggplot(DiD.data.baseline, aes(x=ed.level.round, y=PovertyIn
                      axis.text.y=element_text(size=11, angle = 90, hjust = 0.5, vjust = 1),
                      axis.title.x=element_text(size=13,face="bold"),
                      axis.title.y=element_text(size=13,face="bold")) +
-  labs(x="Educational level of household's head",y="Poverty Index", title="Correlation: Poverty Index & Educational Attainment")
+  labs(x="Educational level of household's head",y="Poverty Alleviation Index", title="Correlation: Poverty Alleviation Index & Educational Attainment")
 Poverty_Educ.fig <- plotly::ggplotly(Poverty_Educ.plot)
 Poverty_Educ.fig
 
 plot_grid(Poverty_FS.plot, Poverty_Educ.plot, ncol=1)
-#ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/toUse_final/Poverty_Heath_Educ_corr.jpg"), width = 10, height = 10)
+#ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/toUse_final_reverseScale/Poverty_Heath_Educ_corr.jpg"), width = 10, height = 10)
 
 
 #------------------------------------------------------------------------------------------------------#
@@ -952,9 +936,9 @@ Gender.point.plot <- ggplot(Gender.baseline,aes(x=Gender,y=mean, label=paste0("n
         axis.text.y=element_text(size=11, angle = 90, hjust = 0.5, vjust = 1),
         axis.title.x=element_text(size=13,face="bold"),
         axis.title.y=element_text(size=13,face="bold")) +
-  labs(x="",y="Poverty Index", title="Gender (Female vs. Male) ", subtitle=paste0("Baseline means difference t-test = ",test.val))  
+  labs(x="",y="Poverty Alleviation Index", title="Gender (Female vs. Male) ", subtitle=paste0("Baseline means difference t-test = ",test.val))  
 Gender.point.plot
-#ggsave(paste0(resultPath, "Paper 1-MPA and Equity/results/2020/plots/baseline_inequality/Gender_baseIneq",".jpg"))
+#ggsave(paste0(resultPath, "Paper 1-MPA and Equity/results/2020/plots/baseline_inequality/Gender_baseIneq_nov2020",".jpg"))
 
 
 
@@ -984,7 +968,7 @@ Fisher.point.plot <- ggplot(Fisher.baseline,aes(x=nonFisher_label,y=mean, label=
         axis.text.y=element_text(size=11, angle = 90, hjust = 0.5, vjust = 1),
         axis.title.x=element_text(size=13,face="bold"),
         axis.title.y=element_text(size=13,face="bold")) +
-  labs(x="",y="Poverty Index", title="Livelihood (non-Fisher vs. Fisher)", subtitle=paste0("Baseline means difference t-test = ",test.val))
+  labs(x="",y="Poverty Alleviation Index", title="Livelihood (non-Fisher vs. Fisher)", subtitle=paste0("Baseline means difference t-test = ",test.val))
 Fisher.point.plot
 
 
@@ -1041,7 +1025,7 @@ Age_Cohort.point.plot <- ggplot(Age_Cohort.baseline,aes(x=Age_Cohort,y=mean, lab
         axis.text.y=element_text(size=11, angle = 90, hjust = 0.5, vjust = 1),
         axis.title.x=element_text(size=13,face="bold"),
         axis.title.y=element_text(size=13,face="bold")) +
-  labs(x="",y="Poverty Index", title="Age Cohort (Retired vs. Working)",subtitle=paste0("Baseline means difference t-test = ",test.val)) 
+  labs(x="",y="Poverty Alleviation Index", title="Age Cohort (Retired vs. Working)",subtitle=paste0("Baseline means difference t-test = ",test.val)) 
 Age_Cohort.point.plot
 #ggsave(paste0(resultPath, "Paper 1-MPA and Equity/results/2020/plots/baseline_inequality/Age_Cohort_baseIneq",".jpg"))
 
@@ -1072,7 +1056,7 @@ Adat.point.plot <- ggplot(Adat.baseline,aes(x=nonAdat_label,y=mean, label=paste0
         axis.text.y=element_text(size=11, angle = 90, hjust = 0.5, vjust = 1),
         axis.title.x=element_text(size=13,face="bold"),
         axis.title.y=element_text(size=13,face="bold")) +
-  labs(x="",y="Poverty Index", title="Tenure Right-holder (Non-Adat vs. Adat) ", subtitle=paste0("Baseline means difference t-test = ",test.val))  
+  labs(x="",y="Poverty Alleviation Index", title="Tenure Right-holder (Non-Adat vs. Adat) ", subtitle=paste0("Baseline means difference t-test = ",test.val))  
 Adat.point.plot
 
 #ggsave(paste0(resultPath, "Paper 1-MPA and Equity/results/2020/plots/baseline_inequality/Adat_baseIneq",".jpg"))
@@ -1114,6 +1098,8 @@ library(cowplot)
 plot_grid(Gender.point.plot, Age_Cohort.point.plot, Fisher.point.plot, Adat.point.plot, ncol=2)
 #ggsave(paste0(resultPath, "Paper 1-MPA and Equity/results/2020/plots/baseline_inequality/Combine_baseIneq_1",".pdf"), width = 12, height = 9)
 #ggsave(paste0(resultPath, "Paper 1-MPA and Equity/results/2020/plots/baseline_inequality/Combine_baseIneq_1",".jpg"), width = 12, height = 9)
+ggsave(paste0(resultPath, "Paper 1-MPA and Equity/results/2020/plots/toUse_final_reverseScale/Combine_baseIneq_1",".png"), width = 12, height = 9)
+
 
 plot_grid(Gender.point.plot, Age_Cohort.point.plot, Fisher.point.plot, Adat.point.plot, ncol=2)
 #ggsave(paste0(resultPath, "Paper 1-MPA and Equity/results/2020/plots/baseline_inequality/Combine_baseIneq_2",".pdf"), width = 12, height = 12)
@@ -1295,12 +1281,15 @@ DiD.data.coarseMatch <-DiD.data.coarseMatch %>%
   mutate(dist.wt=1, 
          pair.id=1)
 
+DiD.data.coarseMatch <-DiD.data.coarseMatch %>% 
+  mutate(EconTrend_increase = ifelse(EconTrend_decrease==1,0,1))
+
 ##-----------------------------------------------------------------------------------------##
-         
+
 # ---- 5b. Produce aggregate subgroup impacts (stargazer) ----
 
 model.out.subgroup <- data.frame()
-varNames <- c("PovertyIndex_pca", "EconTrend_decrease")
+varNames <- c("PovertyIndex_pca", "EconTrend_increase")
 regValue.list <-list()
 
 ##--------------------Stargazer Section------------------##
@@ -1404,14 +1393,14 @@ for (i in varNames) {
   regValue.age.working <- regValue
   
   regValue.list[[i]] <- list(regValue.gender.female, regValue.gender.male, regValue.age.retired, regValue.age.working, regValue.tenure.adat, regValue.tenure.nonAdat, regValue.livelihood.fisher, regValue.livelihood.nonFisher)
-
-
+  
+  
 }
 ##-------------------------------------------------------------------------------##
 ##-- Output Sensitivity result tables for GINI outcome
 ##save html (can open in MS Word)
 stargazer(regValue.list["PovertyIndex_pca"],
-          out = paste0(resultPath,"Paper 1-MPA and Equity/results/2020/tables/impact_subGroup_povertyIndex"), type = "html", 
+          out = paste0(resultPath,"Paper 1-MPA and Equity/results/2020/tables/impact_subGroup_povertyIndex_Nov2020"), type = "html", 
           df = FALSE, notes.append = FALSE, omit.table.layout = "n",
           column.labels=c("Female","Male","Retired","Working", "Adat", "non-Adat", "Fisher", "non-Fisher"),
           title="Subgroup Impacts: DiD Regression Results",
@@ -1420,12 +1409,12 @@ stargazer(regValue.list["PovertyIndex_pca"],
                            c("Interview Year FEs","Yes","Yes","Yes","Yes", "Yes","Yes","Yes","Yes")))
 
 
-stargazer(regValue.list["EconTrend_decrease"],
-          out = paste0(resultPath,"Paper 1-MPA and Equity/results/2020/tables/impact_subGroup_EconTrend"), type = "html", 
+stargazer(regValue.list["EconTrend_increase"],
+          out = paste0(resultPath,"Paper 1-MPA and Equity/results/2020/tables/impact_subGroup_EconTrend_Nov2020"), type = "html", 
           df = FALSE, notes.append = FALSE, omit.table.layout = "n",
           column.labels=c("Female","Male","Retired","Working", "Adat", "non-Adat", "Fisher", "non-Fisher"),
           title="Subgroup Impacts: DiD Regression Results",
-          align=TRUE, dep.var.labels="Negative Perception on Economic Trend",
+          align=TRUE, dep.var.labels="Positive Perception on Economic Trend",
           add.lines = list(c("MPA-cluster FEs","Yes","Yes","Yes","Yes", "Yes","Yes","Yes","Yes"),
                            c("Interview Year FEs","Yes","Yes","Yes","Yes", "Yes","Yes","Yes","Yes")))
 
@@ -1446,13 +1435,13 @@ for (i in varNames) {
     regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
                      | SettlementID + InterviewYear + pair.id | 0 | SettlementID,  data=reg.df, exactDOF = TRUE, weights=w)
- 
+    
     reg.broom <- tidy(regValue) %>% 
       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
       mutate(term=gsub("Treatment:Post1","Impact",term),
              term=gsub("Post1","Control_trend",term),
              Response=i, subgroup="Gender", subgroup_id=genderID)
-
+    
     ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
     regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
                                   n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
@@ -1628,17 +1617,17 @@ for (i in varNames) {
 ##-------------------------------------------------------------------------------##
 ##keeping only 2 relevant terms "Treatment:Post1" and "Post1" 
 model.out.subgroup1 <- model.out.subgroup %>%
-  mutate(domain=ifelse(Response=="PovertyIndex_PCA"," Poverty Index (Asset-based PCA)",
-                       ifelse(Response=="EconTrend_decrease","Decrease Economic Trend (Subjective outcome)",
-                            ifelse(Response=="FSIndex_z"," Health (Food Security)",
-                                 ifelse(Response=="MAIndex_z","Economic Wellbeing (Material Assets)",
-                                        ifelse(Response=="MTIndex_z"," Empowerment (Marine Tenure)",
-                                               ifelse(Response=="PAIndex_z"," Culture (Place Attachment)", "  Education (School Enrollment)")))))),
+  mutate(domain=ifelse(Response=="PovertyIndex_PCA"," Poverty Alleviation Index (Asset-based PCA)",
+                       ifelse(Response=="EconTrend_increase","Positive Economic Trend (Subjective outcome)",
+                              ifelse(Response=="FSIndex_z"," Health (Food Security)",
+                                     ifelse(Response=="MAIndex_z","Economic Wellbeing (Material Assets)",
+                                            ifelse(Response=="MTIndex_z"," Empowerment (Marine Tenure)",
+                                                   ifelse(Response=="PAIndex_z"," Culture (Place Attachment)", "  Education (School Enrollment)")))))),
          domain=gsub(" \\(", "\n \\(", domain))
 
 model.out.subgroup1 <- model.out.subgroup %>%
-  mutate(Indicator= ifelse(Response=="EconTrend_decrease", "2. Decreasing Economic Trend (Household perception [subjective])", 
-                           ifelse(Response=="PovertyIndex_pca", "1. Poverty Index (Asset-based [objective])", "")),
+  mutate(Indicator= ifelse(Response=="EconTrend_increase", "2. Economic Stability or Improvement (Household perception [subjective])", 
+                           ifelse(Response=="PovertyIndex_pca", "1. Poverty Alleviation Index (Asset-based [objective])", "")),
          Indicator=gsub(" \\(", "\n \\(", Indicator)) %>% 
   mutate(subgroup=ifelse(subgroup=="Indigenous", "Residence", subgroup), 
          subgroup=ifelse(subgroup=="Fishing Livelihood", "Livelihood", subgroup)) %>% 
@@ -1651,7 +1640,7 @@ model.out.subgroup1 <- model.out.subgroup %>%
                                                                     ifelse(subgroup=="Age" & subgroup_id==0, "Working-age", "Retirement-age"))))))))
 
 ##Export 
-#export(model.out.subgroup1,  paste0(resultPath, "Paper 1-MPA and Equity/results/2020/outputs/impact_ouput_coarseMatch.csv"))
+#export(model.out.subgroup1,  paste0(resultPath, "Paper 1-MPA and Equity/results/2020/outputs/impact_ouput_coarseMatch_Nov2020.xlsx"))
 
 
 
@@ -1665,7 +1654,7 @@ Gender.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",subgroup=="Gen
   geom_bar(stat="identity", position =pd, width = 0.5, size=1)+ 
   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=1.5, position = pd ) +
   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.1, size=0.3, position = pd ) +
-  theme_bw() + theme(legend.position=c(0.15,0.85), legend.title = element_blank(), legend.text = element_text(size=9),
+  theme_bw() + theme(legend.position=c(0.45,0.13), legend.title = element_blank(), legend.text = element_text(size=9),
                      legend.background = element_rect(size=0.5, linetype="solid", color="black"), 
                      axis.text.x=element_text(size=10, angle = 0, hjust = 0.5, vjust = 1),
                      axis.text.y=element_text(size=10, angle = 90, hjust = 0.5, vjust = 1)) +
@@ -1679,7 +1668,7 @@ Livelihood.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",subgroup==
   geom_bar(stat="identity", position =pd, width = 0.5, size=1)+ 
   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=1.5, position = pd ) +
   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.1, size=0.3, position = pd ) +
-  theme_bw() + theme(legend.position=c(0.15,0.85), legend.title = element_blank(), legend.text = element_text(size=9),
+  theme_bw() + theme(legend.position=c(0.45,0.13), legend.title = element_blank(), legend.text = element_text(size=9),
                      legend.background = element_rect(size=0.5, linetype="solid", color="black"), 
                      axis.text.x=element_text(size=10, angle = 0, hjust = 0.5, vjust = 1),
                      axis.text.y=element_text(size=10, angle = 90, hjust = 0.5, vjust = 1)) +
@@ -1707,7 +1696,7 @@ Tenureship.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",subgroup==
   geom_bar(stat="identity", position =pd, width = 0.5, size=1)+ 
   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=1.5, position = pd ) +
   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.1, size=0.3, position = pd ) +
-  theme_bw() + theme(legend.position=c(0.15,0.85), legend.title = element_blank(), legend.text = element_text(size=9),
+  theme_bw() + theme(legend.position=c(0.45,0.13), legend.title = element_blank(), legend.text = element_text(size=9),
                      legend.background = element_rect(size=0.5, linetype="solid", color="black"), 
                      axis.text.x=element_text(size=10, angle = 0, hjust = 0.5, vjust = 1),
                      axis.text.y=element_text(size=10, angle = 90, hjust = 0.5, vjust = 1)) +
@@ -1720,7 +1709,7 @@ Age.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",subgroup=="Age"),
   geom_bar(stat="identity", position =pd, width = 0.5, size=1)+ 
   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=1.5, position = pd ) +
   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.1, size=0.3, position = pd ) +
-  theme_bw() + theme(legend.position=c(0.15,0.85), legend.title = element_blank(), legend.text = element_text(size=9),
+  theme_bw() + theme(legend.position=c(0.45,0.13), legend.title = element_blank(), legend.text = element_text(size=9),
                      legend.background = element_rect(size=0.5, linetype="solid", color="black"), 
                      axis.text.x=element_text(size=10, angle = 0, hjust = 0.5, vjust = 1),
                      axis.text.y=element_text(size=10, angle = 90, hjust = 0.5, vjust = 1)) +
@@ -1731,14 +1720,14 @@ Age.plot_z
 
 ##combine PLOTS
 plot_grid(Gender.plot_z, Age.plot_z, Livelihood.plot_z, Tenureship.plot_z, ncol=2)
-#ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/Impact_plots/Poverty_EconTrend_4groups.png"),width = 12, height = 8)
+#ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/toUse_final_reverseScale/Poverty_EconTrend_4groups.png"),width = 12, height = 8)
 
 
 
 # ---- 5d. Produce over-time impact plot ----
 ##------5d. changes in poverty impact overtime (t2 and t4; using BHS data only)
 model.out.time <- data.frame()
-varNames <- c("PovertyIndex_pca", "EconTrend_decrease")
+varNames <- c("PovertyIndex_pca", "EconTrend_increase")
 DiD.data.coarseMatch.BHS <- DiD.data.coarseMatch %>% filter(MPAID%in%c(1:6))
 
 for (i in varNames) {
@@ -1762,7 +1751,7 @@ for (i in varNames) {
              term=gsub("yearsPostF4","Control_4",term),
              term=gsub("Treatment:yearsPostF7","Impact_7",term),
              term=gsub("yearsPostF7","Control_7",term),)
-
+    
     
     ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
     regValue <- felm(Y  ~  Control + yearsPostF + Control:yearsPostF + 
@@ -1857,7 +1846,7 @@ for (i in varNames) {
     
     model.out.time <- rbind(model.out.time, reg.broom, reg.broom.treatTrend)
   } 
-    
+  
   ##----------------Age (retirement vs working)------------------------------##
   for (age.retiredID in 0:1) {
     reg.df <- DiD.data.coarseMatch.BHS %>% filter(age.retired==age.retiredID)
@@ -1983,7 +1972,7 @@ model.out.time1 <- model.out.time %>%
                            ifelse(Response=="PovertyIndex_pca", "1. Poverty Index (Asset-based [objective])", "")),
          Indicator=gsub(" \\(", "\n \\(", Indicator)) %>% 
   mutate(impact_time= ifelse(term=="Impact_2", "2 years", 
-                              ifelse(term=="Impact_4", "4 years", NA))) %>% 
+                             ifelse(term=="Impact_4", "4 years", NA))) %>% 
   mutate(subgroup=ifelse(subgroup=="Indigenous", "Residence", subgroup), 
          subgroup=ifelse(subgroup=="Fishing Livelihood", "Livelihood", subgroup)) %>% 
   mutate(subgroup_label = ifelse(subgroup=="Gender" & subgroup_id==0, "Female",    
@@ -2091,7 +2080,7 @@ DiD.data.coarseMatch <- DiD.data.coarseMatch %>%
   mutate(NumTotalGroup = NumMarineGroup + NumOtherGroup,
          NumTotalGroup.Female = ifelse(Male==0, NumMarineGroup + NumOtherGroup, NA),
          NumTotalGroup.Male = ifelse(Male==1, NumMarineGroup + NumOtherGroup, NA),
-  
+         
          NumTotalGroup.Fisher = ifelse(Fisher==1, NumMarineGroup + NumOtherGroup, NA),
          NumTotalGroup.nonFisher = ifelse(Fisher==0, NumMarineGroup + NumOtherGroup, NA),
          
@@ -2124,7 +2113,7 @@ DiD.data.coarseMatch <- DiD.data.coarseMatch %>%
 ## important: get the intensive (# of groups) and extensive (whether 0/1) measure of subgroup participations 
 DiD.data.coarseMatch.settl <- data.frame()
 DiD.data.coarseMatch.settl <- DiD.data.coarseMatch %>% 
-  select(MPAID, SettlementID, Treatment, Post, yearsPost, InterviewYear, TimeMarket, PovertyIndex_GINI_Settl, PovertyIndex_pca, EconTrend_decrease, customary.gov.pct, Fisher, lat, long, 
+  select(MPAID, SettlementID, Treatment, Post, yearsPost, InterviewYear, TimeMarket, PovertyIndex_GINI_Settl, PovertyIndex_pca, EconTrend_decrease,EconTrend_increase, customary.gov.pct, Fisher, lat, long, 
          NumTotalGroup, NumTotalGroup.AgeRetired, NumTotalGroup.AgeWorking, NumTotalGroup.Fisher, NumTotalGroup.nonFisher, NumTotalGroup.Female, NumTotalGroup.Male, 
          NumTotalGroup.Indigenous, NumTotalGroup.nonIndigenous, NumTotalGroup.Adat, NumTotalGroup.nonAdat,
          Parti.dum, Parti.Female.dum, Parti.Male.dum, Parti.AgeRetired.dum, Parti.AgeWorking.dum, Parti.Fisher.dum, Parti.nonFisher.dum,
@@ -2137,6 +2126,7 @@ DiD.data.coarseMatch.settl <- DiD.data.coarseMatch %>%
             PovertyIndex_GINI_Settl=first(PovertyIndex_GINI_Settl), 
             PovertyIndex_pca = mean(PovertyIndex_pca, na.rm=TRUE),
             EconTrend_decrease = mean(EconTrend_decrease, na.rm=TRUE), 
+            EconTrend_increase = mean(EconTrend_increase, na.rm=TRUE), 
             TimeMarket = mean(TimeMarket, na.rm=TRUE),
             Fisher = mean(Fisher, na.rm=TRUE),
             lat = first(lat), 
@@ -2148,7 +2138,7 @@ DiD.data.coarseMatch.settl <- DiD.data.coarseMatch %>%
             Parti_settl.m = mean(NumTotalGroup),
             Parti_settl.Female.m = mean(NumTotalGroup.Female, na.rm = TRUE),
             Parti_settl.Male.m = mean(NumTotalGroup.Male, na.rm = TRUE),
-      
+            
             Parti_settl.AgeRetired.m = mean(NumTotalGroup.AgeRetired, na.rm = TRUE),
             Parti_settl.AgeWorking.m = mean(NumTotalGroup.AgeWorking, na.rm = TRUE),
             
@@ -2289,7 +2279,7 @@ DiD.data.Parti.sGroup.base <- DiD.data.coarseMatch.settl %>%
          Parti_settl.Adat.pct.above = ifelse(Parti_settl.Adat.pct>=Parti_MPA.Adat.pct, 1, 0),
          Parti_settl.nonAdat.m.above = ifelse(Parti_settl.nonAdat.m>=Parti_MPA.nonAdat.m, 1, 0),
          Parti_settl.nonAdat.pct.above = ifelse(Parti_settl.nonAdat.pct>=Parti_MPA.nonAdat.pct, 1, 0)) 
-  
+
 
 ##--- merge the baseline participation moderating factors in DiD.data
 DiD.data.coarseMatch <- DiD.data.coarseMatch %>% 
@@ -2302,9 +2292,9 @@ DiD.data.coarseMatch.settl <- DiD.data.coarseMatch.settl %>%
 
 #---------------------------------------------------------------------------#
 # --- Settlement-level regressions: Poverty Index, EconTrend, and Poverty's Gini
-         
+
 model.out.GINI <- data.frame()
-varNames <- c("PovertyIndex_GINI_Settl", "PovertyIndex_pca", "EconTrend_decrease")
+varNames <- c("PovertyIndex_GINI_Settl", "PovertyIndex_pca", "EconTrend_increase")
 
 
 regValue.list <-list()
@@ -2317,7 +2307,7 @@ for (i in varNames) {
   
   ## --- 1. base (MPAID only)
   regValue <- felm(Y  ~ Treatment + Post + Treatment:Post 
-                     # + Fisher.base + TimeMarket.base + lat + long + customary.gov.pct.base 
+                   # + Fisher.base + TimeMarket.base + lat + long + customary.gov.pct.base 
                    | MPAID  + pair.id | 0 | 0, data=reg.df, exactDOF = TRUE, weights=w)
   regValue.1 <- regValue
   
@@ -2341,7 +2331,7 @@ for (i in varNames) {
   
   ## --- 3. base + settlement's baseline controls
   regValue <- felm(Y  ~ Treatment + Post + Treatment:Post 
-                    + Fisher.base + TimeMarket.base + lat + long + customary.gov.pct.base 
+                   + Fisher.base + TimeMarket.base + lat + long + customary.gov.pct.base 
                    | MPAID  + pair.id | 0 | 0, data=reg.df, exactDOF = TRUE, weights=w)
   regValue.3 <- regValue
   
@@ -2353,7 +2343,7 @@ for (i in varNames) {
   
   ## --- 4. base + controls + interview year
   regValue <- felm(Y  ~ Treatment + Post + Treatment:Post 
-                    + Fisher.base + TimeMarket.base + lat + long + customary.gov.pct.base 
+                   + Fisher.base + TimeMarket.base + lat + long + customary.gov.pct.base 
                    | MPAID  + InterviewYear + pair.id | 0 | 0, data=reg.df, exactDOF = TRUE, weights=w)
   regValue.4 <- regValue
   
@@ -2403,9 +2393,9 @@ for (i in varNames) {
 
 names(master.reg.list$PovertyIndex_GINI_Settl) <- paste0("Spec ",seq(1:6))
 names(master.reg.list$PovertyIndex_pca) <- paste0("Spec ",seq(1:6))
-names(master.reg.list$EconTrend_decrease) <- paste0("Spec ",seq(1:6))
+names(master.reg.list$EconTrend_increase) <- paste0("Spec ",seq(1:6))
 
- 
+
 model.out.GINI <- rbind(reg.broom1,reg.broom2, reg.broom3, reg.broom4, reg.broom5, reg.broom6)
 model.out.GINI[order(model.out.GINI$term),]
 
@@ -2450,7 +2440,7 @@ model.out.GINI[order(model.out.GINI$term),]
 
 ##save html (can open in MS Word or Excel)
 stargazer(master.reg.list$PovertyIndex_GINI_Settl[c("Spec 1","Spec 2","Spec 3","Spec 4")],
-          out = paste0(resultPath,"Paper 1-MPA and Equity/results/2020/tables/Settle_GINI_impact"), type = "html", 
+          out = paste0(resultPath,"Paper 1-MPA and Equity/results/2020/tables/Settle_GINI_impact_Nov2020"), type = "html", 
           df = FALSE, notes.append = FALSE,  omit.table.layout = "n", 
           #keep = c("Treatment:Post1"), 
           #covariate.labels=c("Treatment X Post"),
@@ -2463,7 +2453,7 @@ stargazer(master.reg.list$PovertyIndex_GINI_Settl[c("Spec 1","Spec 2","Spec 3","
 
 ##save html (can open in MS Word or Excel)
 stargazer(master.reg.list$PovertyIndex_pca[c("Spec 1","Spec 2","Spec 3","Spec 4")],
-          out = paste0(resultPath,"Paper 1-MPA and Equity/results/2020/tables/Settle_poverty_impact"), type = "html", 
+          out = paste0(resultPath,"Paper 1-MPA and Equity/results/2020/tables/Settle_poverty_impact_Nov2020"), type = "html", 
           df = FALSE, notes.append = FALSE, omit.table.layout = "n", 
           #keep = c("Treatment:Post1"), 
           #covariate.labels=c("Treatment X Post"),
@@ -2476,8 +2466,8 @@ stargazer(master.reg.list$PovertyIndex_pca[c("Spec 1","Spec 2","Spec 3","Spec 4"
 
 
 ##save html (can open in MS Word or Excel)
-stargazer(master.reg.list$EconTrend_decrease[c("Spec 1","Spec 2","Spec 3","Spec 4")],
-          out = paste0(resultPath,"Paper 1-MPA and Equity/results/2020/tables/Settle_EconTrend_impact"), type = "html", 
+stargazer(master.reg.list$EconTrend_increase[c("Spec 1","Spec 2","Spec 3","Spec 4")],
+          out = paste0(resultPath,"Paper 1-MPA and Equity/results/2020/tables/Settle_EconTrend_impact_Nov2020"), type = "html", 
           df = FALSE, notes.append = FALSE, omit.table.layout = "n", 
           #keep = c("Treatment:Post1"), 
           #covariate.labels=c("Treatment X Post"),
@@ -2489,7 +2479,7 @@ stargazer(master.reg.list$EconTrend_decrease[c("Spec 1","Spec 2","Spec 3","Spec 
                            c("Settlement Covariates","No","No","Yes","Yes")))
 
 
-                       
+
 ##-- Drawing impacts for All, "High Participation",and "Low Participation"
 
 # GINI.plot <- ggplot(filter(model.out.GINI, term=="Impact", Spec=="base+InterviewYear+control"),aes(x=sample, y=estimate)) +
@@ -2519,7 +2509,7 @@ stargazer(master.reg.list$EconTrend_decrease[c("Spec 1","Spec 2","Spec 3","Spec 
 model.out.subgroup.Parti <- data.frame()
 reg.broom.cumulative <- data.frame() 
 
-varNames <- c("PovertyIndex_pca", "EconTrend_decrease")
+varNames <- c("PovertyIndex_pca", "EconTrend_increase")
 #varNames <- c("PovertyIndex_pca")
 
 for (i in varNames) {
@@ -2834,8 +2824,8 @@ model.out.subgroup.Parti <- rbind(model.out.subgroup.Parti, reg.broom.cumulative
 
 ##keeping only 2 relevant terms "Treatment:Post1" and "Post1" 
 model.out.subgroup.Parti <- model.out.subgroup.Parti %>%
-  mutate(Indicator= ifelse(Response=="EconTrend_decrease", "2. Decreasing Economic Trend", 
-                           ifelse(Response=="PovertyIndex_pca", "1. Poverty Index", "")),
+  mutate(Indicator= ifelse(Response=="EconTrend_increase", "2. Economic Stability or Improvement (Household perception [subjective])", 
+                           ifelse(Response=="PovertyIndex_pca", "1. Poverty Alleviation Index (Asset-based [objective])", "")),
          Indicator=gsub(" \\(", "\n \\(", Indicator)) %>% 
   mutate(subgroup=ifelse(subgroup=="Indigenous", "Residence", subgroup), 
          subgroup=ifelse(subgroup=="Fishing Livelihood", "Livelihood", subgroup)) %>% 
@@ -2930,7 +2920,7 @@ Age.plot.Parti
 
 ##combine PLOTS
 plot_grid(Gender.plot.Parti, Age.plot.Parti, Livelihood.plot.Parti, Tenureship.plot.Parti, ncol=1)
-#ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/Impact_plots/Poverty_EconTrend_4groups_Parti_OneSampleSplit.jpg"), width=10, height=14)
+ggsave(paste0(resultPath,"Paper 1-MPA and Equity/results/2020/plots/toUse_final_reverseScale/Poverty_EconTrend_4groups_Parti_OneSampleSplit.jpg"), width=12, height=14)
 
 
 
