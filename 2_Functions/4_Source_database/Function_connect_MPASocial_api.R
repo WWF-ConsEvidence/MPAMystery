@@ -32,9 +32,12 @@ source.from.SQL <- function(endpoint=NULL) {
   
   # define API endpoint URL
   base <- "https://mpasocial.org/api/" # this is the api base url
+  
+  # define JSON report format
+  format = "/json/"
 
   # create API endpoint url as object
-  url <- paste(base, endpoint, sep = "")
+  url <- paste(base, endpoint, format, sep = "", collapse = "")
   
   
   # optional querying of household data only
@@ -65,7 +68,9 @@ source.from.SQL <- function(endpoint=NULL) {
   api.data.deserialize <- content(api.connect, "text")
   
   # Read and save data as R workable object
-  api.data.final <- fromJSON(api.data.deserialize, flatten = TRUE) # conversion to r workable object (list or df)
+  api.data <- fromJSON(api.data.deserialize, flatten = TRUE) # conversion to r workable object (list or df)
+  
+  api.data.final <- api.data[["results"]]
   
   api.data.final
   

@@ -54,7 +54,7 @@ options(dplyr.summarise.inform = FALSE)
 
 # ---- 1.2 Import data ----
 
-WELLBEING <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_household')
+WELLBEING <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_household_kei_2019_fishIncome')
 DEMOGRAPHIC <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_demographic')
 SETTLEMENT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_settlement')
 ORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_marineorganizationmembership')
@@ -478,7 +478,6 @@ HHData <-
   HHData %>%
   filter(MPAID==MPA) %>%
   mutate(MonitoringYear=factor(MonitoringYear,
-                               levels=unique(MonitoringYear),
                                ordered=T))
 
 IndDemos <-
