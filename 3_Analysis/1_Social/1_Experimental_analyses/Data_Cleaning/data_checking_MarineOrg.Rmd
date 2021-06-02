@@ -1,0 +1,52 @@
+---
+title: "data_checking_MarineOrg"
+author: "Jennie Sun"
+date: "6/1/2021"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(reshape)
+library(xlsx)
+pacman::p_load(rio, plyr, foreach, dplyr, openxlsx, chron)
+```
+
+```{r}
+#load wwf marine org data
+marine_org_wwf <- 
+  import('./BHS_UNIPA_WWF_2016-19_Data_for_Comparison/WWF_data/marineorganizationmembership-20210113.csv')  %>%
+  filter(!is.na(morganizationid))
+colnames(marine_org_wwf) <- tolower(colnames(marine_org_wwf))
+#create skip codes list
+skipcodes <- c(990:999)
+```
+
+Data frame summarizing number of NAs in each column: 
+```{r}
+count_NA_marine_org <- sapply(marine_org_wwf, function(x) sum(is.na(x)))
+count_NA_marine_org <- as.data.frame(count_NA_marine_org)
+```
+
+* ORGANIZATION_POSITION_CHOICES (`position`)
+```{r}
+org_pos_codes <- c(1:2)
+org_pos_index_marine <- 
+  filter(marine_org_wwf, !position%in%c(org_pos_codes, skipcodes)) %>%
+           select(morganizationid, position) %>%
+  filter(!is.na(position))
+
+print(paste0("Values out of range for variables with Organization Position choices for Marine Organization ID", org_pos_index_marine$morganizationid))
+print(org_pos_index_marine)
+```
+
+* YES_NO_CHOICES (`meeting`)
+```{r}
+yes_no_codes <- c(0:1)
+yes_no_var_index_marine <- 
+  filter(marine_org_wwf, !meeting%in%c(yes_no_codes, skipcodes)) %>%
+           select(morganizationid, meeting) %>%
+  filter(!is.na(meeting))
+
+print(paste0("Values out of range for variables with Yes/No choices for Marine Organization ID", yes_no_var_index_marine$morganizationid))
+print(yes_no_var_index_marine)
+```

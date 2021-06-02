@@ -1,0 +1,72 @@
+---
+title: "data_checking_demo"
+author: "Jennie Sun"
+date: "5/25/2021"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(reshape)
+library(xlsx)
+pacman::p_load(rio, plyr, foreach, dplyr, openxlsx, chron)
+```
+
+```{r}
+#load demographic data
+demo_unipa <- 
+  import('./BHS_UNIPA_WWF_2016-19_Data_for_Comparison/UNIPA_data/HH_tbl_DEMOGRAPHIC_UNIPA_Pre-2016.xlsx')  %>%
+  filter(!is.na(DemographicID))
+
+colnames(demo_unipa) <- tolower(colnames(demo_unipa))
+#create skip codes list
+skipcodes <- c(990:999)
+```
+
+Data frame summarizing number of NAs in each column: 
+```{r}
+count_NA_demo <- sapply(demo_unipa, function(x) sum(is.na(x)))
+count_NA_demo <- as.data.frame(count_NA_demo)
+```
+
+* YES_NO_CHOICES
+```{r}
+yes_no_codes <- c(0:1)
+yes_no_var_index_demo <- 
+  filter(demo_unipa, !individualenrolled%in%c(yes_no_codes, skipcodes)) %>%
+           select(household, individualenrolled)
+  filter(demo_unipa, !householdhead%in%c(yes_no_codes, skipcodes)) %>%
+           select(household, householdhead)
+  filter(demo_unipa, !individualunwell%in%c(yes_no_codes, skipcodes)) %>%
+           select(household, individualunwell) 
+
+print(paste0("Values out of range for variables with Yes/No choices for Household ID", yes_no_var_index_demo$household))
+print(yes_no_var_index_demo)
+```
+
+* GENDER_CHOICES (used in Demographics and Death tables)
+```{r}
+gender_codes <- c(1:2) # +skip codes
+gender_index <- 
+    filter(demo_unipa, !individualgender%in%c(gender_codes, skipcodes)) %>%
+           select(household, individualgender)
+print(gender_index)
+```
+
+* EDUCATION_LEVEL_CHOICES
+```{r}
+educ_codes <- c(0:5) # +skip codes
+educ_index <- 
+    filter(demo_unipa, !individualedlevel%in%c(educ_codes, skipcodes)) %>%
+           select(household, individualedlevel)
+print(educ_index)
+```
+
+* RELATIONSHIP_CHOICES
+```{r}
+relashionship_codes <- c(1:13) # +skip codes
+relashionship_index <- 
+    filter(demo_unipa, !relationhhh%in%c(relashionship_codes, skipcodes)) %>%
+           select(household, relationhhh)
+print(relashionship_index)
+```

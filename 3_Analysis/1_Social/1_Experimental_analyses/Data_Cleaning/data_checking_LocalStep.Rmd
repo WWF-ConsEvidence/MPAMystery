@@ -1,0 +1,29 @@
+---
+title: "data_checking_LocalStep"
+author: "Jennie Sun"
+date: "6/2/2021"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(reshape)
+library(xlsx)
+pacman::p_load(rio, plyr, foreach, dplyr, openxlsx, chron)
+```
+
+```{r}
+#load wwf local step data
+local_step_wwf <- 
+  import('./BHS_UNIPA_WWF_2016-19_Data_for_Comparison/WWF_data/localstep-20210113.csv')  %>%
+  filter(!is.na(localstepsid))
+colnames(local_step_wwf) <- tolower(colnames(local_step_wwf))
+#create skip codes list
+skipcodes <- c(990:999)
+```
+
+Data frame summarizing number of NAs in each column: 
+```{r}
+count_NA_local_step <- sapply(local_step_wwf, function(x) sum(is.na(x)))
+count_NA_local_step <- as.data.frame(count_NA_local_step)
+```
