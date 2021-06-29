@@ -14,17 +14,17 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-source('1_Data_wrangling/1_Social/2_Source_data/Source_social_data_flat_files.R')
+source('1_Data_wrangling/1_Social/2_Source_data/Source_social_data_flat_files.R', local = T)
 source('1_Data_wrangling/1_Social/3_Calculating_indicators/Calculate_household_indices.R')
 
 
 # Creating yearsPost to create a continuous variable of time after baseline
 HHData <- HHData %>%
-  mutate(yearsPost = ifelse(MonitoringYear=="Baseline",0,
+ mutate(yearsPost = ifelse(MonitoringYear=="Baseline", 0,
                             as.integer(substr(MonitoringYear, 1, 1))))
 
 #---- Import look up tables ----
-ethnic.lkp<- import("x_Flat_data_files/1_Social/Inputs/master_ethnic_lookup_2017_117.xlsx")
+ethnic.lkp <- import("x_Flat_data_files/1_Social/Inputs/master_ethnic_lookup_2017_117.xlsx")
 education.lkp <- import("x_Flat_data_files/1_Social/Inputs/education_lkp.xlsx")
 
 # ---Create functions
