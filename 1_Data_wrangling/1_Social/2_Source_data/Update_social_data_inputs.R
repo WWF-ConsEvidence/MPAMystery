@@ -30,7 +30,12 @@
 pacman::p_load(rio)
 
 
-# ---- 1.2 Define source.from.SQL function ----
+# ---- 1.2 Load credentials ----
+
+options(mpasocial_userid = rstudioapi::askForPassword("Please enter your USERNAME:"))
+options(mpasocial_password = rstudioapi::askForPassword("Please enter your PASSWORD:"))
+
+# ---- 1.3 Define source.from.SQL function ----
 
 source('2_Functions/4_Source_database/Function_connect_MPASocial_api.R')
 
