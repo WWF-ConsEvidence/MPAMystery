@@ -62,7 +62,7 @@ NMORGANIZATION <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_da
 LTHREAT <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_localthreat')
 LSTEPS <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_localstep')
 MPA.LKP <- last.file(dir.nam='x_Flat_data_files/1_Social/Inputs/Master_database_exports/', nam='tbl_mpa')
-
+# 
 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -242,7 +242,8 @@ HHData <-   WELLBEING %>%
                 PrimaryFishTechnique, SecondaryFishTechnique, TertiaryFishTechnique, 
                 EconStatusTrend, EconStatusReason, Religion, YrResident, TimeMarket, SocialConflict,
                 MarineGroup, OtherGroup, VoteDistrict, VoteNational, NumLocalThreat, NumGlobalThreat, NumLocalAction, NumGlobalAction, 
-                LessProductiveDaysFishing, PoorCatch, PoorCatchUnits, MoreProductiveDaysFishing, GoodCatch, GoodCatchUnits, PaternalEthnicity)
+                LessProductiveDaysFishing, PoorCatch, PoorCatchUnits, MoreProductiveDaysFishing, GoodCatch, GoodCatchUnits, PaternalEthnicity) %>%
+  dplyr::arrange(HouseholdID)
 
 
 # ---- 2.2 Clean & post-code DEMOGRAPHIC to create IndDemos for analysis ----
