@@ -1,0 +1,38 @@
+---
+title: "data_checking_death"
+author: "Jennie Sun"
+date: "6/1/2021"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(reshape)
+library(xlsx)
+pacman::p_load(rio, plyr, foreach, dplyr, openxlsx, chron)
+```
+
+```{r}
+#load wwf death data
+death_wwf <- 
+  import('./BHS_UNIPA_WWF_2016-19_Data_for_Comparison/WWF_data/death-20210113.csv')  %>%
+  filter(!is.na(deathid))
+colnames(death_wwf) <- tolower(colnames(death_wwf))
+#create skip codes list
+skipcodes <- c(990:999)
+```
+
+Data frame summarizing number of NAs in each column: 
+```{r}
+count_NA_death <- sapply(death_wwf, function(x) sum(is.na(x)))
+count_NA_death <- as.data.frame(count_NA_death)
+```
+
+* GENDER_CHOICES (`gender`)
+```{r}
+gender_codes <- c(1:2) # +skip codes
+gender_index <- 
+    filter(death_wwf, !gender%in%c(gender_codes, skipcodes)) %>%
+           select(deathid, gender) %>%
+  filter(!is.na(gender))
+print(gender_index)
+```

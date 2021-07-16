@@ -48,7 +48,6 @@ today.date <- gsub("-","",Sys.Date())
 
 # Files (with package rio)
 last.file <- function(dir.nam, nam){
-  pacman::p_load(rio, tidyverse)
   import(paste0(dir.nam, last(sort(grep(nam, list.files(dir.nam), value=T, fixed=T)))), guess_max=50000)}
 
 # suppress messages for experimental new group_by() and summarise() functionality in dplyr

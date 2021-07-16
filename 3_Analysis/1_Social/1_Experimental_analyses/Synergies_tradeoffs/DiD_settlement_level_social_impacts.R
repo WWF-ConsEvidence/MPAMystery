@@ -24,23 +24,27 @@
 
 source('2_Functions/2_Analysis/Function_process_covariates.R')
 
-mpa.nam <- MPA %>% rename(MPAID = mpaid, MPAName = name)
+mpa.nam <- MPA.LKP %>% rename(MPAID = mpaid, MPAName = name)
 
 # rio::import("x_Flat_data_files/1_Social/Inputs/HH_tbl_MPA.xlsx")
 
 pacman::p_load(lfe, cowplot, stargazer, broom, qvalue, psych, factoextra, ineq, sf, tidyverse)
 
 
-resultPath <- "D:/Dropbox/MPA_research/"
-soc.coord<- import("x_Flat_data_files/1_Social/Inputs/soc.coord.xlsx")
+resultPath <- "x_Flat_data_files/1_Social/Outputs/Synergies_tradeoffs"
+
+# NOTE: change to same lat/long used in settlement to reef matching
+soc.coord <- import('x_Flat_data_files/1_Social/Inputs/soc.coord.province.csv')
+
+soc.coord <- soc.coord %>% mutate(lat = latitude, long = longitude) %>% filter(!is.na(lat)) %>% dplyr::select(-latitude, -longitude, -Treatment)
 
 # --- DiD dataframe 
 DiD.data <- match.covariate %>% 
   filter(!is.na(HouseholdID)) %>% 
-  left_join(select(HHData,DidNotLast:EconStatusReason, SocialConflict:NumGlobalAction, 
+  left_join(dplyr::select(HHData,DidNotLast:EconStatusReason, SocialConflict:NumGlobalAction, 
                    MAIndex:FSIndex, SERate, HouseholdID, InterviewYear), by="HouseholdID") %>% 
   left_join(mpa.nam, by="MPAID") %>% 
-  select(HouseholdID:InterviewYear, MPAName) %>% 
+  dplyr::select(HouseholdID:InterviewYear, MPAName) %>% 
   mutate(TreatFactor = as.factor(ifelse(Treatment==0, 0, MPAID)),
          Post = as.factor(ifelse(yearsPost==0,0 , 1)),
          Control = ifelse(Treatment==1, 0, 1), 
@@ -68,7 +72,7 @@ summary(DiD.data)
 
 # --- Filter to look at 6 BHS and 4 SBS MPAs (with t2 and/or t4 data) --- Jan 2020
 DiD.data <- DiD.data %>% 
-  filter(MPAID%in%c(1:6))
+  filter(MPAID%in%c(1:6, 15:18))
 
 # --- two additional outcome variables --- Feb 2020
 DiD.data <- DiD.data %>% 
@@ -80,7 +84,7 @@ DiD.data <- DiD.data %>%
 
 # Prepare ethnic polarization index 
 HH.eth <- HH.eth %>% 
-  left_join(select(DiD.data,HouseholdID, SettlementID, MPAID, yearsPost),by="HouseholdID")
+  left_join(dplyr::select(DiD.data,HouseholdID, SettlementID, MPAID, yearsPost),by="HouseholdID")
 
 eth.polarize <- HH.eth %>% 
   filter(yearsPost==0 & !is.na(HouseholdID)) %>% 
@@ -99,7 +103,7 @@ DiD.data <- DiD.data %>%
 # Customary Governance Index (%HHs excercise rights to exclude/transfer/manage)  
 customary.gov.data <- DiD.data %>% 
   filter(yearsPost==0) %>% 
-  select(SettlementID, RightsManage, RightsTransfer, RightsExclude) %>% 
+  dplyr::select(SettlementID, RightsManage, RightsTransfer, RightsExclude) %>% 
   mutate(customary.gov = ifelse(RightsManage%in%c(1) | RightsExclude%in%c(1) | RightsTransfer%in%c(1), 1,0)) %>% 
   group_by(SettlementID) %>% 
   summarise(num.HH.Settl=n(),
@@ -108,7 +112,7 @@ customary.gov.data <- DiD.data %>%
 
 
 DiD.data <- DiD.data %>% 
-  left_join(select(customary.gov.data,customary.gov.pct,SettlementID), by="SettlementID")
+  left_join(dplyr::select(customary.gov.data,customary.gov.pct,SettlementID), by="SettlementID")
 
 
 
@@ -126,9 +130,9 @@ DiD.data <- DiD.data %>%
 HH.age.raw <- IndDemos %>%
   filter(RelationHHH==0) %>%
   mutate(IndividualAge_raw = IndividualAge) %>% 
-  select(HouseholdID,IndividualAge_raw) %>%
-  left_join(select(DiD.data,HouseholdID,yearsPost),by="HouseholdID") %>%
-  select(HouseholdID,IndividualAge_raw) %>% 
+  dplyr::select(HouseholdID,IndividualAge_raw) %>%
+  left_join(dplyr::select(DiD.data,HouseholdID,yearsPost),by="HouseholdID") %>%
+  dplyr::select(HouseholdID,IndividualAge_raw) %>% 
   distinct(HouseholdID,.keep_all = T)
 
 DiD.data <- DiD.data %>% 
@@ -136,7 +140,7 @@ DiD.data <- DiD.data %>%
 
 ## --- retaining the raw yrsResidence (The current yrResidence is already categorized)
 YrResident.raw <- HHData %>%
-  select(HouseholdID, YrResident)
+  dplyr::select(HouseholdID, YrResident)
 
 DiD.data <- DiD.data %>% 
   left_join(YrResident.raw, by="HouseholdID") 
@@ -210,18 +214,18 @@ DiD.data <-  DiD.data %>%
 
 # --- summary(DiD.data)
 DiD.data.summary <- DiD.data %>% 
-  select(MPAID,MonitoringYear,InterviewYear, yearsPost, MPAName) %>% 
+  dplyr::select(MPAID,MonitoringYear,InterviewYear, yearsPost, MPAName) %>% 
   group_by(MPAID,MonitoringYear) %>%
   summarise(n=sum(!is.na(yearsPost)),
             yearsPost = mean(yearsPost),InterviewYear = first(InterviewYear), MPAName=first(MPAName))  
 DiD.data.summary
 
 # calculate Z scores (standardized values for each of the Big Five and the sub_asset groups)
-DiD.data <- DiD.data %>% 
-  group_by(MPAID,MonitoringYear) %>% 
-  mutate_at(vars(MAIndex:SERate, Household_asset:Vehicles_w2, MTIndex_AccHarv, MTIndex_ManExcTrans, SocialConflict, SocialConflict_increase), .funs = list(`z`= ~ (.-mean(.,na.rm=T))/sd(.,na.rm = T))) %>% 
-  ungroup()
-summary(DiD.data)
+# DiD.data <- DiD.data %>% 
+#   group_by(MPAID, MonitoringYear) %>% 
+#   mutate_at(vars(MAIndex:SERate, Household_asset:Vehicles_w2, MTIndex_AccHarv, MTIndex_ManExcTrans, SocialConflict, SocialConflict_increase), .funs = list(`z`= ~ (.-mean(.,na.rm=T))/sd(.,na.rm = T))) %>% 
+#   ungroup()
+# summary(DiD.data)
 # mean2 <- function(x){ mean(x,na.rm=T)}
 # sd2 <- function(x){ sd(x,na.rm=T)}
 
@@ -249,7 +253,7 @@ summary(DiD.data)
 ##---dataframe for matching settlements
 DiD.data.matchingCov <- DiD.data %>%
   filter(yearsPost==0) %>% 
-  select(MPAID, MonitoringYear, SettlementID, InterviewYear, Treatment, yearsPost, Post, Fisher, TimeMarket, eth.polarize, customary.gov.pct, MTIndex, YrResident, EconStatusTrend, lat, long) %>% 
+  dplyr::select(MPAID, MonitoringYear, SettlementID, InterviewYear, Treatment, yearsPost, Post, Fisher, TimeMarket, eth.polarize, customary.gov.pct, MTIndex, YrResident, EconStatusTrend, lat, long) %>% 
   group_by(SettlementID) %>%
   summarise(MPAID=first(MPAID),
             Treatment=first(Treatment),
@@ -262,11 +266,13 @@ DiD.data.matchingCov <- DiD.data %>%
             #EconStatusTrend = mean(EconStatusTrend, na.rm=T),
             #dom.eth = mean(dom.eth,na.rm=T),
             TimeMarket = mean(TimeMarket,na.rm=T)) %>% 
-  select(SettlementID,Treatment, TimeMarket, Fisher, eth.polarize, customary.gov.pct, lat, long, MPAID) %>% 
-  mutate(MPAID=as.integer(MPAID))
+  dplyr::select(SettlementID, Treatment, TimeMarket, Fisher, eth.polarize, customary.gov.pct, lat, long, MPAID) %>% 
+  mutate(MPAID=as.character(MPAID),
+         MPAID=as.integer(MPAID)) %>%
+  filter(!is.na(lat)) # !!! QUICK FIX UNTIL LAT/LONG COORDS FOR ALL SOCIAL SETTLEMENTS
 
 DiD.data.matchingCov.final <- DiD.data.matchingCov %>% 
-  select(TimeMarket, Fisher, eth.polarize, lat, long, MPAID) 
+  dplyr::select(TimeMarket, Fisher, eth.polarize, lat, long, MPAID)
 
 ## -- Mathcing settlements
 Tr<-as.vector(DiD.data.matchingCov$Treatment)  
@@ -306,7 +312,7 @@ i.control<-m_mahanobis$index.control
 
 ##-- mahalanobis distance weighting
 DiD.data.matchingCov.mahDis <- DiD.data.matchingCov %>% 
-  select(TimeMarket, Fisher, eth.polarize, lat, long) 
+  dplyr::select(TimeMarket, Fisher, eth.polarize, lat, long) 
 
 mal.dist <- mahalanobis(DiD.data.matchingCov.mahDis,cov(DiD.data.matchingCov.mahDis) ,center=F)
 head(mal.dist)
@@ -317,7 +323,7 @@ pair.treat.settl <-as.data.frame(cbind(DiD.data.matchingCov[i.treat,"SettlementI
          inv.dist=1/abs(pair.dist)) %>%
   group_by(SettlementID) %>% 
   mutate(dist.wt=inv.dist/sum(inv.dist)) %>% 
-  select(SettlementID,pair.id,t.mal.dist:dist.wt) %>% 
+  dplyr::select(SettlementID,pair.id,t.mal.dist:dist.wt) %>% 
   ungroup()
 head(pair.treat.settl)
 summary(pair.treat.settl)
@@ -334,20 +340,20 @@ names(pair.control.settl)[1:2] <- c("ctrl.id", "treat.id")
 head(pair.control.settl)  
 
 settl.check <- pair.control.settl %>% 
-  left_join(select(SETTLEMENT,SettlementName,SettlementID), by=c("ctrl.id"="SettlementID")  ) %>%
+  left_join(dplyr::select(Settlements,SettlementName,SettlementID), by=c("ctrl.id"="SettlementID")  ) %>%
   rename(ctrl.settlement=SettlementName) %>%
-  left_join(select(DiD.data.matchingCov,TimeMarket, Fisher, eth.polarize, lat, long,SettlementID), by=c("ctrl.id"="SettlementID") ) %>% 
+  left_join(dplyr::select(DiD.data.matchingCov,TimeMarket, Fisher, eth.polarize, lat, long,SettlementID), by=c("ctrl.id"="SettlementID") ) %>% 
   rename(ctrl.TimeMarket=TimeMarket, ctrl.Fisher=Fisher, ctrl.eth.polarize = eth.polarize) %>% 
   
-  left_join(select(SETTLEMENT,SettlementName,SettlementID), by=c("treat.id"="SettlementID") ) %>%
+  left_join(dplyr::select(Settlements,SettlementName,SettlementID), by=c("treat.id"="SettlementID") ) %>%
   rename(treat.settlement=SettlementName) %>% 
-  left_join(select(DiD.data.matchingCov,TimeMarket, Fisher, eth.polarize, lat, long,SettlementID), by=c("treat.id"="SettlementID") ) %>% 
+  left_join(dplyr::select(DiD.data.matchingCov,TimeMarket, Fisher, eth.polarize, lat, long,SettlementID), by=c("treat.id"="SettlementID") ) %>% 
   rename(treat.TimeMarket=TimeMarket, treat.Fisher=Fisher, treat.eth.polarize = eth.polarize) %>% 
   
   mutate(TimeMarket.dis = treat.TimeMarket-ctrl.TimeMarket, 
          Fisher.dis = treat.Fisher-ctrl.Fisher, 
          eth.polarize.dis = treat.eth.polarize-ctrl.eth.polarize) %>% 
-  select(treat.settlement, ctrl.settlement, pair.id,t.mal.dist,c.mal.dist, treat.TimeMarket,ctrl.TimeMarket,treat.Fisher,ctrl.Fisher, 
+  dplyr::select(treat.settlement, ctrl.settlement, pair.id,t.mal.dist,c.mal.dist, treat.TimeMarket,ctrl.TimeMarket,treat.Fisher,ctrl.Fisher, 
          treat.eth.polarize, ctrl.eth.polarize, pair.dist,TimeMarket.dis:eth.polarize.dis)
 head(settl.check)
 #export(settl.check,"D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/pair_name_1to3_w_wLatLon_comp.xlsx")
@@ -355,7 +361,7 @@ head(settl.check)
 DiD.data.SettlMatch <- data.frame()
 DiD.data.SettlMatch <- rbind(pair.treat.settl, 
                              pair.control.settl %>% 
-                               select(-treat.id) %>% 
+                               dplyr::select(-treat.id) %>% 
                                rename(SettlementID=ctrl.id)) %>% 
   arrange(pair.id,SettlementID) 
 head(DiD.data.SettlMatch)
@@ -676,7 +682,7 @@ ggsave(paste0(resultPath,"/Paper 0-MPA Impact BHS/Settlement_matching/plots/2-bi
 ##---BEGIN---##
 ##---BEGIN---##
 ##-------------------------------------------------------------------------------##
-##---4. DiD Model for heterogeneous impact across MPA (6 MPAs)
+##---4. DiD Model for heterogeneous impact across Settlements (6 MPAs)
 ##-------------------------------------------------------------------------------##
 
 ###generating short MPA names
@@ -818,243 +824,245 @@ ggsave(paste0(resultPath,"Settlement_matching/plots/3-big5-mpa-z-1to3-w.jpg"),wi
 ##---BEGIN---##
 ##---BEGIN---##
 ##---BEGIN---##
-##-------------------------------------------------------------------------------##
-##---5. DiD Model for heterogeneous impact across subgroups (5 subgroups)
-##-------------------------------------------------------------------------------##
-model.out.subgroup <- data.frame()
-varNames <- c("FSIndex_z","MAIndex_z","MTIndex_z","PAIndex_z","SERate_z")
-for (i in varNames) {
-  
-  ##----------------Gender------------------------------##
-  for (genderID in 0:1) {
-    DiD.data.gender <- DiD.data.SettlMatch %>%  filter(Male==genderID)
-    Y <- DiD.data.gender[,i]
-    w <- DiD.data.gender[,"dist.wt"]
-    
-    
-    regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
-                       n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                     | SettlementID + pair.id | 0 | SettlementID + pair.id,  data=DiD.data.gender,exactDOF = TRUE, weights=w)
-    
-    
-    reg.broom <- tidy(regValue) %>% 
-      filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-      mutate(term=gsub("Treatment:Post1","Impact",term),
-             term=gsub("Post1","Control_trend",term),
-             Response=i, subgroup="Gender", subgroup_id=genderID)
-    
-    ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
-    regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
-                                  n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                                | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.gender,exactDOF = TRUE, weights = w)
-    summary(regValue.treatTrend)
-    
-    reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
-      filter(term%in%c("Post1")) %>% 
-      mutate(term=gsub("Post1","Treatment_trend",term),
-             Response=i, subgroup="Gender", subgroup_id=genderID)
-    
-    model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
-  }
-  
-  ##----------------Ethnicity (dominant/non-dominant)------------------------------##
-  for (dom.ethID in 0:1) {
-    DiD.data.dom.eth <- DiD.data.SettlMatch %>% filter(dom.eth==dom.ethID)
-    Y <- DiD.data.dom.eth[,i]
-    w <- DiD.data.dom.eth[,"dist.wt"]
-    
-    regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-                       n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                     | SettlementID + pair.id | 0 | SettlementID + pair.id, data=DiD.data.dom.eth,exactDOF = TRUE, weights=w)
-    
-    reg.broom <- tidy(regValue) %>% 
-      filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-      mutate(term=gsub("Treatment:Post1","Impact",term),
-             term=gsub("Post1","Control_trend",term),
-             Response=i, subgroup="Ethnicity", subgroup_id=dom.ethID)
-    
-    ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
-    regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
-                                  n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                                | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.dom.eth,exactDOF = TRUE, weights = w)
-    summary(regValue.treatTrend)
-    
-    reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
-      filter(term%in%c("Post1")) %>% 
-      mutate(term=gsub("Post1","Treatment_trend",term),
-             Response=i, subgroup="Ethnicity", subgroup_id=dom.ethID)
-    
-    model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
-  } 
-  
-  ##----------------Economic Wealth (below/above median)------------------------------##
-  for (wealthID in 0:1) {
-    DiD.data.wealth <- DiD.data.SettlMatch %>% filter(wealth.above==wealthID)
-    Y <- DiD.data.wealth[,i]
-    w <- DiD.data.wealth[,"dist.wt"]
-    
-    regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-                       n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                     | SettlementID + pair.id | 0 | SettlementID + pair.id, data=DiD.data.wealth,exactDOF = TRUE, weights=w)
-    
-    reg.broom <- tidy(regValue) %>% 
-      filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-      mutate(term=gsub("Treatment:Post1","Impact",term),
-             term=gsub("Post1","Control_trend",term),
-             Response=i, subgroup="Economic Wealth", subgroup_id=wealthID)
-    
-    ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
-    regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
-                                  n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                                | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.wealth,exactDOF = TRUE, weights = w)
-    summary(regValue.treatTrend)
-    
-    reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
-      filter(term%in%c("Post1")) %>% 
-      mutate(term=gsub("Post1","Treatment_trend",term),
-             Response=i, subgroup="Economic Wealth", subgroup_id=wealthID)
-    
-    model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
-  }
-  
-  
-  
-  ##----------------Occupation (fisher/non-fisher)------------------------------##
-  
-  ##---DiD Regressions: by Occupation (non-fisher only)
-  DiD.data.fisher0 <- DiD.data.SettlMatch %>% filter(Fisher==0)
-  Y <- DiD.data.fisher0[,i]
-  w <- DiD.data.fisher0[,"dist.wt"]
-  
-  regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
-                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                   | SettlementID + pair.id | 0 | SettlementID + pair.id, data=DiD.data.fisher0,exactDOF = TRUE, weights=w)
-  
-  reg.broom <- tidy(regValue) %>% 
-    filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-    mutate(term=gsub("Treatment:Post1","Impact",term),
-           term=gsub("Post1","Control_trend",term),
-           Response=i, subgroup="Fishing Livelihood", subgroup_id=0)
-  
-  ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
-  regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
-                                n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                              | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.fisher0,exactDOF = TRUE, weights = w)
-  summary(regValue.treatTrend)
-  
-  reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
-    filter(term%in%c("Post1")) %>% 
-    mutate(term=gsub("Post1","Treatment_trend",term),
-           Response=i, subgroup="Fishing Livelihood", subgroup_id=0)
-  
-  model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
-  
-  
-  ##---DiD Regressions: by Occupation (fisher only)
-  DiD.data.fisher1 <- DiD.data.SettlMatch %>% filter(Fisher==1)
-  Y <- DiD.data.fisher1[,i]
-  w <- DiD.data.fisher1[,"dist.wt"]
-  
-  regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
-                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge 
-                   | SettlementID + pair.id | 0 | SettlementID + pair.id, data=DiD.data.fisher1,exactDOF = TRUE, weights=w)
-  
-  reg.broom <- tidy(regValue) %>% 
-    filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-    mutate(term=gsub("Treatment:Post1","Impact",term),
-           term=gsub("Post1","Control_trend",term),
-           Response=i, subgroup="Fishing Livelihood", subgroup_id=1)
-  
-  ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
-  regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
-                                n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge 
-                              | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.fisher1,exactDOF = TRUE, weights = w)
-  summary(regValue.treatTrend)
-  
-  reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
-    filter(term%in%c("Post1")) %>% 
-    mutate(term=gsub("Post1","Treatment_trend",term),
-           Response=i, subgroup="Fishing Livelihood", subgroup_id=1)
-  
-  model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
-}
-
-##keeping only 2 relevant terms "Treatment:Post1" and "Post1" 
-model.out.subgroup1 <- model.out.subgroup %>%
-  mutate(domain=ifelse(Response=="FSIndex_z"," Health (Food Security)",
-                       ifelse(Response=="MAIndex_z","Economic Wellbeing (Material Assets)",
-                              ifelse(Response=="MTIndex_z"," Empowerment (Marine Tenure)",
-                                     ifelse(Response=="PAIndex_z"," Culture (Place Attachment)", "  Education (School Enrollment)")))),
-         domain=gsub(" \\(", "\n \\(", domain)) 
-
-##Export 
-export(model.out.subgroup1,  "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/BHS_impact_output_subGroup_1to3_w_new.csv")
 
 
-
-
-##----------------------------------------------------------------##
-##PLOT: "regular" index
-pd <- position_dodge(width=.5) # move them .05 to the left and right
-
-
-FS.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="FSIndex_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
-  geom_line( position = pd) +
-  theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="Food Security")  +
-  scale_colour_manual(values = c("red", "blue"))
-
-MT.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="MTIndex_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
-  geom_line( position = pd) +
-  theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="Marine Tenure")  +
-  scale_colour_manual(values = c("red", "blue"))
-
-PA.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="PAIndex_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
-  geom_line( position = pd) +
-  theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="Place Attachment")  +
-  scale_colour_manual(values = c("red", "blue"))
-
-
-MA.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="MAIndex_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
-  geom_line( position = pd) +
-  theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="Material Assets")  +
-  scale_colour_manual(values = c("red", "blue"))
-
-SE.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="SERate_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
-  geom_line( position = pd) +
-  theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="School Enrollment")  +
-  scale_colour_manual(values = c("red", "blue"))
-
-##combine PLOTS
-plot_grid(MA.plot_z,FS.plot_z,MT.plot_z,PA.plot_z,SE.plot_z,ncol=3)
-ggsave(paste0(resultPath,"Settlement_matching/plots/4-big5-subgroup-z-1to3-w.jpg"),width = 12, height = 6)
-
-##---END---##
-##---END---##
-##---END---##
-
-
+# ##-------------------------------------------------------------------------------##
+# ##---5. DiD Model for heterogeneous impact across subgroups (5 subgroups)
+# ##-------------------------------------------------------------------------------##
+# model.out.subgroup <- data.frame()
+# varNames <- c("FSIndex_z","MAIndex_z","MTIndex_z","PAIndex_z","SERate_z")
+# for (i in varNames) {
+#   
+#   ##----------------Gender------------------------------##
+#   for (genderID in 0:1) {
+#     DiD.data.gender <- DiD.data.SettlMatch %>%  filter(Male==genderID)
+#     Y <- DiD.data.gender[,i]
+#     w <- DiD.data.gender[,"dist.wt"]
+#     
+#     
+#     regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
+#                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+#                      | SettlementID + pair.id | 0 | SettlementID + pair.id,  data=DiD.data.gender,exactDOF = TRUE, weights=w)
+#     
+#     
+#     reg.broom <- tidy(regValue) %>% 
+#       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
+#       mutate(term=gsub("Treatment:Post1","Impact",term),
+#              term=gsub("Post1","Control_trend",term),
+#              Response=i, subgroup="Gender", subgroup_id=genderID)
+#     
+#     ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
+#     regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
+#                                   n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+#                                 | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.gender,exactDOF = TRUE, weights = w)
+#     summary(regValue.treatTrend)
+#     
+#     reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
+#       filter(term%in%c("Post1")) %>% 
+#       mutate(term=gsub("Post1","Treatment_trend",term),
+#              Response=i, subgroup="Gender", subgroup_id=genderID)
+#     
+#     model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
+#   }
+#   
+#   ##----------------Ethnicity (dominant/non-dominant)------------------------------##
+#   for (dom.ethID in 0:1) {
+#     DiD.data.dom.eth <- DiD.data.SettlMatch %>% filter(dom.eth==dom.ethID)
+#     Y <- DiD.data.dom.eth[,i]
+#     w <- DiD.data.dom.eth[,"dist.wt"]
+#     
+#     regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
+#                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+#                      | SettlementID + pair.id | 0 | SettlementID + pair.id, data=DiD.data.dom.eth,exactDOF = TRUE, weights=w)
+#     
+#     reg.broom <- tidy(regValue) %>% 
+#       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
+#       mutate(term=gsub("Treatment:Post1","Impact",term),
+#              term=gsub("Post1","Control_trend",term),
+#              Response=i, subgroup="Ethnicity", subgroup_id=dom.ethID)
+#     
+#     ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
+#     regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
+#                                   n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+#                                 | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.dom.eth,exactDOF = TRUE, weights = w)
+#     summary(regValue.treatTrend)
+#     
+#     reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
+#       filter(term%in%c("Post1")) %>% 
+#       mutate(term=gsub("Post1","Treatment_trend",term),
+#              Response=i, subgroup="Ethnicity", subgroup_id=dom.ethID)
+#     
+#     model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
+#   } 
+#   
+#   ##----------------Economic Wealth (below/above median)------------------------------##
+#   for (wealthID in 0:1) {
+#     DiD.data.wealth <- DiD.data.SettlMatch %>% filter(wealth.above==wealthID)
+#     Y <- DiD.data.wealth[,i]
+#     w <- DiD.data.wealth[,"dist.wt"]
+#     
+#     regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
+#                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+#                      | SettlementID + pair.id | 0 | SettlementID + pair.id, data=DiD.data.wealth,exactDOF = TRUE, weights=w)
+#     
+#     reg.broom <- tidy(regValue) %>% 
+#       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
+#       mutate(term=gsub("Treatment:Post1","Impact",term),
+#              term=gsub("Post1","Control_trend",term),
+#              Response=i, subgroup="Economic Wealth", subgroup_id=wealthID)
+#     
+#     ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
+#     regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
+#                                   n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+#                                 | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.wealth,exactDOF = TRUE, weights = w)
+#     summary(regValue.treatTrend)
+#     
+#     reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
+#       filter(term%in%c("Post1")) %>% 
+#       mutate(term=gsub("Post1","Treatment_trend",term),
+#              Response=i, subgroup="Economic Wealth", subgroup_id=wealthID)
+#     
+#     model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
+#   }
+#   
+#   
+#   
+#   ##----------------Occupation (fisher/non-fisher)------------------------------##
+#   
+#   ##---DiD Regressions: by Occupation (non-fisher only)
+#   DiD.data.fisher0 <- DiD.data.SettlMatch %>% filter(Fisher==0)
+#   Y <- DiD.data.fisher0[,i]
+#   w <- DiD.data.fisher0[,"dist.wt"]
+#   
+#   regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
+#                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+#                    | SettlementID + pair.id | 0 | SettlementID + pair.id, data=DiD.data.fisher0,exactDOF = TRUE, weights=w)
+#   
+#   reg.broom <- tidy(regValue) %>% 
+#     filter(term%in%c("Treatment:Post1", "Post1")) %>% 
+#     mutate(term=gsub("Treatment:Post1","Impact",term),
+#            term=gsub("Post1","Control_trend",term),
+#            Response=i, subgroup="Fishing Livelihood", subgroup_id=0)
+#   
+#   ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
+#   regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
+#                                 n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+#                               | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.fisher0,exactDOF = TRUE, weights = w)
+#   summary(regValue.treatTrend)
+#   
+#   reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
+#     filter(term%in%c("Post1")) %>% 
+#     mutate(term=gsub("Post1","Treatment_trend",term),
+#            Response=i, subgroup="Fishing Livelihood", subgroup_id=0)
+#   
+#   model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
+#   
+#   
+#   ##---DiD Regressions: by Occupation (fisher only)
+#   DiD.data.fisher1 <- DiD.data.SettlMatch %>% filter(Fisher==1)
+#   Y <- DiD.data.fisher1[,i]
+#   w <- DiD.data.fisher1[,"dist.wt"]
+#   
+#   regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
+#                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge 
+#                    | SettlementID + pair.id | 0 | SettlementID + pair.id, data=DiD.data.fisher1,exactDOF = TRUE, weights=w)
+#   
+#   reg.broom <- tidy(regValue) %>% 
+#     filter(term%in%c("Treatment:Post1", "Post1")) %>% 
+#     mutate(term=gsub("Treatment:Post1","Impact",term),
+#            term=gsub("Post1","Control_trend",term),
+#            Response=i, subgroup="Fishing Livelihood", subgroup_id=1)
+#   
+#   ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
+#   regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
+#                                 n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge 
+#                               | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.fisher1,exactDOF = TRUE, weights = w)
+#   summary(regValue.treatTrend)
+#   
+#   reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
+#     filter(term%in%c("Post1")) %>% 
+#     mutate(term=gsub("Post1","Treatment_trend",term),
+#            Response=i, subgroup="Fishing Livelihood", subgroup_id=1)
+#   
+#   model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
+# }
+# 
+# ##keeping only 2 relevant terms "Treatment:Post1" and "Post1" 
+# model.out.subgroup1 <- model.out.subgroup %>%
+#   mutate(domain=ifelse(Response=="FSIndex_z"," Health (Food Security)",
+#                        ifelse(Response=="MAIndex_z","Economic Wellbeing (Material Assets)",
+#                               ifelse(Response=="MTIndex_z"," Empowerment (Marine Tenure)",
+#                                      ifelse(Response=="PAIndex_z"," Culture (Place Attachment)", "  Education (School Enrollment)")))),
+#          domain=gsub(" \\(", "\n \\(", domain)) 
+# 
+# ##Export 
+# export(model.out.subgroup1,  "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/BHS_impact_output_subGroup_1to3_w_new.csv")
+# 
+# 
+# 
+# 
+# ##----------------------------------------------------------------##
+# ##PLOT: "regular" index
+# pd <- position_dodge(width=.5) # move them .05 to the left and right
+# 
+# 
+# FS.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="FSIndex_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
+#   geom_line( position = pd) +
+#   theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   labs(x="",y="", title="Food Security")  +
+#   scale_colour_manual(values = c("red", "blue"))
+# 
+# MT.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="MTIndex_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
+#   geom_line( position = pd) +
+#   theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   labs(x="",y="", title="Marine Tenure")  +
+#   scale_colour_manual(values = c("red", "blue"))
+# 
+# PA.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="PAIndex_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
+#   geom_line( position = pd) +
+#   theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   labs(x="",y="", title="Place Attachment")  +
+#   scale_colour_manual(values = c("red", "blue"))
+# 
+# 
+# MA.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="MAIndex_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
+#   geom_line( position = pd) +
+#   theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   labs(x="",y="", title="Material Assets")  +
+#   scale_colour_manual(values = c("red", "blue"))
+# 
+# SE.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="SERate_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
+#   geom_line( position = pd) +
+#   theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
+#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
+#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   labs(x="",y="", title="School Enrollment")  +
+#   scale_colour_manual(values = c("red", "blue"))
+# 
+# ##combine PLOTS
+# plot_grid(MA.plot_z,FS.plot_z,MT.plot_z,PA.plot_z,SE.plot_z,ncol=3)
+# ggsave(paste0(resultPath,"Settlement_matching/plots/4-big5-subgroup-z-1to3-w.jpg"),width = 12, height = 6)
+# 
+# ##---END---##
+# ##---END---##
+# ##---END---##
+# 
+# 

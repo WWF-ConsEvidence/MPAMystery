@@ -1,0 +1,29 @@
+---
+title: "data_checking_GlobalStep"
+author: "Jennie Sun"
+date: "6/2/2021"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(reshape)
+library(xlsx)
+pacman::p_load(rio, plyr, foreach, dplyr, openxlsx, chron)
+```
+
+```{r}
+#load wwf global step data
+global_step_wwf <- 
+  import('./BHS_UNIPA_WWF_2016-19_Data_for_Comparison/WWF_data/globalstep-20210113.csv')  %>%
+  filter(!is.na(globalstepsid))
+colnames(global_step_wwf) <- tolower(colnames(global_step_wwf))
+#create skip codes list
+skipcodes <- c(990:999)
+```
+
+Data frame summarizing number of NAs in each column: 
+```{r}
+count_NA_global_step <- sapply(global_step_wwf, function(x) sum(is.na(x)))
+count_NA_global_step <- as.data.frame(count_NA_global_step)
+```

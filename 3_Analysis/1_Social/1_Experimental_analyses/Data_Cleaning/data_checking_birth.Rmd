@@ -1,0 +1,40 @@
+---
+title: "data_checking_birth"
+author: "Jennie Sun"
+date: "5/25/2021"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(reshape)
+library(xlsx)
+pacman::p_load(rio, plyr, foreach, dplyr, openxlsx, chron)
+```
+
+```{r}
+#load wwf birth data
+birth_wwf <- 
+  import('./BHS_UNIPA_WWF_2016-19_Data_for_Comparison/WWF_data/birth-20210113.csv')  %>%
+  filter(!is.na(birthid))
+colnames(birth_wwf) <- tolower(colnames(birth_wwf))
+#create skip codes list
+skipcodes <- c(990:999)
+```
+
+Data frame summarizing number of NAs in each column: 
+```{r}
+count_NA_birth <- sapply(birth_wwf, function(x) sum(is.na(x)))
+count_NA_birth <- as.data.frame(count_NA_birth)
+```
+
+* YES_NO_CHOICES (`infantsurvived`)
+```{r}
+yes_no_codes <- c(0:1)
+yes_no_var_index_birth <- 
+  filter(birth_wwf, !infantsurvived%in%c(yes_no_codes, skipcodes)) %>%
+           select(birthid, infantsurvived) %>%
+  filter(!is.na(infantsurvived))
+
+print(paste0("Values out of range for variables with Yes/No choices for Birth ID", yes_no_var_index_birth$birthid))
+print(yes_no_var_index_birth)
+```
