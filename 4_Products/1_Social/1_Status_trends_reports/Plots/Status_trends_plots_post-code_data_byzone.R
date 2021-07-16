@@ -7,6 +7,7 @@
 pacman::p_load(rio,ggplot2,reshape2,dplyr)
 
 source('1_Data_wrangling/1_Social/2_Source_data/Source_social_data_flat_files.R')
+source('1_Data_wrangling/1_Social/3_Calculating_indicators/Calculate_household_indices.R', local=T)
 source('3_Analysis/1_Social/2_Status_trends/Sett_MPA_level_means_byzone.R')
 source('2_Functions/3_Plotting/Function_plotthemes.R')
 source('2_Functions/3_Plotting/Function_define_asteriskplotting.R')
@@ -21,12 +22,21 @@ MPA.name <-
 
 # ----- import post-coded threat type data from MPA of choice & analyze at settlement and MPA level ----
 
+ThreatType_Import <-  
+  # import('C:/Users/Matheus DeNardo/Dropbox (MPAMystery)/CU37_Kadek_MPA_Social_Reports_Consultancy/THREAT/Kei Kecil/KeiKecil_LTHREAT-postcod.xlsx') 
+  # import('C:/Users/Matheus DeNardo/Dropbox (MPAMystery)/CU37_Kadek_MPA_Social_Reports_Consultancy/THREAT/Koon/Koon_LTHREAT-PostCod.xlsx')
+  # import('C:/Users/Matheus DeNardo/Dropbox (MPAMystery)/CU37_Kadek_MPA_Social_Reports_Consultancy/THREAT/Selat Pantar/SelatPantar_LTHREAT 2014&2017.xlsx')
+  # import('C:/Users/Matheus DeNardo/Dropbox (MPAMystery)/CU37_Kadek_MPA_Social_Reports_Consultancy/THREAT/Sultra/SulawesiTenggara_LTHREAT-post coding.xlsx')
+  import('C:/Users/Matheus DeNardo/Dropbox (MPAMystery)/CU37_Kadek_MPA_Social_Reports_Consultancy/THREAT/Wakatobi/WakatobiNP_LTHREAT_Postcode.xlsx')
+
+
+
 ThreatType <-
-  import('x_Flat_data_files/1_Social/Outputs/Status_trends_analysis/WakatobiNP_20200317/WakatobiNP_LTHREAT-Postcode.xlsx') %>%
-  left_join(SETTLEMENT[SETTLEMENT$MPAID==20,c("SettlementID","SettlementName")],.,by="SettlementID") %>%
-  mutate(Zone=ifelse(Zone=="Take","Use",Zone),
-         Zone=factor(Zone,levels=c("Use","No Take"),ordered=T),
-         MPAID=20) %>%
+  ThreatType_Import %>%
+  left_join(Settlements[Settlements$MPAID==21,c("SettlementID","SettlementName", "Zone")],.,by="SettlementID") %>%
+  mutate(zone=ifelse(Zone=="Take","Use",Zone),
+         zone=factor(Zone,levels=c("Use","No Take"),ordered=T),
+         MPAID=21) %>%
   filter(!is.na(SettlementName))
 
 Sett.level.ThreatType <- 
@@ -48,7 +58,7 @@ Sett.level.ThreatType <-
 MPA.level.ThreatType <- 
   ThreatType %>%
   mutate(SettlementID=NA,
-         SettlementName=ifelse(Zone=="Use","Use Settlements","No Take Settlements")) %>%
+         SettlementName=ifelse(Zone=="Take","Use Settlements","No Take Settlements")) %>%
   group_by(MPAID,SettlementID,SettlementName,Zone) %>%
   summarise(UnsustainableFish=(length(HouseholdID[MainThreat=="UnsustainableFishing" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
             Pollution=(length(HouseholdID[MainThreat=="Pollution" & !is.na(MainThreat)])/length(HouseholdID[!is.na(MainThreat)]))*100,
@@ -73,6 +83,8 @@ Sett.level.ThreatType <-
                                 null.row.ThreatType[-1]),
                      Sett.level.ThreatType%>%filter(Zone=="No Take"))
   }
+
+# Sett.level.ThreatType <- Sett.level.ThreatType %>% slice(-1)
 
 
 ThreatType.status <-
@@ -108,7 +120,7 @@ FreqTables.ThreatType <-
 FreqTables.ThreatType <- 
   as.data.frame(t(FreqTables.ThreatType[,-1]))
 
-colnames(FreqTables.ThreatType) <- c("t0","repeat1")
+colnames(FreqTables.ThreatType) <- c("t0")
 
 FreqTables.ThreatType$Category <- rownames(FreqTables.ThreatType)
 FreqTables.ThreatType$Variable <- "ThreatType"
@@ -289,7 +301,7 @@ ThreatType.statusplot <-
   coord_cartesian(ylim=1,
                   clip='off') +
   scale_fill_manual(name="",
-                    values=multianswer.fillcols.status[["ThreatType.SBS"]],
+                    values=multianswer.fillcols.status[["ThreatType2"]],
                     labels=c("No Threat", "Aquaculture", "Inadequate Protection", "Tourism", 
                              "Natural Phenomenon", "Pollution", "Unsustainable Fishing")) +
   coord_flip() + Statusplot.labs["ThreatTypes"] + plot.guides.techreport +
@@ -298,29 +310,29 @@ ThreatType.statusplot <-
   }
 
 
-ThreatType.trendplot <-
-  PostCode.trend.PLOTFORMAT %>%
-  melt(.,id.vars="order",
-       measure.vars=c("NoThreat", "Aquaculture", "InadequateProc","Tourism","NaturalPhenomenon", "Pollution","UnsustainableFish")) %>%
-  ggplot(aes(x=factor(order),y=value,fill=variable)) +
-  geom_bar(stat="identity",
-           position="fill",
-           width=0.8,
-           size=0.15,
-           colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
-            size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
-            size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
-  scale_y_continuous(expand=c(0,0),
-                     labels=scales::percent_format()) +
-  scale_x_discrete(labels=PostCode.trend.PLOTFORMAT$Label[order(PostCode.trend.PLOTFORMAT$order)]) +
-  scale_fill_manual(name="",
-                    values=multianswer.fillcols.status[["ThreatType.SBS"]],
-                    labels=c("No Threat", "Aquaculture", "Inadequate Protection", "Tourism", 
-                             "Natural Phenomenon", "Pollution", "Unsustainable Fishing")) +
-  coord_flip() + plot.theme + Trendplot.labs + plot.guides.techreport 
+# ThreatType.trendplot <-
+#   PostCode.trend.PLOTFORMAT %>%
+#   melt(.,id.vars="order",
+#        measure.vars=c("NoThreat", "Aquaculture", "InadequateProc","Tourism","NaturalPhenomenon", "Pollution","UnsustainableFish")) %>%
+#   ggplot(aes(x=factor(order),y=value,fill=variable)) +
+#   geom_bar(stat="identity",
+#            position="fill",
+#            width=0.8,
+#            size=0.15,
+#            colour="#505050") +
+#   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
+#   geom_text(aes(x=3.25,y=.91,label="Treatment",fontface=2),
+#             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
+#   geom_text(aes(x=2.95,y=.91,label="Control",fontface=2),
+#             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
+#   scale_y_continuous(expand=c(0,0),
+#                      labels=scales::percent_format()) +
+#   scale_x_discrete(labels=PostCode.trend.PLOTFORMAT$Label[order(PostCode.trend.PLOTFORMAT$order)]) +
+#   scale_fill_manual(name="",
+#                     values=multianswer.fillcols.status[["ThreatType.SBS"]],
+#                     labels=c("No Threat", "Aquaculture", "Inadequate Protection", "Tourism", 
+#                              "Natural Phenomenon", "Pollution", "Unsustainable Fishing")) +
+#   coord_flip() + plot.theme + Trendplot.labs + plot.guides.techreport 
 
 # - bahasa
 ThreatType.statusplot.bahasa <- 
@@ -353,7 +365,7 @@ ThreatType.statusplot.bahasa <-
   coord_cartesian(ylim=1,
                   clip='off') +
   scale_fill_manual(name="",
-                    values=multianswer.fillcols.status[["ThreatType.SBS"]],
+                    values=multianswer.fillcols.status[["ThreatType2"]],
                     labels=c("Tidak ada ancaman", "Budidaya perairan", "Perlindungan yang tidak memadai", "Pariwisata", 
                              "Fenomena alam", "Polusi", "Penangkapan ikan yang\ntidak berkelanjutan")) +
   coord_flip() + Statusplot.labs.bahasa["ThreatTypes"] + plot.guides.techreport +
@@ -362,29 +374,29 @@ ThreatType.statusplot.bahasa <-
   }
 
 
-ThreatType.trendplot.bahasa <-
-  PostCode.trend.PLOTFORMAT %>%
-  melt(.,id.vars="order",
-       measure.vars=c("NoThreat", "Aquaculture", "InadequateProc","Tourism","NaturalPhenomenon", "Pollution","UnsustainableFish")) %>%
-  ggplot(aes(x=factor(order),y=value,fill=variable)) +
-  geom_bar(stat="identity",
-           position="fill",
-           width=0.8,
-           size=0.15,
-           colour="#505050") +
-  geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
-  geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
-            size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
-  geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
-            size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
-  scale_y_continuous(expand=c(0,0),
-                     labels=scales::percent_format()) +
-  scale_x_discrete(labels=PostCode.trend.PLOTFORMAT$Label.bahasa[order(PostCode.trend.PLOTFORMAT$order)]) +
-  scale_fill_manual(name="",
-                    values=multianswer.fillcols.status[["ThreatType.SBS"]],
-                    labels=c("Tidak ada ancaman", "Budidaya perairan", "Perlindungan yang tidak memadai", "Pariwisata", 
-                             "Fenomena alam", "Polusi", "Penangkapan ikan yang\ntidak berkelanjutan")) +
-  coord_flip() + plot.theme + Trendplot.labs.bahasa + plot.guides.techreport 
+# ThreatType.trendplot.bahasa <-
+#   PostCode.trend.PLOTFORMAT %>%
+#   melt(.,id.vars="order",
+#        measure.vars=c("NoThreat", "Aquaculture", "InadequateProc","Tourism","NaturalPhenomenon", "Pollution","UnsustainableFish")) %>%
+#   ggplot(aes(x=factor(order),y=value,fill=variable)) +
+#   geom_bar(stat="identity",
+#            position="fill",
+#            width=0.8,
+#            size=0.15,
+#            colour="#505050") +
+#   geom_vline(aes(xintercept=3),size=0.25,colour="#505050") +
+#   geom_text(aes(x=3.25,y=.91,label="Perlakuan",fontface=2),
+#             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
+#   geom_text(aes(x=2.95,y=.91,label="Kontrol",fontface=2),
+#             size=rel(3.5),vjust=1,lineheight=0.8,colour="#505050") +
+#   scale_y_continuous(expand=c(0,0),
+#                      labels=scales::percent_format()) +
+#   scale_x_discrete(labels=PostCode.trend.PLOTFORMAT$Label.bahasa[order(PostCode.trend.PLOTFORMAT$order)]) +
+#   scale_fill_manual(name="",
+#                     values=multianswer.fillcols.status[["ThreatType.SBS"]],
+#                     labels=c("Tidak ada ancaman", "Budidaya perairan", "Perlindungan yang tidak memadai", "Pariwisata", 
+#                              "Fenomena alam", "Polusi", "Penangkapan ikan yang\ntidak berkelanjutan")) +
+#   coord_flip() + plot.theme + Trendplot.labs.bahasa + plot.guides.techreport 
 
 # 
 # # - NUMBER ETHNICITIES
