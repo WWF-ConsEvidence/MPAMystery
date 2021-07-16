@@ -32,12 +32,14 @@ source.from.SQL <- function(endpoint=NULL) {
   
   # define API endpoint URL
   base <- "https://mpasocial.org/api/" # this is the api base url
+  endpoint <- "household" # this is the name of the api endpoint where you specify the database subtable you want to access
   
-  # define JSON report format
-  format = "/json/"
 
   # create API endpoint url as object
-  url <- paste(base, endpoint, format, sep = "", collapse = "")
+  url <- paste(base, endpoint, sep = "", collapse = "")
+  
+  
+  
   
   
   # optional querying of household data only
@@ -57,20 +59,19 @@ source.from.SQL <- function(endpoint=NULL) {
   # ---- CONNECT TO API ENDPOINT USING LOGIN CREDENTIALS ----
   
   api.connect <- GET(url, 
-                     authenticate(user = rstudioapi::askForPassword("Please enter your USERNAME:"),
-                                  password = rstudioapi::askForPassword("Please enter your PASSWORD:"), 
+                     authenticate(user = getOption("mpasocial_userid"),
+                                  password = getOption("mpasocial_password"), 
                                   type = "basic"), verbose())
   
   
   # ---- CONVERT API OUTPUT TO R WORKABLE OBJECT ----
   
   # deserialize data: convert into readable JSON text format
-  api.data.deserialize <- content(api.connect, "text")
+  api.data.deserialize <- content(api.connect, as = "parsed", type = "text/csv")
   
   # Read and save data as R workable object
-  api.data <- fromJSON(api.data.deserialize, flatten = TRUE) # conversion to r workable object (list or df)
+  api.data.final <- data.frame(api.data.deserialize) # conversion to r workable object (list or df)
   
-  api.data.final <- api.data[["results"]]
   
   api.data.final
   
