@@ -1,48 +1,73 @@
-##----------------------------------------------------------------------------------------------------------------------------------##
-##---MPA Social Impacts - BHS---##
-##---Jan 2020---##
-##---Duong Le---##
-##---Research: MPA Social Impacts in BHS; Big Five impact indicators; aggregate and heterogeneous by time, MPA, and subgroup--------##
+# 
+# code: calculate settlement level social impacts across BHS and SBS
+# 
+# author: Duong Le; Kelly Claborn (clabornkelly@gmail.com)
+# created: September 2020 (based on Duong Le's original DiD regression scripts)
+# modified: February 2021
+# 
+#  
+# ---- code sections ----
+#  1) LOAD LIBRARIES, SOURCE SCRIPTS, & IMPORT DATA
+#  2) CREATE MASTER DiD DATA FRAME
+#  3) SETTLEMENT BASELINE MATCHING
+#  4) CONSTRUCT DATA FRAME FOR IMPACT ANALYSIS
+#  5) PRE-PROCESS IMPACT DATA FRAMES
+#  6) DiD MODEL FOR HETEROGENEOUS IMPACT ACROSS SETTLEMENTS
+#  7) PLOT SETTLEMENT LEVEL IMPACTS
+# 
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 1: LOAD LIBRARIES, SOURCE SCRIPTS, & IMPORT DATA ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
 
-
-##--------------------------------------Analysis Steps------------------------------------------------------------------------------##
-##---0. Sourcing and creating data frame [line 20]
-##---1. [DiD + settlement baseline matching]---Perform matching & Construct new dataframe & produce before/after matching stats/plots [line 240]
-##***Important: the 1to3_w dataframe is "DiD.data.SettleMatch"; the coarse matching dataframe is "DiD.data.coarseMatch"
-
-##---2. DiD Model for aggregate impacts (Seasape-level) [line 490] ---> DiD.data.SettleMatch result
-##---3. DiD Model for heterogeneous impact over time (t2 vs t4) [line 650] ---> DiD.data.SettleMatch result
-##---4. DiD Model for heterogeneous impact across MPA (6 MPAs) [line 790] ---> DiD.data.SettleMatch result
-##---5. DiD Model for heterogeneous impact across subgroups (4 subgroups) [line 990] ---> DiD.data.SettleMatch result
-##----------------------------------------------------------------------------------------------------------------------------------##
-
-
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##---0. Sourcing and creating data frame 
-
-source('2_Functions/2_Analysis/Function_process_covariates.R')
-
-mpa.nam <- MPA.LKP %>% rename(MPAID = mpaid, MPAName = name)
-
-# rio::import("x_Flat_data_files/1_Social/Inputs/HH_tbl_MPA.xlsx")
+# ---- 1.1 Call libraries ----
 
 pacman::p_load(lfe, cowplot, stargazer, broom, qvalue, psych, factoextra, ineq, sf, tidyverse)
 
 
+# ---- 1.2 Sourcing scripts & flat data ----
+
+# This script also pulls in 'Source_social_data_flat_files.R' and 'Calculate_household_indices.R'
+# -- it creates HHData (with the BigFive indices calculated), MPA lookup tables, and ultimately a match.covariate data frame used to create the DiD.data frame
+# -- FLAT FILES NEEDED FOR FUNCTION_PROCESS_COVARIATES.R:
+      #  All files needed for sourcing script (master database exports)
+      # "x_Flat_data_files/1_Social/Inputs/master_ethnic_lookup_2017_117.xlsx"
+      # "x_Flat_data_files/1_Social/Inputs/education_lkp.xlsx"
+
+source('2_Functions/2_Analysis/Function_process_covariates.R')
+
+# Rename the MPA.LKP table to match the rest of the script as was originally written by Duong
+mpa.nam <- MPA.LKP %>% rename(MPAID = mpaid, MPAName = name)
+
+# FLAT FILE: Pull in settlement-level coordinates
+soc.coord <- import('x_Flat_data_files/1_Social/Inputs/soc.coord.province.csv') %>% 
+  mutate(lat = latitude, long = longitude) %>% filter(!is.na(lat)) %>% dplyr::select(-latitude, -longitude, -Treatment)
+
+
+# ---- 1.3 Create relative result path for outputs (within the broader GitHub repo file structure)
+
+dir.create("x_Flat_data_files/1_Social/Outputs/Synergies_tradeoffs")
 resultPath <- "x_Flat_data_files/1_Social/Outputs/Synergies_tradeoffs"
 
-# NOTE: change to same lat/long used in settlement to reef matching
-soc.coord <- import('x_Flat_data_files/1_Social/Inputs/soc.coord.province.csv')
 
-soc.coord <- soc.coord %>% mutate(lat = latitude, long = longitude) %>% filter(!is.na(lat)) %>% dplyr::select(-latitude, -longitude, -Treatment)
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 2: CREATE MASTER DiD DATA FRAME ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
 
-# --- DiD dataframe 
+
+# ---- 2.1 Initialize DiD data frame ----
+
 DiD.data <- match.covariate %>% 
   filter(!is.na(HouseholdID)) %>% 
   left_join(dplyr::select(HHData,DidNotLast:EconStatusReason, SocialConflict:NumGlobalAction, 
-                   MAIndex:FSIndex, SERate, HouseholdID, InterviewYear), by="HouseholdID") %>% 
+                          MAIndex:FSIndex, SERate, HouseholdID, InterviewYear), by="HouseholdID") %>% 
   left_join(mpa.nam, by="MPAID") %>% 
   dplyr::select(HouseholdID:InterviewYear, MPAName) %>% 
   mutate(TreatFactor = as.factor(ifelse(Treatment==0, 0, MPAID)),
@@ -56,13 +81,15 @@ DiD.data <- match.covariate %>%
          Male = IndividualGender, 
          PrimaryLivelihood.bin = as.factor(ifelse(PrimaryLivelihood==1,1,
                                                   ifelse(PrimaryLivelihood==2,2,
-                                                         ifelse(PrimaryLivelihood==3|PrimaryLivelihood==4,3,
-                                                                ifelse(PrimaryLivelihood==6|PrimaryLivelihood==7,4,5)))))) %>% 
+                                                         ifelse(PrimaryLivelihood==3 | PrimaryLivelihood==4,3,
+                                                                ifelse(PrimaryLivelihood==6 | PrimaryLivelihood==7,4,5))))),
+         MTIndex_AccHarv = RightsAccess + RightsHarvest, 
+         MTIndex_ManExcTrans= RightsManage + RightsExclude + RightsTransfer, 
+         SocialConflict_increase = ifelse(is.na(SocialConflict), NA, 
+                                          ifelse(SocialConflict%in%c(1,2), 1, 0))) %>% 
   filter(!is.na(IndividualGender)) %>% 
-  left_join(soc.coord, by="SettlementID")
+  left_join(soc.coord, by = "SettlementID")
 
-
-summary(DiD.data)
 # PrimaryLivelihood.bin:
 # 1.Farming
 # 2.Harvesting forest products
@@ -70,21 +97,17 @@ summary(DiD.data)
 # 4.Marine tourism + wage labor
 # 5.Extractives + other
 
-# --- Filter to look at 6 BHS and 4 SBS MPAs (with t2 and/or t4 data) --- Jan 2020
+
+# Filter DiD data to look at 6 BHS and 4 SBS MPAs (with t2, t3, and/or t4 data)
+
 DiD.data <- DiD.data %>% 
   filter(MPAID%in%c(1:6, 15:18))
 
-# --- two additional outcome variables --- Feb 2020
-DiD.data <- DiD.data %>% 
-  mutate(MTIndex_AccHarv = RightsAccess + RightsHarvest, 
-         MTIndex_ManExcTrans= RightsManage + RightsExclude + RightsTransfer, 
-         SocialConflict_increase = ifelse(is.na(SocialConflict), NA, 
-                                          ifelse(SocialConflict==1|SocialConflict==2, 1, 0)))
 
+# ---- 2.2 Prepare ethnic polarization index ----
 
-# Prepare ethnic polarization index 
 HH.eth <- HH.eth %>% 
-  left_join(dplyr::select(DiD.data,HouseholdID, SettlementID, MPAID, yearsPost),by="HouseholdID")
+  left_join(dplyr::select(DiD.data, HouseholdID, SettlementID, MPAID, yearsPost),by = "HouseholdID")
 
 eth.polarize <- HH.eth %>% 
   filter(yearsPost==0 & !is.na(HouseholdID)) %>% 
@@ -97,36 +120,42 @@ eth.polarize <- HH.eth %>%
   group_by(SettlementID) %>% 
   summarise(eth.polarize=4*mean(eth.pct*eth.pct*(1-eth.pct)))
 
+# Add eth.polarize to DiD.data
 DiD.data <- DiD.data %>% 
   left_join(eth.polarize, by="SettlementID")
 
-# Customary Governance Index (%HHs excercise rights to exclude/transfer/manage)  
+
+# ---- 2.3 Prepare Customary Governance Index (%HHs excercise rights to exclude/transfer/manage) ----
+
 customary.gov.data <- DiD.data %>% 
   filter(yearsPost==0) %>% 
   dplyr::select(SettlementID, RightsManage, RightsTransfer, RightsExclude) %>% 
-  mutate(customary.gov = ifelse(RightsManage%in%c(1) | RightsExclude%in%c(1) | RightsTransfer%in%c(1), 1,0)) %>% 
+  mutate(customary.gov = ifelse(RightsManage==1 | RightsExclude==1 | RightsTransfer==1, 1, 0)) %>% 
   group_by(SettlementID) %>% 
-  summarise(num.HH.Settl=n(),
+  summarise(num.HH.Settl = n(),
             num.HH.customary = sum(customary.gov)) %>% 
   mutate(customary.gov.pct = num.HH.customary/num.HH.Settl)
 
-
+# Add customary governance data to DiD.data
 DiD.data <- DiD.data %>% 
-  left_join(dplyr::select(customary.gov.data,customary.gov.pct,SettlementID), by="SettlementID")
+  left_join(dplyr::select(customary.gov.data, customary.gov.pct, SettlementID), by="SettlementID")
 
 
 
-# Indicator wealth.above in each seascape-year (factors)
+# ---- 2.4 Prepare Indicator wealth.above in each seascape-year (factors) ----
+
 MA.wealth.breaks <- DiD.data %>%
   group_by(yearsPost, MPAID) %>%
   summarise(wealth.median = median(MAIndex, na.rm = T))
 
+# Add wealth breaks to DiD.data
 DiD.data <- DiD.data %>% 
   left_join(MA.wealth.breaks, by = c("yearsPost","MPAID")) %>% 
   mutate(wealth.above=ifelse(MAIndex<=wealth.median,0,1))
 
 
-## --- retaining the raw HHH.age (The IndividualAge is currently already categorized)
+# ---- 2.5 Retain the raw HHH.age (IndividualAge is currently already categorized) ----
+
 HH.age.raw <- IndDemos %>%
   filter(RelationHHH==0) %>%
   mutate(IndividualAge_raw = IndividualAge) %>% 
@@ -135,17 +164,24 @@ HH.age.raw <- IndDemos %>%
   dplyr::select(HouseholdID,IndividualAge_raw) %>% 
   distinct(HouseholdID,.keep_all = T)
 
+# Add raw household age to DiD.data
 DiD.data <- DiD.data %>% 
-  left_join(HH.age.raw,by="HouseholdID") 
+  left_join(HH.age.raw, by = "HouseholdID") 
 
-## --- retaining the raw yrsResidence (The current yrResidence is already categorized)
+
+# ---- 2.6 Retain the raw yrsResidence (the current yrResidence is already categorized) ----
+
 YrResident.raw <- HHData %>%
   dplyr::select(HouseholdID, YrResident)
 
+# Add raw years resident to DiD.data
 DiD.data <- DiD.data %>% 
-  left_join(YrResident.raw, by="HouseholdID") 
+  left_join(YrResident.raw, by = "HouseholdID") 
 
-## --- Modifying Asset Items to generate sub-Asset Groups (i.e. Household assets (discretionary & appliances), Productive Marine-based Assets (the boats), and land-based (vehicles)
+
+# ---- 2.7 Modify asset items to generate sub-asset groups ----
+#         (i.e. Household assets (discretionary & appliances), Productive Marine-based Assets (the boats), and land-based (vehicles)
+
 DiD.data <- DiD.data %>% 
   mutate(Entertain = Entertain,
          PhoneCombined = PhoneCombined/2,
@@ -180,7 +216,9 @@ DiD.data <- DiD.data %>%
          Boats_motor_dum = ifelse(BoatOutboard >0 | BoatInboard >0,1,0),
          Vehicles_dum = ifelse(Bicycle>0 | Motorcycle>0 | CarTruck>0,1,0))
 
-# --- Adding Indicators for community Participation (marine and non-marine groups)
+
+# ---- 2.8 Add indicators for community participation (marine and non-marine groups) ----
+
 MarineGroup.Indicators <- Organization %>%
   group_by(HouseholdID) %>%
   summarise(NumMarineGroup=n(),
@@ -207,18 +245,23 @@ Non_MarineGroup.Indicators <- NMOrganization %>%
   mutate(OtherGroup.Meeting.Active=ifelse(is.na(OtherGroup.Meeting.Active),0,
                                           ifelse(OtherGroup.Meeting.Active>0,1,0))) 
 
-
+# Add to DiD.data
 DiD.data <-  DiD.data %>% 
   left_join(.,MarineGroup.Indicators[,c("HouseholdID", "NumMarineGroup", "Marine.Lead.count", "Marine.Meeting.Active", "Marine.Days.Participate")],by="HouseholdID") %>% 
   left_join(.,Non_MarineGroup.Indicators[,c("HouseholdID", "NumOtherGroup", "OtherGroup.Lead.count", "OtherGroup.Meeting.Active", "OtherGroup.Days.Participate")],by="HouseholdID") 
 
-# --- summary(DiD.data)
+
+# ---- 2.9 Summarize DiD.data ----
+
 DiD.data.summary <- DiD.data %>% 
   dplyr::select(MPAID,MonitoringYear,InterviewYear, yearsPost, MPAName) %>% 
   group_by(MPAID,MonitoringYear) %>%
   summarise(n=sum(!is.na(yearsPost)),
             yearsPost = mean(yearsPost),InterviewYear = first(InterviewYear), MPAName=first(MPAName))  
 DiD.data.summary
+
+# NOTE: we do not calculate z scores for the Big Five and sub asset groups for our settlement level impact analysis (like it is done for MPA level impact analysis), 
+#       because we scale the impacts later (by dividing by two standard deviations) when looking at relative magnitude across eco and social impacts.
 
 # calculate Z scores (standardized values for each of the Big Five and the sub_asset groups)
 # DiD.data <- DiD.data %>% 
@@ -230,27 +273,17 @@ DiD.data.summary
 # sd2 <- function(x){ sd(x,na.rm=T)}
 
 
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 3: SETTLEMENT BASELINE MATCHING  ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
 
-##---END---##
-##---END---##
-##---END---##
 
+# ---- 3.1 Create data frame for matching settlements ----
 
-
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##-------------------------------------------------------------------------------##
-##---1. [DiD + settlement baseline matching]---Perform matching & Construct new dataframe
-##-------------------------------------------------------------------------------##
-
-# DiD.data <- DiD.data %>% 
-#   mutate(ed.no = ifelse(ed.level==0,1,0),
-#          ed.primary = ifelse(ed.level<=1,1,0),
-#          ed.high = ifelse(ed.level>=3,1,0),
-#          ed.college = ifelse(ed.level>=4,1,0))
-
-##---dataframe for matching settlements
 DiD.data.matchingCov <- DiD.data %>%
   filter(yearsPost==0) %>% 
   dplyr::select(MPAID, MonitoringYear, SettlementID, InterviewYear, Treatment, yearsPost, Post, Fisher, TimeMarket, eth.polarize, customary.gov.pct, MTIndex, YrResident, EconStatusTrend, lat, long) %>% 
@@ -274,795 +307,536 @@ DiD.data.matchingCov <- DiD.data %>%
 DiD.data.matchingCov.final <- DiD.data.matchingCov %>% 
   dplyr::select(TimeMarket, Fisher, eth.polarize, lat, long, MPAID)
 
-## -- Mathcing settlements
-Tr<-as.vector(DiD.data.matchingCov$Treatment)  
+# ---- 3.2 Matching settlements ----
 
-##-------------------------------------------------------------------------------------------##
-### Run match algorithm (COVARIATE MATCHING (Malanobis) with calipers
-## Always run with replace=TRUE, and ties=TRUE, vary M (# matches)
-# m1<-Match(Y=NULL, Tr,X, M=1, caliper=Xcaliper, exact=Xexact, replace=TRUE, ties=TRUE)
-# summary(m1)
+Tr <- as.vector(DiD.data.matchingCov$Treatment)  
+
+
+# ---- 3.3 Run match algorithm (COVARIATE MATCHING (Malanobis) with calipers ----
 
 # Exact matching on MPAID (i.e., control and treatment settlements have to come from the same MPA; that's why the last item is "1")
-Xexact<-c(0,0,0,0,0,1)
-m_mahanobis<-Matching::Match(Y=NULL, Tr, X=DiD.data.matchingCov.final, M=3, exact=Xexact, replace=TRUE, ties=T)
+# -- Always run with replace=TRUE, and ties=TRUE, vary M (# matches)
+# -- Note: After matching trials, best option is mahanobis, 1-to-3 match (3 control setts per treatment sett)
+Xexact <- c(0,0,0,0,0,1)
+
+m_mahanobis <- Matching::Match(Y=NULL, Tr, X=DiD.data.matchingCov.final, M = 3, exact = Xexact, replace = TRUE, ties = T)
+
 summary(m_mahanobis)
 
-# Compute match balance statistics (don't need stats on exact-matched variables)
-m_balance_2<-Matching::MatchBalance(Tr~ TimeMarket + Fisher + eth.polarize  + lat + long,
-                                    data=DiD.data.matchingCov, match.out=m_mahanobis, ks=TRUE, nboots=1000, digits=3)
+
+# ---- 3.4 Compute match balance statistics (don't need stats on exact-matched variables) ----
+
+m_balance_2 <- Matching::MatchBalance(Tr ~ TimeMarket + Fisher + eth.polarize  + lat + long,
+                                      data = DiD.data.matchingCov, match.out = m_mahanobis, ks = TRUE, nboots = 1000, digits = 3)
+
 
 
 # 
-# ##-------------------------------------------------------------------------------------------##
-# ##---pscore matching
-# # calculate p scores
-# pscore <- glm(Tr~ TimeMarket + Fisher +  eth.polarize + customary.gov.pct, data=DiD.data.matchingCov)$fitted.values
-# psore_frame = cbind(pscore, DiD.data.matchingCov$MPAID)
-# Xexact<-c(0,1)
-# m_pscore<-Matching::Match(Y=NULL, Tr, X=psore_frame, M=1, exact=Xexact, replace=TRUE, ties=T)
-# m_balance_2<-Matching::MatchBalance(Tr~  TimeMarket + Fisher + eth.polarize + customary.gov.pct ,data=DiD.data.matchingCov, match.out=m_pscore, ks=TRUE, nboots=1000, digits=3)
-# ##-------------------------------------------------------------------------------------------##
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 4: CONSTRUCT DATA FRAME FOR IMPACT ANALYSIS  ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
 
+# ---- 4.1 Mahalanobis distance weighting ----
 
-##--Note: After the matching trials, best option is mahanobis, 1-to-3 match. Go with that for now.
-##construct DiD.data.SettlMatch dataframe
-i.treat<-m_mahanobis$index.treated
-i.control<-m_mahanobis$index.control  
+i.treat <- m_mahanobis$index.treated
+i.control <- m_mahanobis$index.control  
 
-##-- mahalanobis distance weighting
 DiD.data.matchingCov.mahDis <- DiD.data.matchingCov %>% 
   dplyr::select(TimeMarket, Fisher, eth.polarize, lat, long) 
 
-mal.dist <- mahalanobis(DiD.data.matchingCov.mahDis,cov(DiD.data.matchingCov.mahDis) ,center=F)
+# Calculate distances
+mal.dist <- mahalanobis(DiD.data.matchingCov.mahDis,cov(DiD.data.matchingCov.mahDis), center = F)
 head(mal.dist)
-pair.treat.settl <-as.data.frame(cbind(DiD.data.matchingCov[i.treat,"SettlementID"],mal.dist[i.treat],mal.dist[i.control]))  %>%
-  rename(t.mal.dist=`mal.dist[i.treat]`,c.mal.dist=`mal.dist[i.control]`) %>%
-  mutate(pair.dist=t.mal.dist-c.mal.dist,
-         pair.id=1:nrow(.),
-         inv.dist=1/abs(pair.dist)) %>%
+
+
+# ---- 4.2 Wrangle initial paired data frames based on distance weighting ----
+
+# Create treatment settlement pair data frame
+pair.treat.settl <- as.data.frame(cbind(DiD.data.matchingCov[i.treat,"SettlementID"], mal.dist[i.treat],mal.dist[i.control]))  %>%
+  rename(t.mal.dist = `mal.dist[i.treat]`,c.mal.dist = `mal.dist[i.control]`) %>%
+  mutate(pair.dist = t.mal.dist-c.mal.dist,
+         pair.id = 1:nrow(.),
+         inv.dist = 1/abs(pair.dist)) %>%
   group_by(SettlementID) %>% 
-  mutate(dist.wt=inv.dist/sum(inv.dist)) %>% 
-  dplyr::select(SettlementID,pair.id,t.mal.dist:dist.wt) %>% 
+  mutate(dist.wt = inv.dist/sum(inv.dist)) %>% 
+  dplyr::select(SettlementID, pair.id, t.mal.dist:dist.wt) %>% 
   ungroup()
+
 head(pair.treat.settl)
 summary(pair.treat.settl)
-# treat.wt <- cbind(DiD.data.matchingCov[i.treat,"SettlementID"],dist.weight)
-# pair.treat.settl <- DiD.data.matchingCov %>% 
-#   filter(Treatment==1) %>% 
-#   mutate(pair.id=SettlementID) %>% 
-#   select(SettlementID, pair.id) %>% 
-#   left_join(treat.wt,by="SettlementID")
-# head(pair.treat.settl)
 
+# Create control settlement pair data frame
 pair.control.settl <- cbind(DiD.data.matchingCov[i.control,"SettlementID"], pair.treat.settl) 
 names(pair.control.settl)[1:2] <- c("ctrl.id", "treat.id")
 head(pair.control.settl)  
 
+# Check data frame
 settl.check <- pair.control.settl %>% 
-  left_join(dplyr::select(Settlements,SettlementName,SettlementID), by=c("ctrl.id"="SettlementID")  ) %>%
-  rename(ctrl.settlement=SettlementName) %>%
-  left_join(dplyr::select(DiD.data.matchingCov,TimeMarket, Fisher, eth.polarize, lat, long,SettlementID), by=c("ctrl.id"="SettlementID") ) %>% 
-  rename(ctrl.TimeMarket=TimeMarket, ctrl.Fisher=Fisher, ctrl.eth.polarize = eth.polarize) %>% 
   
-  left_join(dplyr::select(Settlements,SettlementName,SettlementID), by=c("treat.id"="SettlementID") ) %>%
-  rename(treat.settlement=SettlementName) %>% 
-  left_join(dplyr::select(DiD.data.matchingCov,TimeMarket, Fisher, eth.polarize, lat, long,SettlementID), by=c("treat.id"="SettlementID") ) %>% 
-  rename(treat.TimeMarket=TimeMarket, treat.Fisher=Fisher, treat.eth.polarize = eth.polarize) %>% 
+  left_join(dplyr::select(Settlements, SettlementName, SettlementID), by = c("ctrl.id"="SettlementID")) %>%
+  rename(ctrl.settlement = SettlementName) %>%
+  left_join(dplyr::select(DiD.data.matchingCov, TimeMarket, Fisher, eth.polarize, lat, long, SettlementID), by = c("ctrl.id" = "SettlementID")) %>% 
+  rename(ctrl.TimeMarket = TimeMarket, ctrl.Fisher = Fisher, ctrl.eth.polarize = eth.polarize) %>% 
+  
+  left_join(dplyr::select(Settlements, SettlementName, SettlementID), by = c("treat.id" = "SettlementID")) %>%
+  rename(treat.settlement = SettlementName) %>% 
+  left_join(dplyr::select(DiD.data.matchingCov,TimeMarket, Fisher, eth.polarize, lat, long, SettlementID), by = c("treat.id" = "SettlementID")) %>% 
+  rename(treat.TimeMarket = TimeMarket, treat.Fisher = Fisher, treat.eth.polarize = eth.polarize) %>% 
   
   mutate(TimeMarket.dis = treat.TimeMarket-ctrl.TimeMarket, 
          Fisher.dis = treat.Fisher-ctrl.Fisher, 
          eth.polarize.dis = treat.eth.polarize-ctrl.eth.polarize) %>% 
-  dplyr::select(treat.settlement, ctrl.settlement, pair.id,t.mal.dist,c.mal.dist, treat.TimeMarket,ctrl.TimeMarket,treat.Fisher,ctrl.Fisher, 
-         treat.eth.polarize, ctrl.eth.polarize, pair.dist,TimeMarket.dis:eth.polarize.dis)
+  dplyr::select(treat.settlement, ctrl.settlement, pair.id,t.mal.dist,c.mal.dist, treat.TimeMarket, ctrl.TimeMarket, treat.Fisher, ctrl.Fisher, 
+                treat.eth.polarize, ctrl.eth.polarize, pair.dist, TimeMarket.dis:eth.polarize.dis)
+
+
 head(settl.check)
-#export(settl.check,"D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/pair_name_1to3_w_wLatLon_comp.xlsx")
+
+# ---- 4.3 Create master data frame for impact analysis, DiD.data.SettlMatch ----
 
 DiD.data.SettlMatch <- data.frame()
 DiD.data.SettlMatch <- rbind(pair.treat.settl, 
                              pair.control.settl %>% 
                                dplyr::select(-treat.id) %>% 
-                               rename(SettlementID=ctrl.id)) %>% 
-  arrange(pair.id,SettlementID) 
+                               rename(SettlementID = ctrl.id)) %>% 
+  arrange(pair.id, SettlementID) 
+
 head(DiD.data.SettlMatch)
 
 DiD.data.SettlMatch <- DiD.data.SettlMatch %>% left_join(DiD.data, by="SettlementID")
 DiD.data.SettlMatch <- as.data.frame(DiD.data.SettlMatch)
-# #export(DiD.data.SettlMatch,"D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/DiD_data_1to3_w_latLon.xlsx")
-# #export(DiD.data.SettlMatch,"D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/DiD_data_1to3_w_latLon.csv")
-# #Export to txt file
-# library(foreign)
-# #install.packages("writexl")
-# library(writexl)
-# write.table(DiD.data.SettlMatch, "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/DiD_data_1to3_w.txt", sep="\t")
-# write_xlsx(DiD.data.SettlMatch, path = "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/DiD_data_1to3_w", col_names = TRUE, format_headers = TRUE)
 
 
 
-# test <- DiD.data.SettlMatch %>% 
-#   filter(pair.id==38) %>% 
-#   select(SettlementID, pair.id) 
 # 
-# unique(test$SettlementID)
-# pair.control.settl %>% 
-#   filter(pair.id==38)
-
-# ##---Get settlement pair names
-# pair_name <- pair.control.settl %>% 
-#   left_join(select(SETTLEMENT,SettlementName,SettlementID), by="SettlementID" ) %>% 
-#   rename(ctrl.settlement=SettlementName) %>% 
-#   left_join(select(SETTLEMENT,SettlementName,SettlementID), by=c("pair.id"="SettlementID") ) %>% 
-#   rename(treat.settlement=SettlementName) 
-#  export(pair_name,"D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/pair_name_oneToOne.xlsx") 
-#   
-#   head(pair_name)
-# #Export to txt file
-# library(foreign)
-# #install.packages("writexl")
-# library(writexl)
-# write.table(pair_name, "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/pair_name.txt", sep="\t")
-# write_xlsx(pair_name, path = "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/pair_name", col_names = TRUE, format_headers = TRUE)
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 5: PRE-PROCESS IMPACT DATA FRAMES ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
 
+# ---- 5.1 Generate short MPA names, for reference ----
 
-
-
-png(paste0(resultPath,"matching_qqplot_3.png"), bg = "white", width = 1200, height=700)
-par(mfrow=c(1,3), cex=0.8)
-qqplot(DiD.data.matchingCov$TimeMarket[i.treat],DiD.data.matchingCov$TimeMarket[i.control], xlab="Treat",ylab = "Control", main="Time to Market")
-abline(0,1,col="red")
-qqplot(DiD.data.matchingCov$Fisher[i.treat],DiD.data.matchingCov$Fisher[i.control], xlab="Treat",ylab = "Control", main="Pct Fisher")
-abline(0,1,col="red")
-qqplot(DiD.data.matchingCov$eth.polarize[i.treat],DiD.data.matchingCov$eth.polarize[i.control], xlab="Treat",ylab = "Control", main="Ethnic polarization")
-abline(0,1,col="red")
-dev.off()
-
-##---BEGIN---##
-# Export data frame to Excel for exploratory Stata analysis
-
-# #Export to txt file
-# library(foreign)
-# #install.packages("writexl")
-# library(writexl)
-# write.table(DiD.data.SettlMatch, "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/matched_DID_BHS_data.txt", sep="\t")
-# write_xlsx(DiD.data.SettlMatch, path = "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/matched_DID_BHS_data", col_names = TRUE, format_headers = TRUE)
-
-
-# ##--histogram plots of the matching covariate (baseline -- before matching)
-DiD.data.density.before <- DiD.data.matchingCov %>% 
-  mutate(Treat=as.factor(Treatment), 
-         Group=ifelse(Treatment==1, " MPA", "Control"))
-
-density.TimeMarket <- ggplot(DiD.data.density.before, aes(x = TimeMarket)) + labs(x="Time to Market", y="Density") +
-  stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.3, color="black") + theme_classic() +
-  theme(legend.position=c(0.85,0.85)) + theme(legend.background = element_rect(fill="white", size=0.5, linetype="solid",colour ="black")) +
-  theme(legend.title = element_text(colour="black", size=14, face="bold")) + theme(legend.text = element_text(colour="black", size=11))
-
-
-density.eth.polarize <- ggplot(DiD.data.density.before, aes(x = eth.polarize)) + labs(x="Ethnic Polarization Index", y="Density") +  
-  stat_density(aes(group = Treat, linetype = Group),position="identity", geom="line", size=1.2, color="black") + theme_classic() + theme(legend.position="none")
-
-density.Fisher <- ggplot(DiD.data.density.before, aes(x = Fisher)) + labs(x="Fishery Livelihood (%)", y="Density") +
-  stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.2, color="black") + theme_classic() + theme(legend.position="none")
-
-# density.customary <- ggplot(DiD.data.density.before, aes(x = customary.gov.pct)) + labs(x="Customary Governance (%)", y="Density") +
-#   stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.3, color="black") + theme_classic() + theme(legend.position="none")
-
-plot_grid(density.TimeMarket,density.Fisher,density.eth.polarize,ncol=2)
-ggsave(paste0(resultPath,"Settlement_matching/plots/histograms_matchingCovs_before.jpg"),width = 11, height = 9)
-
-# ##--histogram plots of the matching covariate (baseline -- after matching)
-DiD.data.density.after <- DiD.data.SettlMatch %>% 
-  filter(yearsPost==0) %>% 
-  mutate(Treat=as.factor(Treatment), 
-         Group=ifelse(Treatment==1, " MPA", "Control"))
-
-density.TimeMarket <- ggplot(DiD.data.density.after, aes(x = TimeMarket)) + labs(x="Time to Market", y="Density") +
-  stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.3, color="black") + theme_classic() +
-  theme(legend.position=c(0.85,0.85)) + theme(legend.background = element_rect(fill="white", size=0.5, linetype="solid",colour ="black")) +
-  theme(legend.title = element_text(colour="black", size=14, face="bold")) + theme(legend.text = element_text(colour="black", size=11))
-
-
-density.eth.polarize <- ggplot(DiD.data.density.after, aes(x = eth.polarize)) + labs(x="Ethnic Polarization Index", y="Density") +  
-  stat_density(aes(group = Treat, linetype = Group),position="identity", geom="line", size=1.2, color="black") + theme_classic() + theme(legend.position="none")
-
-density.Fisher <- ggplot(DiD.data.density.after, aes(x = Fisher)) + labs(x="Fishery Livelihood (%)", y="Density") +
-  stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.2, color="black") + theme_classic() + theme(legend.position="none")
-
-# density.customary <- ggplot(DiD.data.density.after, aes(x = customary.gov.pct)) + labs(x="Customary Governance (%)", y="Density") +
-#   stat_density(aes(group = Treat, linetype = Group),position="identity",geom="line", size=1.3, color="black") + theme_classic() + theme(legend.position="none")
-
-plot_grid(density.TimeMarket,density.Fisher,density.eth.polarize,ncol=2)
-ggsave(paste0(resultPath,"Settlement_matching/plots/histograms_matchingCovs_after.jpg"),width = 11, height = 9)
-
-##---END---##
-##---END---##
-##---END---##
-
-##--Important: Now changing "DiD.data" into "DiD.data" dataframe "DiD.data.coarseMatch", and renaming "DiD.data.SettlMatch" "DiD.data" for Sections 6.1 to 6.4
-DiD.data.coarseMatch <- DiD.data
-DiD.data.coarseMatch <- as.data.frame(DiD.data.coarseMatch)
-
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##-------------------------------------------------------------------------------##
-##---2. DiD Model to generate aggregate impacts (Seasape-level) 
-##---Spec 1-3 are matched DiD (one-to-three matching); Spec 4-6 are coarse DID for [SI]
-##-------------------------------------------------------------------------------##
-varNames <- c("FSIndex_z","MAIndex_z","MTIndex_z","PAIndex_z","SERate_z")
-#varNames <- c("FSIndex_z")
-
-#varNames <- c("MTIndex_AccHarv", "MTIndex_ManExcTrans", "SocialConflict", "SocialConflict_increase")
-##DiD Regression model (presenting 6 alternative models)
-model.out <- data.frame()
-for (i in varNames) {
-  print(i)
-  Y <- DiD.data.SettlMatch[,i]
-  w <- DiD.data.SettlMatch[,"dist.wt"]
-  ## 1. Specification 1 (main spec):  (a) + (b) + (c) + (two-way clustering s.e.)
-  regValue <- felm(Y  ~  Treatment + Post + Treatment:Post + 
-                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                   | SettlementID  + pair.id + InterviewYear  | 0 | SettlementID + pair.id, data=DiD.data.SettlMatch,exactDOF = TRUE, weights = w)
-  summary(regValue)
-  
-  reg.broom <- tidy(regValue) %>% 
-    filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-    mutate(term=gsub("Treatment:Post1","Impact",term),
-           term=gsub("Post1","Control_trend",term),
-           Response=i)
-  
-  ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
-  regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
-                                n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                              | SettlementID  + pair.id + InterviewYear  | 0 | SettlementID + pair.id, data=DiD.data.SettlMatch,exactDOF = TRUE, weights = w)
-  summary(regValue.treatTrend)
-  
-  reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
-    filter(term%in%c("Post1")) %>% 
-    mutate(term=gsub("Post1","Treatment_trend",term),
-           Response=i)
-  
-  model.out <- rbind(model.out, reg.broom, reg.broom.treatTrend)
-}
-
-
-##keeping only 2 relevant terms "Treatment:Post1" and "Post1" 
-model.out1 <- model.out %>% 
-  mutate(domain=ifelse(Response=="FSIndex_z"," Health (Food Security)",
-                       ifelse(Response=="MAIndex_z","Economic Wellbeing (Material Assets)",
-                              ifelse(Response=="MTIndex_z"," Empowerment (Marine Tenure)",
-                                     ifelse(Response=="PAIndex_z"," Culture (Place Attachment)", "  Education (School Enrollment)")))),
-         domain=gsub(" \\(", "\n \\(", domain)) #this line break the labels into 2 lines whenever it finds the symbol "(" in the string
-
-
-##Export 
-export(model.out1,  "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/BHS_impact_output_1to3_w_new.csv")
-
-##PLOTS
-pd <- position_dodge(width=.3) # move them .05 to the left and right
-
-
-Big5.plot <- ggplot(filter(model.out1, term=="Impact"), aes(x=domain,y=estimate)) + 
-  geom_line( position = pd) + coord_flip() +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=5, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="Impact estimates", title="MPA Aggregate Impacts across Social Wellbeing Domains")  
-
-
-ggsave(paste0(resultPath,"Settlement_matching/plots/1-big5-seascape-z-1to3_w.jpg"),width = 12, height = 6)
-
-##---END---##
-##---END---##
-##---END---##
-
-
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##-------------------------------------------------------------------------------##
-##---3. DiD Model for heterogeneous impact over time (t2 vs t4)
-##-------------------------------------------------------------------------------##
-varNames <- c("FSIndex_z","MAIndex_z","MTIndex_z","PAIndex_z","SERate_z")
-#varNames <- c("MTIndex_AccHarv", "MTIndex_ManExcTrans", "SocialConflict", "SocialConflict_increase")
-
-##DiD Regression model
-model.out <- data.frame()
-for (i in varNames) {
-  print(i)
-  Y <- DiD.data.SettlMatch[,i]
-  w <- DiD.data.SettlMatch[,"dist.wt"]
-  
-  ## DiD model (main spec)
-  regValue <- felm(Y  ~  Treatment + yearsPostF + Treatment:yearsPostF + 
-                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                   | SettlementID + pair.id | 0 | SettlementID + pair.id, data=DiD.data.SettlMatch,exactDOF = TRUE, weights=w)
-  summary(regValue)
-  
-  reg.broom <- tidy(regValue) %>% 
-    filter(term%in%c("Treatment:yearsPostF2","yearsPostF2", "Treatment:yearsPostF4","yearsPostF4", "Treatment:yearsPostF7","yearsPostF7")) %>% 
-    mutate(Response=i, 
-           term=gsub("Treatment:yearsPostF2","Impact_2",term),
-           term=gsub("yearsPostF2","Control_2",term),
-           term=gsub("Treatment:yearsPostF4","Impact_4",term),
-           term=gsub("yearsPostF4","Control_4",term),
-           term=gsub("Treatment:yearsPostF7","Impact_7",term),
-           term=gsub("yearsPostF7","Control_7",term),)
-  
-  ## rerun DiD model (main spec) fto obtain Treatment trend
-  regValue.treatTrend <- felm(Y  ~  Control + yearsPostF + Control:yearsPostF + 
-                                n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                              | SettlementID + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.SettlMatch,exactDOF = TRUE, weights=w)
-  summary(regValue.treatTrend)
-  
-  reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
-    filter(term%in%c("yearsPostF2", "yearsPostF4", "yearsPostF7")) %>% 
-    mutate(Response=i, 
-           term=gsub("yearsPostF2","Treatment_2",term),
-           term=gsub("yearsPostF4","Treatment_4",term),
-           term=gsub("yearsPostF7","Treatment_7",term),)
-  
-  model.out <- rbind(model.out, reg.broom, reg.broom.treatTrend)
-}
-
-
-model.out.time <- model.out %>% 
-  mutate(domain=ifelse(Response=="FSIndex_z"," Health (Food Security)",
-                       ifelse(Response=="MAIndex_z","Economic Wellbeing (Material Assets)",
-                              ifelse(Response=="MTIndex_z"," Empowerment (Marine Tenure)",
-                                     ifelse(Response=="PAIndex_z"," Culture (Place Attachment)", "  Education (School Enrollment)")))),
-         domain=gsub(" \\(", "\n \\(", domain)) #this line break the labels into 2 lines whenever it finds the symbol "(" in the string
-
-##Export 
-export(model.out.time,  "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/BHS_impact_output_time_1to3_w_new.csv")
-
-
-##PLOTS
-pd <- position_dodge(width=.3) # move them .05 to the left and righ
-
-#####################Plots
-FS.plot <- ggplot(filter(model.out.time,Response=="FSIndex_z", term%in%c("Impact")), aes(x=time_post,y=estimate, color=term), group=1) + 
-  geom_line( position = pd) + 
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="Food Security")  
-#+ facet_grid(.~Response)
-
-MT.plot <- ggplot(filter(model.out.time,Response=="MTIndex_z",  term%in%c("Impact")),aes(x=time_post,y=estimate, color=term), group=1) + 
-  geom_line( position = pd) + 
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="Marine Tenure")  
-
-
-MA.plot <- ggplot(filter(model.out.time,Response=="MAIndex_z",  term%in%c("Impact")),aes(x=time_post,y=estimate, color=term), group=1) + 
-  geom_line( position = pd) + 
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="Material Assets")  
-
-
-PA.plot <- ggplot(filter(model.out.time,Response=="PAIndex_z",  term%in%c("Impact")),aes(x=time_post,y=estimate, color=term), group=1) + 
-  geom_line( position = pd) + 
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="Impact estimate", title="Place Attachment")  
-
-
-SE.plot <- ggplot(filter(model.out.time,Response=="SERate_z", term%in%c("Impact")),aes(x=time_post,y=estimate, color=term), group=1) + 
-  geom_line( position = pd) + 
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x="",y="", title="School Enrollment")  
-
-#Combine "standardize BigFive"
-plot_grid(MA.plot,FS.plot,MT.plot,PA.plot,SE.plot,ncol=3)
-ggsave(paste0(resultPath,"/Paper 0-MPA Impact BHS/Settlement_matching/plots/2-big5-seascape-time-z-1to3_w_split.jpg"),width = 12, height = 6)
-
-##---END---##
-##---END---##
-##---END---##
-
-
-
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-##-------------------------------------------------------------------------------##
-##---4. DiD Model for heterogeneous impact across Settlements (6 MPAs)
-##-------------------------------------------------------------------------------##
-
-###generating short MPA names
 mpa.nam <- mpa.nam %>% 
-  mutate(MPAName_short = ifelse(MPAID==1,"  Telma",
-                                ifelse(MPAID==2,"  TNTC",
-                                       ifelse(MPAID==3," Kaimana",
-                                              ifelse(MPAID==4," Kofiau",
+  mutate(MPAName_short = ifelse(MPAID==1,"Telma",
+                                ifelse(MPAID==2,"TNTC",
+                                       ifelse(MPAID==3,"Kaimana",
+                                              ifelse(MPAID==4,"Kofiau",
                                                      ifelse(MPAID==5,"Dampier",
                                                             ifelse(MPAID==6,"Misool",
-                                                                   ifelse(MPAID==15,"Selat Pantar",
-                                                                          ifelse(MPAID==16,"Flores Timur","")))))))))
+                                                                   ifelse(MPAID==15,"Alor",
+                                                                          ifelse(MPAID==16,"Flotim",
+                                                                                 ifelse(MPAID==17,"Kei",
+                                                                                        ifelse(MPAID==18,"Koon","")))))))))),
+         MPAName_short = factor(MPAName_short,
+                                levels = c("Telma","TNTC","Kaimana","Kofiau","Dampier","Misool","Alor","Flotim","Kei","Koon"),
+                                ordered = T))
 
-varNames <- c("FSIndex_z","MAIndex_z","MTIndex_z","PAIndex_z","SERate_z")
-#varNames <- c("MTIndex_AccHarv", "MTIndex_ManExcTrans", "SocialConflict", "SocialConflict_increase")
 
-##DiD Regressions: Hetegeneous impact by MPA (and time)
-model.out.mpalevel <- data.frame()
+# ---- 5.2 Identify variable names for social impact DiD ----
 
-for (i in varNames) {
-  for (mpaid in 1:6) {
-    print(i)
-    print(mpaid)
-    DiD.data.mpalevel <- DiD.data.SettlMatch %>% 
-      filter(MPAID==mpaid)
-    Y <- DiD.data.mpalevel[,i]
-    w <- DiD.data.mpalevel[,"dist.wt"]
-    
-    regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
-                       n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                     | SettlementID + pair.id | 0 | SettlementID + pair.id, data=DiD.data.mpalevel,exactDOF = TRUE, weights=w)
-    
-    reg.broom <- tidy(regValue) %>% 
-      filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-      mutate(term=gsub("Treatment:Post1","Impact",term),
-             term=gsub("Post1","Control_trend",term),
-             Response=i, MPAID=mpaid)
-    
-    ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
-    regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
-                                  n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-                                | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.mpalevel,exactDOF = TRUE, weights = w)
-    summary(regValue.treatTrend)
-    
-    reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
-      filter(term%in%c("Post1")) %>% 
-      mutate(term=gsub("Post1","Treatment_trend",term),
-             Response=i, MPAID=mpaid) 
-    
-    model.out.mpalevel <- rbind(model.out.mpalevel, reg.broom, reg.broom.treatTrend)
-  }
+# (noZ indicates that these are not standardized indices when going into the DiD regression function)
+varNames_noZ <- c("FSIndex", "MAIndex", "MTIndex", "PAIndex", "SERate")
+
+
+# ---- 5.3 Identify groups of matched settlements (1:3 matches of treatment to control settlements) ----
+
+groups <- 
+  pair.control.settl %>%
+  group_by(treat.id) %>%
+  summarise(group.id = unique(treat.id),
+            pair1 = ctrl.id[1],
+            pair2 = ctrl.id[2],
+            pair3 = ctrl.id[3],
+            pair.id1 = pair.id[1],
+            pair.id2 = pair.id[2],
+            pair.id3 = pair.id[3]) %>%
+  melt(id.vars=c("group.id", "pair.id1", "pair.id2", "pair.id3"), value.name = "SettlementID") %>%
+  dplyr::select(-variable) %>% filter(!is.na(SettlementID))
+
+# Prepare data to match back to master data frame
+match.to.DiD.data <-
+  DiD.data.SettlMatch[,c("SettlementID","pair.id")] %>%
+  group_by(SettlementID, pair.id) %>%
+  mutate(group.id = groups$group.id[which((groups$pair.id1==pair.id | 
+                                             groups$pair.id2==pair.id | 
+                                             groups$pair.id3==pair.id) & 
+                                            groups$SettlementID==SettlementID)]) %>%
+  ungroup()
+
+
+# ---- 5.4 Add group.id back into the Did.data frame for impact analysis ----
+
+DiD.data.SettlMatch <-
+  cbind.data.frame(DiD.data.SettlMatch, match.to.DiD.data[,"group.id"]) %>%
+  mutate(SettlementID = as.factor(SettlementID),
+         TreatmentF = ifelse(Treatment==0, 0, group.id),
+         pair.id = as.factor(pair.id),
+         group.id = as.factor(group.id),
+         TreatmentF = as.factor(TreatmentF))
+
+
+# check group list for quality control
+group.list <- unique(groups$group.id)
+
+summary(DiD.data.SettlMatch)
+
+
+
+# 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 6: DiD MODEL FOR HETEROGENEOUS IMPACT ACROSS SETTLEMENTS ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 
+
+# ---- 6.1 Make empty output data frame for t2, t3, and t4 impacts ----
+
+model.out.settlevel <- data.frame()
+
+
+# ---- 6.2 DiD Regressions: Heterogeneous impact by settlement, t2, t3, and t4 ----
+# NOTE: t2 impacts exist for all BHS MPAs, as well as Koon MPA in SBS
+# NOTE: t3 impacts exist for SBS MPAs only -- Alor, Flotim, Kei
+# NOTE: t4 impacts exist only for BHS MPAs
+
+for (i in varNames_noZ) {
+  print(i)
+  
+  Y <- DiD.data.SettlMatch.filtered[,i]
+  w <- DiD.data.SettlMatch.filtered[,"dist.wt"]
+  
+  regValue <- felm(Y  ~   TreatmentF + yearsPostF +  TreatmentF:yearsPostF + 
+                     n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
+                   | SettlementID + pair.id | 0 | SettlementID + pair.id + group.id, data = DiD.data.SettlMatch.filtered, exactDOF = TRUE, weights = w)
+  
+
+  reg.broom <- tidy(regValue) %>% 
+    mutate(keep = ifelse(grepl("TreatmentF", term) & grepl(":yearsPost", term), 1, 0),
+           SettlementID = sub("TreatmentF", "", term),
+           SettlementID = sub(":yearsPostF*.", "", SettlementID),
+           time = paste("t", gsub(".*PostF", "\\1", term), sep = "")) %>%
+    filter(keep==1) %>% 
+    dplyr::select(-keep) %>%
+    mutate(Response = i) %>%
+    na.omit()
+  
+
+  model.out.settlevel <- rbind(model.out.settlevel, reg.broom)
 }
 
 
-##keeping only 2 relevant terms "Treatment:Post1" and "Post1" 
-model.out.mpalevel1 <- model.out.mpalevel %>% 
-  mutate(domain=ifelse(Response=="FSIndex_z"," Health (Food Security)",
-                       ifelse(Response=="MAIndex_z","Economic Wellbeing (Material Assets)",
-                              ifelse(Response=="MTIndex_z"," Empowerment (Marine Tenure)",
-                                     ifelse(Response=="PAIndex_z"," Culture (Place Attachment)", "  Education (School Enrollment)")))),
-         domain=gsub(" \\(", "\n \\(", domain)) 
+# ---- 6.3 Keep only 2 relevant terms "Treatment:Post1" and "Post1" ----
 
-##Export 
-export(model.out.mpalevel1,  "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/BHS_impact_output_MPA_1to3_w_new.csv")
+model.out.settlevel1 <- model.out.settlevel %>% 
+  mutate(SettlementID = as.numeric(SettlementID),
+         domain=ifelse(Response=="FSIndex"," Health (Food Security)",
+                       ifelse(Response=="MAIndex","Economic Wellbeing (Material Assets)",
+                              ifelse(Response=="MTIndex"," Empowerment (Marine Tenure)",
+                                     ifelse(Response=="PAIndex"," Culture (Place Attachment)", "  Education (School Enrollment)")))),
+         domain=gsub(" \\(", "\n \\(", domain)) %>%
+  left_join(Settlements[,c("SettlementID", "SettlementName", "MPAID")], by = "SettlementID") %>%
+  left_join(soc.coord[,c("SettlementID", "lat", "long")], by = "SettlementID") %>%
+  mutate(MPAID=ifelse(SettlementID %in% c(113,82,81,83,84), 7,
+                      ifelse(SettlementID %in% c(114,115,93,94,92), 8,
+                             ifelse(SettlementID %in% c(85:90,95,91), 9, MPAID))))
 
-
-##-------------------------------------------------------------------##
-##Producing Big Five plots using "standardized" index
-FS.plot_z <- ggplot(filter(model.out.mpalevel1, term=="Impact", Response=="FSIndex_z"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
-  geom_line( position = pd) + 
-  theme(legend.position = "none") +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  #geom_vline(xintercept = 1.5, linetype = "dotdash") +
-  labs(x="",y="", title="Food Security")  +
-  scale_colour_manual(values = c("black", "blue"))
-#ggsave(paste0(resultPath,"Settlement_matching/plots/3-FS-mpa-z.jpg"),width = 12, height = 6)
+export(model.out.settlevel1, paste(resultPath, 'settlevel_impacts_1-3match_20210707.csv', sep="/"))
 
 
-MT.plot_z <- ggplot(filter(model.out.mpalevel1,term=="Impact",Response=="MTIndex_z"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
-  geom_line( position = pd) + 
-  theme(legend.position = "none") +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  #geom_vline(xintercept = 1.5, linetype = "dotdash") +
-  labs(x="",y="", title="Marine Tenure")  +
-  scale_colour_manual(values = c("black", "blue")) 
+# ---- 6.4 Export settlement-level impacts to resultPath ----
+
+export(model.out.settlevel1, paste(resultPath, paste('settlevel_impacts_1-3match_', format(Sys.Date(), format = "%Y%m%d"), '.csv', sep = ""), sep = "/"))
 
 
-PA.plot_z <- ggplot(filter(model.out.mpalevel1,term=="Impact",Response=="PAIndex_z"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
-  geom_line( position = pd) + 
-  theme(legend.position = "none") +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  #geom_vline(xintercept = 1.5, linetype = "dotdash") +
-  labs(x="",y="", title="Place Attachment")  +
-  scale_colour_manual(values = c("black", "blue"))
+# check number of settlements from output per MPA, etc.
+
+Num.setts.years <- HHData %>% group_by(MPAID,InterviewYear,MPAName) %>% summarise(num.setts = length(SettlementID))
+
+Num.setts.impacts <- model.out.settlevel1 %>% filter(term=="Impact", Response=="FSIndex") %>% group_by(MPAID) %>% summarise(num.setts = length(SettlementID))
 
 
-MA.plot_z <- ggplot(filter(model.out.mpalevel1,term=="Impact",Response=="MAIndex_z"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
-  geom_line( position = pd) + 
-  theme(legend.position = "none") +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  #geom_vline(xintercept = 1.5, linetype = "dotdash") +
-  labs(x="",y="", title="Material Assets")  +
-  scale_colour_manual(values = c("black", "blue"))
 
-
-SE.plot_z <- ggplot(filter(model.out.mpalevel1,term=="Impact",Response=="SERate_z"),aes(x=MPAName_short,y=estimate, color=term),group=1) + 
-  geom_line( position = pd) + 
-  theme(legend.position = "none") +
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=0.0, size=2, color="black", position = pd ) +
-  geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error), width=0.0, size=0.5, color="black", position = pd ) +
-  geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  #geom_vline(xintercept = 1.5, linetype = "dotdash") +
-  labs(x="",y="", title="School Enrollment")  +
-  scale_colour_manual(values = c("black", "blue"))
-
-
-##combine PLOTS
-plot_grid(MA.plot_z,FS.plot_z,MT.plot_z,PA.plot_z,SE.plot_z,ncol=3)
-ggsave(paste0(resultPath,"Settlement_matching/plots/3-big5-mpa-z-1to3-w.jpg"),width = 12, height = 6)
-
-##---END---##
-##---END---##
-##---END---##
-
-
-##---BEGIN---##
-##---BEGIN---##
-##---BEGIN---##
-
-
-# ##-------------------------------------------------------------------------------##
-# ##---5. DiD Model for heterogeneous impact across subgroups (5 subgroups)
-# ##-------------------------------------------------------------------------------##
-# model.out.subgroup <- data.frame()
-# varNames <- c("FSIndex_z","MAIndex_z","MTIndex_z","PAIndex_z","SERate_z")
-# for (i in varNames) {
-#   
-#   ##----------------Gender------------------------------##
-#   for (genderID in 0:1) {
-#     DiD.data.gender <- DiD.data.SettlMatch %>%  filter(Male==genderID)
-#     Y <- DiD.data.gender[,i]
-#     w <- DiD.data.gender[,"dist.wt"]
-#     
-#     
-#     regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
-#                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                      | SettlementID + pair.id | 0 | SettlementID + pair.id,  data=DiD.data.gender,exactDOF = TRUE, weights=w)
-#     
-#     
-#     reg.broom <- tidy(regValue) %>% 
-#       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#       mutate(term=gsub("Treatment:Post1","Impact",term),
-#              term=gsub("Post1","Control_trend",term),
-#              Response=i, subgroup="Gender", subgroup_id=genderID)
-#     
-#     ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
-#     regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
-#                                   n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                                 | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.gender,exactDOF = TRUE, weights = w)
-#     summary(regValue.treatTrend)
-#     
-#     reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
-#       filter(term%in%c("Post1")) %>% 
-#       mutate(term=gsub("Post1","Treatment_trend",term),
-#              Response=i, subgroup="Gender", subgroup_id=genderID)
-#     
-#     model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
-#   }
-#   
-#   ##----------------Ethnicity (dominant/non-dominant)------------------------------##
-#   for (dom.ethID in 0:1) {
-#     DiD.data.dom.eth <- DiD.data.SettlMatch %>% filter(dom.eth==dom.ethID)
-#     Y <- DiD.data.dom.eth[,i]
-#     w <- DiD.data.dom.eth[,"dist.wt"]
-#     
-#     regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-#                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                      | SettlementID + pair.id | 0 | SettlementID + pair.id, data=DiD.data.dom.eth,exactDOF = TRUE, weights=w)
-#     
-#     reg.broom <- tidy(regValue) %>% 
-#       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#       mutate(term=gsub("Treatment:Post1","Impact",term),
-#              term=gsub("Post1","Control_trend",term),
-#              Response=i, subgroup="Ethnicity", subgroup_id=dom.ethID)
-#     
-#     ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
-#     regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
-#                                   n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                                 | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.dom.eth,exactDOF = TRUE, weights = w)
-#     summary(regValue.treatTrend)
-#     
-#     reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
-#       filter(term%in%c("Post1")) %>% 
-#       mutate(term=gsub("Post1","Treatment_trend",term),
-#              Response=i, subgroup="Ethnicity", subgroup_id=dom.ethID)
-#     
-#     model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
-#   } 
-#   
-#   ##----------------Economic Wealth (below/above median)------------------------------##
-#   for (wealthID in 0:1) {
-#     DiD.data.wealth <- DiD.data.SettlMatch %>% filter(wealth.above==wealthID)
-#     Y <- DiD.data.wealth[,i]
-#     w <- DiD.data.wealth[,"dist.wt"]
-#     
-#     regValue <- felm(Y  ~  Treatment + Post + Treatment:Post +
-#                        n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                      | SettlementID + pair.id | 0 | SettlementID + pair.id, data=DiD.data.wealth,exactDOF = TRUE, weights=w)
-#     
-#     reg.broom <- tidy(regValue) %>% 
-#       filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#       mutate(term=gsub("Treatment:Post1","Impact",term),
-#              term=gsub("Post1","Control_trend",term),
-#              Response=i, subgroup="Economic Wealth", subgroup_id=wealthID)
-#     
-#     ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
-#     regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
-#                                   n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                                 | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.wealth,exactDOF = TRUE, weights = w)
-#     summary(regValue.treatTrend)
-#     
-#     reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
-#       filter(term%in%c("Post1")) %>% 
-#       mutate(term=gsub("Post1","Treatment_trend",term),
-#              Response=i, subgroup="Economic Wealth", subgroup_id=wealthID)
-#     
-#     model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
-#   }
-#   
-#   
-#   
-#   ##----------------Occupation (fisher/non-fisher)------------------------------##
-#   
-#   ##---DiD Regressions: by Occupation (non-fisher only)
-#   DiD.data.fisher0 <- DiD.data.SettlMatch %>% filter(Fisher==0)
-#   Y <- DiD.data.fisher0[,i]
-#   w <- DiD.data.fisher0[,"dist.wt"]
-#   
-#   regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
-#                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                    | SettlementID + pair.id | 0 | SettlementID + pair.id, data=DiD.data.fisher0,exactDOF = TRUE, weights=w)
-#   
-#   reg.broom <- tidy(regValue) %>% 
-#     filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#     mutate(term=gsub("Treatment:Post1","Impact",term),
-#            term=gsub("Post1","Control_trend",term),
-#            Response=i, subgroup="Fishing Livelihood", subgroup_id=0)
-#   
-#   ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
-#   regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
-#                                 n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge + PrimaryLivelihood.bin
-#                               | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.fisher0,exactDOF = TRUE, weights = w)
-#   summary(regValue.treatTrend)
-#   
-#   reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
-#     filter(term%in%c("Post1")) %>% 
-#     mutate(term=gsub("Post1","Treatment_trend",term),
-#            Response=i, subgroup="Fishing Livelihood", subgroup_id=0)
-#   
-#   model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
-#   
-#   
-#   ##---DiD Regressions: by Occupation (fisher only)
-#   DiD.data.fisher1 <- DiD.data.SettlMatch %>% filter(Fisher==1)
-#   Y <- DiD.data.fisher1[,i]
-#   w <- DiD.data.fisher1[,"dist.wt"]
-#   
-#   regValue <- felm(Y  ~   Treatment + Post + Treatment:Post +
-#                      n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge 
-#                    | SettlementID + pair.id | 0 | SettlementID + pair.id, data=DiD.data.fisher1,exactDOF = TRUE, weights=w)
-#   
-#   reg.broom <- tidy(regValue) %>% 
-#     filter(term%in%c("Treatment:Post1", "Post1")) %>% 
-#     mutate(term=gsub("Treatment:Post1","Impact",term),
-#            term=gsub("Post1","Control_trend",term),
-#            Response=i, subgroup="Fishing Livelihood", subgroup_id=1)
-#   
-#   ## Rerun with Control (instead of Treatment) and Post to get "Treatment trend" estimates
-#   regValue.treatTrend <- felm(Y  ~  Control + Post + Control:Post + 
-#                                 n.child  + ed.level +  dom.eth + YearsResident + IndividualGender + IndividualAge 
-#                               | SettlementID  + pair.id  | 0 | SettlementID + pair.id, data=DiD.data.fisher1,exactDOF = TRUE, weights = w)
-#   summary(regValue.treatTrend)
-#   
-#   reg.broom.treatTrend <- tidy(regValue.treatTrend) %>% 
-#     filter(term%in%c("Post1")) %>% 
-#     mutate(term=gsub("Post1","Treatment_trend",term),
-#            Response=i, subgroup="Fishing Livelihood", subgroup_id=1)
-#   
-#   model.out.subgroup <- rbind(model.out.subgroup, reg.broom, reg.broom.treatTrend)
-# }
 # 
-# ##keeping only 2 relevant terms "Treatment:Post1" and "Post1" 
-# model.out.subgroup1 <- model.out.subgroup %>%
-#   mutate(domain=ifelse(Response=="FSIndex_z"," Health (Food Security)",
-#                        ifelse(Response=="MAIndex_z","Economic Wellbeing (Material Assets)",
-#                               ifelse(Response=="MTIndex_z"," Empowerment (Marine Tenure)",
-#                                      ifelse(Response=="PAIndex_z"," Culture (Place Attachment)", "  Education (School Enrollment)")))),
-#          domain=gsub(" \\(", "\n \\(", domain)) 
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# ---- SECTION 7: PLOT SETTLEMENT LEVEL IMPACTS ----
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
-# ##Export 
-# export(model.out.subgroup1,  "D:/Dropbox/MPA_research/Paper 0-MPA Impact BHS/BHS_impact_output_subGroup_1to3_w_new.csv")
-# 
-# 
-# 
-# 
-# ##----------------------------------------------------------------##
-# ##PLOT: "regular" index
-# pd <- position_dodge(width=.5) # move them .05 to the left and right
-# 
-# 
-# FS.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="FSIndex_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
-#   geom_line( position = pd) +
-#   theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
-#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
-#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-#   geom_hline(yintercept = 0, linetype = "dashed") +
-#   labs(x="",y="", title="Food Security")  +
-#   scale_colour_manual(values = c("red", "blue"))
-# 
-# MT.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="MTIndex_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
-#   geom_line( position = pd) +
-#   theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
-#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
-#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-#   geom_hline(yintercept = 0, linetype = "dashed") +
-#   labs(x="",y="", title="Marine Tenure")  +
-#   scale_colour_manual(values = c("red", "blue"))
-# 
-# PA.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="PAIndex_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
-#   geom_line( position = pd) +
-#   theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
-#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
-#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-#   geom_hline(yintercept = 0, linetype = "dashed") +
-#   labs(x="",y="", title="Place Attachment")  +
-#   scale_colour_manual(values = c("red", "blue"))
-# 
-# 
-# MA.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="MAIndex_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
-#   geom_line( position = pd) +
-#   theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
-#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
-#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-#   geom_hline(yintercept = 0, linetype = "dashed") +
-#   labs(x="",y="", title="Material Assets")  +
-#   scale_colour_manual(values = c("red", "blue"))
-# 
-# SE.plot_z <- ggplot(filter(model.out.subgroup1,term=="Impact",Response=="SERate_z"),aes(x=subgroup, y=estimate, color=as.factor(subgroup_id)),group=2) +
-#   geom_line( position = pd) +
-#   theme(legend.position = "none", axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-#   geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error, color=as.factor(subgroup_id)), width=0.0, size=1, position = pd ) +
-#   geom_errorbar(aes(ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error, color=as.factor(subgroup_id)), width=0.0, size=0, position = pd ) +
-#   geom_point(stat="identity", position =pd, fill='white', size=3, shape=21)+ theme_bw() + theme(legend.position="none") +
-#   geom_hline(yintercept = 0, linetype = "dashed") +
-#   labs(x="",y="", title="School Enrollment")  +
-#   scale_colour_manual(values = c("red", "blue"))
-# 
-# ##combine PLOTS
-# plot_grid(MA.plot_z,FS.plot_z,MT.plot_z,PA.plot_z,SE.plot_z,ncol=3)
-# ggsave(paste0(resultPath,"Settlement_matching/plots/4-big5-subgroup-z-1to3-w.jpg"),width = 12, height = 6)
-# 
-# ##---END---##
-# ##---END---##
-# ##---END---##
-# 
-# 
+
+# ---- 7.1 Define plot theme(s) ----
+
+plot.theme <- theme(plot.title = element_text(size=16,
+                                              angle=0,
+                                              face="bold",
+                                              colour="#303030"),
+                    plot.subtitle = element_text(size=13,
+                                                 face="italic",
+                                                 colour="#303030",
+                                                 lineheight = 1.2),
+                    axis.ticks = element_blank(),
+                    panel.background = element_rect(fill="white",
+                                                    colour="#909090"),
+                    panel.border = element_rect(fill=NA,
+                                                size=0.25,
+                                                colour="#303030"),
+                    panel.grid = element_blank(),
+                    plot.margin = margin(t=15,r=20,b=5,l=5,unit="pt"),
+                    axis.title = element_text(size=12,
+                                              angle=0,
+                                              face="bold",
+                                              colour="#303030"),
+                    axis.text = element_text(size=12,
+                                             angle=0,
+                                             colour="#303030",
+                                             lineheight=0.7),
+                    legend.position = "right",
+                    legend.justification = "right",
+                    legend.box.spacing = unit(0.1,"cm"),
+                    legend.margin = margin(l=10,unit="pt"))
+
+legends <- guides(colour = guide_legend(title.theme = element_text(face="bold",
+                                                                               size=12,
+                                                                               angle=0,
+                                                                               colour="#505050",
+                                                                               lineheight=0.75),
+                                                    label.theme = element_text(size=12,
+                                                                               angle=0,
+                                                                               colour="#505050",
+                                                                               lineheight=1.25),
+                                                    barheight = 10,
+                                                    order = 1))
+  
+# ---- 7.2 Prep data ----
+
+model.out.settlevel.plotting <- 
+  left_join(model.out.settlevel1, mpa.nam[,c("MPAID","MPAName_short")], by = "MPAID") %>%
+  mutate(significant = ifelse(p.value<0.01,"<0.01",
+                              ifelse(p.value>=0.01 & p.value<0.05, "<0.05", 
+                                     ifelse(p.value>=0.05 & p.value<0.1, "<0.1", 
+                                            ifelse(p.value>=0.1 & p.value<0.2, "<0.2", "None")))))
+
+significant.colors <- c("<0.01" = "#16A085", "<0.05" = "#DFB306", "<0.1" = "#8E44AD", "<0.2" = "#B03A2E", "None" = "black")
+
+
+# ---- 7.3 Food security settlement level impacts ----
+
+# GEOM_POINTS
+FS.sett.impacts.byMPA <-
+  ggplot(model.out.settlevel.plotting%>%filter(term=="Impact" & Response=="FSIndex_z" & !is.na(estimate)),
+         aes(x = MPAName_short, y = estimate)) +
+  geom_point(aes(colour = significant)) +
+  geom_hline(aes(yintercept = 0), linetype = 3, size = 0.5, colour = "#303030") +
+  scale_colour_manual(name = "Signficance",
+                      values = significant.colors) +
+  scale_y_continuous(expand = c(0,0),
+                     breaks = c(-2,-1.5,-1,-0.5,0,0.5,1,1.5,2),
+                     limits = c(-2,2)) +
+  plot.theme + legends + 
+  labs(x = "MPA", y = "Average treatment effect", title = "Food Security", subtitle = "Settlement level impacts (t3/t4)")
+
+# SETT NAME LABELS
+FS.sett.impacts.byMPA.settnames <-
+  ggplot(model.out.settlevel.plotting%>%filter(term=="Impact" & Response=="FSIndex_z" & !is.na(estimate)),
+         aes(x = MPAName_short, y = estimate)) +
+  geom_text(aes(label = SettlementName, colour = significant), size = 3.5, fontface = "bold") +
+  geom_hline(aes(yintercept = 0), linetype = 3, size = 0.5, colour = "#303030") +
+  scale_colour_manual(name = "Signficance",
+                      values = significant.colors) +
+  scale_y_continuous(expand = c(0,0),
+                     breaks = c(-2,-1.5,-1,-0.5,0,0.5,1,1.5,2),
+                     limits = c(-2.1,2)) +
+  plot.theme + legends + 
+  labs(x = "MPA", y = "Average treatment effect", title = "Food Security", subtitle = "Settlement level impacts (t3/t4)")
+
+
+# ---- 7.4 Material assets settlement level impacts ----
+
+# GEOM_POINTS
+MA.sett.impacts.byMPA <-
+  ggplot(model.out.settlevel.plotting%>%filter(term=="Impact" & Response=="MAIndex_z" & !is.na(estimate)),
+         aes(x = MPAName_short, y = estimate)) +
+  geom_point(aes(colour = significant)) +
+  geom_hline(aes(yintercept = 0), linetype = 3, size = 0.5, colour = "#303030") +
+  scale_colour_manual(name = "Signficance",
+                      values = significant.colors) +
+  scale_y_continuous(expand = c(0,0),
+                     breaks = c(-2,-1.5,-1,-0.5,0,0.5,1,1.5,2),
+                     limits = c(-2,2)) +
+  plot.theme + legends + 
+  labs(x = "MPA", y = "Average treatment effect", title = "Material Assets", subtitle = "Settlement level impacts (t3/t4)")
+
+# SETT NAME LABELS
+MA.sett.impacts.byMPA.settnames <-
+  ggplot(model.out.settlevel.plotting%>%filter(term=="Impact" & Response=="MAIndex_z" & !is.na(estimate)),
+         aes(x = MPAName_short, y = estimate)) +
+  geom_text(aes(label = SettlementName, colour = significant), size = 3.5, fontface = "bold") +
+  geom_hline(aes(yintercept = 0), linetype = 3, size = 0.5, colour = "#303030") +
+  scale_colour_manual(name = "Signficance",
+                      values = significant.colors) +
+  scale_y_continuous(expand = c(0,0),
+                     breaks = c(-2,-1.5,-1,-0.5,0,0.5,1,1.5,2),
+                     limits = c(-2,2)) +
+  plot.theme + legends + 
+  labs(x = "MPA", y = "Average treatment effect", title = "Material Assets", subtitle = "Settlement level impacts (t3/t4)")
+
+
+# ---- 7.5 Marine tenure settlement level impacts ----
+
+# GEOM_POINTS
+MT.sett.impacts.byMPA <-
+  ggplot(model.out.settlevel.plotting%>%filter(term=="Impact" & Response=="MTIndex_z" & !is.na(estimate)),
+         aes(x = MPAName_short, y = estimate)) +
+  geom_point(aes(colour = significant)) +
+  geom_hline(aes(yintercept = 0), linetype = 3, size = 0.5, colour = "#303030") +
+  scale_colour_manual(name = "Signficance",
+                      values = significant.colors) +
+  scale_y_continuous(expand = c(0,0),
+                     breaks = c(-2,-1.5,-1,-0.5,0,0.5,1,1.5,2),
+                     limits = c(-2.1,2.2)) +
+  plot.theme + legends + 
+  labs(x = "MPA", y = "Average treatment effect", title = "Marine Tenure", subtitle = "Settlement level impacts (t3/t4)")
+
+
+# SETT NAME LABELS
+MT.sett.impacts.byMPA.settnames <-
+  ggplot(model.out.settlevel.plotting%>%filter(term=="Impact" & Response=="MTIndex_z" & !is.na(estimate)),
+         aes(x = MPAName_short, y = estimate)) +
+  geom_text(aes(label = SettlementName, colour = significant), size = 3.5, fontface = "bold") +
+  geom_hline(aes(yintercept = 0), linetype = 3, size = 0.5, colour = "#303030") +
+  scale_colour_manual(name = "Signficance",
+                      values = significant.colors) +
+  scale_y_continuous(expand = c(0,0),
+                     breaks = c(-2,-1.5,-1,-0.5,0,0.5,1,1.5,2),
+                     limits = c(-2.1,2.2)) +
+  plot.theme + legends + 
+  labs(x = "MPA", y = "Average treatment effect", title = "Marine Tenure", subtitle = "Settlement level impacts (t3/t4)")
+
+
+# ---- 7.6 Place attachment settlement level impacts ----
+
+# GEOM_POINTS
+PA.sett.impacts.byMPA <-
+  ggplot(model.out.settlevel.plotting%>%filter(term=="Impact" & Response=="PAIndex_z" & !is.na(estimate)),
+         aes(x = MPAName_short, y = estimate)) +
+  geom_point(aes(colour = significant)) +
+  geom_hline(aes(yintercept = 0), linetype = 3, size = 0.5, colour = "#303030") +
+  scale_colour_manual(name = "Signficance",
+                      values = significant.colors) +
+  scale_y_continuous(expand = c(0,0),
+                     breaks = c(-2,-1.5,-1,-0.5,0,0.5,1,1.5,2),
+                     limits = c(-2.3,2.3)) +
+  plot.theme + legends + 
+  labs(x = "MPA", y = "Average treatment effect", title = "Place Attachment", subtitle = "Settlement level impacts (t3/t4)")
+
+# SETT NAME LABELS
+PA.sett.impacts.byMPA.settnames <-
+  ggplot(model.out.settlevel.plotting%>%filter(term=="Impact" & Response=="PAIndex_z" & !is.na(estimate)),
+         aes(x = MPAName_short, y = estimate)) +
+  geom_text(aes(label = SettlementName, colour = significant), size = 3.5, fontface = "bold") +
+  geom_hline(aes(yintercept = 0), linetype = 3, size = 0.5, colour = "#303030") +
+  scale_colour_manual(name = "Signficance",
+                      values = significant.colors) +
+  scale_y_continuous(expand = c(0,0),
+                     breaks = c(-2,-1.5,-1,-0.5,0,0.5,1,1.5,2),
+                     limits = c(-2.3,2.3)) +
+  plot.theme + legends + 
+  labs(x = "MPA", y = "Average treatment effect", title = "Place Attachment", subtitle = "Settlement level impacts (t3/t4)")
+
+
+# ---- 7.7 School enrollment settlement level impacts ----
+
+# GEOM_POINTS
+SE.sett.impacts.byMPA <-
+  ggplot(model.out.settlevel.plotting%>%filter(term=="Impact" & Response=="SERate_z" & !is.na(estimate)),
+         aes(x = MPAName_short, y = estimate)) +
+  geom_point(aes(colour = significant)) +
+  geom_hline(aes(yintercept = 0), linetype = 3, size = 0.5, colour = "#303030") +
+  scale_colour_manual(name = "Signficance",
+                      values = significant.colors) +
+  scale_y_continuous(expand = c(0,0),
+                     breaks = c(-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5),
+                     limits = c(-2.6,2.6)) +
+  plot.theme + legends + 
+  labs(x = "MPA", y = "Average treatment effect", title = "School Enrollment", subtitle = "Settlement level impacts (t3/t4)")
+
+# SETT NAME LABELS
+SE.sett.impacts.byMPA.settnames <-
+  ggplot(model.out.settlevel.plotting%>%filter(term=="Impact" & Response=="SERate_z" & !is.na(estimate)),
+         aes(x = MPAName_short, y = estimate)) +
+  geom_text(aes(label = SettlementName, colour = significant), size = 3.5, fontface = "bold") +
+  geom_hline(aes(yintercept = 0), linetype = 3, size = 0.5, colour = "#303030") +
+  scale_colour_manual(name = "Signficance",
+                      values = significant.colors) +
+  scale_y_continuous(expand = c(0,0),
+                     breaks = c(-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3),
+                     limits = c(-3,3.1)) +
+  plot.theme + legends + 
+  labs(x = "MPA", y = "Average treatment effect", title = "School Enrollment", subtitle = "Settlement level impacts (t3/t4)")
+
+
+# ---- 7.8 Export plots ----
+
+# Create plot output directory
+dir.create(paste(resultPath, paste(format(Sys.Date(), format = "%Y%m%d"), "settimpacts_plots", sep = "_"), sep = "/"))
+plot.resultPath <- paste(resultPath, paste(format(Sys.Date(), format = "%Y%m%d"), "settimpacts_plots", sep = "_"), sep = "/")
+
+# GEOM_POINT plots
+png(paste(resultPath,"FS.sett.1-3match.impacts.png", sep = "/"),
+    units = "in", height = 6, width = 8, res = 400)
+plot(FS.sett.impacts.byMPA)
+dev.off()
+
+png(paste(resultPath,"MA.sett.1-3match.impacts.png", sep = "/"),
+    units = "in", height = 6, width = 8, res = 400)
+plot(MA.sett.impacts.byMPA)
+dev.off()
+
+png(paste(resultPath,"MT.sett.1-3match.impacts.png", sep = "/"),
+    units = "in", height = 6, width = 8, res = 400)
+plot(MT.sett.impacts.byMPA)
+dev.off()
+
+png(paste(resultPath,"PA.sett.1-3match.impacts.png", sep = "/"),
+    units = "in", height = 6, width = 8, res = 400)
+plot(PA.sett.impacts.byMPA)
+dev.off()
+
+png(paste(resultPath,"SE.sett.1-3match.impacts.png", sep = "/"),
+    units = "in", height = 6, width = 8, res = 400)
+plot(SE.sett.impacts.byMPA)
+dev.off()
+
+
+# SETT NAMES PLOTS
+png(paste(resultPath,"FS.sett.1-3match.impacts.namelabels.png", sep = "/"),
+    units = "in", height = 6, width = 8, res = 400)
+plot(FS.sett.impacts.byMPA.settnames)
+dev.off()
+
+png(paste(resultPath,"MA.sett.1-3match.impacts.namelabels.png", sep = "/"),
+    units = "in", height = 6, width = 8, res = 400)
+plot(MA.sett.impacts.byMPA.settnames)
+dev.off()
+
+png(paste(resultPath,"MT.sett.1-3match.impacts.namelabels.png", sep = "/"),
+    units = "in", height = 6, width = 8, res = 400)
+plot(MT.sett.impacts.byMPA.settnames)
+dev.off()
+
+png(paste(resultPath,"PA.sett.1-3match.impacts.namelabels.png", sep = "/"),
+    units = "in", height = 6, width = 8, res = 400)
+plot(PA.sett.impacts.byMPA.settnames)
+dev.off()
+
+png(paste(resultPath,"SE.sett.1-3match.impacts.namelabels.png", sep = "/"),
+    units = "in", height = 6, width = 8, res = 400)
+plot(SE.sett.impacts.byMPA.settnames)
+dev.off()

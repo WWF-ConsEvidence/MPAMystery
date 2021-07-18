@@ -1,8 +1,10 @@
 # 
 # code: Gravity weighting reef site distance from settlements for BHS and SBS
 # 
-# modified: September 2020
-
+# author: Robert Fidler
+# created: 
+# modified: September 2020, by Kelly Claborn (clabornkelly@gmail.com)
+# 
 # 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -11,24 +13,15 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
 
-# load libraries
+# ---- 1.1 Load libraries ----
+
 pacman::p_load(rio, reshape2, raster, dplyr)
 
-# source script that wrangles flat data (with coordinates for social and eco sites) 
-source('3_Analysis/1_Social/1_Experimental_analyses/Synergies_tradeoffs/Wrangle_data_for_gravity_weight.R')
+# ---- 1.2 Source script that wrangles flat data (with coordinates for social and eco sites) ----
+
+source('3_Analysis/1_Social/1_Experimental_analyses/Synergies_tradeoffs/Wrangle_data_for_distance_weight.R')
+
 gps.final.2 <- data.for.weighting
-
-
-# # verify that years sampled are within 1-2 (or whatever cutoff) of each other, for eco and social sites
-# SBS.sites.byyear <-
-#   import('x_Flat_data_files/2_Ecological/Inputs/2020-01-24_SBS_Query_ raw fish by transect.xlsx') %>%
-#   group_by(Site_ID, MPA_Name) %>%
-#   summarise(num.year = length(unique(Year)), \\
-#             baseline = min(Year),
-#             status = max(Year))
-
-
-# grav2 <- import('x_Flat_data_files/1_Social/Inputs/Synergies_tradeoffs/population.for.weighting.csv')
 
 
 # 
@@ -81,69 +74,82 @@ MPA.17y <- unique(MPA.17[,c("SettlementID", "long.y", "lat.y", "MPAID")])
 MPA.18x <- unique(MPA.18[,c("SiteID", "long.x", "lat.x", "MPAID")])
 MPA.18y <- unique(MPA.18[,c("SettlementID", "long.y", "lat.y", "MPAID")])
 
-#Run PointDistance
+# ---- 2.2 Per MPA, run point distance and set column and row names for matrix ----
+
+# MPA 1
+# Run PointDistance
 MPA.1.dist <- as.data.frame(pointDistance(MPA.1x[,2:3], MPA.1y[,2:3], lonlat = T, allpairs = T))
-#Set Column and Row Names for Matrix
+# Set Column and Row Names for Matrix
 rownames(MPA.1.dist) <- MPA.1x$SiteID
 colnames(MPA.1.dist) <- MPA.1y$SettlementID
 
-#Run PointDistance
+# MPA 2
+# Run PointDistance
 MPA.2.dist <- as.data.frame(pointDistance(MPA.2x[,2:3], MPA.2y[,2:3], lonlat = T, allpairs = T))
-#Set Column and Row Names for Matrix
+# Set Column and Row Names for Matrix
 rownames(MPA.2.dist) <- MPA.2x$SiteID
 colnames(MPA.2.dist) <- MPA.2y$SettlementID
 
-#Run PointDistance
+# MPA 4
+# Run PointDistance
 MPA.4.dist <- as.data.frame(pointDistance(MPA.4x[,2:3], MPA.4y[,2:3], lonlat = T, allpairs = T))
-#Set Column and Row Names for Matrix
+# Set Column and Row Names for Matrix
 rownames(MPA.4.dist) <- MPA.4x$SiteID
 colnames(MPA.4.dist) <- MPA.4y$SettlementID
 
+# MPA 5
 # Run PointDistance
 MPA.5.dist <- as.data.frame(pointDistance(MPA.5x[,2:3], MPA.5y[,2:3], lonlat = T, allpairs = T))
-#Set Column and Row Names for Matrix
+# Set Column and Row Names for Matrix
 rownames(MPA.5.dist) <- MPA.5x$SiteID
 colnames(MPA.5.dist) <- MPA.5y$SettlementID
 
-#Run PointDistance
+# MPA 6
+# Run PointDistance
 MPA.6.dist <- as.data.frame(pointDistance(MPA.6x[,2:3], MPA.6y[,2:3], lonlat = T, allpairs = T))
-#Set Column and Row Names for Matrix
+# Set Column and Row Names for Matrix
 rownames(MPA.6.dist) <- MPA.6x$SiteID
 colnames(MPA.6.dist) <- MPA.6y$SettlementID
 
-#Run PointDistance
+# MPA 7
+# Run PointDistance
 MPA.7.dist <- as.data.frame(pointDistance(MPA.7x[,2:3], MPA.7y[,2:3], lonlat = T, allpairs = T))
-#Set Column and Row Names for Matrix
+# Set Column and Row Names for Matrix
 rownames(MPA.7.dist) <- MPA.7x$SiteID
 colnames(MPA.7.dist) <- MPA.7y$SettlementID
 
-#Run PointDistance
+# MPA 9
+# Run PointDistance
 MPA.9.dist <- as.data.frame(pointDistance(MPA.9x[,2:3], MPA.9y[,2:3], lonlat = T, allpairs = T))
-#Set Column and Row Names for Matrix
+# Set Column and Row Names for Matrix
 rownames(MPA.9.dist) <- MPA.9x$SiteID
 colnames(MPA.9.dist) <- MPA.9y$SettlementID
 
-#Run PointDistance
+# MPA 15
+# Run PointDistance
 MPA.15.dist <- as.data.frame(pointDistance(MPA.15x[,2:3], MPA.15y[,2:3], lonlat = T, allpairs = T))
-#Set Column and Row Names for Matrix
+# Set Column and Row Names for Matrix
 rownames(MPA.15.dist) <- MPA.15x$SiteID
 colnames(MPA.15.dist) <- MPA.15y$SettlementID
 
-#Run PointDistance
+# MPA 16
+# Run PointDistance
 MPA.16.dist <- as.data.frame(pointDistance(MPA.16x[,2:3], MPA.16y[,2:3], lonlat = T, allpairs = T))
-#Set Column and Row Names for Matrix
+# Set Column and Row Names for Matrix
 rownames(MPA.16.dist) <- MPA.16x$SiteID
 colnames(MPA.16.dist) <- MPA.16y$SettlementID
 
-#Run PointDistance
+# MPA 17
+# Run PointDistance
 MPA.17.dist <- as.data.frame(pointDistance(MPA.17x[,2:3], MPA.17y[,2:3], lonlat = T, allpairs = T))
-#Set Column and Row Names for Matrix
+# Set Column and Row Names for Matrix
 rownames(MPA.17.dist) <- MPA.17x$SiteID
 colnames(MPA.17.dist) <- MPA.17y$SettlementID
 
-#Run PointDistance
+# MPA 18
+# Run PointDistance
 MPA.18.dist <- as.data.frame(pointDistance(MPA.18x[,2:3], MPA.18y[,2:3], lonlat = T, allpairs = T))
-#Set Column and Row Names for Matrix
+# Set Column and Row Names for Matrix
 rownames(MPA.18.dist) <- MPA.18x$SiteID
 colnames(MPA.18.dist) <- MPA.18y$SettlementID
 
@@ -173,7 +179,8 @@ mpa.matrix.16 <- MPA.16.dist
 mpa.matrix.17 <- MPA.17.dist
 mpa.matrix.18 <- MPA.18.dist
 
-#-- Transpose Data Frames (so that eco sites are columns, instead of settlements)
+# ---- 3.1 Transpose Data Frames (so that eco sites are columns, instead of settlements) ----
+
 transpose <- lapply(mget(paste0("mpa.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                     function(mpa.matrix.)
                       mpa.matrix. <- as.data.frame(t(mpa.matrix.))) 
@@ -181,7 +188,8 @@ transpose <- lapply(mget(paste0("mpa.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
 invisible(list2env(transpose, globalenv()))
 
 
-#-- Square Distances, inverted (for relative weight calculations)
+# ---- 3.2 Square Distances, inverted (for relative weight calculations) ----
+
 mpa.wt.matrix.1 <- as.data.frame(1/(mpa.matrix.1^2))
 mpa.wt.matrix.2 <- as.data.frame(1/(mpa.matrix.2^2))
 mpa.wt.matrix.4 <- as.data.frame(1/(mpa.matrix.4^2))
@@ -195,18 +203,18 @@ mpa.wt.matrix.17 <- as.data.frame(1/(mpa.matrix.17^2))
 mpa.wt.matrix.18 <- as.data.frame(1/(mpa.matrix.18^2))
 
 
-# ---- Calculate relative weights, using inverse square distances ----
+# ---- 3.3 Calculate relative weights, using inverse square distances ----
 # NOTE: this allows the smalles distance to have the largest weight
 
-#--Removing NA Columns
+# -- Removing NA Columns
 na.b.gone <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                     function(mpa.wt.matrix.)
                       mpa.wt.matrix.[!sapply(mpa.wt.matrix., function(x) all(is.na(x)))]) 
 
 invisible(list2env(na.b.gone, globalenv()))
 
-#--Converting Distances into Relative Importance Values
-#-----Calculating Sum of Weights
+# -- Converting Distances into Relative Importance Values
+# ----- Calculating Sum of Weights
 grav.sum <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                    function(mpa.wt.matrix.){
                      mpa.wt.matrix.$gravsum<-apply(mpa.wt.matrix., 1, FUN=sum)
@@ -214,7 +222,7 @@ grav.sum <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                      return(mpa.wt.matrix.)})
 invisible(list2env(grav.sum, globalenv()))
 
-#-----Moving Minimum Distance to Column 1
+# ----- Moving Minimum Distance to Column 1
 movecol <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                   function(mpa.wt.matrix.){
                     mpa.wt.matrix.<-mpa.wt.matrix.%>%dplyr::select(gravsum, everything())
@@ -222,7 +230,7 @@ movecol <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                     return(mpa.wt.matrix.)})
 invisible(list2env(movecol, globalenv()))
 
-#-----Multiplying 1/x by min.dist to Calculate Relative Distance
+# ----- Multiplying 1/x by min.dist to Calculate Relative Distance
 relative.dist <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                         function(mpa.wt.matrix.)
                           sweep(mpa.wt.matrix., MARGIN = 1, FUN="/", STATS=mpa.wt.matrix.$gravsum)
@@ -230,7 +238,7 @@ relative.dist <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,1
 )
 invisible(list2env(relative.dist, globalenv()))
 
-#-----Removing Min Dist Column
+# ----- Removing Min Dist Column
 min.b.gone <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                      function(mpa.wt.matrix.)
                        mpa.wt.matrix. <- mpa.wt.matrix.[,-1]
@@ -238,7 +246,7 @@ min.b.gone <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))
 )
 invisible(list2env(min.b.gone, globalenv()))
 
-#-----Calculate Relative Distance Sums
+# ----- Calculate Relative Distance Sums
 rel.dist.sum <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                        function(mpa.wt.matrix.){
                          mpa.wt.matrix.$rdsum <- rowSums(mpa.wt.matrix., 1)
@@ -247,7 +255,7 @@ rel.dist.sum <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18
 invisible(list2env(rel.dist.sum, globalenv()))
 
 
-#-----Moving Relative Distance Sums to Column 1
+# ----- Moving Relative Distance Sums to Column 1
 movecol2 <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                    function(mpa.wt.matrix.){
                      mpa.wt.matrix. <- mpa.wt.matrix.%>%dplyr::select(rdsum, everything())
@@ -256,14 +264,14 @@ movecol2 <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
 invisible(list2env(movecol2, globalenv()))
 
 
-#-----Removing RDSum Column
+# ----- Removing RDSum Column
 min.b.gone <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                      function(mpa.wt.matrix.)
                        mpa.wt.matrix. <- mpa.wt.matrix.[,-1]
                      )
 invisible(list2env(min.b.gone, globalenv()))
 
-#--Moving Settlement ID from Row Names to Column
+# -- Moving Settlement ID from Row Names to Column
 site.columns <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                        function(mpa.wt.matrix.){
                          mpa.wt.matrix.$SettlementID <- rownames(mpa.wt.matrix.)
@@ -271,7 +279,7 @@ site.columns <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18
                          return(mpa.wt.matrix.)})
 invisible(list2env(site.columns, globalenv()))
 
-#--Reorganize Matrices into Column Format
+# -- Reorganize Matrices into Column Format
 melting <- lapply(mget(paste0("mpa.wt.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                   function(mpa.wt.matrix.)
                     melt(mpa.wt.matrix., id.vars = "SettlementID", variable.name = "SiteID", value.name = "Relative_Weight"))
@@ -280,9 +288,9 @@ invisible(list2env(melting, globalenv()))
 
 
 
-# ---- Calculate raw distances ----
+# ---- 3.4 Calculate raw distances ----
 
-#-- Distances as data frames
+# -- Distances as data frames
 mpa.dist.matrix.1 <- as.data.frame(mpa.matrix.1)
 mpa.dist.matrix.2 <- as.data.frame(mpa.matrix.2)
 mpa.dist.matrix.4 <- as.data.frame(mpa.matrix.4)
@@ -295,7 +303,7 @@ mpa.dist.matrix.16 <- as.data.frame(mpa.matrix.16)
 mpa.dist.matrix.17 <- as.data.frame(mpa.matrix.17)
 mpa.dist.matrix.18 <- as.data.frame(mpa.matrix.18)
 
-#-- Moving Settlement ID from Row Names to Column
+# -- Moving Settlement ID from Row Names to Column
 site.columns <- lapply(mget(paste0("mpa.dist.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                        function(mpa.dist.matrix.){
                          mpa.dist.matrix.$SettlementID <- rownames(mpa.dist.matrix.)
@@ -304,7 +312,7 @@ site.columns <- lapply(mget(paste0("mpa.dist.matrix.", c(1,2,4,5,6,7,9,15,16,17,
 invisible(list2env(site.columns, globalenv()))
 
 
-#-- Reorganize Matrices into Column Format
+# -- Reorganize Matrices into Column Format
 melting <- lapply(mget(paste0("mpa.dist.matrix.", c(1,2,4,5,6,7,9,15,16,17,18))),
                   function(mpa.dist.matrix.)
                     melt(mpa.dist.matrix., id.vars = "SettlementID", variable.name = "SiteID", value.name = "Distance_m"))
@@ -321,7 +329,7 @@ invisible(list2env(melting, globalenv()))
 # 
 
 
-# Combining Data Frames
+# ---- 4.1 Combining Data Frames ----
 
 all.distances <- 
   rbind(mpa.dist.matrix.1, mpa.dist.matrix.2, mpa.dist.matrix.4, 
@@ -350,4 +358,9 @@ weight.crosscheck <-
                    num.sites=length(SiteID))
 
 
-export(all.distances.weights,'x_Flat_data_files/1_Social/Outputs/Synergies_tradeoffs/Gravity_weights_allsites_persett_20210409.csv')
+# ---- 4.2 Export to flat file to be read into synergies/tradeoffs analysis ----
+
+export(all.distances.weights, 
+       paste0('x_Flat_data_files/1_Social/Outputs/Synergies_tradeoffs/Distance_weights_allsites_persett_', 
+              format(Sys.Date(), format = "%Y%m%d"), 
+              '.csv', sep = ""))

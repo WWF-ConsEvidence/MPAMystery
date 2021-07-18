@@ -18,13 +18,18 @@ pacman::p_load(rio, dplyr)
 
 source('1_Data_wrangling/1_Social/2_Source_data/Source_social_data_flat_files.R')
 
+
 # ---- 1.1 Import flat files ----
+
+# Settlement level coordinates
 sett.coords <- import('x_Flat_data_files/1_Social/Inputs/soc.coord.province.csv') %>%
   left_join(Settlements[,c("SettlementID","MPAID")], by="SettlementID") %>%
   mutate(MPAID = ifelse(SettlementID %in% c(113,82,81,83,84),7,
                         ifelse(SettlementID %in% c(114,115,93,94,92),8,
                                ifelse(SettlementID %in% c(85:90,95,91),9,MPAID))))
 
+
+# Reef level coordinates
 reef.coords <- import('x_Flat_data_files/1_Social/Inputs/Synergies_tradeoffs/eco.sites.included.synergies.csv') %>%
   mutate(MPAID = ifelse(grepl("Mayalibit",MPA_Name),1,
                         ifelse(grepl("Cenderawasih",MPA_Name),2,
@@ -38,18 +43,24 @@ reef.coords <- import('x_Flat_data_files/1_Social/Inputs/Synergies_tradeoffs/eco
                                                                                 ifelse(grepl("Kei Kecil",MPA_Name),17,
                                                                                        ifelse(grepl("Koon",MPA_Name),18,NA))))))))))))
 
+
+# Settlement impacts
 sett.impacts <- import('x_Flat_data_files/1_Social/Outputs/Synergies_tradeoffs/settlevel_impacts_1-3match_20201218.csv') %>%
   filter(term=="Impact" & !is.na(estimate) & Response=="FSIndex_z" & (time=="t2" | time=="t3") & MPAID!=8)
   # filter list of impacts so that each settlement is only listed once (instead of for each variable, year, etc.)
   # also, remove Teluk Etna MPA (MPAID==8) since there are no eco sites in Etna
 
+
+# Eco impacts
 eco.impacts <- import('x_Flat_data_files/1_Social/Inputs/Synergies_tradeoffs/eco.impacts.20210409.csv')
 
+
+# ---- 1.2 Identify reef sites with eco impacts associated ----
 
 sites <- 
   left_join(eco.impacts[,c("Site_ID", "MPA_Name")], 
             reef.coords[,c("Site_ID","latitude","longitude","MPAID","t0","t1")], 
-            by="Site_ID") %>%
+            by = "Site_ID") %>%
   rename("SiteID" = "Site_ID") %>%
   .[order(.$MPAID),]
 
@@ -61,6 +72,9 @@ sites <-
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
+
+
+# ---- 2.1 Identify number of sites and settlements per MPA
 
 nsites.byMPA <-
   sites %>%
@@ -77,8 +91,10 @@ n.byMPA <-
   mutate(nsites.cumsum = cumsum(nsites))
   
 
+# ---- 2.2 Identify settlements included in weighting analysis ----
+
 setts.forweighting <- 
-  left_join(sett.impacts[,c("SettlementID","MPAID","lat","long")], nsites.byMPA, by="MPAID") %>%
+  left_join(sett.impacts[,c("SettlementID","MPAID","lat","long")], nsites.byMPA, by = "MPAID") %>%
   .[order(.$MPAID),]
 
 duplicate.settrows <- 
@@ -87,6 +103,8 @@ duplicate.settrows <-
   rename("lat.y" = "lat",
          "long.y" = "long")
 
+
+# ---- 2.3 Remove duplicate eco site rows ----
 
 duplicate.ecorows <- 
   rbind.data.frame(sites[rep(1:n.byMPA$nsites.cumsum[1],n.byMPA$nsetts[1]),],
@@ -104,7 +122,11 @@ duplicate.ecorows <-
   rename("lat.x" = "latitude",
          "long.x" = "longitude")
 
+
+# ---- 2.4 Create data.for.weighting data frame that will feed directly into the distance weighting script ----
+
 data.for.weighting <-
   cbind.data.frame(duplicate.ecorows, duplicate.settrows)
+
 
 # export(data.for.weighting, 'x_Flat_data_files/1_Social/Inputs/Synergies_tradeoffs/data.for.weighting.KC.csv')
