@@ -32,7 +32,8 @@ source.from.SQL <- function(endpoint=NULL) {
   
   # define API endpoint URL
   base <- "https://mpasocial.org/api/" # this is the api base url
-  endpoint <- "household" # this is the name of the api endpoint where you specify the database subtable you want to access
+  
+  # endpoint <-  # this is the name of the api endpoint where you specify the database subtable you want to access
   
 
   # create API endpoint url as object
