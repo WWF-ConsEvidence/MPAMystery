@@ -11,7 +11,7 @@ pacman::p_load(rio, plyr, foreach, dplyr, openxlsx, chron, tidyverse, reshape, x
 ```{r}
 #load the household data
 household_tbl <-
-  import('***INSERT DATAFRAME LOCATION HERE ***)  %>%
+  import('INSERT FILE PATH HERE') %>%
   filter(!is.na(householdid))
 #rename the column with typo in UNIPA dataset
 names(household_tbl)[names(household_tbl) == "assetsattellite"] <- "assetsatellite"
